@@ -1,0 +1,4 @@
+﻿RootDir5
+UPDATE TestTable1
+SET City='Berlin', Population=10
+WHERE Name='Mimy';

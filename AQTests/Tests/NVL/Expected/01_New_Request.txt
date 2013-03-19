@@ -1,0 +1,3 @@
+SELECT . TestTable1 Name
+FROM , Cities TestTable1
+WHERE K_JEQ . TestTable1 City . Cities CityName 

@@ -1,0 +1,4 @@
+; table_1.champ_2; table_1.val_1; SUM table_1.val_1; table_1.val_2; SUM table_1.val_2; table_1.val_3; SUM table_1.val_3; table_1.val_4; SUM table_1.val_4; Count
+; abcpqrpqr; 57; 64863; 0.62; 445638.02; 8106.00; 23681418.00; 77640; 22919376; 295
+; yzmnodef; 91; 64863; 1684.00; 445638.02; 0.00; 23681418.00; 5; 22919376; 264
+; yzpqrghi; 91; 64863; 3.33; 445638.02; 80644.50; 23681418.00; 54; 22919376; 264

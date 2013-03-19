@@ -1,0 +1,2 @@
+SELECT . People Name
+FROM People

@@ -1,0 +1,8 @@
+; People.Name; Count
+; John; 1
+; Mary; 1
+; Mimy; 3
+; Nan; 1
+; Stan; 3
+; Steve; 2
+; Sunny; 1

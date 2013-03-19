@@ -1,0 +1,2 @@
+SELECT MIN . table_4 val_4
+FROM table_4

@@ -1,0 +1,3 @@
+SELECT . table_1 champ_2
+FROM , table_1 table_2
+WHERE AND K_JEQ . table_2 val_1 . table_1 val_1 LIKE . table_1 champ_2 K_VALUE '_______u'

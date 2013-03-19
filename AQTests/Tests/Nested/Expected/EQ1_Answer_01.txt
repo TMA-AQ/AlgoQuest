@@ -1,0 +1,4 @@
+; COUNT table_1.champ_2
+1 
+1 
+; 9147

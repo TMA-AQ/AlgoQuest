@@ -1,0 +1,5 @@
+RootDir4
+select People.City, People.Age, People.Name, SUM (People.Age) OVER (PARTITION BY People.City ORDER BY People.Name)
+from People, Cities
+where People.City=Cities.CityName
+order by People.City, People.Name;

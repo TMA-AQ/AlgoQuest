@@ -1,0 +1,3 @@
+; table_1.champ_2; Count
+; abcabcabc; 12037
+; abcabcdef; 9147

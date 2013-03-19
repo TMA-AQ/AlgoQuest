@@ -1,0 +1,4 @@
+﻿Date1
+select TO_CHAR(COTATION.dte) + ' some data ' + COTATION.isin, SUBSTRING(TO_CHAR(COTATION.ouv), 1, 4)
+from COTATION, ACTION
+where COTATION.isin=ACTION.isin;

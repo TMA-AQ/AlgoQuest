@@ -1,0 +1,4 @@
+MSALGOQUEST
+select TO_DATE('0' + SUBSTRING(CAST(table_1.id AS STRING), 1, 1) + '/01/1997')
+from table_1, table_6
+where table_1.champ_1=table_6.champ_1;

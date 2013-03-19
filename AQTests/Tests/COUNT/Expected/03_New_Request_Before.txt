@@ -1,0 +1,3 @@
+SELECT COUNT K_STAR
+FROM , People Cities
+WHERE K_JEQ . People City . Cities CityName 

@@ -1,0 +1,4 @@
+MSALGOQUEST
+select a.champ_2, b.val_1
+from table_1 as a, table_2 b
+where b.val_1=a.val_1 AND a.id IN (1, 2, 3);

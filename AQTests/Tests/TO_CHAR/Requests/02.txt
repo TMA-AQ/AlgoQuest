@@ -1,0 +1,4 @@
+﻿Date1
+select TO_CHAR(COTATION.dte, 'YYYYMM')
+from COTATION, ACTION
+where COTATION.isin=ACTION.isin;

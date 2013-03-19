@@ -1,0 +1,4 @@
+; Num_table : 1     ; Count
+7 
+1 
+ ; 0  ; 7

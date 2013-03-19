@@ -1,0 +1,16 @@
+<aq_config>
+  <databases>
+    <database>
+      <dbname>BNP</dbname>
+      <iniFile>C:\AlgoQuestEnterpriseManager\DB\BNP\ini.properties</iniFile>
+    </database>
+    <database>
+      <dbname>MSALGOQUEST</dbname>
+      <iniFile>C:\AlgoQuestEnterpriseManager\DB\MSALGOQUEST\ini.properties</iniFile>
+    </database>
+    <database>
+      <dbname>TEST</dbname>
+      <iniFile>C:\AlgoQuestEnterpriseManager\DB\TEST\ini.properties</iniFile>
+    </database>
+  </databases>
+</aq_config>

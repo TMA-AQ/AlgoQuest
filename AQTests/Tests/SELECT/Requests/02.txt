@@ -1,0 +1,5 @@
+MSALGOQUEST
+SELECT count(*)
+FROM   table_1,
+       table_2
+WHERE  table_2.val_1 = table_1.val_1;

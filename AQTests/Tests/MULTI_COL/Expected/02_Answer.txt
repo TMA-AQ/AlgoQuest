@@ -1,0 +1,8 @@
+; table_1.champ_1; table_1.champ_2; table_1.champ_3; table_6.champ_1; table_6.champ_2; table_7.champ_2; table_7.champ_3; Count
+; defmnomno; mnojkljkl; jklghipqr; defmnomno; mnojkljkl; jklghipqr; mnojkljkl; 1
+; ghighidef; yzpqrabc; vwxdefpqr; ghighidef; yzpqrabc; vwxdefpqr; yzpqrabc; 1
+; ghijkldef; abcstudef; jklghivwx; ghijkldef; abcstudef; jklghivwx; abcstudef; 1
+; mnopqrstu; pqrpqrabc; jklmnoghi; mnopqrstu; pqrpqrabc; jklmnoghi; pqrpqrabc; 1
+; mnovwxyz; vwxyzdef; stupqrdef; mnovwxyz; vwxyzdef; stupqrdef; vwxyzdef; 1
+; stuyzjkl; defstumno; defjklmno; stuyzjkl; defstumno; defjklmno; defstumno; 1
+; yzjklvwx; ghivwxdef; ghiyzvwx; yzjklvwx; ghivwxdef; ghiyzvwx; ghivwxdef; 1

@@ -1,0 +1,3 @@
+SELECT . People Name
+FROM People
+WHERE K_JNO . People NAME

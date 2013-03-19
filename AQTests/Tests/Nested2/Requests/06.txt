@@ -1,0 +1,25 @@
+﻿BNP
+SELECT 
+	TA.seq_point_de_vente_histo,
+    TA.seq_produit,
+    TA.seq_indicateur,
+    TA.seq_cbp_histo,
+    TA.seq_caf_histo,
+    TA.min_sem_court,
+	h.SEQ_SEM_COURT,
+	h.SEM_COURT,
+	h.NUM_SEM_REPPI,
+	h.ANNEE,
+	h.DAT_MAJ,
+	h.NUM_ACTUATE
+FROM   (SELECT sss.seq_point_de_vente_histo,
+               sss.seq_produit,
+               sss.seq_indicateur,
+               sss.seq_cbp_histo,
+               sss.seq_caf_histo,
+               sss.seq_sem_court min_sem_court
+        FROM   tw_flux_quotidien_hebdo_diag sss
+        WHERE  sss.seq_point_de_vente_histo = '19800101ZXXXXX00002') TA,
+       td_hebdo_calendrier h
+WHERE  h.seq_sem_court >= TA.min_sem_court
+       AND h.seq_sem_court <= '200710'; 

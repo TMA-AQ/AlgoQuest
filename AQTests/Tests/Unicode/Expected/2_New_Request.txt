@@ -1,0 +1,2 @@
+FROM , Albums Tracks
+WHERE AND K_JEQ . Tracks SerialNr . Albums Serialnr = . TRACKS Song K_VALUE 'Осень'

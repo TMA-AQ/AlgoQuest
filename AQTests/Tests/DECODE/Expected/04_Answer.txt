@@ -1,0 +1,5 @@
+; DECODE People.Name , , , , , ,; Count
+; Other guy; 12
+; Some Alice; 1
+; Some Bran; 2
+; Some Steve; 2

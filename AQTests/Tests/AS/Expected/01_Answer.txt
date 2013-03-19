@@ -1,0 +1,4 @@
+; field2; value1; sum_value1; V2; SUMV2; Count
+; abcpqrpqr; 57; 64863; 0.62; 445638.02; 295
+; yzmnodef; 91; 64863; 1684.00; 445638.02; 264
+; yzpqrghi; 91; 64863; 3.33; 445638.02; 264

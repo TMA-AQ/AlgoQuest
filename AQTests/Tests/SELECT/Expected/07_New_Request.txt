@@ -1,0 +1,3 @@
+SELECT . People Name
+FROM People
+WHERE AND K_JNO . People NAME IN . People Name , K_VALUE 'John' , K_VALUE 'Mary' , K_VALUE 'Mimy' , K_VALUE 'Nan' , K_VALUE 'Stan' , K_VALUE 'Steve' K_VALUE 'Sunny'

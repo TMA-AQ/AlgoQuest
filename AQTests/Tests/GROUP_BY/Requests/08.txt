@@ -1,0 +1,4 @@
+ACTION
+SELECT c.isin, Count(c.isin)
+FROM   cotation c
+GROUP  BY c.isin;

@@ -1,0 +1,14 @@
+; table_1.champ_1; table_1.champ_2; table_1.champ_4; table_1.champ_5; table_1.champ_6; Count
+; defjklvwx; yzjklabc; vwxdefjkl; defmnopqr; jklghighi; 274
+; defvwxabc; stupqrghi; jklstuabc; stuabcdef; ghighiyz; 254
+; jklmnoyz; yzpqrmno; ghipqrmno; defstuabc; jklghimno; 27
+; jklpqrpqr; ghivwxdef; abcabcabc; vwxabcghi; vwxghivwx; 26
+; mnomnovwx; yzghidef; vwxdefjkl; abcdefstu; pqrdefyz; 27601
+; mnostuyz; stughiabc; jklabcyz; studefdef; pqrdefmno; 261
+; mnovwxjkl; stuabcyz; abcmnoyz; yzdefstu; pqrstuabc; 251
+; pqrjklyz; stumnoyz; ghivwxyz; defabcghi; ghijklstu; 2821
+; pqrmnoabc; mnodefjkl; yzstudef; defmnostu; pqrvwxvwx; 27601
+; pqrstuvwx; mnodefjkl; defjklvwx; pqrabcjkl; yzghiyz; 27601
+; stughivwx; stupqrabc; mnostuyz; pqrjkljkl; jkljklyz; 2800
+; vwxabcabc; defdefstu; ghiyzstu; ghipqrstu; yzpqrstu; 248
+; yzabcyz; yzdefstu; mnojkljkl; defpqrjkl; pqrghidef; 27601

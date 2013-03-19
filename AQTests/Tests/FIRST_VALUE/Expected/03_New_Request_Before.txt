@@ -1,0 +1,4 @@
+SELECT , , , . People City . People Age . People Name FIRST_VALUE . People Name
+ORDER BY , . People Age . People Name PARTITION BY , . People City . People Age FRAME ROWS PRECEDING K_VALUE 1
+FROM , People Cities
+WHERE K_JEQ . People City . Cities CityName 

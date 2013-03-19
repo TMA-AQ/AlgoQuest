@@ -1,0 +1,4 @@
+﻿MSALGOQUEST
+select table_1.val_3
+from table_1, table_6
+where table_1.champ_1=table_6.champ_1 AND table_1.val_3 >= 905;

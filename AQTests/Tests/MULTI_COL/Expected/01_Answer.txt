@@ -1,0 +1,2 @@
+; COUNT table_1.val_1
+; 383761

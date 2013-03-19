@@ -1,0 +1,8 @@
+ACTION
+SELECT c.isin,
+       a.libelle,
+       c.dte
+FROM   cotation c
+       left outer join action a
+                    ON c.isin = a.isin
+WHERE  c.dte > To_date('14/09/2012', 'DD/MM/YYYY'); 

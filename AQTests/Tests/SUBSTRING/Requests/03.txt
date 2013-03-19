@@ -1,0 +1,5 @@
+MSALGOQUEST
+SELECT Substring(table_1.champ_1, 2, 2)
+FROM   table_1,
+       table_2
+WHERE  table_1.val_1 = table_2.val_1; 

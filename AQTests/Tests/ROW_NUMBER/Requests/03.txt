@@ -1,0 +1,5 @@
+﻿RootDir4
+select People.Name, ROW_NUMBER() OVER (ORDER BY People.Name)
+from Cities, People
+where Cities.CityName=People.City
+ORDER BY People.Name;

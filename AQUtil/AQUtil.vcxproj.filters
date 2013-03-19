@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Fichiers sources">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Fichiers de ressources">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\aq">
+      <UniqueIdentifier>{8ecb82d3-d62e-4ccc-9f13-df1c1782cb30}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\aq">
+      <UniqueIdentifier>{0406f379-4ab2-4051-88ba-8afb239fb91b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests">
+      <UniqueIdentifier>{dcc1d33f-13da-4079-8610-ddeb8e2749ab}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\Logger.h">
+      <Filter>Fichiers d%27en-tête\aq</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\ParallelProcess.h">
+      <Filter>Fichiers d%27en-tête\aq</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\Timer.h">
+      <Filter>Fichiers d%27en-tête\aq</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\FileMapper.h">
+      <Filter>Fichiers d%27en-tête\aq</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\DateConversion.h">
+      <Filter>Fichiers d%27en-tête\aq</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\BaseDesc.h">
+      <Filter>Fichiers d%27en-tête\aq</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\Symbole.h">
+      <Filter>Fichiers d%27en-tête\aq</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="aq\Logger.cpp">
+      <Filter>Fichiers sources\aq</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\check_log.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\check_parallel_process.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\Timer.cpp">
+      <Filter>Fichiers sources\aq</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\FileMapper.cpp">
+      <Filter>Fichiers sources\aq</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\check_file_mapper.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\DateConversion.cpp">
+      <Filter>Fichiers sources\aq</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\BaseDesc.cpp">
+      <Filter>Fichiers sources\aq</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Tests\Makefile.win">
+      <Filter>Tests</Filter>
+    </None>
+    <None Include="aq\LocklessQueue.h">
+      <Filter>Fichiers d%27en-tête\aq</Filter>
+    </None>
+  </ItemGroup>
+</Project>

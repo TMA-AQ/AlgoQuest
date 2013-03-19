@@ -1,0 +1,137 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Fichiers sources">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Fichiers de ressources">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Fichiers sources\aq">
+      <UniqueIdentifier>{e235f3c9-7436-4206-9ce6-481412749f05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\aq">
+      <UniqueIdentifier>{e38bd1cb-5573-42b2-a708-f5af34d2830a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\win">
+      <UniqueIdentifier>{c87a2114-fe34-4e4c-a344-2c22a3fec264}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\win">
+      <UniqueIdentifier>{d471c760-4819-4fcc-ae67-7a2fcc7ba24a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\unix">
+      <UniqueIdentifier>{cb2a6ac2-bff1-4fee-a7d9-3f2e78664be1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\aq\protocol">
+      <UniqueIdentifier>{d339a90e-5c8e-4fba-8d3c-fe73e95ee40f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\aq\sync">
+      <UniqueIdentifier>{259802bf-8857-4e1c-8a40-4cee04d28dc7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\aq\protocol">
+      <UniqueIdentifier>{b099506c-4b38-4534-876a-036e14f3c860}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\aq\async">
+      <UniqueIdentifier>{143b1456-e357-4a80-b189-f542322c604d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\aq\async">
+      <UniqueIdentifier>{ef31ece0-bb5b-4b38-b7c9-26599c089125}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\aq\sync">
+      <UniqueIdentifier>{94acd26a-a108-4bfc-ad54-9add52875bcc}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\Configuration.h">
+      <Filter>Fichiers d%27en-tête\aq</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\Link.h">
+      <Filter>Fichiers d%27en-tête\aq</Filter>
+    </ClInclude>
+    <ClInclude Include="win\AQService.h">
+      <Filter>Fichiers d%27en-tête\win</Filter>
+    </ClInclude>
+    <ClInclude Include="win\ServiceBase.h">
+      <Filter>Fichiers d%27en-tête\win</Filter>
+    </ClInclude>
+    <ClInclude Include="win\ServiceInstaller.h">
+      <Filter>Fichiers d%27en-tête\win</Filter>
+    </ClInclude>
+    <ClInclude Include="win\ThreadPool.h">
+      <Filter>Fichiers d%27en-tête\win</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\protocol\CommandHandler.h">
+      <Filter>Fichiers d%27en-tête\aq\protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\protocol\Demuxer.h">
+      <Filter>Fichiers d%27en-tête\aq\protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\async\AsyncServer.h">
+      <Filter>Fichiers d%27en-tête\aq\async</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\async\AsyncSession.h">
+      <Filter>Fichiers d%27en-tête\aq\async</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\sync\SyncServer.h">
+      <Filter>Fichiers d%27en-tête\aq\sync</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\sync\SyncSession.h">
+      <Filter>Fichiers d%27en-tête\aq\sync</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="aq\Configuration.cpp">
+      <Filter>Fichiers sources\aq</Filter>
+    </ClCompile>
+    <ClCompile Include="win\AQServerWin.cpp">
+      <Filter>Fichiers sources\win</Filter>
+    </ClCompile>
+    <ClCompile Include="win\AQService.cpp">
+      <Filter>Fichiers sources\win</Filter>
+    </ClCompile>
+    <ClCompile Include="win\ServiceBase.cpp">
+      <Filter>Fichiers sources\win</Filter>
+    </ClCompile>
+    <ClCompile Include="win\ServiceInstaller.cpp">
+      <Filter>Fichiers sources\win</Filter>
+    </ClCompile>
+    <ClCompile Include="unix\AQServerUnix.cpp">
+      <Filter>Fichiers sources\unix</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\protocol\Demuxer.cpp">
+      <Filter>Fichiers sources\aq\protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\async\AsyncServer.cpp">
+      <Filter>Fichiers sources\aq\async</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\async\AsyncSession.cpp">
+      <Filter>Fichiers sources\aq\async</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\sync\SyncServer.cpp">
+      <Filter>Fichiers sources\aq\sync</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\sync\SyncSession.cpp">
+      <Filter>Fichiers sources\aq\sync</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="config.xml">
+      <Filter>Fichiers de ressources</Filter>
+    </Xml>
+  </ItemGroup>
+</Project>

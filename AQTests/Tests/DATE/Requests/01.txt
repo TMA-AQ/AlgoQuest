@@ -1,0 +1,4 @@
+﻿Date1
+select COTATION.dte, DATE(COTATION.dte)
+from COTATION, ACTION
+where COTATION.isin=ACTION.isin;

@@ -1,0 +1,4 @@
+RootDir4
+select People.City, SUM(People.Age)
+from People, Cities
+where People.City=Cities.CityName;

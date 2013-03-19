@@ -1,0 +1,4 @@
+﻿RootDir5
+select TestTable1.Name, NVL(TestTable1.Name, 'NOT FOUND!')
+from Cities, TestTable1
+where Cities.CityName=TestTable1.City;

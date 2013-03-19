@@ -1,0 +1,4 @@
+RootDir4
+select *
+from People, Cities
+where People.City=Cities.CityName;

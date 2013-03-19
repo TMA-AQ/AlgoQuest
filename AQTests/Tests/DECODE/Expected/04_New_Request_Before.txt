@@ -1,0 +1,3 @@
+SELECT DECODE . People Name , , , , K_VALUE 'Alice' K_VALUE 'Some Alice' , K_VALUE 'Steve' K_VALUE 'Some Steve' , K_VALUE 'Bran' K_VALUE 'Some Bran' K_VALUE 'Other guy'
+FROM , People Cities
+WHERE K_JEQ . People City . Cities CityName

@@ -1,0 +1,6 @@
+ACTION
+SELECT COTATION.dte
+FROM   COTATION,
+       ACTION
+WHERE  COTATION.isin = ACTION.isin
+       AND COTATION.dte IN ( To_date('10/09/2012', 'DD/MM/YYYY'), To_date('20/08/2012', 'DD/MM/YYYY'), To_date('22/08/2012'), To_date('24/08/2012', 'DD/MM/YYYY') ); 

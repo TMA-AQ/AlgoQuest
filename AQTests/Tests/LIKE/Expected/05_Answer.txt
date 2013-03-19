@@ -1,0 +1,17 @@
+; table_1.champ_2; Count
+; abcyzstu; 111529
+; defyzstu; 70025
+; ghiyzstu; 126201
+; jklyzstu; 64208
+; mnoyzstu; 87280
+; pqryzstu; 210565
+; stuyzstu; 144500
+; vwxyzstu; 169512
+; yzabcstu; 116032
+; yzdefstu; 86383
+; yzghistu; 158959
+; yzjklstu; 174292
+; yzmnostu; 74427
+; yzpqrstu; 124868
+; yzstustu; 236209
+; yzvwxstu; 42092

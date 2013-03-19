@@ -1,0 +1,2 @@
+SELECT MAX . table_4 id
+FROM table_4

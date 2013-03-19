@@ -1,0 +1,7 @@
+; table_1.champ_1; AVG table_1.val_1 PARTITION BY table_1.champ_1; Count
+; abcabcabc; 133; 7
+; abcabcdef; 54; 3
+; abcabcghi; 345; 8
+; abcabcjkl; 283; 12
+; abcabcmno; 162; 12
+; abcabcpqr; 160; 11

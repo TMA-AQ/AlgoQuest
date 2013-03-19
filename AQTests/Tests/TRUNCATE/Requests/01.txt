@@ -1,0 +1,5 @@
+﻿RootDir5
+CREATE TABLE TestTable2 AS
+select People.City, Cities.Population
+from People, Cities
+where People.City=Cities.CityName;

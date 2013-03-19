@@ -1,0 +1,6 @@
+ACTION
+SELECT *
+FROM   cotation_neg n,
+       cotation c
+WHERE  n.dte = c.dte
+       AND n.isin = c.isin; 

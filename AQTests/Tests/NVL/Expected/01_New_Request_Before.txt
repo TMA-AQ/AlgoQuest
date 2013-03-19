@@ -1,0 +1,3 @@
+SELECT , . TestTable1 Name NVL . TestTable1 Name K_VALUE 'NOT FOUND!'
+FROM , Cities TestTable1
+WHERE K_JEQ . TestTable1 City . Cities CityName 

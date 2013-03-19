@@ -1,0 +1,4 @@
+RootDir4
+select People.City, People.Age, People.Name, FIRST_VALUE (People.Name) OVER (PARTITION BY People.City,People.Age ORDER BY People.Age, People.Name)
+from People, Cities
+where People.City=Cities.CityName;

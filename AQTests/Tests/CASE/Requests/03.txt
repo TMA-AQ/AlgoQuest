@@ -1,0 +1,11 @@
+RootDir4
+select	People.Age, 
+	CASE People.Age 
+		WHEN 20 THEN People.Name
+		WHEN 21 THEN People.Name
+		WHEN 32 THEN People.Name
+	ELSE
+		People.City
+	END
+from Cities, People
+where Cities.CityName=People.City;

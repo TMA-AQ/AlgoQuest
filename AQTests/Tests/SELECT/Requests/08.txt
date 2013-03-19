@@ -1,0 +1,4 @@
+﻿RootDir4
+select People.City
+from People
+where People.City='NewYork';

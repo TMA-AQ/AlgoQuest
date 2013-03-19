@@ -1,0 +1,4 @@
+﻿RootDir5
+select *
+from People, TestTable1
+where People.City=TestTable1.City;

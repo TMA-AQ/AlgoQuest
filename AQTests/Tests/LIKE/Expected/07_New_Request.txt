@@ -1,0 +1,3 @@
+SELECT . table_1 champ_2
+FROM , table_1 table_2
+WHERE AND K_JEQ . table_2 val_1 . table_1 val_1 IN . table_1 champ_2 , K_VALUE 'abcghighi' , K_VALUE 'defghighi' , K_VALUE 'ghighiabc' , K_VALUE 'ghighidef' , K_VALUE 'ghighighi' , K_VALUE 'ghighijkl' , K_VALUE 'ghighimno' , K_VALUE 'ghighipqr' , K_VALUE 'ghighistu' , K_VALUE 'ghighivwx' , K_VALUE 'ghighiyz' , K_VALUE 'jklghighi' , K_VALUE 'mnoghighi' , K_VALUE 'pqrghighi' , K_VALUE 'stughighi' , K_VALUE 'vwxghighi' K_VALUE 'yzghighi'

@@ -1,0 +1,2 @@
+; SUBSTRING , CAST table_1.val_1 K_STRING_TYPE ,; Count
+; 98; 32

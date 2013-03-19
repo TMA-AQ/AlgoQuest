@@ -1,0 +1,3 @@
+SELECT AS - COUNT K_STAR K_VALUE 1 DIFF
+FROM , COTATION action
+WHERE K_JEQ . action isin . COTATION isin 

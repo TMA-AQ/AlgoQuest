@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Fichiers sources">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Fichiers de ressources">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Fichiers sources\driver">
+      <UniqueIdentifier>{31f322e5-986d-4219-8b96-d530d7859cd9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\driver">
+      <UniqueIdentifier>{18c298c9-d2f4-408a-a650-84d994ad631e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\tests">
+      <UniqueIdentifier>{07b9f5f3-13a4-4207-959e-872a09fbfa5c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="driver\SQLTypes.h">
+      <Filter>Fichiers d%27en-tête\driver</Filter>
+    </ClInclude>
+    <ClInclude Include="driver\Connection.h">
+      <Filter>Fichiers d%27en-tête\driver</Filter>
+    </ClInclude>
+    <ClInclude Include="driver\ResultSet.h">
+      <Filter>Fichiers d%27en-tête\driver</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="driver\dllmain.cpp">
+      <Filter>Fichiers sources\driver</Filter>
+    </ClCompile>
+    <ClCompile Include="driver\SQLAttr.cpp">
+      <Filter>Fichiers sources\driver</Filter>
+    </ClCompile>
+    <ClCompile Include="driver\SQLCatalog.cpp">
+      <Filter>Fichiers sources\driver</Filter>
+    </ClCompile>
+    <ClCompile Include="driver\SQLConn.cpp">
+      <Filter>Fichiers sources\driver</Filter>
+    </ClCompile>
+    <ClCompile Include="driver\SQLDesc.cpp">
+      <Filter>Fichiers sources\driver</Filter>
+    </ClCompile>
+    <ClCompile Include="driver\SQLDiag.cpp">
+      <Filter>Fichiers sources\driver</Filter>
+    </ClCompile>
+    <ClCompile Include="driver\SQLEnv.cpp">
+      <Filter>Fichiers sources\driver</Filter>
+    </ClCompile>
+    <ClCompile Include="driver\SQLResult.cpp">
+      <Filter>Fichiers sources\driver</Filter>
+    </ClCompile>
+    <ClCompile Include="driver\SQLStmt.cpp">
+      <Filter>Fichiers sources\driver</Filter>
+    </ClCompile>
+    <ClCompile Include="driver\Connection.cpp">
+      <Filter>Fichiers sources\driver</Filter>
+    </ClCompile>
+    <ClCompile Include="driver\SQLConnectW.cpp">
+      <Filter>Fichiers sources\driver</Filter>
+    </ClCompile>
+    <ClCompile Include="driver\ResultSet.cpp">
+      <Filter>Fichiers sources\driver</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="AQODBC.def">
+      <Filter>Fichiers de ressources</Filter>
+    </None>
+  </ItemGroup>
+</Project>

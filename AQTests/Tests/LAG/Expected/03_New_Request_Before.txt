@@ -1,0 +1,4 @@
+SELECT , , , , . action libelle . COTATION isin . COTATION dte . COTATION clo LAG , . COTATION clo K_VALUE 1
+ORDER BY . COTATION dte PARTITION BY . COTATION isin
+FROM , COTATION action
+WHERE AND K_JEQ . action isin . COTATION isin = . COTATION isin K_VALUE 'FR0000130007'

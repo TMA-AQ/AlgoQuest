@@ -1,0 +1,12 @@
+; Cities.CITYNAME; Cities.POPULATION; People.NAME; People.AGE; People.CITY; Count
+; Madrid; 5; Bran; 32; Madrid; 2
+; Madrid; 5; Caesar; 20; Madrid; 1
+; Madrid; 5; Mimy; 30; Madrid; 3
+; Madrid; 5; Nan; 20; Madrid; 1
+; Madrid; 5; Stan; 32; Madrid; 3
+; NewYork; 20; Alice; 22; NewYork; 1
+; NewYork; 20; Bob; 20; NewYork; 1
+; NewYork; 20; John; 21; NewYork; 1
+; NewYork; 20; Mary; 24; NewYork; 1
+; NewYork; 20; Steve; 22; NewYork; 2
+; NewYork; 20; Sunny; 24; NewYork; 1

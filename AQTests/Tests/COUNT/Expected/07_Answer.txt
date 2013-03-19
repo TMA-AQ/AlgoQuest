@@ -1,0 +1,7 @@
+; table_1.champ_1; COUNT table_1.val_1 PARTITION BY table_1.champ_1; Count
+; abcabcabc; 7; 7
+; abcabcdef; 3; 3
+; abcabcghi; 8; 8
+; abcabcjkl; 12; 12
+; abcabcmno; 12; 12
+; abcabcpqr; 11; 11

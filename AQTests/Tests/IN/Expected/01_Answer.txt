@@ -1,0 +1,9 @@
+; table_1.champ_2; Count
+; abcabcabc; 121817
+; abcdefabc; 119687
+; abcghiabc; 92437
+; abcjklabc; 172816
+; abcmnoabc; 86376
+; abcpqrabc; 67613
+; abcstuabc; 114575
+; abcvwxabc; 113966

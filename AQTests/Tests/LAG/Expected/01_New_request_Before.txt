@@ -1,0 +1,4 @@
+SELECT , , , , , . table_1 champ_1 . table_1 champ_2 . table_1 champ_4 . table_1 champ_5 . table_1 champ_6 LAG , . table_1 champ_1 K_VALUE 1
+ORDER BY . table_1 champ_1 PARTITION BY . table_1 champ_5
+FROM , table_1 table_2
+WHERE AND K_JEQ . table_2 val_1 . table_1 val_1 = . table_1 champ_3 K_VALUE 'abcabcabc'

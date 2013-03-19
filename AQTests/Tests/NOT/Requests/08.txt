@@ -1,0 +1,4 @@
+﻿MSALGOQUEST
+select table_1.val_1
+from table_1, table_6
+where table_1.champ_1=table_6.champ_1 AND NOT(table_1.val_1 <= 15 OR table_1.val_1 >= 35);

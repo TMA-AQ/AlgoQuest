@@ -1,0 +1,12 @@
+; People.NAME; People.AGE; People.CITY; Count
+; Alice; 22; NewYork; 1
+; Bob; 20; NewYork; 1
+; Bran; 32; Madrid; 2
+; Caesar; 20; Madrid; 1
+; John; 21; NewYork; 1
+; Mary; 24; NewYork; 1
+; Mimy; 30; Madrid; 3
+; Nan; 20; Madrid; 1
+; Stan; 32; Madrid; 3
+; Steve; 22; NewYork; 2
+; Sunny; 24; NewYork; 1

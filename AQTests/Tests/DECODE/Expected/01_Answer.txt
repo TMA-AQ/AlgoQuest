@@ -1,0 +1,12 @@
+; People.Name; DECODE People.Name , , , , , ,; Count
+; Alice; Some Alice; 1
+; Bob; Other guy; 1
+; Bran; Some Bran; 2
+; Caesar; Other guy; 1
+; John; Other guy; 1
+; Mary; Other guy; 1
+; Mimy; Other guy; 3
+; Nan; Other guy; 1
+; Stan; Other guy; 3
+; Steve; Some Steve; 2
+; Sunny; Other guy; 1

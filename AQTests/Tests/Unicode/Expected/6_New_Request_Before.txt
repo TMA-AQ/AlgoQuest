@@ -1,0 +1,3 @@
+SELECT COUNT K_STAR
+FROM , Albums Tracks
+WHERE AND K_JEQ . Tracks SerialNr . Albums Serialnr IN . TRACKS Song , K_VALUE 'русский' , K_VALUE 'Последнийзвонок' , K_VALUE 'al-ʻarabīyah' K_VALUE 'مختلفة،سباققضاءالناص'

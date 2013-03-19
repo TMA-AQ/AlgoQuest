@@ -1,0 +1,3 @@
+SELECT . table_1 val_2
+FROM , table_1 table_2
+WHERE AND K_JEQ . table_2 val_1 . table_1 val_1 IN . table_1 val_2 , K_VALUE 5483.78 , K_VALUE 8.50 , K_VALUE 480.30 K_VALUE 26.40

@@ -1,0 +1,3 @@
+SELECT , , , , , , , , , , , , , . cotation ISIN . cotation DTE . cotation OUV . cotation MAXI . cotation MINI . cotation CLO . cotation VOLUME . cotation_neg ISIN . cotation_neg DTE . cotation_neg OUV . cotation_neg MAXI . cotation_neg MINI . cotation_neg CLO . cotation_neg VOLUME
+FROM , cotation_neg cotation
+WHERE AND K_JEQ . cotation_neg dte . cotation dte K_JEQ . cotation_neg isin . cotation isin 

@@ -1,0 +1,46 @@
+PROGRAMS = check-log.exe check-parallel-process.exe check-file-mapper.exe
+
+CC = cl.exe
+LD = link.exe
+
+INCLUDEDIRS = \
+	/I "C:\Boost\install\include\boost-1_50" \
+	/I ".."
+
+PATH_OBJ = ../../AQSuite/x64/Debug
+OBJ= \
+     $(PATH_OBJ)/AQUtil.lib
+
+CPPFLAGS = /DESRI_WINDOWS $(INCLUDEDIRS) /nologo \
+         /EHsc /Zi /W3 /WX- /Od /Gm /EHsc /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope \
+         /Gd /wd"4996" /errorReport:queue \
+         /D "WIN32" /D "_DEBUG" /D "_CONSOLE"
+
+LDFLAGS = /LIBPATH:"C:\Boost\install\lib" /DEBUG /MACHINE:X64 /NOLOGO
+
+ALL: $(PROGRAMS)
+
+
+check-log.exe: check_log.obj $(OBJ)
+	$(LD) $(LDFLAGS) /out:$@ check_log.obj $(OBJ)
+
+check_log.obj: check_log.cpp
+
+
+check-parallel-process.exe: check_parallel_process.obj $(OBJ)
+	$(LD) $(LDFLAGS) /out:$@ check_parallel_process.obj $(OBJ)
+
+check_parallel_process.obj: check_parallel_process.cpp ../aq/ParallelProcess.h
+
+
+check-file-mapper.exe: check_file_mapper.obj $(OBJ)
+	$(LD) $(LDFLAGS) /out:$@ check_file_mapper.obj $(OBJ)
+
+check_file_mapper.obj: check_file_mapper.cpp
+
+
+clean:
+	del check_log.obj check_parallel_process.obj $(PROGRAMS) *.tlh *.idb *.pdb
+
+run:
+          $(PROGRAM)

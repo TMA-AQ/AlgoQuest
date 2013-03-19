@@ -1,0 +1,5 @@
+SELECT , , , . People City . People Age . People Name LAG , . People Name K_VALUE 1
+ORDER BY . People Name PARTITION BY . People City
+FROM , People Cities
+WHERE K_JEQ . People City . Cities CityName
+ORDER BY , . People City . People Name

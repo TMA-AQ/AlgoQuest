@@ -1,0 +1,7 @@
+﻿RootDir5
+SELECT People.Name,
+decode(People.Name, 'Alice', 'Some Alice',
+                    'Steve', 'Some Steve',
+                    'Bran', 'Some Bran')
+from People, Cities
+where People.City=Cities.CityName;

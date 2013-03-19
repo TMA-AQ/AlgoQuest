@@ -1,0 +1,5 @@
+DATE1
+select COTATION.dte
+from COTATION, ACTION
+where COTATION.isin=ACTION.isin
+AND COTATION.dte = TO_DATE('03/09/2012','DD/MM/YYYY');

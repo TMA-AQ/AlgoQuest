@@ -1,0 +1,16 @@
+; People.Name; DECODE People.Name , , , , ,; Count
+; Alice; Some Alice; 1
+; Bob; NULL; 1
+; Bran; Some Bran; 2
+; Caesar; NULL; 1
+; John; NULL; 1
+; Mary; NULL; 1
+; Mimy; NULL; 1
+; Mimy; NULL; 1
+; Mimy; NULL; 1
+; Nan; NULL; 1
+; Stan; NULL; 1
+; Stan; NULL; 1
+; Stan; NULL; 1
+; Steve; Some Steve; 2
+; Sunny; NULL; 1

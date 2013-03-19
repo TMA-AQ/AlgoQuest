@@ -1,0 +1,3 @@
+SELECT . People Name
+FROM People
+WHERE = . People City K_VALUE 'NewYork'

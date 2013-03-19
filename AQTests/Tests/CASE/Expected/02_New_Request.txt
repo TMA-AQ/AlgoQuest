@@ -1,0 +1,3 @@
+SELECT , , . People City . People Name . People Age
+FROM , Cities People
+WHERE K_JEQ . People City . Cities CityName 

@@ -1,0 +1,4 @@
+; table_1.champ_2; table_1.val_1; AVG table_1.val_1; table_1.val_2; AVG table_1.val_2; table_1.val_3; AVG table_1.val_3; table_1.val_4; AVG table_1.val_4; Count
+; abcpqrpqr; 57; 79; 0.62; 541.48; 8106.00; 28774.51; 77640; 27849; 295
+; yzmnodef; 91; 79; 1684.00; 541.48; 0.00; 28774.51; 5; 27849; 264
+; yzpqrghi; 91; 79; 3.33; 541.48; 80644.50; 28774.51; 54; 27849; 264

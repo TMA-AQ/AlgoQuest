@@ -1,0 +1,5 @@
+MSALGOQUEST
+select SUBSTRING(CAST(table_1.val_1 AS string), 2,2)
+from table_1, table_2
+where table_1.val_1=table_2.val_1
+and table_1.val_1=998;

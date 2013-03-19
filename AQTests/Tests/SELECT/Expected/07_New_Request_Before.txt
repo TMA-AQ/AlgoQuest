@@ -1,0 +1,3 @@
+SELECT . People Name
+FROM People
+WHERE > . People Name K_VALUE 'D'

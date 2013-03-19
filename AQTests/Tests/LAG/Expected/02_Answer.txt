@@ -1,0 +1,16 @@
+; People.City; People.Age; People.Name; LAG , People.Name ORDER BY People.Name PARTITION BY People.City; Count
+; Madrid; 32; Bran; NULL; 1
+; Madrid; 32; Bran; Bran; 1
+; Madrid; 20; Caesar; Bran; 1
+; Madrid; 30; Mimy; Caesar; 1
+; Madrid; 30; Mimy; Mimy; 2
+; Madrid; 20; Nan; Mimy; 1
+; Madrid; 32; Stan; Nan; 1
+; Madrid; 32; Stan; Stan; 2
+; NewYork; 22; Alice; NULL; 1
+; NewYork; 20; Bob; Alice; 1
+; NewYork; 21; John; Bob; 1
+; NewYork; 24; Mary; John; 1
+; NewYork; 22; Steve; Mary; 1
+; NewYork; 22; Steve; Steve; 1
+; NewYork; 24; Sunny; Steve; 1

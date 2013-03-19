@@ -1,0 +1,3 @@
+SELECT , . People Age CASE . People Age WHEN K_VALUE 20 . People Name WHEN K_VALUE 21 . People Name WHEN K_VALUE 22 . People Name WHEN K_VALUE 24 . People City WHEN K_VALUE 30 . People City WHEN K_VALUE 32 . People City
+FROM , Cities People
+WHERE K_JEQ . People City . Cities CityName 

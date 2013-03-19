@@ -1,0 +1,5 @@
+SELECT . table_1 val_1
+FROM , table_1 table_2
+WHERE K_JEQ . table_2 val_1 . table_1 val_1
+GROUP BY , . table_1 val_1 . table_1 champ_1
+ORDER BY . table_1 val_1

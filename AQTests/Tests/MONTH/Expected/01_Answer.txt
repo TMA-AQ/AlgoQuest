@@ -1,0 +1,2 @@
+; MONTH TO_DATE + + SUBSTRING , CAST table_1.id K_STRING_TYPE ,; Count
+; 1; 137428

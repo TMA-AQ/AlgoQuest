@@ -1,0 +1,13 @@
+; table_1.champ_1; COUNT table_1.val_1 ORDER BY , table_1.champ_1 table_1.val_1 PARTITION BY table_1.champ_1 FRAME ROWS PRECEDING; Count
+; abcabcabc; 1; 1
+; abcabcabc; 2; 6
+; abcabcdef; 1; 1
+; abcabcdef; 2; 2
+; abcabcghi; 1; 1
+; abcabcghi; 2; 7
+; abcabcjkl; 1; 1
+; abcabcjkl; 2; 11
+; abcabcmno; 1; 1
+; abcabcmno; 2; 11
+; abcabcpqr; 1; 1
+; abcabcpqr; 2; 10

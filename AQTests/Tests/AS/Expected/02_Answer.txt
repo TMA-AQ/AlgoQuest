@@ -1,0 +1,4 @@
+; a.champ_2; b.val_1; Count
+; abcpqrpqr; 57; 295
+; yzmnodef; 91; 264
+; yzpqrghi; 91; 264

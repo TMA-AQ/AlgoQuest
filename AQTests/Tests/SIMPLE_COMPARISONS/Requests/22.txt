@@ -1,0 +1,4 @@
+﻿ACTION
+select COTATION.dte
+from COTATION, ACTION
+where COTATION.isin=ACTION.isin AND COTATION.dte >= TO_DATE('10/09/2012');
