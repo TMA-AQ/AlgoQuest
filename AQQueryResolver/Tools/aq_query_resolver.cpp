@@ -432,7 +432,7 @@ int main(int argc, char**argv)
 			("log-lock", po::bool_switch(&lock_mode), "for multithread program")
 			("log-date", po::bool_switch(&date_mode), "add date to log")
 			("log-pid", po::bool_switch(&pid_mode), "add thread id to log")
-			("log-ident", po::value<std::string>(&ident)->default_value("sql2prefix.log"), "")
+			("log-ident", po::value<std::string>(&ident)->default_value("aq_query_resolver"), "")
 			("aq-ini", po::value<std::string>(&propertiesFile), "")
 			("query-ident", po::value<std::string>(&queryIdent), "")
 			("simulate-aq-engine", po::bool_switch(&simulateAQEngine), "")
@@ -553,7 +553,7 @@ int main(int argc, char**argv)
 		{
 			//
 			// Log file
-			 std::string logFilename = settings.szRootPath + "/calculus/" + queryIdent + "/sql2prefix.log";
+			 std::string logFilename = settings.szRootPath + "/calculus/" + queryIdent + "/aq_query_resolver.log";
 			 aq::Logger::getInstance().setLocalFile(logFilename.c_str());
 			 aq::Logger::getInstance().setLevel(LOG_DEBUG);
 

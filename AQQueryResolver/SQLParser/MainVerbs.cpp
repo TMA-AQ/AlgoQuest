@@ -691,13 +691,13 @@ void PreProcessSelect( tnode *pNode, Base& BaseDesc )
 			//pNode = expression_transform( pNode, &BaseDesc, pSettings->szThesaurusPath, &nRet );
 			if ( nRet == 0 && pNode != NULL ) {
 			} else {
-				aq::Logger::getInstance().log(AQ_ERROR, "SQL2Prefix : Function expression_transform() returned error : %d !\n", nRet);
+				aq::Logger::getInstance().log(AQ_ERROR, "Function expression_transform() returned error : %d !\n", nRet);
 			}
 		} else {
-			aq::Logger::getInstance().log(AQ_ERROR, "SQL2Prefix : Function enforce_qualified_column_reference() returned error : %d !\n", nRet);
+			aq::Logger::getInstance().log(AQ_ERROR, "Function enforce_qualified_column_reference() returned error : %d !\n", nRet);
 		}
 	} else {
-		aq::Logger::getInstance().log(AQ_ERROR, "SQL2Prefix : Function create_column_map_for_tables_used_in_select() returned NULL !\n");
+		aq::Logger::getInstance().log(AQ_ERROR, "Function create_column_map_for_tables_used_in_select() returned NULL !\n");
 		throw generic_error(generic_error::INVALID_QUERY, "Error : No or bad tables specified in SQL SELECT ... FROM Statement");
 	}
 }

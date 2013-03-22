@@ -16,7 +16,7 @@ CPPFLAGS = /DESRI_WINDOWS $(INCLUDEDIRS) /nologo \
 
 LDFLAGS = /LIBPATH:"$(BOOST_LIB_DIR)" /DEBUG /MACHINE:X64 /NOLOGO \
 		 "$(AQ_UTIL_LIB)" \
-		 "../build/x64/Debug/SQL2Prefix.lib"
+		 "../build/x64/Debug/AQQueryResolver.lib"
 
 ALL: $(PROGRAMS)
 
@@ -48,7 +48,7 @@ printresult.obj: printresult.cpp
 .PHONY: clean mrproper
 
 clean:
-	del sqlparser.obj sql2prefix.obj printresult.obj *.tlh *.idb *.pdb *.ilk
+	del sqlparser.obj aq_query_resolver.obj printresult.obj *.tlh *.idb *.pdb *.ilk
 	
 mrproper: clean
 	rm -rf $(PROGRAM)
