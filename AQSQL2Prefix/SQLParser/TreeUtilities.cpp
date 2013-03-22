@@ -10,9 +10,9 @@
 using namespace std;
 
 //------------------------------------------------------------------------------
-const int nrJoinTypes = 6;
-const int joinTypes[] = { K_JEQ, K_JNEQ, K_JINF, K_JIEQ, K_JSUP, K_JSEQ };
-const int inverseTypes[] = { K_JEQ, K_JNEQ, K_JSUP, K_JSEQ, K_JINF, K_JIEQ };
+const int nrJoinTypes = 7;
+const int joinTypes[] = { K_JEQ, K_JAUTO, K_JNEQ, K_JINF, K_JIEQ, K_JSUP, K_JSEQ };
+const int inverseTypes[] = { K_JEQ, K_JAUTO, K_JNEQ, K_JSUP, K_JSEQ, K_JINF, K_JIEQ };
 
 //------------------------------------------------------------------------------
 void addConditionsToWhere( tnode* pCond, tnode* pStart )

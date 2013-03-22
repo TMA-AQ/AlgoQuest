@@ -28,9 +28,11 @@ void AQEngine::call(TProjectSettings& settings, tnode *pNode, int mode, int sele
 {
 	string str;
 	syntax_tree_to_prefix_form( pNode, str );
+	std::cout << std::endl << str << std::endl << std::endl;
 	ParseJeq( str );
 	
 #if defined(_DEBUG)
+	std::cout << std::endl << str << std::endl << std::endl;
 	std::string queryStr; 
 	// syntax_tree_to_sql_form(pNode, queryStr);
 	std::cout << std::endl << queryStr << std::endl << std::endl;

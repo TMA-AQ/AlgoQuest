@@ -138,7 +138,7 @@ void VerbNode::changeQuery()
 		this->pNode->inf = 1;
 		this->VerbObject->Disabled = true;
 	}
-
+	
 	//std::cout << *this->pNode << std::endl << std::endl;
 	//std::cout << "===" << std::endl << std::endl;
 

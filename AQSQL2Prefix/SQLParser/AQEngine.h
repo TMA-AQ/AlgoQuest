@@ -15,7 +15,7 @@ public:
 				int mode, 
 				int selectLevel);
 
-	virtual const boost::shared_ptr<aq::AQMatrix> getAQMatrix() const { return aqMatrix; }
+	boost::shared_ptr<aq::AQMatrix> getAQMatrix() { return aqMatrix; }
 	const std::vector<llong>& getTablesIDs() const { return tableIDs; }
 
 private:

@@ -404,12 +404,20 @@ Table::Ptr QueryResolver::SolveSelectRegular( int nSelectLevel )
 	// Query Pre Processing
 
 	timer.start();
-
+	
 	VerbNode::Ptr spTree = QueryResolver::BuildVerbsTree( this->sqlStatement, this->BaseDesc, this->pSettings );
+	
+	syntax_tree_to_prefix_form( this->sqlStatement, str );
+	std::cout << std::endl << str << std::endl << std::endl;
+
 	// TODO: optimize tree by detecting identical subtrees
 	spTree->changeQuery();
-	QueryResolver::cleanQuery( this->sqlStatement );
+	
+	syntax_tree_to_prefix_form( this->sqlStatement, str );
+	std::cout << std::endl << str << std::endl << std::endl;
 
+	QueryResolver::cleanQuery( this->sqlStatement );
+	
 	aq::Logger::getInstance().log(AQ_INFO, "Query Preprocessing: Time elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
 
 	//
@@ -433,7 +441,16 @@ Table::Ptr QueryResolver::SolveSelectRegular( int nSelectLevel )
 
 	if (pSettings->computeAnswer)
 	{
-		table = this->solveAQMatrice(spTree);
+	
+		//
+		if (pSettings->useRowResolver && !this->nested && !this->hasOrderBy && !this->hasPartitionBy)
+		{
+			table = this->solveAQMatriceByRows(spTree);
+		}
+		else
+		{
+			table = this->solveAQMatriceByColumns(spTree);
+		}
 		spTree = NULL; //debug13 - force delete to see if it causes an error
 	}
 
@@ -1389,8 +1406,9 @@ int QueryResolver::SolveSQLStatement()
 }
 
 //------------------------------------------------------------------------------
-Table::Ptr QueryResolver::solveAQMatrice(VerbNode::Ptr spTree)
-{
+Table::Ptr QueryResolver::solveAQMatriceByRows(VerbNode::Ptr spTree)
+{	
+	assert(pSettings->useRowResolver);
 	aq::Timer timer;
 
 	// get select columns from query
@@ -1401,22 +1419,50 @@ Table::Ptr QueryResolver::solveAQMatrice(VerbNode::Ptr spTree)
 	// result
 	Table::Ptr table = new Table();
 
-	//
-	if (pSettings->useRowResolver && !this->nested && !this->hasGroupBy && !this->hasOrderBy && !this->hasPartitionBy)
-	{
-
 #ifdef OUTPUT_NESTED_QUERIES
-		MakeBackupFile( pSettings->szOutputFN, nQueryIdx, 0 );
-		MakeBackupFile( pSettings->szAnswerFN, nQueryIdx, 1 );
+	MakeBackupFile( pSettings->szOutputFN, nQueryIdx, 0 );
+	MakeBackupFile( pSettings->szAnswerFN, nQueryIdx, 1 );
 #endif
 
-		boost::shared_ptr<aq::RowProcessing> rowProcessing(new aq::RowProcessing(pSettings->output == "stdout" ? pSettings->output : pSettings->szAnswerFN));
-		rowProcessing->setColumn(columnTypes);
+	if (this->hasGroupBy)
+	{
 		timer.start();
-		table->loadFromTableAnswerByRow(*(aq_engine->getAQMatrix()), aq_engine->getTablesIDs(), columnTypes, *pSettings, BaseDesc, rowProcessing );
-		aq::Logger::getInstance().log(AQ_INFO, "Load From Answer: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
-		return Table::Ptr(); // empty
+		std::map<size_t, std::vector<size_t> > columnsByTableId;
+		for (std::vector<Column::Ptr>::const_iterator it = columnTypes.begin(); it != columnTypes.end(); ++it)
+		{
+			(*it)->TableID = BaseDesc.getTableIdx((*it)->getTableName());
+			columnsByTableId[(*it)->TableID].push_back((*it)->ID);
+		}
+
+		std::vector<Column::Ptr> columnGroupBy;
+		tnode * nodeGroup = find_main_node(this->sqlStatement, K_GROUP);
+		std::vector<tnode**> columnNodes;
+		getAllColumnNodes(nodeGroup, columnNodes);
+
+		aq_engine->getAQMatrix()->groupBy(columnsByTableId); // FIXME : the group by must be ordered according to the group by clause
+		aq::Logger::getInstance().log(AQ_INFO, "AQMatrix Group By: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
 	}
+
+	boost::shared_ptr<aq::RowProcessing> rowProcessing(new aq::RowProcessing(pSettings->output == "stdout" ? pSettings->output : pSettings->szAnswerFN));
+	rowProcessing->setColumn(columnTypes);
+	timer.start();
+	table->loadFromTableAnswerByRow(*(aq_engine->getAQMatrix()), aq_engine->getTablesIDs(), columnTypes, *pSettings, BaseDesc, rowProcessing );
+	aq::Logger::getInstance().log(AQ_INFO, "Load From Answer: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
+	return Table::Ptr(); // empty
+}
+
+//------------------------------------------------------------------------------
+Table::Ptr QueryResolver::solveAQMatriceByColumns(VerbNode::Ptr spTree)
+{
+	aq::Timer timer;
+
+	// get select columns from query
+	vector<Column::Ptr> columnTypes;
+	this->getColumnTypes( this->sqlStatement, columnTypes, this->BaseDesc );
+	
+	//
+	// result
+	Table::Ptr table = new Table();
 
 	timer.start();
 	table->loadFromTableAnswerByColumn(*(aq_engine->getAQMatrix()), aq_engine->getTablesIDs(), columnTypes, *pSettings, BaseDesc );

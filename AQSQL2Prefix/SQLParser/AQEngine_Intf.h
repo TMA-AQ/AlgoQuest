@@ -19,7 +19,7 @@ public:
 						int mode, 
 						int selectLevel) = 0;
 
-	virtual const boost::shared_ptr<aq::AQMatrix> getAQMatrix() const = 0;
+	virtual boost::shared_ptr<aq::AQMatrix> getAQMatrix() = 0;
 	virtual const std::vector<llong>& getTablesIDs() const = 0;
 
 	// virtual void run(Base& BaseDesc, const char * query, AQEngineCallback_Intf * callback);

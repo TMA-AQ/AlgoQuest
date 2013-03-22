@@ -20,7 +20,8 @@ public:
 	~QueryResolver();
 
 	int SolveSQLStatement();
-	Table::Ptr solveAQMatrice(VerbNode::Ptr spTree);
+	Table::Ptr solveAQMatriceByRows(VerbNode::Ptr spTree);
+	Table::Ptr solveAQMatriceByColumns(VerbNode::Ptr spTree);
 	// Table::Ptr solveAQMatriceV2(VerbNode::Ptr spTree, tnode * pNode);
 	Table::Ptr getResult() { return this->result; }
 

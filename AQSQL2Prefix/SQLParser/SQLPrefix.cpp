@@ -5,6 +5,7 @@
 #include <malloc.h>
 #include <string.h>
 #include <stack>
+#include <map>
 #include "DateConversion.h"
 
 #define STR_BUF_SIZE_ROUND_UP	4096
@@ -127,10 +128,62 @@ int IsColumnReference( tnode *pNode ) {
 }
 
 //------------------------------------------------------------------------------
+void getTableAndColumnName(tnode * n, std::string& table, std::string& column) 
+{
+	if (n == NULL) return;
+	
+	if (n->tag == K_COLUMN)
+	{
+		column = n->data.val_str;
+	}
+	else if (( n->tag == K_PERIOD ) &&
+					 ( (n->left != NULL) && (n->right != NULL) ) &&
+					 ( n->left->tag == K_IDENT ) &&
+					 ( (n->right->tag == K_IDENT) || (n->right->tag == K_COLUMN) ) )
+	{
+		table = n->left->data.val_str;
+		column = n->right->data.val_str;
+	}
+}
+
+//------------------------------------------------------------------------------
+bool SameTableAndColumn(tnode * l, tnode * r, const std::map<std::string, std::string>& tablesAlias)
+{
+	std::string lt, lc, rt, rc;
+	getTableAndColumnName(l, lt, lc);
+	getTableAndColumnName(r, rt, rc);
+	std::map<std::string, std::string>::const_iterator lt_it = tablesAlias.find(lt);
+	std::map<std::string, std::string>::const_iterator rt_it = tablesAlias.find(rt);
+	if (lt_it != tablesAlias.end()) lt = lt_it->second;
+	if (rt_it != tablesAlias.end()) rt = rt_it->second;
+	return (lt == rt) && (lc == rc);
+}
+
+void getTableAlias(tnode *pNode, std::map<std::string, std::string>& tablesAlias)
+{
+	if (pNode != NULL)
+	{
+		if ((pNode->tag == K_AS) &&
+				(pNode->left != NULL) && (pNode->left->tag == K_IDENT) &&
+				(pNode->right != NULL) && (pNode->right->tag == K_IDENT))
+		{
+			tablesAlias.insert(std::make_pair(pNode->right->data.val_str, pNode->left->data.val_str));
+		}
+		else
+		{
+			if (pNode->left != NULL) getTableAlias(pNode->left, tablesAlias);
+			if (pNode->right != NULL) getTableAlias(pNode->right, tablesAlias);
+		}
+	}
+}
+
+//------------------------------------------------------------------------------
 void syntax_tree_to_prefix_form( tnode *pNode, string& str )
 {
 	if ( pNode == NULL )
 		return;
+
+	std::map<std::string, std::string> tablesAlias;
 
 	str.clear();
 	char szTmpBuf[1000];
@@ -146,10 +199,26 @@ void syntax_tree_to_prefix_form( tnode *pNode, string& str )
 			if ( IsColumnReference( pTop->left ) && IsColumnReference( pTop->right ) )
 				pTop->tag = K_JEQ;
 		}
-		if( pTop->tag == K_SELECT && !pTop->left );
+#if defined (K_JAUTO_ACTIVATED)
+		if ( pTop->tag == K_JEQ ) {
+			if ( IsColumnReference( pTop->left ) && IsColumnReference( pTop->right ) ) {
+				if ( SameTableAndColumn(pTop->left, pTop->right, tablesAlias) ) {
+					pTop->tag = K_JAUTO;
+				}
+			}
+		}
+#endif
+		if( pTop->tag == K_SELECT && !pTop->left ) {
 			//do not show node
-		else
+		}
+		else {
 			show_node( pTop, str, szTmpBuf, szBuffer );
+#if defined (K_JAUTO_ACTIVATED)
+			if (pTop->tag == K_FROM) {
+				getTableAlias(pTop, tablesAlias);
+			}
+#endif
+		}
 		if( pTop->next )
 			nodes.push( pTop->next );
 		if( pTop->right )

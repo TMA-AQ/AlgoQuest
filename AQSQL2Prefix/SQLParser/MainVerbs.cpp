@@ -19,8 +19,10 @@ SelectVerb::SelectVerb()
 }
 
 //------------------------------------------------------------------------------
-void getAllColumns( tnode*& pNode, vector<tnode*>& columns )
+void getAllColumns( tnode* pNode, vector<tnode*>& columns )
 {
+	// std::cout << *pNode << std::endl;
+
 	if( !pNode || pNode->inf == 1 && pNode->tag != K_COMMA || pNode->tag == K_JNO )
 		return;
 	if( pNode->tag == K_PERIOD )
@@ -117,6 +119,7 @@ bool SelectVerb::changeQuery(	tnode* pStart, tnode* pNode,
 								VerbResult::Ptr resRight, 
 								VerbResult::Ptr resNext )
 {
+
 	if( resLeft && resLeft->getType() == VerbResult::ASTERISK )
 	{
 		this->Columns.clear();
@@ -147,24 +150,25 @@ bool SelectVerb::changeQuery(	tnode* pStart, tnode* pNode,
 		}
 		this->Columns.push_back( name );
 	}
+
 	assert( this->Columns.size() == this->ColumnsDisplay.size() );
 	getAllColumns( pNode, columns );
 	//add extra columns
 	if( this->Columns.size() == columns.size() )
 		return false; //no extra columns
-
+		
 	if( pNode->left->tag == K_COMMA )
 	{
 		pNode = pNode->left;
 		while( pNode->left && pNode->left->tag == K_COMMA )
 			pNode = pNode->left;
 	}
-
+	
 	tnode* pAuxNode = pNode->left;
 	pNode->left = new_node( K_COMMA );
 	pNode = pNode->left;
 	pNode->right = pAuxNode;
-
+	
 	for( size_t idx = this->Columns.size(); idx < columns.size() - 1; ++idx )
 	{
 		pNode->left = new_node( K_COMMA );
@@ -172,6 +176,7 @@ bool SelectVerb::changeQuery(	tnode* pStart, tnode* pNode,
 		pNode->right = columns[idx];
 	}
 	pNode->left = columns[columns.size() - 1];
+
 	return false;
 }
 
@@ -357,6 +362,10 @@ void processNot( tnode*& pNode, bool applyNot )
 	case K_JEQ:
 		if( applyNot )
 			pNode->tag = K_JNEQ;
+		break;
+	case K_JAUTO:
+		if( applyNot )
+			pNode->tag = K_JAUTO;
 		break;
 	case K_JNEQ:
 		if( applyNot )

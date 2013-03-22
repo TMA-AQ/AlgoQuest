@@ -37,6 +37,8 @@ int yylex( void );
 %token K_UMINUS
 	/* K_JEQ echivalent with K_EQ but for columns equality ! */
 %token K_JEQ
+	/* K_JAUTO echivalent with K_JEQ but for table.columns equality ! */
+%token K_JAUTO
 
 %token K_PERIOD K_COMMA K_SEMICOLON
 	/* K_DOT */

@@ -1,9 +1,14 @@
 #include "AQMatrix.h"
 #include "Utilities.h"
 #include "Exceptions.h"
+#include "Table.h"
+#include <iostream>
+#include <set>
+#include <list>
 #include <aq/FileMapper.h>
 #include <boost/scoped_array.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/bind.hpp>
 
 using namespace aq;
  
@@ -28,10 +33,16 @@ namespace
 }
 
 AQMatrix::AQMatrix()
+	: totalCount(0),
+		nbRows(0),
+		hasCount(false)
 {
 }
 
 AQMatrix::AQMatrix(const AQMatrix& source)
+	: totalCount(source.totalCount),
+		nbRows(source.nbRows),
+		hasCount(source.hasCount)
 {
 }
 
@@ -41,6 +52,12 @@ AQMatrix::~AQMatrix()
 
 AQMatrix& AQMatrix::operator=(const AQMatrix& source)
 {
+	if (this != &source)
+	{
+		totalCount = source.totalCount;
+		nbRows = source.nbRows;
+		hasCount = source.hasCount;
+	}
 	return *this;
 }
 
@@ -194,4 +211,148 @@ void AQMatrix::computeUniqueRow(std::vector<std::vector<size_t> >& mapToUniqueIn
 			mapToUniqueIndex[idx][index[idx2]] = uniqueIndex[idx].size() - 1;
 		}
 	}
+}
+
+class ColumnMapper
+{
+public:
+		void getValue(size_t index, ColumnItem::Ptr value)
+		{
+			// TODO
+		}
+};
+
+void AQMatrix::groupBy(const std::map<size_t, std::vector<size_t> >& columnsByTableId)
+{
+	if (this->indexes.size() == 0)
+		return;
+
+	size_t nbColumns = 0;
+
+	for (std::map<size_t, std::vector<size_t> >::const_iterator it_t = columnsByTableId.begin(); it_t != columnsByTableId.end(); ++it_t)
+	{
+		std::cout << "TABLE: " << it_t->first << std::endl;
+		std::cout << "  COLUMNS: ";
+		for (std::vector<size_t>::const_iterator it_c = it_t->second.begin(); it_c != it_t->second.end(); ++it_c)
+		{
+			++ nbColumns;
+			std::cout << *it_c << " ";
+		}
+		std::cout << std::endl;
+	}
+
+	if (this->indexes.size() < 0)
+	{
+		return;
+	}
+
+	//
+	// TODO : check index length integrity
+
+	size_t size = this->indexes[0].size();
+	groupByIndex.resize(size, 0);
+	std::vector<std::pair<size_t, std::vector<ColumnItem::Ptr> > > items(10, std::make_pair(0, std::vector<ColumnItem::Ptr>(nbColumns))); // FIXME : the size must be a settings
+	std::vector<ColumnMapper> columnsMapper(nbColumns);
+	size_t lastItem = 0;
+
+	std::set<size_t> treatedRows;
+	std::set<size_t> indexToTreat;
+	for (size_t i = 0; i < size; ++i) indexToTreat.insert(i);
+
+	while ((treatedRows.size() < indexes.size()) && (indexToTreat.size() != 0))
+	{
+
+		for (std::set<size_t>::iterator it = indexToTreat.begin(); it != indexToTreat.end(); ++it)
+		{
+			size_t index = *it;
+
+			// Check if this row has been treated
+			assert(treatedRows.find(index) == treatedRows.end());
+
+			// Load Row
+			std::pair<size_t, std::vector<ColumnItem::Ptr> >& row = items[lastItem];
+			row.first = index;
+			for (size_t i = 0; i < columnsMapper.size(); ++i)
+			{
+				columnsMapper[i].getValue(index, row.second[i]);
+			}
+
+			// check if this row is identical to a preceding row stored in items
+			if (lastItem > 0)
+			{
+				size_t i = 0;
+				for (i = 0; i < lastItem; ++i)
+				{
+					//if (std::equal(row.second.begin(), row.second.end(), items[i].second.begin()))
+					//{
+					//	break;
+					//}
+
+					// FIXME
+					if (index % 1000)
+					{
+						break;
+					}
+
+				}
+
+				if (i == lastItem)
+				{
+					// No identical row found
+					if (lastItem == items.size() - 1)
+					{
+						// items is not big enough to contains this row => do not keep it
+					}
+					else
+					{
+						// items can contain this row => mark it as treated and give a new group-by index
+						lastItem ++;
+						treatedRows.insert(index);
+						assert(row.first == index);
+						groupByIndex[index] = index;
+					}
+				}
+				else
+				{
+					// an identical row has been found => mark as treated and give its group-by index
+					treatedRows.insert(index);
+					groupByIndex[index] = items[i].first;
+				}
+
+			}
+			else
+			{
+				// this is the first row treated a new group-by index
+				lastItem ++;
+				treatedRows.insert(index);
+				assert(row.first == index);
+				groupByIndex[index] = index;
+			}
+
+		}
+
+		// all row in items are treated and group by is complete for this rows (it is possible to apply a callback on it)
+		items.clear();
+		lastItem = 0;
+
+		// remove treated row
+		std::for_each(treatedRows.begin(), treatedRows.end(), [&] (size_t v) {
+			indexToTreat.erase(v);
+		});
+
+		assert((treatedRows.size() + indexToTreat.size()) == size);
+
+	}
+
+	// FIXME : for test
+	size_t gbid = 0;
+	for (size_t i = 0; i < groupByIndex.size(); ++i)
+	{
+		if (groupByIndex[i] > gbid)
+		{
+			gbid = groupByIndex[i];
+		}
+		groupByIndex[i] = gbid;
+	}
+
 }

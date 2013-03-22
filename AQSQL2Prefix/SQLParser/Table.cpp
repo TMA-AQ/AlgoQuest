@@ -9,6 +9,7 @@
 #include <aq/Timer.h>
 #include <aq/Logger.h>
 #include <algorithm>
+#include <set>
 #include <boost/scoped_array.hpp>
 #include <boost/bind.hpp>
 #include <boost/algorithm/string/trim.hpp>
@@ -1086,13 +1087,23 @@ void Table::loadFromTableAnswerByRow(aq::AQMatrix& aqMatrix, const std::vector<l
 		rowProcessing->process(row);
 		return;
 	}
+	
+	//
+	// Get group by index
+	const std::vector<size_t>& groupByIndex = aqMatrix.getGroupBy();
+	std::set<size_t> groupByIds;
+	std::for_each(groupByIndex.begin(), groupByIndex.end(), [&] (size_t gbid) { groupByIds.insert(gbid); });
+
+	assert((groupByIndex.size() == 0) || (groupByIndex.size() == mapToUniqueIndex[0].size()));
 
 	//
 	// For each Row
+	size_t previous_gid = groupByIndex[0];
 	aq::RowProcessing::row_t row;
 	row.resize(aqMatrix.hasCountColumn() ? this->Columns.size() + 1 : this->Columns.size());
 	for (size_t i = 0; i < size; ++i)
 	{
+
 		for (size_t j = 0; j < mapToUniqueIndex.size(); ++j) 
 		{
 			for (size_t c = 0; c < this->Columns.size(); ++c)
@@ -1105,12 +1116,25 @@ void Table::loadFromTableAnswerByRow(aq::AQMatrix& aqMatrix, const std::vector<l
 				}
 			}
 		}
+
 		if (aqMatrix.hasCountColumn())
 		{
 			ColumnItem::Ptr item(new ColumnItem((double)count[i]));
 			row[this->Columns.size()] = std::make_pair(item, COL_TYPE_BIG_INT);
 		}
-		if (rowProcessing->process(row) == 0)
+
+		if ((i == 0) || (previous_gid < groupByIndex[i]))
+		{
+			if (rowProcessing->process(row) == 0)
+			{
+				for (size_t c = 0; c < this->Columns.size(); ++c)
+				{
+					assert(this->Columns[c]->Items.size());
+					this->Columns[c]->Items.erase(--(this->Columns[c]->Items.end()));
+				}
+			}
+		}
+		else
 		{
 			for (size_t c = 0; c < this->Columns.size(); ++c)
 			{
@@ -1118,6 +1142,8 @@ void Table::loadFromTableAnswerByRow(aq::AQMatrix& aqMatrix, const std::vector<l
 				this->Columns[c]->Items.erase(--(this->Columns[c]->Items.end()));
 			}
 		}
+
+		previous_gid = groupByIndex[i];
 	}
 }
 

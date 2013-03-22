@@ -61,7 +61,7 @@ void findJoin( const string& inputString, string& joinType, std::string::size_ty
 	position = string::npos;
 	for( int idx = 0; idx < nrJoinTypes; ++idx )
 	{
-		int pos = inputString.find( id_to_string( joinTypes[idx] ) );
+		std::string::size_type pos = inputString.find( id_to_string( joinTypes[idx] ) );
 		if( pos != string::npos && (pos < position || position == string::npos) )
 		{
 			position = pos;
@@ -91,7 +91,7 @@ connectionLine nextConnectionLine( string& inputString )
 	if( inputString.length() > 0 )
 		findJoin( inputString, connectionType, nextPosition );
 
-	if( nextPosition > -1 )
+	if( nextPosition != std::string::npos )
 		inputString = inputString.substr( nextPosition );
 	else
 		return CL;
@@ -119,7 +119,7 @@ connectionLine nextConnectionLine( string& inputString )
 	CL.table2 = inputString.substr(0, nextPosition);
 
 	nextPosition = inputString.find(' ', nextPosition + 1);
-	if (nextPosition == -1)         
+	if (nextPosition == std::string::npos)         
 		CL.tableAndCol2.push_back( inputString );
 	else
 	{

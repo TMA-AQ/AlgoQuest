@@ -56,6 +56,14 @@ public:
 };
 
 //------------------------------------------------------------------------------
+class JautoVerb: public ComparisonVerb
+{
+	VERB_DECLARE( JautoVerb );
+public:
+	virtual int getVerbType() const { return K_JAUTO; };
+};
+
+//------------------------------------------------------------------------------
 class LtVerb: public ComparisonVerb
 {
 	VERB_DECLARE( LtVerb );

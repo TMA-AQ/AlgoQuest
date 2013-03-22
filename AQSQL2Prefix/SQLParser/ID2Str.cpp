@@ -90,6 +90,7 @@ TID2String g_id2str[] = {
 	{ K_CALL  ,			"CALL"			},
 	{ K_COLUMNS,		"COLUMNS"		},
 	{ K_JEQ,			"K_JEQ"			},
+	{ K_JAUTO,			"K_JAUTO"			},
 /*
 	{ K_JTHETA,			"JTHETA"		},
 */
@@ -174,6 +175,7 @@ char* id_to_sql_string( unsigned int nID )
 	switch (nID)
 	{
 	case K_JEQ: nID = K_EQ ; break;
+	case K_JAUTO: nID = K_EQ ; break;
 	case K_JNO: nID = K_LT ; break;
 	case K_JINF: nID = K_LT ; break;
 	case K_JIEQ: nID = K_LEQ ; break;

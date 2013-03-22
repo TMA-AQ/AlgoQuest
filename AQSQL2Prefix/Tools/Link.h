@@ -50,6 +50,7 @@ void verb_register()
   ComparisonVerb ComparisonVerb_Var;
   EqVerb EqVerb_Var;
   JeqVerb JeqVerb_Var;
+  JautoVerb JautoVerb_Var;
   LtVerb LtVerb_Var;
   LeqVerb LeqVerb_Var;
   GtVerb GtVerb_Var;

@@ -75,7 +75,7 @@ public:
 		std::copy(_tableIDs.begin(), _tableIDs.end(), tableIDs.begin());
 	}
 
-	const boost::shared_ptr<aq::AQMatrix> getAQMatrix() const
+	boost::shared_ptr<aq::AQMatrix> getAQMatrix()
 	{
 		return aqMatrix;
 	}
@@ -138,7 +138,11 @@ int processAQMatrix(const std::string& query, const std::string& aqMatrixFileNam
 	aqEngine.setTablesIDs(tableIDs);
 
 	QueryResolver queryResolver(pNode, &settings, &aqEngine, baseDesc);
-	queryResolver.solveAQMatrice(spTree);
+	if (settings.useRowResolver)
+		queryResolver.solveAQMatriceByRows(spTree);
+	else
+		queryResolver.solveAQMatriceByColumns(spTree);
+		
 
 	Table::Ptr result = queryResolver.getResult();
 	if (result)
