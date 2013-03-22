@@ -3,6 +3,7 @@
 
 //------------------------------------------------------------------------------
 #include <aq/Utilities.h>
+#include <aq/DBTypes.h>
 #include <vector>
 #include <string>
 #include <sstream>
@@ -26,11 +27,7 @@ typedef struct tnode {
 
 	TNodeDataType	eNodeDataType;
 	unsigned int	nStrBufCb;		// String Buffer (data.val_str) allocated bytes
-	union {
-		char		*val_str;		// chaine
-		llong		val_int;		// 
-		double		val_number;		// entier/réel
-	} data;							// - feuille - le contenu du noeud
+	aq::data_holder_t data;		 // - feuille - le contenu du noeud
 	struct tnode	*next;			// arbre suivant : le frère
 	int				inf;			// used by Verbs to exchange information
 } tnode;
@@ -47,7 +44,8 @@ tnode* delete_node( tnode* pNode );
 void delete_subtree( tnode* pNode );
 tnode* get_leftmost_child( tnode *pNode );
 class Scalar;
-tnode* set_data( tnode* pNode, const Scalar& scalar );
+// tnode* set_data( tnode* pNode, const Scalar& scalar );
+tnode& set_data( tnode& pNode, const aq::data_holder_t data, aq::ColumnType type );
 std::string to_string(const tnode* const pNode );
 tnode* clone_subtree( tnode* pNode );
 

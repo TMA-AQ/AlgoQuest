@@ -67,7 +67,7 @@ private:
 	void CleanSpaceAtEnd( char *my_field );
 	void ChangeCommaToDot( char *string );
 	tnode* getLastTag( tnode*& pNode, tnode* pLastTag, tnode* pCheckNode, int tag );
-	void FileWriteEnreg( ColumnType col_type, const int col_size, char *my_field, FILE *fcol );
+	void FileWriteEnreg( aq::ColumnType col_type, const int col_size, char *my_field, FILE *fcol );
 
 	// Variables Members
 	TProjectSettings * pSettings;

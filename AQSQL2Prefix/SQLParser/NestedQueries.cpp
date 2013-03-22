@@ -408,15 +408,9 @@ Table::Ptr QueryResolver::SolveSelectRegular( int nSelectLevel )
 	
 	VerbNode::Ptr spTree = QueryResolver::BuildVerbsTree( this->sqlStatement, this->BaseDesc, this->pSettings );
 	
-	syntax_tree_to_prefix_form( this->sqlStatement, str );
-	std::cout << std::endl << str << std::endl << std::endl;
-
 	// TODO: optimize tree by detecting identical subtrees
 	spTree->changeQuery();
 	
-	syntax_tree_to_prefix_form( this->sqlStatement, str );
-	std::cout << std::endl << str << std::endl << std::endl;
-
 	QueryResolver::cleanQuery( this->sqlStatement );
 	
 	aq::Logger::getInstance().log(AQ_INFO, "Query Preprocessing: Time elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
@@ -683,7 +677,7 @@ void QueryResolver::ChangeCommaToDot (  char *string )
 }
 
 //-------------------------------------------------------------------------------
-void QueryResolver::FileWriteEnreg( ColumnType col_type, const int col_size, char *my_field, FILE *fcol )
+void QueryResolver::FileWriteEnreg( aq::ColumnType col_type, const int col_size, char *my_field, FILE *fcol )
 {
 	int dum_int;
 	int * my_int = & dum_int;

@@ -5,6 +5,7 @@
 #include "Settings.h"
 #include "AQMatrix.h"
 
+#include <aq/DBTypes.h>
 #include <aq/Utilities.h>
 
 #include <vector>
@@ -36,43 +37,28 @@ class Base;
 #define EXPR_TR_ERR_PATTERN_MATCHING				-12
 
 //------------------------------------------------------------------------------
-enum ColumnType
-{
-	COL_TYPE_VARCHAR	= 0,
-	COL_TYPE_INT,
-	COL_TYPE_BIG_INT,
-	COL_TYPE_DOUBLE,
-	COL_TYPE_DATE1,
-	COL_TYPE_DATE2,
-	COL_TYPE_DATE3,
-	COL_TYPE_DATE4
-};
-
-//------------------------------------------------------------------------------
-bool compatibleTypes( ColumnType type1, ColumnType type2 );
-
-//------------------------------------------------------------------------------
 class ColumnItem: public Object
 {
 	OBJECT_DECLARE( ColumnItem );
 public:
+	// data_holder_t data;
 	double numval;
 	std::string strval;
 
 	ColumnItem();
-	ColumnItem( char* strval, ColumnType type );
+	ColumnItem( char* strval, aq::ColumnType type );
 	ColumnItem( const std::string& strval );
 	ColumnItem( double numval );
 
-	void toString( char* buffer, const ColumnType& type ) const;
+	void toString( char* buffer, const aq::ColumnType& type ) const;
 
 private:	
 	boost::variant<std::string, double> val;
 
 };
 
-bool lessThan( ColumnItem* first, ColumnItem* second, ColumnType type );
-bool equal( ColumnItem* first, ColumnItem* second, ColumnType type );
+bool lessThan( ColumnItem* first, ColumnItem* second, aq::ColumnType type );
+bool equal( ColumnItem* first, ColumnItem* second, aq::ColumnType type );
 
 //------------------------------------------------------------------------------
 class VerbResult: public Object
@@ -101,9 +87,9 @@ public:
 	virtual int getType() const { return VerbResult::COLUMN; }
 
 	Column();
-	Column( ColumnType type );
+	Column( aq::ColumnType type );
 	Column(	const std::string& name, unsigned int ID,
-			unsigned int size, ColumnType type);
+			unsigned int size, aq::ColumnType type);
 	Column( const Column& source );
 	Column& operator=(const Column& source);
 
@@ -117,7 +103,7 @@ public:
 	std::string& getTableName();
 
 	int loadFromThesaurus( const char *pszFilePath, int nFileType, 
-		unsigned int nColumnSize, ColumnType eColumnType, int *pErr );
+		unsigned int nColumnSize, aq::ColumnType eColumnType, int *pErr );
 	void increase( size_t newSize );
 	void setCount( Column::Ptr count );
 	Column::Ptr getCount();
@@ -136,7 +122,7 @@ public:
 	unsigned int	TableID;
 	unsigned int	ID;
 	unsigned int	Size;	//maximum size of the text, not number of items
-	ColumnType		Type;
+	aq::ColumnType		Type;
 	
 private:
 
@@ -173,10 +159,37 @@ public:
 
 	std::string				Name;
 
-	Scalar( ColumnType type ): Type(type){}
-	Scalar( ColumnType type, const ColumnItem& item ): Type(type), Item(item){}
+	Scalar( aq::ColumnType type ): Type(type){}
+	Scalar( aq::ColumnType type, const ColumnItem& item ): Type(type), Item(item){}
 	ColumnItem	Item;
-	ColumnType	Type;
+	aq::ColumnType	Type;
+
+	const aq::data_holder_t getValue() const
+	{
+		aq::data_holder_t data;
+		switch (Type)
+		{
+		case aq::COL_TYPE_INT:
+		case aq::COL_TYPE_BIG_INT:
+		case aq::COL_TYPE_DATE1:
+		case aq::COL_TYPE_DATE2:
+		case aq::COL_TYPE_DATE3:
+		case aq::COL_TYPE_DATE4:
+			data.val_int = Item.numval;
+			break;
+		case aq::COL_TYPE_DOUBLE:
+			data.val_number = Item.numval;
+			break;
+		case aq::COL_TYPE_VARCHAR:
+			// if (data.val_str) free(data.val_str);
+			data.val_str = static_cast<char*>(::malloc((Item.strval.size() + 1) * sizeof(char)));
+			strcpy(data.val_str, Item.strval.c_str());
+			break;
+		default:
+			break;
+		}
+		return data;
+	}
 };
 
 //------------------------------------------------------------------------------

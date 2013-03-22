@@ -1,9 +1,9 @@
 #include "SQLPrefix.h"
 #include "ID2Str.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <malloc.h>
-#include <string.h>
+#include <cstdio>
+#include <cassert>
+#include <cstdlib>
+#include <cstring>
 #include <stack>
 #include <map>
 #include <aq/DateConversion.h>
@@ -194,6 +194,7 @@ void syntax_tree_to_prefix_form( tnode *pNode, string& str )
 	while( nodes.size() > 0 )
 	{
 		tnode* pTop = nodes.top();
+		assert(pTop != NULL);
 		nodes.pop();
 		// Enforce K_JEQ instead of K_EQ !
 		if ( pTop->tag == K_EQ ) {

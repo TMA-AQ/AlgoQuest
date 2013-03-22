@@ -22,8 +22,6 @@ SelectVerb::SelectVerb()
 //------------------------------------------------------------------------------
 void getAllColumns( tnode* pNode, vector<tnode*>& columns )
 {
-	// std::cout << *pNode << std::endl;
-
 	if( !pNode || pNode->inf == 1 && pNode->tag != K_COMMA || pNode->tag == K_JNO )
 		return;
 	if( pNode->tag == K_PERIOD )
@@ -53,7 +51,7 @@ void getAllColumns( tnode* pNode, vector<tnode*>& columns )
 		}
 		if( !found )
 		{
-			columns.push_back( pNode );
+			columns.push_back( clone_subtree(pNode) );
 			pNode = NULL;
 		}
 		return;
@@ -154,6 +152,7 @@ bool SelectVerb::changeQuery(	tnode* pStart, tnode* pNode,
 
 	assert( this->Columns.size() == this->ColumnsDisplay.size() );
 	getAllColumns( pNode, columns );
+
 	//add extra columns
 	if( this->Columns.size() == columns.size() )
 		return false; //no extra columns

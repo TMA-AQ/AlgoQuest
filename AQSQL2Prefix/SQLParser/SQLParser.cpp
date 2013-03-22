@@ -1,5 +1,6 @@
 #include "SQLParser.h"
-#include "Table.h"
+// #include "Table.h"
+#include <aq/DBTypes.h>
 #include "sql92_grm_tab.h"
 #include "ID2Str.h"
 
@@ -251,31 +252,29 @@ tnode* get_leftmost_child( tnode *pNode ) {
 }
 
 //------------------------------------------------------------------------------
-tnode* set_data( tnode* pNode, const Scalar& scalar )
+tnode& set_data( tnode& pNode, aq::data_holder_t data, aq::ColumnType type )
 {
-	if ( pNode == NULL ) 
-		return NULL;
-
-	switch( scalar.Type )
+	switch (type)
 	{
-	case COL_TYPE_DOUBLE:
-		pNode->tag = K_REAL;
-		set_double_data( pNode, scalar.Item.numval );
+	case aq::COL_TYPE_INT:
+	case aq::COL_TYPE_BIG_INT:
+	case aq::COL_TYPE_DATE1:
+	case aq::COL_TYPE_DATE2:
+	case aq::COL_TYPE_DATE3:
+	case aq::COL_TYPE_DATE4:
+		pNode.tag = K_INTEGER;
+		set_int_data( &pNode, (llong) data.val_int );
 		break;
-	case COL_TYPE_INT:
-	case COL_TYPE_BIG_INT:
-	case COL_TYPE_DATE1:
-	case COL_TYPE_DATE2:
-	case COL_TYPE_DATE3:
-		pNode->tag = K_INTEGER;
-		set_int_data( pNode, (llong) scalar.Item.numval );
+	case aq::COL_TYPE_DOUBLE:
+		pNode.tag = K_REAL;
+		set_double_data( &pNode, data.val_number );
 		break;
-	case COL_TYPE_VARCHAR:
-		pNode->tag = K_STRING;
-		set_string_data( pNode, scalar.Item.strval.c_str() );
+	case aq::COL_TYPE_VARCHAR:
+		pNode.tag = K_STRING;
+		set_string_data( &pNode, data.val_str );
 		break;
 	default:
-		assert( 0 );
+		break;
 	}
 	return pNode;
 }
@@ -437,7 +436,7 @@ tnode* find_deeper_node(tnode * pNode, int tag, bool with_next ) {
 
 void dump(const tnode * const pNode, std::ostream& os, std::string indent)
 {
-	os << indent << "'" << id_to_string(pNode->tag) << "' [" << pNode->tag << ", " << pNode->inf << "] : " << to_string(pNode) << std::endl;
+	os << indent << "'" << id_to_string(pNode->tag) << "' [" << pNode->tag << ", " << pNode->inf << "] : " << to_string(pNode) << " [address:" << pNode << "]" << std::endl;
 
 	if (pNode->left) dump(pNode->left, os, indent + "  ");
 	// else os << indent << "NULL [empty left]" << std::endl;

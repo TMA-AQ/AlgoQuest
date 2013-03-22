@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Verb.h"
+#include <aq/DBTypes.h>
 
 //------------------------------------------------------------------------------
 class ComparisonVerb: public Verb
@@ -32,7 +33,7 @@ private:
 	TProjectSettings * m_settings;
 	virtual bool compare(	ColumnItem* item1, 
 							ColumnItem* item2, 
-							ColumnType type );
+							aq::ColumnType type );
 };
 
 //------------------------------------------------------------------------------
@@ -44,7 +45,7 @@ public:
 private:
 	bool compare(	ColumnItem* item1, 
 					ColumnItem* item2, 
-					ColumnType type );
+					aq::ColumnType type );
 };
 
 //------------------------------------------------------------------------------
@@ -72,7 +73,7 @@ public:
 private:
 	bool compare(	ColumnItem* item1, 
 					ColumnItem* item2, 
-					ColumnType type );
+					aq::ColumnType type );
 };
 
 //------------------------------------------------------------------------------
@@ -84,7 +85,7 @@ public:
 private:
 	bool compare(	ColumnItem* item1, 
 					ColumnItem* item2, 
-					ColumnType type );
+					aq::ColumnType type );
 };
 
 //------------------------------------------------------------------------------
@@ -96,7 +97,7 @@ public:
 private:
 	bool compare(	ColumnItem* item1, 
 					ColumnItem* item2, 
-					ColumnType type );
+					aq::ColumnType type );
 };
 
 //------------------------------------------------------------------------------
@@ -108,7 +109,7 @@ public:
 private:
 	bool compare(	ColumnItem* item1, 
 					ColumnItem* item2, 
-					ColumnType type );
+					aq::ColumnType type );
 };
 
 //------------------------------------------------------------------------------
@@ -184,7 +185,7 @@ public:
 private:
 	bool compare(	ColumnItem* item1, 
 					ColumnItem* item2, 
-					ColumnType type );
+					aq::ColumnType type );
 };
 
 //------------------------------------------------------------------------------

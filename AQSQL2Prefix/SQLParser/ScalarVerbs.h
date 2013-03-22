@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Verb.h"
+#include <aq/DBTypes.h>
 
 //------------------------------------------------------------------------------
 class ScalarVerb: public Verb
@@ -15,7 +16,7 @@ public:
 protected:
 	virtual void computeResult( VerbResult::Ptr param );
 	virtual void transformItem( const ColumnItem& item, ColumnItem& result ){};
-	virtual ColumnType outputType( ColumnType inputType ){ return COL_TYPE_INT; };
+	virtual aq::ColumnType outputType( aq::ColumnType inputType ){ return aq::ColumnType::COL_TYPE_INT; };
 };
 
 //------------------------------------------------------------------------------
@@ -26,7 +27,7 @@ public:
 	virtual int getVerbType() const { return K_SQRT; }
 protected:
 	virtual void transformItem( const ColumnItem& item, ColumnItem& result );
-	virtual ColumnType outputType( ColumnType inputType );
+	virtual aq::ColumnType outputType( aq::ColumnType inputType );
 };
 
 //------------------------------------------------------------------------------
@@ -37,7 +38,7 @@ public:
 	virtual int getVerbType() const { return K_ABS; }
 protected:
 	virtual void transformItem( const ColumnItem& item, ColumnItem& result );
-	virtual ColumnType outputType( ColumnType inputType );
+	virtual aq::ColumnType outputType( aq::ColumnType inputType );
 };
 
 //------------------------------------------------------------------------------
@@ -49,7 +50,7 @@ public:
 	bool preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal );
 protected:
 	virtual void transformItem( const ColumnItem& item, ColumnItem& result );
-	virtual ColumnType outputType( ColumnType inputType );
+	virtual aq::ColumnType outputType( aq::ColumnType inputType );
 	llong StartPos, Size;
 };
 
@@ -62,8 +63,8 @@ public:
 	bool preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal );
 protected:
 	virtual void transformItem( const ColumnItem& item, ColumnItem& result );
-	virtual ColumnType outputType( ColumnType inputType );
-	ColumnType OutputType;
+	virtual aq::ColumnType outputType( aq::ColumnType inputType );
+	aq::ColumnType OutputType;
 };
 
 //------------------------------------------------------------------------------
@@ -74,7 +75,7 @@ public:
 	virtual int getVerbType() const { return K_YEAR; };
 protected:
 	virtual void transformItem( const ColumnItem& item, ColumnItem& result );
-	virtual ColumnType outputType( ColumnType inputType );
+	virtual aq::ColumnType outputType( aq::ColumnType inputType );
 };
 
 //------------------------------------------------------------------------------
@@ -85,7 +86,7 @@ public:
 	virtual int getVerbType() const { return K_MONTH; };
 protected:
 	virtual void transformItem( const ColumnItem& item, ColumnItem& result );
-	virtual ColumnType outputType( ColumnType inputType );
+	virtual aq::ColumnType outputType( aq::ColumnType inputType );
 };
 
 //------------------------------------------------------------------------------
@@ -96,7 +97,7 @@ public:
 	virtual int getVerbType() const { return K_DAY; };
 protected:
 	virtual void transformItem( const ColumnItem& item, ColumnItem& result );
-	virtual ColumnType outputType( ColumnType inputType );
+	virtual aq::ColumnType outputType( aq::ColumnType inputType );
 };
 
 //------------------------------------------------------------------------------
@@ -111,8 +112,8 @@ public:
 								VerbResult::Ptr resNext );
 protected:
 	virtual void transformItem( const ColumnItem& item, ColumnItem& result );
-	virtual ColumnType outputType( ColumnType inputType );
-	ColumnType InputType;
+	virtual aq::ColumnType outputType( aq::ColumnType inputType );
+	aq::ColumnType InputType;
 	std::string Format;
 };
 
@@ -124,5 +125,5 @@ public:
 	virtual int getVerbType() const { return K_DATE; };
 protected:
 	virtual void transformItem( const ColumnItem& item, ColumnItem& result );
-	virtual ColumnType outputType( ColumnType inputType );
+	virtual aq::ColumnType outputType( aq::ColumnType inputType );
 };

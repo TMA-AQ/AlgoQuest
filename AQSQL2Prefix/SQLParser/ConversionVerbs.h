@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Verb.h"
+#include <aq/DBTypes.h>
 
 //------------------------------------------------------------------------------
 class CastVerb: public Verb
@@ -16,7 +17,7 @@ public:
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
 private:
 	void solve( VerbResult::Ptr resLeft );
-	ColumnType ConvertType;
+	aq::ColumnType ConvertType;
 };
 
 //------------------------------------------------------------------------------

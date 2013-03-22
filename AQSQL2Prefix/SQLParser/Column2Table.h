@@ -14,7 +14,7 @@ int get_table_and_column_id_from_table_array( Base* baseDesc, char *pszTableName
 												  char *pszColumnName, unsigned int *pnTableId, 
 												  unsigned int *pnColumnId,
 												  unsigned int *pnColumnSize,
-												  ColumnType *peColumnType );
+												  aq::ColumnType *peColumnType );
 
 //------------------------------------------------------------------------------
 typedef struct tagColumn2Tables {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Verb.h"
+#include <aq/DBTypes.h>
 
 //------------------------------------------------------------------------------
 class BinaryVerb: public Verb
@@ -15,9 +16,9 @@ public:
 protected:
 	virtual void computeResult( VerbResult::Ptr param1, VerbResult::Ptr param2 );
 	virtual void transformItem( const ColumnItem& item1, const ColumnItem& item2, 
-								ColumnType resultType, ColumnItem& result ){};
-	virtual ColumnType outputType( ColumnType inputType1, ColumnType inputType2 )
-	{ return COL_TYPE_INT; };
+								aq::ColumnType resultType, ColumnItem& result ){};
+	virtual aq::ColumnType outputType( aq::ColumnType inputType1, aq::ColumnType inputType2 )
+	{ return aq::ColumnType::COL_TYPE_INT; };
 };
 
 //------------------------------------------------------------------------------
@@ -28,8 +29,8 @@ public:
 	virtual int getVerbType() const { return K_MINUS; };
 protected:
 	virtual void transformItem( const ColumnItem& item1, const ColumnItem& item2, 
-		ColumnType resultType, ColumnItem& result );
-	virtual ColumnType outputType( ColumnType inputType1, ColumnType inputType2 );
+		aq::ColumnType resultType, ColumnItem& result );
+	virtual aq::ColumnType outputType( aq::ColumnType inputType1, aq::ColumnType inputType2 );
 };
 
 //------------------------------------------------------------------------------
@@ -40,8 +41,8 @@ public:
 	virtual int getVerbType() const { return K_PLUS; };
 protected:
 	virtual void transformItem( const ColumnItem& item1, const ColumnItem& item2, 
-		ColumnType resultType, ColumnItem& result );
-	virtual ColumnType outputType( ColumnType inputType1, ColumnType inputType2 );
+		aq::ColumnType resultType, ColumnItem& result );
+	virtual aq::ColumnType outputType( aq::ColumnType inputType1, aq::ColumnType inputType2 );
 };
 
 //------------------------------------------------------------------------------
@@ -52,8 +53,8 @@ public:
 	virtual int getVerbType() const { return K_MUL; };
 protected:
 	virtual void transformItem( const ColumnItem& item1, const ColumnItem& item2, 
-		ColumnType resultType, ColumnItem& result );
-	virtual ColumnType outputType( ColumnType inputType1, ColumnType inputType2 );
+		aq::ColumnType resultType, ColumnItem& result );
+	virtual aq::ColumnType outputType( aq::ColumnType inputType1, aq::ColumnType inputType2 );
 };
 
 //------------------------------------------------------------------------------
@@ -64,6 +65,6 @@ public:
 	virtual int getVerbType() const { return K_DIV; };
 protected:
 	virtual void transformItem( const ColumnItem& item1, const ColumnItem& item2, 
-		ColumnType resultType, ColumnItem& result );
-	virtual ColumnType outputType( ColumnType inputType1, ColumnType inputType2 );
+		aq::ColumnType resultType, ColumnItem& result );
+	virtual aq::ColumnType outputType( aq::ColumnType inputType1, aq::ColumnType inputType2 );
 };
