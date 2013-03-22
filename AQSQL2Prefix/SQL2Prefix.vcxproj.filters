@@ -81,9 +81,6 @@
     <ClCompile Include="SQLParser\MainVerbs.cpp">
       <Filter>Source Files\SQLParser</Filter>
     </ClCompile>
-    <ClCompile Include="SQLParser\NestedQueries.cpp">
-      <Filter>Source Files\SQLParser</Filter>
-    </ClCompile>
     <ClCompile Include="SQLParser\Optimizations.cpp">
       <Filter>Source Files\SQLParser</Filter>
     </ClCompile>
@@ -136,6 +133,9 @@
       <Filter>Source Files\DBLoader</Filter>
     </ClCompile>
     <ClCompile Include="SQLParser\Settings.cpp">
+      <Filter>Source Files\SQLParser</Filter>
+    </ClCompile>
+    <ClCompile Include="SQLParser\QueryResolver.cpp">
       <Filter>Source Files\SQLParser</Filter>
     </ClCompile>
   </ItemGroup>
@@ -191,9 +191,6 @@
     <ClInclude Include="SQLParser\MainVerbs.h">
       <Filter>Header Files\SQLParser</Filter>
     </ClInclude>
-    <ClInclude Include="SQLParser\NestedQueries.h">
-      <Filter>Header Files\SQLParser</Filter>
-    </ClInclude>
     <ClInclude Include="SQLParser\Object.h">
       <Filter>Header Files\SQLParser</Filter>
     </ClInclude>
@@ -243,6 +240,9 @@
       <Filter>Header Files\DBLoader</Filter>
     </ClInclude>
     <ClInclude Include="SQLParser\Settings.h">
+      <Filter>Header Files\SQLParser</Filter>
+    </ClInclude>
+    <ClInclude Include="SQLParser\QueryResolver.h">
       <Filter>Header Files\SQLParser</Filter>
     </ClInclude>
   </ItemGroup>

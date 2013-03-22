@@ -2,7 +2,7 @@
 #include <SQLParser/SQLParser.h>
 #include <SQLParser/SQLPrefix.h>
 #include <SQLParser/Column2Table.h>
-#include <SQLParser/NestedQueries.h>
+#include <SQLParser/QueryResolver.h>
 #include <SQLParser/JeqParser.h>
 #include <aq/Exceptions.h>
 #include <DBLoader/DatabaseLoader.h>

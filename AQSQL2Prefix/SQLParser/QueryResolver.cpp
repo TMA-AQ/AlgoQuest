@@ -1,27 +1,28 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <malloc.h>
-#include <string.h>
-#include <direct.h>
-#include <deque>
-#include <utility>
-#include "NestedQueries.h"
+#include "QueryResolver.h"
 #include "SQLPrefix.h"
 #include "sql92_grm_tab.h"
 #include "Table.h"
 #include "RowProcessing.h"
 #include "Verb.h"
-#include <algorithm>
 #include "JeqParser.h"
-#include <aq/Exceptions.h>
 #include "Column2Table.h"
 #include "ExprTransform.h"
-#include <boost/scoped_array.hpp>
 #include "TreeUtilities.h"
 #include "Optimizations.h"
 #include "AQEngine_Intf.h"
+
+#include <aq/Exceptions.h>
 #include <aq/Logger.h>
 #include <aq/DateConversion.h>
+
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <utility>
+
+#include <deque>
+#include <algorithm>
+#include <boost/scoped_array.hpp>
 
 using namespace aq;
 using namespace std;

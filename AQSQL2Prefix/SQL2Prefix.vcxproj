@@ -314,9 +314,9 @@
     </ClCompile>
     <ClCompile Include="SQLParser\LIKE_PatternMatching.cpp" />
     <ClCompile Include="SQLParser\MainVerbs.cpp" />
-    <ClCompile Include="SQLParser\NestedQueries.cpp" />
     <ClCompile Include="SQLParser\Optimizations.cpp" />
     <ClCompile Include="SQLParser\OverVerbs.cpp" />
+    <ClCompile Include="SQLParser\QueryResolver.cpp" />
     <ClCompile Include="SQLParser\RowProcessing.cpp" />
     <ClCompile Include="SQLParser\ScalarVerbs.cpp" />
     <ClCompile Include="SQLParser\Settings.cpp" />
@@ -415,10 +415,10 @@
     <ClInclude Include="SQLParser\JoinVerbs.h" />
     <ClInclude Include="SQLParser\LIKE_PatternMatching.h" />
     <ClInclude Include="SQLParser\MainVerbs.h" />
-    <ClInclude Include="SQLParser\NestedQueries.h" />
     <ClInclude Include="SQLParser\Object.h" />
     <ClInclude Include="SQLParser\Optimizations.h" />
     <ClInclude Include="SQLParser\OverVerbs.h" />
+    <ClInclude Include="SQLParser\QueryResolver.h" />
     <ClInclude Include="SQLParser\RowProcessing.h" />
     <ClInclude Include="SQLParser\ScalarVerbs.h" />
     <ClInclude Include="SQLParser\Settings.h" />
