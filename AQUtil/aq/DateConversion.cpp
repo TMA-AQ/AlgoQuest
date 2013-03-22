@@ -1,5 +1,9 @@
 #include "DateConversion.h"
-#include <cstdio>
+#include <stdio.h>
+#include <assert.h>
+#include <cstring>
+#include "Utilities.h"
+#include <ctime>
 
 namespace aq
 {
@@ -17,7 +21,7 @@ const long long MONTH = DAY * 33;
 const long long YEAR = MONTH * 14;
 
 //------------------------------------------------------------------------------
-int dateToBigInt( const char* strval, DateType dateType, long long * intval )
+int dateToBigInt( const char* strval, DateType dateType, long long* intval )
 {
 	if( !strval || !intval )
 		return 0;
@@ -49,9 +53,57 @@ int dateToBigInt( const char* strval, DateType dateType, long long * intval )
 		*intval = year * YEAR + month * MONTH + day * DAY + 
 			hour * HOUR + minute * MINUTE + SECOND * second + MILLISECOND * millisecond ;
 		return 1;
-	default:;
+	default:
+		assert( 0 );
 	}
 	return 0;
+}
+
+//------------------------------------------------------------------------------
+int dateToBigInt( const char* strval, DateType* dateType, long long* intval )
+{
+	if( !strval || !dateType || !intval )
+		return 0;
+	int day = 0, month = 0, year = 0;
+	int hour = 0, minute = 0, second = 0, millisecond  = 0;
+	if( sscanf( strval, "%d/%d/%d %d:%d:%d.%d", &day, &month, &year, 
+		&hour, &minute, &second, &millisecond ) == 7 )
+	{
+		*dateType = DDMMYYYY_HHMMSS_MMM;
+	}
+	else if( sscanf( strval, "%d/%d/%d %d:%d:%d", &day, &month, &year, 
+				&hour, &minute, &second ) == 6 )
+	{
+		*dateType = DDMMYYYY_HHMMSS;
+	}
+	else 
+	{
+		if( strlen( strval ) > 10 )
+			return 0;
+		char yearstr[5];
+		if( sscanf( strval, "%d/%d/%s", &day, &month, yearstr ) != 3 )
+			return 0;
+		llong intval;
+		if( StrToInt( yearstr, &intval ) != 0 )
+			return 0;
+		int year = (int) intval;
+		switch( strlen( yearstr ) )
+		{
+		case 4:
+			*dateType = DDMMYYYY;
+			break;
+		case 2:
+			*dateType = DDMMYY;
+			year += year >= 30 ? 1900: 2000;
+			break;
+		default:
+			return 0;
+		}
+	}
+
+	*intval = year * YEAR + month * MONTH + day * DAY + 
+		hour * HOUR + minute * MINUTE + SECOND * second;
+	return 1;
 }
 
 //------------------------------------------------------------------------------
@@ -94,9 +146,58 @@ int bigIntToDate( long long intval, DateType dateType, char* strval )
 				return 0;
 			return 1;
 		}
-	default:;
+	case YYYYMM:
+		if( sprintf( strval, "%.4d%.2d", year, month ) < 0 )
+			return 0;
+		return 1;
+	default:
+		assert( 0 );
 	}
 	return 0;
+}
+
+//------------------------------------------------------------------------------
+void dateToParts(	long long intval, int& year, int& month, int& day, int& hour, 
+				int& minute, int& second, int& millisecond )
+{
+	year = (int)(intval / YEAR);
+	intval %= YEAR;
+	month = (int)(intval / MONTH);
+	intval %= MONTH;
+	day = (int)(intval / DAY);
+	intval %= DAY;
+	hour = (int)(intval / HOUR);
+	intval %= HOUR;
+	minute = (int)(intval / MINUTE);
+	intval %= MINUTE;
+	second = (int)(intval / SECOND);
+	intval %= SECOND;
+	millisecond = (int)(intval / MILLISECOND);
+	intval %= MILLISECOND;
+}
+
+//------------------------------------------------------------------------------
+void dateFromParts(	long long& intval, int year, int month, int day, int hour, 
+				   int minute, int second, int millisecond )
+{
+	intval = year * YEAR + month * MONTH + day * DAY + 
+		hour * HOUR + minute * MINUTE + SECOND * second + MILLISECOND * millisecond;
+}
+
+//------------------------------------------------------------------------------
+long long currentDate()
+{
+	time_t currentTime_t = time(NULL);
+	struct tm *currentTime = localtime( &currentTime_t );
+	int year = currentTime->tm_year + 1900;
+	int month = currentTime->tm_mon + 1;
+	int day = currentTime->tm_mday;
+	int hour = currentTime->tm_hour;
+	int minute = currentTime->tm_min;
+	int second = currentTime->tm_sec;
+	long long intval = year * YEAR + month * MONTH + day * DAY + 
+		hour * HOUR + minute * MINUTE + SECOND * second;
+	return intval;
 }
 
 }
