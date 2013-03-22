@@ -154,6 +154,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="aq\DBTypes.h" />
     <ClInclude Include="aq\BaseDesc.h" />
     <ClInclude Include="aq\DateConversion.h" />
     <ClInclude Include="aq\Exceptions.h" />
@@ -169,6 +170,7 @@
   <ItemGroup>
     <ClCompile Include="aq\BaseDesc.cpp" />
     <ClCompile Include="aq\DateConversion.cpp" />
+    <ClCompile Include="aq\DBTypes.cpp" />
     <ClCompile Include="aq\Exceptions.cpp" />
     <ClCompile Include="aq\FileMapper.cpp" />
     <ClCompile Include="aq\Logger.cpp" />

@@ -159,7 +159,7 @@ int GetFiles( const char* pszSrcPath, std::vector<std::string>& files )
 //------------------------------------------------------------------------------
 char* ReadValidLine( FILE* pFIn, char* pszTmpBuf, int nSize, int nTrimEnd ) {
 	char *psz = NULL;
-	int  nLen;
+	size_t  nLen;
 
 	/* Read a valid line */
 	pszTmpBuf[ 0 ] = '\0';
