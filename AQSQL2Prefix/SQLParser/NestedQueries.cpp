@@ -846,7 +846,20 @@ void QueryResolver::SolveInsert(	tnode* pNode )
 		for( size_t idx = 0; idx < values.size(); ++idx )
 		{
 			Column::Ptr column = new Column( *table.Columns[valuePos[idx]] );
-			column->Items.push_back( new ColumnItem(values[idx], column->Type) );
+			switch( column->Type )
+			{
+			case COL_TYPE_INT:
+			case COL_TYPE_BIG_INT:
+			case COL_TYPE_DATE1:
+			case COL_TYPE_DATE2:
+			case COL_TYPE_DATE3:
+			case COL_TYPE_DOUBLE:
+				column->Items.push_back( new ColumnItem(pNode->data.val_int) );
+				break;
+			case COL_TYPE_VARCHAR:
+				column->Items.push_back( new ColumnItem(pNode->data.val_str) );
+				break;
+			}
 			valuesToInsert->Columns.push_back( column );
 		}
 	}
@@ -1048,8 +1061,22 @@ void QueryResolver::SolveUpdateDelete(	tnode* pNode )
 				if( str == columns[idx2]->getName() )
 				{
 					Column::Ptr newCol = new Column(*columns[idx2]);
-					newCol->Items.push_back( 
-						new ColumnItem(conditions[idx]->right, newCol->Type) );
+
+					switch( newCol->Type )
+					{
+					case COL_TYPE_INT:
+					case COL_TYPE_BIG_INT:
+					case COL_TYPE_DATE1:
+					case COL_TYPE_DATE2:
+					case COL_TYPE_DATE3:
+					case COL_TYPE_DOUBLE:
+						newCol->Items.push_back( new ColumnItem(conditions[idx]->right->data.val_int) );
+						break;
+					case COL_TYPE_VARCHAR:
+						newCol->Items.push_back( new ColumnItem(conditions[idx]->right->data.val_str) );
+						break;
+					}
+
 					condTable->Columns.push_back( newCol );
 					found = true;
 					break;

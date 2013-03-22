@@ -730,7 +730,22 @@ void LagVerb::changeResult(	Table::Ptr table,
 
 	ColumnItem::Ptr defaultValue = NULL;
 	if( this->Default )
-		defaultValue = new ColumnItem( this->Default, column->Type );
+	{
+		switch( column->Type )
+		{
+		case COL_TYPE_INT:
+		case COL_TYPE_BIG_INT:
+		case COL_TYPE_DATE1:
+		case COL_TYPE_DATE2:
+		case COL_TYPE_DATE3:
+		case COL_TYPE_DOUBLE:
+			defaultValue = new ColumnItem(this->Default->right->data.val_int);
+			break;
+		case COL_TYPE_VARCHAR:
+			defaultValue = new ColumnItem(this->Default->right->data.val_str);
+			break;
+		}
+	}
 	this->Result = OffsetColumn( column, partition, false, this->Offset, table,
 		defaultValue );
 }

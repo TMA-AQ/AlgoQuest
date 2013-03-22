@@ -1,14 +1,15 @@
 #ifndef __FIAN_TABLE_H__
 #define __FIAN_TABLE_H__
 
+#include "Object.h"
+#include "Settings.h"
+#include "AQMatrix.h"
+
+#include <aq/Utilities.h>
+
 #include <vector>
 #include <string>
 #include <deque>
-#include "Object.h"
-#include <aq/Utilities.h>
-#include "Settings.h"
-#include "SQLParser.h"
-#include "AQMatrix.h"
 
 #include <boost/variant.hpp>
 
@@ -60,7 +61,6 @@ public:
 
 	ColumnItem();
 	ColumnItem( char* strval, ColumnType type );
-	ColumnItem( tnode* pNode, ColumnType type );
 	ColumnItem( const std::string& strval );
 	ColumnItem( double numval );
 

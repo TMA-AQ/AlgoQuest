@@ -1,13 +1,15 @@
-#include <cassert>
 #include "Table.h"
 #include "RowProcessing.h"
+
 #include <aq/Utilities.h>
-#include <memory>
 #include <aq/Exceptions.h>
 #include <aq/DateConversion.h>
 #include <aq/FileMapper.h>
 #include <aq/Timer.h>
 #include <aq/Logger.h>
+
+#include <cassert>
+#include <memory>
 #include <algorithm>
 #include <set>
 #include <boost/scoped_array.hpp>
@@ -132,30 +134,6 @@ ColumnItem::ColumnItem( char* str, ColumnType type )
 		break;
 	default:
 		throw generic_error(generic_error::NOT_IMPLEMENED, "");
-	}
-}
-
-//------------------------------------------------------------------------------
-ColumnItem::ColumnItem( tnode* pNode, ColumnType type )
-{
-	assert( pNode );
-	switch( type )
-	{
-	case COL_TYPE_INT:
-	case COL_TYPE_BIG_INT:
-	case COL_TYPE_DATE1:
-	case COL_TYPE_DATE2:
-	case COL_TYPE_DATE3:
-		this->numval = (double) pNode->data.val_int;
-		break;
-	case COL_TYPE_DOUBLE:
-		this->numval = pNode->data.val_number;
-		break;
-	case COL_TYPE_VARCHAR:
-		this->strval = pNode->data.val_str;
-		break;
-	default:
-		assert( 0 );
 	}
 }
 

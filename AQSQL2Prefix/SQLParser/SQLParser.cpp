@@ -1,12 +1,13 @@
 #include "SQLParser.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <malloc.h>
-#include <string.h>
-#include <errno.h>
 #include "Table.h"
 #include "sql92_grm_tab.h"
 #include "ID2Str.h"
+
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cassert>
+#include <cerrno>
 #include <stack>
 
 #define STR_BUF_SIZE_ROUND_UP	4096
