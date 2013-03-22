@@ -7,7 +7,6 @@
 #include "Object.h"
 #include <aq/Utilities.h>
 #include "Settings.h"
-#include "DateConversion.h"
 #include "SQLParser.h"
 #include "AQMatrix.h"
 

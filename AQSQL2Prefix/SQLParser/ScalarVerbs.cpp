@@ -1,6 +1,7 @@
 #include "ScalarVerbs.h"
 #include <cmath>
 #include <aq/Exceptions.h>
+#include <aq/DateConversion.h>
 
 using namespace aq;
 using namespace std;

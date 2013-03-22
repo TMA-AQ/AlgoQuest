@@ -1,5 +1,6 @@
 #include "DateVerbs.h"
 #include <aq/Exceptions.h>
+#include <aq/DateConversion.h>
 
 using namespace aq;
 using namespace std;

@@ -21,6 +21,7 @@
 #include "Optimizations.h"
 #include "AQEngine_Intf.h"
 #include <aq/Logger.h>
+#include <aq/DateConversion.h>
 
 using namespace aq;
 using namespace std;

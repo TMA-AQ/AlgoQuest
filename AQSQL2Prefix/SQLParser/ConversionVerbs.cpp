@@ -1,6 +1,7 @@
 #include "ConversionVerbs.h"
 #include <algorithm>
 #include <aq/Exceptions.h>
+#include <aq/DateConversion.h>
 
 using namespace aq;
 using namespace std;
@@ -97,10 +98,10 @@ void Convert(	ColumnItem& dest, int destType,
 				DateType dateType;
 				switch( sourceType )
 				{
-				case COL_TYPE_DATE1: dateType = DDMMYYYY_HHMMSS; break;
-				case COL_TYPE_DATE2: dateType = DDMMYYYY; break;
-				case COL_TYPE_DATE3: dateType = DDMMYY; break;
-				case COL_TYPE_DATE4: dateType = YYYYMM; break;
+				case COL_TYPE_DATE1: dateType = aq::DateType::DDMMYYYY_HHMMSS; break;
+				case COL_TYPE_DATE2: dateType = aq::DateType::DDMMYYYY; break;
+				case COL_TYPE_DATE3: dateType = aq::DateType::DDMMYY; break;
+				case COL_TYPE_DATE4: dateType = aq::DateType::YYYYMM; break;
 				default:
 					assert( 0 );
 				}

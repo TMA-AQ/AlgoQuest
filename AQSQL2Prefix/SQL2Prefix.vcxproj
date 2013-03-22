@@ -298,7 +298,6 @@
     <ClCompile Include="SQLParser\Column2Table.cpp" />
     <ClCompile Include="SQLParser\ComparisonVerbs.cpp" />
     <ClCompile Include="SQLParser\ConversionVerbs.cpp" />
-    <ClCompile Include="SQLParser\DateConversion.cpp" />
     <ClCompile Include="SQLParser\DateVerbs.cpp" />
     <ClCompile Include="SQLParser\DumpVisitor.cpp" />
     <ClCompile Include="SQLParser\ExprTransform.cpp" />
@@ -408,7 +407,6 @@
     <ClInclude Include="SQLParser\Column2Table.h" />
     <ClInclude Include="SQLParser\ComparisonVerbs.h" />
     <ClInclude Include="SQLParser\ConversionVerbs.h" />
-    <ClInclude Include="SQLParser\DateConversion.h" />
     <ClInclude Include="SQLParser\DateVerbs.h" />
     <ClInclude Include="SQLParser\DumpVisitor.h" />
     <ClInclude Include="SQLParser\ExprTransform.h" />

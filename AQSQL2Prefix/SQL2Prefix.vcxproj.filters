@@ -57,9 +57,6 @@
     <ClCompile Include="SQLParser\ConversionVerbs.cpp">
       <Filter>Source Files\SQLParser</Filter>
     </ClCompile>
-    <ClCompile Include="SQLParser\DateConversion.cpp">
-      <Filter>Source Files\SQLParser</Filter>
-    </ClCompile>
     <ClCompile Include="SQLParser\DateVerbs.cpp">
       <Filter>Source Files\SQLParser</Filter>
     </ClCompile>
@@ -171,9 +168,6 @@
       <Filter>Header Files\SQLParser</Filter>
     </ClInclude>
     <ClInclude Include="SQLParser\ConversionVerbs.h">
-      <Filter>Header Files\SQLParser</Filter>
-    </ClInclude>
-    <ClInclude Include="SQLParser\DateConversion.h">
       <Filter>Header Files\SQLParser</Filter>
     </ClInclude>
     <ClInclude Include="SQLParser\DateVerbs.h">
