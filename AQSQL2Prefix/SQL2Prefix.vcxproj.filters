@@ -19,12 +19,6 @@
     <Filter Include="Source Files\SQLParser">
       <UniqueIdentifier>{c47b51d2-75c6-4bb8-9d19-6b555da6ed17}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Tools">
-      <UniqueIdentifier>{c8d6f05b-c5a2-4e0e-a3b0-d8f6b00bd5b2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Tools\data">
-      <UniqueIdentifier>{9ebe5bed-02ac-4a87-958e-8a3b31f4c9d9}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\SQLParser">
       <UniqueIdentifier>{732d4bc0-7ede-4b5c-a97a-9f51369a2625}</UniqueIdentifier>
     </Filter>
@@ -111,12 +105,6 @@
     <ClCompile Include="SQLParser\AQEngine.cpp">
       <Filter>Source Files\SQLParser</Filter>
     </ClCompile>
-    <ClCompile Include="Tools\sqlparser.cpp">
-      <Filter>Source Files\Tools</Filter>
-    </ClCompile>
-    <ClCompile Include="Tools\printresult.cpp">
-      <Filter>Source Files\Tools</Filter>
-    </ClCompile>
     <ClCompile Include="SQLParser\DumpVisitor.cpp">
       <Filter>Source Files\SQLParser</Filter>
     </ClCompile>
@@ -140,9 +128,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Tools\Link.h">
-      <Filter>Source Files\Tools</Filter>
-    </ClInclude>
     <ClInclude Include="SQLParser\AggregateVerbs.h">
       <Filter>Header Files\SQLParser</Filter>
     </ClInclude>
@@ -258,12 +243,6 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Tools\data\base">
-      <Filter>Source Files\Tools\data</Filter>
-    </None>
-    <None Include="Tools\Makefile.win">
-      <Filter>Source Files\Tools</Filter>
-    </None>
     <None Include="Generate_Parser.bat">
       <Filter>Resource Files</Filter>
     </None>

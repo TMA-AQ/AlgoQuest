@@ -331,16 +331,6 @@
     <ClCompile Include="SQLParser\Table.cpp" />
     <ClCompile Include="SQLParser\TreeUtilities.cpp" />
     <ClCompile Include="SQLParser\Verb.cpp" />
-    <ClCompile Include="Tools\printresult.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="Tools\sqlparser.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="SQLParser\SQL92_Grm.y">
@@ -429,12 +419,9 @@
     <ClInclude Include="SQLParser\TreeUtilities.h" />
     <ClInclude Include="SQLParser\Verb.h" />
     <ClInclude Include="SQLParser\VerbVisitor.h" />
-    <ClInclude Include="Tools\Link.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Generate_Parser.bat" />
-    <None Include="Tools\data\base" />
-    <None Include="Tools\Makefile.win" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AQUtil\AQUtil.vcxproj">

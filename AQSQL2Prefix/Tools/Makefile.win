@@ -1,4 +1,4 @@
-PROGRAMS = sql2prefix.exe sqlparser.exe printresult.exe
+PROGRAMS = aq_query_resolver.exe sqlparser.exe printresult.exe
 
 CC = cl.exe
 LD = link.exe
@@ -22,11 +22,11 @@ ALL: $(PROGRAMS)
 
 
 
-########## sql2prefix
-sql2prefix.exe: sql2prefix.obj
-	$(LD) $(LDFLAGS) /out:$@ sql2prefix.obj
+########## aq_query_resolver
+aq_query_resolver.exe: aq_query_resolver.obj
+	$(LD) $(LDFLAGS) /out:$@ aq_query_resolver.obj
 
-sql2prefix.obj: sql2prefix.cpp
+aq_query_resolver.obj: aq_query_resolver.cpp
 
 
 
