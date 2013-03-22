@@ -2,6 +2,7 @@
 #include <algorithm>
 #include "Exceptions.h"
 
+using namespace aq;
 using namespace std;
 using namespace boost;
 

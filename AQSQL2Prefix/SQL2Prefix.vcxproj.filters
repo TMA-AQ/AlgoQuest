@@ -84,9 +84,6 @@
     <ClCompile Include="SQLParser\LIKE_PatternMatching.cpp">
       <Filter>Source Files\SQLParser</Filter>
     </ClCompile>
-    <ClCompile Include="SQLParser\Log.cpp">
-      <Filter>Source Files\SQLParser</Filter>
-    </ClCompile>
     <ClCompile Include="SQLParser\MainVerbs.cpp">
       <Filter>Source Files\SQLParser</Filter>
     </ClCompile>
@@ -147,6 +144,9 @@
     <ClCompile Include="DBLoader\DatabaseLoader.cpp">
       <Filter>Source Files\DBLoader</Filter>
     </ClCompile>
+    <ClCompile Include="SQLParser\Settings.cpp">
+      <Filter>Source Files\SQLParser</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Tools\Link.h">
@@ -203,9 +203,6 @@
     <ClInclude Include="SQLParser\LIKE_PatternMatching.h">
       <Filter>Header Files\SQLParser</Filter>
     </ClInclude>
-    <ClInclude Include="SQLParser\Log.h">
-      <Filter>Header Files\SQLParser</Filter>
-    </ClInclude>
     <ClInclude Include="SQLParser\MainVerbs.h">
       <Filter>Header Files\SQLParser</Filter>
     </ClInclude>
@@ -219,9 +216,6 @@
       <Filter>Header Files\SQLParser</Filter>
     </ClInclude>
     <ClInclude Include="SQLParser\OverVerbs.h">
-      <Filter>Header Files\SQLParser</Filter>
-    </ClInclude>
-    <ClInclude Include="resource.h">
       <Filter>Header Files\SQLParser</Filter>
     </ClInclude>
     <ClInclude Include="SQLParser\ScalarVerbs.h">
@@ -265,6 +259,9 @@
     </ClInclude>
     <ClInclude Include="DBLoader\DatabaseLoader.h">
       <Filter>Header Files\DBLoader</Filter>
+    </ClInclude>
+    <ClInclude Include="SQLParser\Settings.h">
+      <Filter>Header Files\SQLParser</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

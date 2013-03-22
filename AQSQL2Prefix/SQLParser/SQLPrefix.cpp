@@ -11,6 +11,7 @@
 #define STR_BUF_SIZE_ROUND_UP	4096
 #define EXIT_ON_MEM_ERROR		1
 
+using namespace aq;
 using namespace std;
 
 //------------------------------------------------------------------------------

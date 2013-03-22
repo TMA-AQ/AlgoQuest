@@ -1,5 +1,8 @@
 #pragma once
 
+namespace aq
+{
+
 typedef enum 
 {
 	DDMMYYYY_HHMMSS,
@@ -7,7 +10,7 @@ typedef enum
 	DDMMYY,
 	DDMMYYYY_HHMMSS_MMM,
 	YYYYMM
-}DateType;
+} DateType;
 
 //1 - success, 0 - failure
 int dateToBigInt( const char* strval, DateType dateType, long long* intval );
@@ -18,3 +21,5 @@ void dateToParts(	long long intval, int& year, int& month, int& day, int& hour,
 void dateFromParts(	long long& intval, int year, int month, int day, int hour, 
 					int minute, int second, int millisecond );
 long long currentDate();
+
+}

@@ -52,3 +52,5 @@ void getColumnsIds(	const Table& table, std::vector<tnode*>& columns,
 void eliminateAliases( tnode* pSelect );
 
 void getAllColumnNodes( tnode*& pNode, std::vector<tnode**>& columnNodes );
+
+void getColumnsList( tnode* pNode, std::vector<tnode*>& columns );

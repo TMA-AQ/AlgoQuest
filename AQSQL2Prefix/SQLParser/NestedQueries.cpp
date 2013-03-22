@@ -8,7 +8,6 @@
 #include "NestedQueries.h"
 #include "SQLPrefix.h"
 #include "sql92_grm_tab.h"
-#include "Log.h"
 #include "Table.h"
 #include "RowProcessing.h"
 #include "Verb.h"
@@ -23,6 +22,7 @@
 #include "AQEngine_Intf.h"
 #include <aq/Logger.h>
 
+using namespace aq;
 using namespace std;
 
 //------------------------------------------------------------------------------

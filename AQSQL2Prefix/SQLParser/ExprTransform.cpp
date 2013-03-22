@@ -11,6 +11,9 @@
 #include <boost/bind.hpp>
 
 //------------------------------------------------------------------------------
+// PRIVATE
+
+//------------------------------------------------------------------------------
 #ifndef _MAX_PATH
 #define _MAX_PATH 256
 #endif 
@@ -80,19 +83,6 @@ int get_thesaurus_info_for_column_reference( tnode *pNode, Base* baseDesc,
 												}
 
 												return 0;
-}
-
-//------------------------------------------------------------------------------
-int get_thesaurus_for_column_reference( Column& thesaurus, tnode *pNode, int part, Base* baseDesc, char* pszPath, int *pErr ) {
-	unsigned int	nTableId;
-	unsigned int	nColumnId;
-	unsigned int	nColumnSize;
-	ColumnType		eColumnType;
-
-	if ( get_thesaurus_info_for_column_reference( pNode, baseDesc, &nTableId, &nColumnId, &nColumnSize, &eColumnType, pErr ) == -1 )
-		return -1;
-
-	return get_thesaurus_for_column( thesaurus, nTableId, nColumnId, nColumnSize, part, eColumnType, pszPath, pErr );
 }
 
 //------------------------------------------------------------------------------
@@ -851,6 +841,22 @@ tnode* transform_cmp_op( tnode* pNode, Base* baseDesc, char* pszPath, int *pErr 
 	/* Free pNode */
 	delete_subtree( pNode );
 	return pNodeRes;
+}
+
+//------------------------------------------------------------------------------
+// PUBLIC API
+
+//------------------------------------------------------------------------------
+int get_thesaurus_for_column_reference( Column& thesaurus, tnode *pNode, int part, Base* baseDesc, char* pszPath, int *pErr ) {
+	unsigned int	nTableId;
+	unsigned int	nColumnId;
+	unsigned int	nColumnSize;
+	ColumnType		eColumnType;
+
+	if ( get_thesaurus_info_for_column_reference( pNode, baseDesc, &nTableId, &nColumnId, &nColumnSize, &eColumnType, pErr ) == -1 )
+		return -1;
+
+	return get_thesaurus_for_column( thesaurus, nTableId, nColumnId, nColumnSize, part, eColumnType, pszPath, pErr );
 }
 
 

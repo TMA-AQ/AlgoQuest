@@ -17,6 +17,7 @@
 #include <boost/thread.hpp>
 
 using namespace std;
+using namespace aq;
 
 //------------------------------------------------------------------------------
 #define STR_BIG_BUF_SIZE 1048576
@@ -1985,18 +1986,6 @@ void Table::orderBy(	std::vector<Column::Ptr> columns,
 			newColumns[idx2]->Items.push_back( this->Columns[idx2]->Items[index[idx]] );
 
 	this->updateColumnsContent( newColumns );
-}
-
-//------------------------------------------------------------------------------
-Column::Ptr TableRef::getColumn() const
-{
-	assert( this->Columns.size() <= 1 );
-	size_t colIdx = 0;
-	if( this->Columns.size() > 0 )
-		colIdx = this->Columns[0];
-	assert( this->Ref );
-	assert( (colIdx >= 0) && (colIdx < this->Ref->Columns.size()) );
-	return this->Ref->Columns[colIdx];
 }
 
 //------------------------------------------------------------------------------

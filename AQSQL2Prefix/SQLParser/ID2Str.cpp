@@ -1,6 +1,12 @@
 #include "ID2Str.h"
 #include <stdio.h>
 
+struct TID2String 
+{
+	unsigned int	m_nID;
+	char			   *pszStr;
+};
+
 //------------------------------------------------------------------------------
 TID2String g_id2str[] = {
 	{ K_ALL,			"ALL"			},

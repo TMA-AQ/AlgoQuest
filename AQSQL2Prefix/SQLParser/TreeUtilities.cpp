@@ -754,3 +754,21 @@ void eliminateAliases( tnode* pSelect )
 	delete_subtree( pSelect->left );
 	pSelect->left = nodeArrayToCommaList( newColumns );
 }
+
+//------------------------------------------------------------------------------
+void getColumnsList( tnode* pNode,std::vector<tnode*>& columns )
+{
+	if( (pNode->tag == K_PERIOD) || (pNode->inf == 1) )
+	{
+		columns.push_back( pNode );
+	} else if( pNode->tag == K_COMMA )
+	{
+		getColumnsList( pNode->left, columns );
+		getColumnsList( pNode->right, columns );
+	} else
+	{
+		// 		pNode->tag = K_DELETED;
+		// 		columns.push_back( NULL );
+		columns.push_back( pNode );
+	}
+}

@@ -1,5 +1,4 @@
 #include "AQEngine.h"
-#include "Log.h"
 #include "Exceptions.h"
 #include "JeqParser.h"
 #include "SQLPrefix.h"

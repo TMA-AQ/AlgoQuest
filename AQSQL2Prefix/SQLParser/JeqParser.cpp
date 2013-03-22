@@ -1,13 +1,15 @@
 #include "JeqParser.h"
-#include <vector>
-#include "Utilities.h"
-#include <map>
-#include <assert.h>
-#include "TreeUtilities.h"
 #include "ID2Str.h"
+#include <vector>
+#include <map>
+#include <cassert>
 #include <boost/bind.hpp>
 #include <boost/algorithm/string.hpp>
 using namespace std;
+
+extern const int nrJoinTypes;
+extern const int joinTypes[];
+extern const int inverseTypes[];
 
 //------------------------------------------------------------------------------
 struct connectionLine
@@ -99,7 +101,7 @@ connectionLine nextConnectionLine( string& inputString )
 	CL.connectionType.push_back( connectionType );
 
 	inputString = inputString.substr( inputString.find(' ') + 1 );
-	Trim( inputString );
+	boost::algorithm::trim( inputString );
 
 	nextPosition = inputString.find(' ') + 1;
 	nextPosition = inputString.find(' ', nextPosition) + 1;
@@ -108,10 +110,10 @@ connectionLine nextConnectionLine( string& inputString )
 
 	nextPosition = inputString.find(' ', nextPosition + 1);
 	CL.tableAndCol1.push_back( inputString.substr(0, nextPosition) );
-	Trim( CL.tableAndCol1[0] );
+	boost::algorithm::trim( CL.tableAndCol1[0] );
 
 	inputString = inputString.substr(nextPosition + 1);
-	Trim( inputString );
+	boost::algorithm::trim( inputString );
 
 	nextPosition = inputString.find(' ') + 1;
 	nextPosition = inputString.find(' ', nextPosition) + 1;
@@ -124,7 +126,7 @@ connectionLine nextConnectionLine( string& inputString )
 	else
 	{
 		CL.tableAndCol2.push_back( inputString.substr(0, nextPosition) );
-		Trim( CL.tableAndCol2[0] );
+		boost::algorithm::trim( CL.tableAndCol2[0] );
 	}
 
 	boost::algorithm::to_upper(CL.table1);

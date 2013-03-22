@@ -6,13 +6,14 @@
 #include <deque>
 #include "Object.h"
 #include "Utilities.h"
+#include "Settings.h"
 #include "DateConversion.h"
 #include "SQLParser.h"
 #include "AQMatrix.h"
 
 #include <boost/variant.hpp>
 
-// Forward declaratio (need because of a conflict #define in header)
+// Forward declaration (need because of a conflict #define in header)
 namespace aq 
 {
 	class FileMapper;
@@ -89,7 +90,8 @@ public:
 		ASTERISK,
 		ROW_VALIDATION
 	};
-	virtual int getType(){ assert(0); return -1; }; //abstract class semantics
+	// virtual int getType(){ assert(0); return -1; }; //abstract class semantics
+	virtual int getType() const = 0; // real abstract class
 };
 
 //------------------------------------------------------------------------------
@@ -97,7 +99,7 @@ class Column: public VerbResult
 {
 	OBJECT_DECLARE( Column );
 public:
-	virtual int getType(){ return VerbResult::COLUMN; }
+	virtual int getType() const { return VerbResult::COLUMN; }
 
 	Column();
 	Column( ColumnType type );
@@ -168,7 +170,7 @@ class Scalar: public VerbResult
 {
 	OBJECT_DECLARE( Scalar );
 public:
-	virtual int getType(){ return VerbResult::SCALAR; }
+	virtual int getType() const { return VerbResult::SCALAR; }
 
 	std::string				Name;
 
@@ -183,7 +185,7 @@ class SubTable: public VerbResult
 {
 	OBJECT_DECLARE( SubTable );
 public:
-	virtual int getType(){ return VerbResult::SUB_TABLE; }
+	virtual int getType() const { return VerbResult::SUB_TABLE; }
 
 	std::vector<int>	Rows;
 };
@@ -193,7 +195,7 @@ class Asterisk: public VerbResult
 {
 	OBJECT_DECLARE( Asterisk );
 public:
-	virtual int getType(){ return VerbResult::ASTERISK; }
+	virtual int getType() const { return VerbResult::ASTERISK; }
 };
 
 //------------------------------------------------------------------------------
@@ -201,7 +203,7 @@ class TablePartition: public VerbResult
 {
 	OBJECT_DECLARE( TablePartition );
 public:
-	virtual int getType(){ return VerbResult::TABLE_PARTITION; }
+	virtual int getType() const { return VerbResult::TABLE_PARTITION; }
 
 	TablePartition()
 		: FrameUnits(ROWS), 
@@ -237,7 +239,7 @@ class RowValidation: public VerbResult
 {
 	OBJECT_DECLARE( RowValidation );
 public:
-	virtual int getType(){ return ROW_VALIDATION; };
+	virtual int getType() const { return ROW_VALIDATION; };
 
 	std::vector<bool> ValidRows;
 };
@@ -312,22 +314,9 @@ class VerbResultArray: public VerbResult
 {
 	OBJECT_DECLARE( VerbResultArray );
 public:
-	virtual int getType(){ return VerbResult::ARRAY; }
+	virtual int getType() const { return VerbResult::ARRAY; }
 
 	std::deque<VerbResult::Ptr>	Results;
-};
-
-//------------------------------------------------------------------------------
-class TableRef: public Object
-{
-	OBJECT_DECLARE( TableRef );
-public:
-	Table::Ptr		Ref;
-	std::vector<int>	Rows;
-	std::vector<int>	Columns;
-
-	TableRef( Table::Ptr table ): Ref(table){}
-	Column::Ptr getColumn() const;
 };
 
 //------------------------------------------------------------------------------

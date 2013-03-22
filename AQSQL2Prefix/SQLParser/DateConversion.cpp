@@ -1,9 +1,12 @@
 #include "DateConversion.h"
-#include <stdio.h>
-#include <assert.h>
-#include <cstring>
 #include "Utilities.h"
+#include <cstdio>
+#include <cassert>
+#include <cstring>
 #include <ctime>
+
+namespace aq
+{
 
 //------------------------------------------------------------------------------
 //maximum number of nanoseconds we can keep track of: 9223372036854775807
@@ -195,4 +198,6 @@ long long currentDate()
 	long long intval = year * YEAR + month * MONTH + day * DAY + 
 		hour * HOUR + minute * MINUTE + SECOND * second;
 	return intval;
+}
+
 }

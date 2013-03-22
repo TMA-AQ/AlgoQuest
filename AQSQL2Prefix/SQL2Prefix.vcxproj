@@ -315,13 +315,13 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="SQLParser\LIKE_PatternMatching.cpp" />
-    <ClCompile Include="SQLParser\Log.cpp" />
     <ClCompile Include="SQLParser\MainVerbs.cpp" />
     <ClCompile Include="SQLParser\NestedQueries.cpp" />
     <ClCompile Include="SQLParser\Optimizations.cpp" />
     <ClCompile Include="SQLParser\OverVerbs.cpp" />
     <ClCompile Include="SQLParser\RowProcessing.cpp" />
     <ClCompile Include="SQLParser\ScalarVerbs.cpp" />
+    <ClCompile Include="SQLParser\Settings.cpp" />
     <ClCompile Include="SQLParser\sql92_grm_tab.c">
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsCpp</CompileAs>
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsCpp</CompileAs>
@@ -419,15 +419,14 @@
     <ClInclude Include="SQLParser\JeqParser.h" />
     <ClInclude Include="SQLParser\JoinVerbs.h" />
     <ClInclude Include="SQLParser\LIKE_PatternMatching.h" />
-    <ClInclude Include="SQLParser\Log.h" />
     <ClInclude Include="SQLParser\MainVerbs.h" />
     <ClInclude Include="SQLParser\NestedQueries.h" />
     <ClInclude Include="SQLParser\Object.h" />
     <ClInclude Include="SQLParser\Optimizations.h" />
     <ClInclude Include="SQLParser\OverVerbs.h" />
-    <ClInclude Include="resource.h" />
     <ClInclude Include="SQLParser\RowProcessing.h" />
     <ClInclude Include="SQLParser\ScalarVerbs.h" />
+    <ClInclude Include="SQLParser\Settings.h" />
     <ClInclude Include="SQLParser\sql92_grm_tab.h" />
     <ClInclude Include="SQLParser\SQLParser.h" />
     <ClInclude Include="SQLParser\SQLPrefix.h" />

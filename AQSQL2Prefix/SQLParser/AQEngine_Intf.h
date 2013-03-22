@@ -2,6 +2,7 @@
 
 #include "SQLParser.h"
 #include "AQMatrix.h"
+#include "Settings.h"
 
 class AQEngineCallback_Intf
 {
