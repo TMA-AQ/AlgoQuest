@@ -2,7 +2,7 @@
 #define __FIAN_NESTEDQUERIES_H__
 
 #include "SQLParser.h"
-#include "Utilities.h"
+#include <aq/Utilities.h>
 #include "AQEngine_Intf.h"
 #include "Table.h"
 #include "Verb.h"

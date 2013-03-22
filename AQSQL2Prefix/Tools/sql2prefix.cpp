@@ -4,7 +4,7 @@
 #include <SQLParser/Column2Table.h>
 #include <SQLParser/NestedQueries.h>
 #include <SQLParser/JeqParser.h>
-#include <SQLParser/Exceptions.h>
+#include <aq/Exceptions.h>
 #include <DBLoader/DatabaseLoader.h>
 #include <iostream>
 #include <list>
@@ -314,12 +314,12 @@ int processQuery(
 		{
 			std::string workingDirectory = settings.szRootPath + "/calculus/" + settings.queryIdent;
 			aq::Logger::getInstance().log(AQ_NOTICE, "remove working directory '%s'\n", workingDirectory.c_str());
-			DeleteFolder(workingDirectory.c_str());
+			aq::DeleteFolder(workingDirectory.c_str());
 		}
 
 		delete pNode;
 	}
-	catch (const generic_error& ge)
+	catch (const aq::generic_error& ge)
 	{
 		aq::Logger::getInstance().log(AQ_ERROR, "%s\n", ge.what());
 		return EXIT_FAILURE;
@@ -666,7 +666,7 @@ int main(int argc, char**argv)
 
 		}
 	}
-	catch (const generic_error& error)
+	catch (const aq::generic_error& error)
 	{
 		std::cerr << "generic error: " << error.what() << std::endl;
 		return error.getType();

@@ -1,9 +1,9 @@
 #include <cassert>
 #include "Table.h"
 #include "RowProcessing.h"
-#include "Utilities.h"
+#include <aq/Utilities.h>
 #include <memory>
-#include "Exceptions.h"
+#include <aq/Exceptions.h>
 #include "DateConversion.h"
 #include <aq/FileMapper.h>
 #include <aq/Timer.h>
@@ -16,8 +16,8 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/thread.hpp>
 
-using namespace std;
 using namespace aq;
+using namespace std;
 
 //------------------------------------------------------------------------------
 #define STR_BIG_BUF_SIZE 1048576

@@ -1,11 +1,12 @@
 #include "ComparisonVerbs.h"
 #include "ExprTransform.h"
-#include "Exceptions.h"
+#include <aq/Exceptions.h>
 #include <aq/Logger.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-using namespace boost;
+using namespace aq;
 using namespace std;
+using namespace boost;
 
 //------------------------------------------------------------------------------
 VERB_IMPLEMENT( ComparisonVerb );

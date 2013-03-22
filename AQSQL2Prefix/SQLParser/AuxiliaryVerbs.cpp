@@ -1,10 +1,11 @@
 #include "AuxiliaryVerbs.h"
-#include "Utilities.h"
+#include <aq/Utilities.h>
 #include "ExprTransform.h"
-#include "Exceptions.h"
+#include <aq/Exceptions.h>
 #include "VerbVisitor.h"
 #include <algorithm>
 
+using namespace aq;
 using namespace std;
 using namespace boost;
 

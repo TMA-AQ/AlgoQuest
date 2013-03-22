@@ -1,5 +1,5 @@
 #include "AQEngine.h"
-#include "Exceptions.h"
+#include <aq/Exceptions.h>
 #include "JeqParser.h"
 #include "SQLPrefix.h"
 #include "TreeUtilities.h"
@@ -9,6 +9,7 @@
 #include <aq/Timer.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
+using namespace aq;
 using namespace std;
 
 

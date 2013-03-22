@@ -5,6 +5,7 @@
 #include <cassert>
 #include <boost/bind.hpp>
 #include <boost/algorithm/string.hpp>
+
 using namespace std;
 
 extern const int nrJoinTypes;

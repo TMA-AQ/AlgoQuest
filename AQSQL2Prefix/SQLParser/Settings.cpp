@@ -1,6 +1,6 @@
 #include "Settings.h"
-#include "Utilities.h"
-#include "Exceptions.h"
+#include <aq/Utilities.h>
+#include <aq/Exceptions.h>
 #include <fstream>
 #include <aq/Logger.h>
 #include <boost/property_tree/ptree.hpp>
@@ -167,7 +167,7 @@ void TProjectSettings::load(const std::string& iniFile)
 	{
     std::ostringstream oss;
     oss << "invalid properties file: " << iniFile << std::endl;
-    throw generic_error(generic_error::INVALID_FILE, oss.str());
+    throw aq::generic_error(aq::generic_error::INVALID_FILE, oss.str());
 	}
 }
 

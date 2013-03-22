@@ -2,11 +2,12 @@
 #include <assert.h>
 #include "sql92_grm_tab.h"
 #include "Table.h"
-#include "Exceptions.h"
+#include <aq/Exceptions.h>
 #include <algorithm>
 #include <boost/scoped_array.hpp>
 #include <direct.h>
 
+using namespace aq;
 using namespace std;
 
 //------------------------------------------------------------------------------

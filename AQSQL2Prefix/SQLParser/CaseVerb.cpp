@@ -1,9 +1,10 @@
 #pragma once
 
 #include "CaseVerb.h"
-#include "Exceptions.h"
+#include <aq/Exceptions.h>
 #include <algorithm>
 
+using namespace aq;
 using namespace std;
 using namespace boost;
 

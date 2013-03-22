@@ -1,6 +1,7 @@
 #include "AggregateVerbs.h"
-#include "Exceptions.h"
+#include <aq/Exceptions.h>
 
+using namespace aq;
 using namespace std;
 using namespace boost;
 

@@ -5,7 +5,7 @@
 #include <string>
 #include <deque>
 #include "Object.h"
-#include "Utilities.h"
+#include <aq/Utilities.h>
 #include "Settings.h"
 #include "DateConversion.h"
 #include "SQLParser.h"

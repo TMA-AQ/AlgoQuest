@@ -6,6 +6,7 @@
 #include <stdlib.h>		// One of this required by "toupper()"
 #include <ctype.h>		// One of this required by "toupper()"
 
+using namespace aq;
 using namespace std;
 
 //------------------------------------------------------------------------------

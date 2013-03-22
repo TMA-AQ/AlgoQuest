@@ -7,8 +7,10 @@
 #include <malloc.h>
 #include <string.h>
 #include <stdlib.h>						/* _MAX_PATH */
-#include "Utilities.h"
+#include <aq/Utilities.h>
 #include <boost/bind.hpp>
+
+using namespace aq;
 
 //------------------------------------------------------------------------------
 // PRIVATE

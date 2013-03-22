@@ -1,12 +1,13 @@
 #include "MainVerbs.h"
 #include <algorithm>
 #include "ID2Str.h"
-#include "Exceptions.h"
+#include <aq/Exceptions.h>
 #include "TreeUtilities.h"
 #include "Column2Table.h"
 #include "VerbVisitor.h"
 #include <aq/Logger.h>
 
+using namespace aq;
 using namespace std;
 using namespace boost;
 

@@ -1,6 +1,6 @@
 #include "ScalarVerbs.h"
 #include <cmath>
-#include "Exceptions.h"
+#include <aq/Exceptions.h>
 
 using namespace aq;
 using namespace std;

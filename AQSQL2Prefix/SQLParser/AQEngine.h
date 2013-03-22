@@ -1,7 +1,7 @@
 #pragma once
 
 #include "AQEngine_Intf.h"
-#include "Utilities.h"
+#include <aq/Utilities.h>
 #include "Table.h"
 
 class AQEngine : public AQEngine_Intf

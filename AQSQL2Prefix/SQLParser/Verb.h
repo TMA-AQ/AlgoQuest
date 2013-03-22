@@ -3,10 +3,17 @@
 #include "SQLParser.h"
 #include "Table.h"
 #include "sql92_grm_tab.h"
+#include <aq/Exceptions.h>
 
 // forward declaration
 class VerbVisitor;
 
+//------------------------------------------------------------------------------
+class verb_error: public aq::generic_error
+{
+public:
+	verb_error( EType type, int verbTag );
+};
 //--------------------------------------------------------------------------
 class Verb: public Object
 {

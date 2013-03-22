@@ -2,7 +2,7 @@
 #define __FIAN_SQLPARSER_H__
 
 //------------------------------------------------------------------------------
-#include "Utilities.h"
+#include <aq/Utilities.h>
 #include <vector>
 #include <string>
 #include <sstream>

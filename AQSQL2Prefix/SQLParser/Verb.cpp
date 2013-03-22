@@ -6,6 +6,13 @@
 using namespace boost;
 
 //------------------------------------------------------------------------------
+verb_error::verb_error( EType type, int verbTag ):
+	generic_error( type, "" )
+{
+	this->Message +=  id_to_string( verbTag );
+}
+
+//------------------------------------------------------------------------------
 Verb::Verb(): Result(NULL), Context(0), Disabled(false)
 {
 }

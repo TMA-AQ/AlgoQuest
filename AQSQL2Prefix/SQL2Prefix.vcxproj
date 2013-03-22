@@ -301,7 +301,6 @@
     <ClCompile Include="SQLParser\DateConversion.cpp" />
     <ClCompile Include="SQLParser\DateVerbs.cpp" />
     <ClCompile Include="SQLParser\DumpVisitor.cpp" />
-    <ClCompile Include="SQLParser\Exceptions.cpp" />
     <ClCompile Include="SQLParser\ExprTransform.cpp" />
     <ClCompile Include="SQLParser\ID2Str.cpp" />
     <ClCompile Include="SQLParser\JeqParser.cpp" />
@@ -332,7 +331,6 @@
     <ClCompile Include="SQLParser\SQLPrefix.cpp" />
     <ClCompile Include="SQLParser\Table.cpp" />
     <ClCompile Include="SQLParser\TreeUtilities.cpp" />
-    <ClCompile Include="SQLParser\Utilities.cpp" />
     <ClCompile Include="SQLParser\Verb.cpp" />
     <ClCompile Include="Tools\printresult.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -413,7 +411,6 @@
     <ClInclude Include="SQLParser\DateConversion.h" />
     <ClInclude Include="SQLParser\DateVerbs.h" />
     <ClInclude Include="SQLParser\DumpVisitor.h" />
-    <ClInclude Include="SQLParser\Exceptions.h" />
     <ClInclude Include="SQLParser\ExprTransform.h" />
     <ClInclude Include="SQLParser\ID2Str.h" />
     <ClInclude Include="SQLParser\JeqParser.h" />
@@ -432,7 +429,6 @@
     <ClInclude Include="SQLParser\SQLPrefix.h" />
     <ClInclude Include="SQLParser\Table.h" />
     <ClInclude Include="SQLParser\TreeUtilities.h" />
-    <ClInclude Include="SQLParser\Utilities.h" />
     <ClInclude Include="SQLParser\Verb.h" />
     <ClInclude Include="SQLParser\VerbVisitor.h" />
     <ClInclude Include="Tools\Link.h" />

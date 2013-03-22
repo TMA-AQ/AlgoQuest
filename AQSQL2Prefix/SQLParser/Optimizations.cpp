@@ -1,8 +1,9 @@
 #include "Optimizations.h"
 #include "AuxiliaryVerbs.h"
-#include "Exceptions.h"
+#include <aq/Exceptions.h>
 #include <boost/scoped_array.hpp>
 
+using namespace aq;
 using namespace std;
 using namespace boost;
 

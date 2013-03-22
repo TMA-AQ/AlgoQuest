@@ -63,9 +63,6 @@
     <ClCompile Include="SQLParser\DateVerbs.cpp">
       <Filter>Source Files\SQLParser</Filter>
     </ClCompile>
-    <ClCompile Include="SQLParser\Exceptions.cpp">
-      <Filter>Source Files\SQLParser</Filter>
-    </ClCompile>
     <ClCompile Include="SQLParser\ExprTransform.cpp">
       <Filter>Source Files\SQLParser</Filter>
     </ClCompile>
@@ -112,9 +109,6 @@
       <Filter>Source Files\SQLParser</Filter>
     </ClCompile>
     <ClCompile Include="SQLParser\TreeUtilities.cpp">
-      <Filter>Source Files\SQLParser</Filter>
-    </ClCompile>
-    <ClCompile Include="SQLParser\Utilities.cpp">
       <Filter>Source Files\SQLParser</Filter>
     </ClCompile>
     <ClCompile Include="SQLParser\Verb.cpp">
@@ -185,9 +179,6 @@
     <ClInclude Include="SQLParser\DateVerbs.h">
       <Filter>Header Files\SQLParser</Filter>
     </ClInclude>
-    <ClInclude Include="SQLParser\Exceptions.h">
-      <Filter>Header Files\SQLParser</Filter>
-    </ClInclude>
     <ClInclude Include="SQLParser\ExprTransform.h">
       <Filter>Header Files\SQLParser</Filter>
     </ClInclude>
@@ -234,9 +225,6 @@
       <Filter>Header Files\SQLParser</Filter>
     </ClInclude>
     <ClInclude Include="SQLParser\TreeUtilities.h">
-      <Filter>Header Files\SQLParser</Filter>
-    </ClInclude>
-    <ClInclude Include="SQLParser\Utilities.h">
       <Filter>Header Files\SQLParser</Filter>
     </ClInclude>
     <ClInclude Include="SQLParser\Verb.h">

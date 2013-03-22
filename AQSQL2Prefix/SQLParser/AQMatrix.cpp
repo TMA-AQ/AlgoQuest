@@ -1,6 +1,6 @@
 #include "AQMatrix.h"
-#include "Utilities.h"
-#include "Exceptions.h"
+#include <aq/Utilities.h>
+#include <aq/Exceptions.h>
 #include "Table.h"
 #include <iostream>
 #include <set>

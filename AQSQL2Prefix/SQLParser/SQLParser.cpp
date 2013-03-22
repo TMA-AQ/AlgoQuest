@@ -293,7 +293,7 @@ std::string to_string(const tnode* const pNode )
 		return szBuffer;
 		break;
 	case NODE_DATA_NUMBER: 
-		doubleToString( szBuffer, pNode->data.val_number );
+		aq::doubleToString( szBuffer, pNode->data.val_number );
 		//sprintf(szBuffer, "%.2lf", pNode->data.val_number);
 		return szBuffer;
 		break;
