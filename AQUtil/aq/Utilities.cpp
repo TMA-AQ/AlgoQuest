@@ -1,15 +1,15 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <malloc.h>
-#include <string.h>
 #include "Utilities.h"
 #include "Exceptions.h"
-#include "SQLParser.h"
-#include "sql92_grm_tab.h"
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <aq/Logger.h>
 #include <boost/filesystem.hpp>
 
 #include <Windows.h>
+
+namespace aq
+{
 
 //------------------------------------------------------------------------------
 
@@ -366,4 +366,6 @@ std::string getThesaurusFileName( char* path, int tableIdx, int columnIdx, int p
 	else
 		sprintf( szFN, "B001T%.4uC%.4uV01P%.12u.the", tableIdx, columnIdx, partIdx );
 	return szFN;
+}
+
 }

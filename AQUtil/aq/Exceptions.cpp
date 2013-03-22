@@ -1,6 +1,7 @@
 #include "Exceptions.h"
-#include "ID2Str.h"
-#include <assert.h>
+#include <cassert>
+
+using namespace aq;
 
 //------------------------------------------------------------------------------
 generic_error::generic_error( EType type, const std::string& msg )
@@ -29,11 +30,4 @@ std::string generic_error::typeToString(generic_error::EType type)
     case INVALID_FILE: return "INVALID_FILE"; break;
 		case AQ_ENGINE: return "AQ_ENGINE"; break;
   }
-}
-
-//------------------------------------------------------------------------------
-verb_error::verb_error( EType type, int verbTag ):
-	generic_error( type, "" )
-{
-	this->Message +=  id_to_string( verbTag );
 }

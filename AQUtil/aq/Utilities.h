@@ -1,18 +1,20 @@
-#ifndef __FIAN_UTILITIES_H__
-#define __FIAN_UTILITIES_H__
+#ifndef __AQ_UTILITIES_H__
+#define __AQ_UTILITIES_H__
 
 #include <string>
 #include <vector>
 
 //------------------------------------------------------------------------------
 typedef long long llong;
-struct tnode;
 
 //------------------------------------------------------------------------------
 #define STR_BUF_SIZE 4096
 
 //------------------------------------------------------------------------------
 extern const double EPSILON;
+
+namespace aq
+{
 
 //------------------------------------------------------------------------------
 char* LoadFile( const char *pszFN );
@@ -79,4 +81,6 @@ void doubleToString( char* strVal, double dVal );
 //------------------------------------------------------------------------------
 std::string getThesaurusFileName( char* path, int tableIdx, int columnIdx, int partIdx );
 
-#endif /* __FIAN_UTILITIES_H__ */
+}
+
+#endif /* __AQ_UTILITIES_H__ */

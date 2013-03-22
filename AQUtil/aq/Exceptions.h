@@ -3,6 +3,9 @@
 #include <stdexcept>
 #include <string>
 
+namespace aq
+{
+
 //------------------------------------------------------------------------------
 class generic_error: public std::exception
 {
@@ -34,9 +37,4 @@ protected:
 	EType type;
 };
 
-//------------------------------------------------------------------------------
-class verb_error: public generic_error
-{
-public:
-	verb_error( EType type, int verbTag );
-};
+}
