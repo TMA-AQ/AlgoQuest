@@ -69,12 +69,12 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "FileDescription", "SQL2Prefix.exe"
+            VALUE "FileDescription", "AQQueryResolver.lib"
             VALUE "FileVersion", "2, 26, 558, 0"
-            VALUE "InternalName", "SQL2Pref"
+            VALUE "InternalName", "AQQueryResolver"
             VALUE "LegalCopyright", "Copyright (C) 2012 AlgoQuest"
-            VALUE "OriginalFilename", "SQL2Prefix.exe"
-            VALUE "ProductName", "SQL2Prefix.exe"
+            VALUE "OriginalFilename", "AQQueryResolver.lib"
+            VALUE "ProductName", "AQQueryResolver.lib"
             VALUE "ProductVersion", "2, 26, 558, 0"
         END
     END
