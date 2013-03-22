@@ -1,0 +1,437 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{C29821BB-E679-400F-8F68-20934A012A85}</ProjectGuid>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>11.0.50727.1</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>build\$(Platform)\$(Configuration)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>build\$(Platform)\$(Configuration)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+    <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>build\$(Platform)\$(Configuration)\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>build\$(Platform)\$(Configuration)\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+    <CustomBuildBeforeTargets>Build</CustomBuildBeforeTargets>
+    <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Midl>
+      <TypeLibraryName>.\Release/SQL2Prefix.tlb</TypeLibraryName>
+      <HeaderFileName />
+    </Midl>
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;OUTPUT_NESTED_QUERIES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeaderOutputFile>$(IntDir)$(ProjectName).pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)</ProgramDataBaseFileName>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>..\AQUtil;$(ProjectDir);C:\Boost\install\include\boost-1_50;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(IntDir)$(TargetName).pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\Release/SQL2Prefix.bsc</OutputFile>
+    </Bscmake>
+    <PreBuildEvent>
+      <Command>.\Generate_Parser.bat SQLParser\sql92_grm_tab.c SQLParser\SQL92_Grm.y SQLParser\lex.yy.c SQLParser\SQL92_Tok.l</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+      <TypeLibraryName>.\Release/SQL2Prefix.tlb</TypeLibraryName>
+      <HeaderFileName />
+    </Midl>
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;OUTPUT_NESTED_QUERIES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeaderOutputFile>$(IntDir)$(ProjectName).pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)</ProgramDataBaseFileName>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>..\AQUtil;$(ProjectDir);C:\Boost\install\include\boost-1_50;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <TreatWarningAsError>false</TreatWarningAsError>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(IntDir)$(TargetName).pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+      <TargetMachine>MachineX64</TargetMachine>
+      <AdditionalLibraryDirectories>C:\Boost\install\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\Release/SQL2Prefix.bsc</OutputFile>
+    </Bscmake>
+    <PreBuildEvent>
+      <Command>.\Generate_Parser.bat SQLParser\sql92_grm_tab.c SQLParser\SQL92_Grm.y SQLParser\lex.yy.c SQLParser\SQL92_Tok.l</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Midl>
+      <TypeLibraryName>.\Debug/SQL2Prefix.tlb</TypeLibraryName>
+      <HeaderFileName />
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;OUTPUT_NESTED_QUERIES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeaderOutputFile>$(IntDir)$(ProjectName).pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)</ProgramDataBaseFileName>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>..\AQUtil;$(ProjectDir);C:\Boost\install\include\boost-1_50;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(IntDir)$(TargetName).pdb</ProgramDatabaseFile>
+      <GenerateMapFile>false</GenerateMapFile>
+      <MapFileName />
+      <SubSystem>Console</SubSystem>
+      <StackReserveSize>10000000</StackReserveSize>
+      <StackCommitSize>0</StackCommitSize>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+      <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalLibraryDirectories>C:\Boost\install\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\Debug/SQL2Prefix.bsc</OutputFile>
+    </Bscmake>
+    <PreBuildEvent>
+      <Command>.\Generate_Parser.bat SQLParser\sql92_grm_tab.c SQLParser\SQL92_Grm.y SQLParser\lex.yy.c SQLParser\SQL92_Tok.l</Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+      <TypeLibraryName>.\Debug/SQL2Prefix.tlb</TypeLibraryName>
+      <HeaderFileName />
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;OUTPUT_NESTED_QUERIES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeaderOutputFile>$(IntDir)$(ProjectName).pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)</ProgramDataBaseFileName>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>..\AQUtil;$(ProjectDir);C:\Boost\install\include\boost-1_50;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(IntDir)$(TargetName).pdb</ProgramDatabaseFile>
+      <GenerateMapFile>false</GenerateMapFile>
+      <MapFileName />
+      <SubSystem>Console</SubSystem>
+      <StackReserveSize>10000000</StackReserveSize>
+      <StackCommitSize>0</StackCommitSize>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+      <TargetMachine>MachineX64</TargetMachine>
+      <AdditionalLibraryDirectories>C:\Boost\install\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\Debug/SQL2Prefix.bsc</OutputFile>
+    </Bscmake>
+    <CustomBuildStep>
+      <Command>
+      </Command>
+    </CustomBuildStep>
+    <PreBuildEvent>
+      <Command>.\Generate_Parser.bat SQLParser\sql92_grm_tab.c SQLParser\SQL92_Grm.y SQLParser\lex.yy.c SQLParser\SQL92_Tok.l</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="DBLoader\DatabaseLoader.cpp" />
+    <ClCompile Include="DBLoader\Util.cpp" />
+    <ClCompile Include="SQLParser\AggregateVerbs.cpp" />
+    <ClCompile Include="SQLParser\AQEngine.cpp" />
+    <ClCompile Include="SQLParser\AQMatrix.cpp" />
+    <ClCompile Include="SQLParser\ArithmeticVerbs.cpp" />
+    <ClCompile Include="SQLParser\AuxiliaryVerbs.cpp" />
+    <ClCompile Include="SQLParser\CaseVerb.cpp" />
+    <ClCompile Include="SQLParser\Column2Table.cpp" />
+    <ClCompile Include="SQLParser\ComparisonVerbs.cpp" />
+    <ClCompile Include="SQLParser\ConversionVerbs.cpp" />
+    <ClCompile Include="SQLParser\DateVerbs.cpp" />
+    <ClCompile Include="SQLParser\DumpVisitor.cpp" />
+    <ClCompile Include="SQLParser\ExprTransform.cpp" />
+    <ClCompile Include="SQLParser\ID2Str.cpp" />
+    <ClCompile Include="SQLParser\JeqParser.cpp" />
+    <ClCompile Include="SQLParser\JoinVerbs.cpp" />
+    <ClCompile Include="SQLParser\lex.yy.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsC</CompileAs>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsC</CompileAs>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="SQLParser\LIKE_PatternMatching.cpp" />
+    <ClCompile Include="SQLParser\MainVerbs.cpp" />
+    <ClCompile Include="SQLParser\Optimizations.cpp" />
+    <ClCompile Include="SQLParser\OverVerbs.cpp" />
+    <ClCompile Include="SQLParser\QueryResolver.cpp" />
+    <ClCompile Include="SQLParser\RowProcessing.cpp" />
+    <ClCompile Include="SQLParser\ScalarVerbs.cpp" />
+    <ClCompile Include="SQLParser\Settings.cpp" />
+    <ClCompile Include="SQLParser\sql92_grm_tab.c">
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsCpp</CompileAs>
+    </ClCompile>
+    <ClCompile Include="SQLParser\SQLParser.cpp" />
+    <ClCompile Include="SQLParser\SQLPrefix.cpp" />
+    <ClCompile Include="SQLParser\Table.cpp" />
+    <ClCompile Include="SQLParser\TreeUtilities.cpp" />
+    <ClCompile Include="SQLParser\Verb.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="SQLParser\SQL92_Grm.y">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Calling BISON on %(FullPath)</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\BisonFlex\bison.bat -o ../SQLParser/sql92_grm_tab.c ../SQLParser/SQL92_Grm.y
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">SQLParser/sql92_grm_tab.c;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Calling BISON on %(FullPath)</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\BisonFlex\bison.bat -o ../SQLParser/sql92_grm_tab.c ../SQLParser/SQL92_Grm.y
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">SQLParser/sql92_grm_tab.c;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Calling BISON on %(FullPath)</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\BisonFlex\bison.bat -o ../SQLParser/sql92_grm_tab.c ../SQLParser/SQL92_Grm.y
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">SQLParser/sql92_grm_tab.c;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Calling BISON on %(FullPath)</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\BisonFlex\bison.bat -o ../SQLParser/sql92_grm_tab.c ../SQLParser/SQL92_Grm.y
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">SQLParser/sql92_grm_tab.c;%(Outputs)</Outputs>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </CustomBuild>
+    <CustomBuild Include="SQLParser\SQL92_Tok.l">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Calling FLEX on %(FullPath)</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\BisonFlex\flex.exe -oSQLParser/lex.yy.c SQLParser/SQL92_Tok.l
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">SQLParser/lex.yy.c;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Calling FLEX on %(FullPath)</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\BisonFlex\flex.exe -oSQLParser/lex.yy.c SQLParser/SQL92_Tok.l
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">SQLParser/lex.yy.c;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Calling FLEX on %(FullPath)</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\BisonFlex\flex.exe -oSQLParser/lex.yy.c SQLParser/SQL92_Tok.l
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">SQLParser/lex.yy.c;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Calling FLEX on %(FullPath)</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\BisonFlex\flex.exe -oSQLParser/lex.yy.c SQLParser/SQL92_Tok.l
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">SQLParser/lex.yy.c;%(Outputs)</Outputs>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </CustomBuild>
+    <CustomBuild Include="SQLParser\sql92_grm.output">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="DBLoader\DatabaseLoader.h" />
+    <ClInclude Include="DBLoader\Util.h" />
+    <ClInclude Include="SQLParser\AggregateVerbs.h" />
+    <ClInclude Include="SQLParser\AQEngine.h" />
+    <ClInclude Include="SQLParser\AQEngine_Intf.h" />
+    <ClInclude Include="SQLParser\AQMatrix.h" />
+    <ClInclude Include="SQLParser\ArithmeticVerbs.h" />
+    <ClInclude Include="SQLParser\AuxiliaryVerbs.h" />
+    <ClInclude Include="SQLParser\CaseVerb.h" />
+    <ClInclude Include="SQLParser\Column2Table.h" />
+    <ClInclude Include="SQLParser\ComparisonVerbs.h" />
+    <ClInclude Include="SQLParser\ConversionVerbs.h" />
+    <ClInclude Include="SQLParser\DateVerbs.h" />
+    <ClInclude Include="SQLParser\DumpVisitor.h" />
+    <ClInclude Include="SQLParser\ExprTransform.h" />
+    <ClInclude Include="SQLParser\ID2Str.h" />
+    <ClInclude Include="SQLParser\JeqParser.h" />
+    <ClInclude Include="SQLParser\JoinVerbs.h" />
+    <ClInclude Include="SQLParser\LIKE_PatternMatching.h" />
+    <ClInclude Include="SQLParser\MainVerbs.h" />
+    <ClInclude Include="SQLParser\Object.h" />
+    <ClInclude Include="SQLParser\Optimizations.h" />
+    <ClInclude Include="SQLParser\OverVerbs.h" />
+    <ClInclude Include="SQLParser\QueryResolver.h" />
+    <ClInclude Include="SQLParser\RowProcessing.h" />
+    <ClInclude Include="SQLParser\ScalarVerbs.h" />
+    <ClInclude Include="SQLParser\Settings.h" />
+    <ClInclude Include="SQLParser\sql92_grm_tab.h" />
+    <ClInclude Include="SQLParser\SQLParser.h" />
+    <ClInclude Include="SQLParser\SQLPrefix.h" />
+    <ClInclude Include="SQLParser\Table.h" />
+    <ClInclude Include="SQLParser\TreeUtilities.h" />
+    <ClInclude Include="SQLParser\Verb.h" />
+    <ClInclude Include="SQLParser\VerbVisitor.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Generate_Parser.bat" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AQUtil\AQUtil.vcxproj">
+      <Project>{49633ed8-bd24-4937-a454-7f73c1f9afd0}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="SQL2Prefix.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

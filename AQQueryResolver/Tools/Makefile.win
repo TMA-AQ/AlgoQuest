@@ -1,0 +1,57 @@
+PROGRAMS = aq_query_resolver.exe sqlparser.exe printresult.exe
+
+CC = cl.exe
+LD = link.exe
+
+INCLUDEDIRS = \
+ 	/I ".." \
+ 	/I "$(BOOST_INCLUDE_DIR)" \
+	/I "$(AQ_UTIL_INCLUDE_DIR)"
+
+CPPFLAGS = /DESRI_WINDOWS $(INCLUDEDIRS) /nologo \
+         /EHsc /Zi /W3 /WX- /Od /Oy- /Gm /EHsc /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope \
+         /DEBUG /Gd /wd"4996" /analyze- /errorReport:queue \
+         /D "__MVC_XP__" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "OUTPUT_NESTED_QUERIES" \
+         /D "CREATE_LOG" /D "_VC80_UPGRADE=0x0600" /D "_MBCS" /U"_DEBUG_"
+
+LDFLAGS = /LIBPATH:"$(BOOST_LIB_DIR)" /DEBUG /MACHINE:X64 /NOLOGO \
+		 "$(AQ_UTIL_LIB)" \
+		 "../build/x64/Debug/SQL2Prefix.lib"
+
+ALL: $(PROGRAMS)
+
+
+
+########## aq_query_resolver
+aq_query_resolver.exe: aq_query_resolver.obj
+	$(LD) $(LDFLAGS) /out:$@ aq_query_resolver.obj
+
+aq_query_resolver.obj: aq_query_resolver.cpp
+
+
+
+########## sqlparser
+sqlparser.exe: sqlparser.obj
+	$(LD) $(LDFLAGS) /out:$@ sqlparser.obj
+
+sqlparser.obj: sqlparser.cpp
+
+
+
+########## printresult
+printresult.exe: printresult.obj
+  $(LD) $(LDFLAGS) /out:$@ printresult.obj
+
+printresult.obj: printresult.cpp
+
+
+.PHONY: clean mrproper
+
+clean:
+	del sqlparser.obj sql2prefix.obj printresult.obj *.tlh *.idb *.pdb *.ilk
+	
+mrproper: clean
+	rm -rf $(PROGRAM)
+
+run:
+          $(PROGRAM)
