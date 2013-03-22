@@ -20,6 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{C29821BB-E679-400F-8F68-20934A012A85}</ProjectGuid>
+    <ProjectName>AQQueryResolver</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -427,9 +428,6 @@
     <ProjectReference Include="..\AQUtil\AQUtil.vcxproj">
       <Project>{49633ed8-bd24-4937-a454-7f73c1f9afd0}</Project>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="SQL2Prefix.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
