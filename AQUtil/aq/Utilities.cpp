@@ -358,7 +358,7 @@ void doubleToString( char* strVal, double dVal )
 }
 
 //------------------------------------------------------------------------------
-std::string getThesaurusFileName( char* path, int tableIdx, int columnIdx, int partIdx )
+std::string getThesaurusFileName( char* path, size_t tableIdx, size_t columnIdx, size_t partIdx )
 {
 	char szFN[ _MAX_PATH ];
 	if( path )

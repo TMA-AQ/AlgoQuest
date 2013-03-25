@@ -12,7 +12,7 @@ class generic_error: public std::exception
 public:
 	enum EType
 	{
-		GENERIC,
+		GENERIC = 0,
 		VERB_TYPE_MISMATCH,
 		VERB_BAD_SYNTAX,
 		THESAURUS_NOT_FOUND,
@@ -29,6 +29,7 @@ public:
 		INVALID_FILE
 	};
 	generic_error( EType type, const std::string& msg );
+	generic_error( EType type, const char * format, ...);
 	virtual const char* what() const throw() { return this->Message.c_str(); };
 	EType getType() const { return type; }
 	static std::string typeToString(EType type);

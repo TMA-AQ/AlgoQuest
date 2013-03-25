@@ -79,7 +79,7 @@ void splitLine( char *psz, char fieldSeparator, std::vector<char*>& fields,
 void doubleToString( char* strVal, double dVal );
 
 //------------------------------------------------------------------------------
-std::string getThesaurusFileName( char* path, int tableIdx, int columnIdx, int partIdx );
+std::string getThesaurusFileName( char* path, size_t tableIdx, size_t columnIdx, size_t partIdx );
 
 }
 
