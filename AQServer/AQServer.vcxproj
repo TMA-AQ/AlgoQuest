@@ -215,12 +215,15 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AQSQL2Prefix\SQL2Prefix.vcxproj">
-      <Project>{c29821bb-e679-400f-8f68-20934a012a85}</Project>
-    </ProjectReference>
+    <Xml Include="config.xml" />
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="config.xml" />
+    <ProjectReference Include="..\AQQueryResolver\AQQueryResolver.vcxproj">
+      <Project>{c29821bb-e679-400f-8f68-20934a012a85}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\AQUtil\AQUtil.vcxproj">
+      <Project>{49633ed8-bd24-4937-a454-7f73c1f9afd0}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
