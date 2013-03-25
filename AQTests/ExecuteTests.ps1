@@ -19,7 +19,7 @@ $resultsFolder = "Results"
 $expectedFolder = "Expected"
 $requestAnswerFolder = "calculus\test\"
 $requestFile = "request.txt"
-$resultFilesStart = @("New_Request", "Answer")
+$resultFilesStart = @("New_Request", "Answer", "sql2prefix.log")
 $deleteFiles = @("Answer_log.txt")
 $logName = "TestLog_"
 $logExt = ".txt"
@@ -82,18 +82,35 @@ Function CheckResult($logFile, $testName, $fileName, $folderResult, $execTime, [
         if( $content1.CompareTo($content2) -ne 0 )
         {
 			# check aq engine answer
-			[string]$aq_engine_answer_content1 = Get-Content $AQEngineFileDestResult
-			[string]$aq_engine_answer_content2 = Get-Content $AQEngineFileDestExpected
-			if ( $aq_engine_answer_content1.CompareTo($aq_engine_answer_content2) -ne 0 )
+			if (Test-Path $AQEngineFileDestExpected)
 			{
-				Write-Warning $($testName + " AQEngine FAILED")
-				Add-Content $logFile ($testName + " AQEngine ERROR: actual response does not match expected response")
-				++$aqEngineErrors.Value
+				if (Test-Path $AQEngineFileDestResult)
+				{
+					[string]$aq_engine_answer_content1 = Get-Content $AQEngineFileDestResult
+					[string]$aq_engine_answer_content2 = Get-Content $AQEngineFileDestExpected
+					if ( $aq_engine_answer_content1.CompareTo($aq_engine_answer_content2) -ne 0 )
+					{
+						Write-Warning $($testName + " AQEngine FAILED")
+						Add-Content $logFile ($testName + " AQEngine ERROR: actual response does not match expected response")
+						++$aqEngineErrors.Value
+					}
+					else
+					{
+						Write-Warning $($testName + " SQL2Prefix FAILED")
+						Add-Content $logFile ($testName + " SQL2Prefix ERROR: actual response does not match expected response")
+					}
+				}
+				else
+				{
+					Write-Warning $($testName + " AQEngine FAILED")
+					Add-Content $logFile ($testName + " AQEngine ERROR: No file found")
+					++$aqEngineErrors.Value
+				}
 			}
 			else
 			{
 				Write-Warning $($testName + " SQL2Prefix FAILED")
-				Add-Content $logFile ($testName + " SQL2Prefix ERROR: actual response does not match expected response")
+				Add-Content $logFile ($testName + " SQL2Prefix ERROR: actual response does not match expected response (BUT AQENGINE Not Checked)")
             }
 			++$errors.Value
         }
@@ -405,21 +422,6 @@ foreach($testFolder in $selectedFolders)
         DeleteExtraFiles $requestAnswerFolderFull
 	    
 		#
-		#
-		if ($p.ExitCode -ne 0)
-		{
-			++$warnings
-			# ++$errors
-			$line = $requestFullName + " WARNING: [" + $sql2prefix + " " + $iniFile + " test ] return exit code [" + $p.ExitCode + "]"
-			Write-Warning $line
-			Add-Content $logFile $line
-			
-			$content = Get-Content $requestFullName
-			Add-Content bad_queries.sql ($content + "`n")
-			continue
-		}
-		
-		#
 		# copy files
         foreach( $resultFileStart in $resultFilesStart )
         {
@@ -432,6 +434,21 @@ foreach($testFolder in $selectedFolders)
 				# Write-Host $src $dst
 				Move-Item -force $src $dst
 			}
+		}
+		
+		#
+		#
+		if ($p.ExitCode -ne 0)
+		{
+			++$warnings
+			# ++$errors
+			$line = $requestFullName + " WARNING: [" + $sql2prefix + " " + $iniFile + " test ] return exit code [" + $p.ExitCode + "]"
+			Write-Warning $line
+			Add-Content $logFile $line
+			
+			$content = Get-Content $requestFullName
+			Add-Content bad_queries.sql ($content + "`n")
+			continue
 		}
 		
 		#
@@ -454,7 +471,7 @@ Write-Output "$unchecked unchecked"
 Write-Output "$noDBErrors with no database"
 Write-Output "$warnings warnings"
 
-$total = $success + $errors + $skipped + $unchecked + $noDBErrors
+$total = $success + $errors + $skipped + $unchecked + $noDBErrors + $warnings
 Write-Output "$total requests checked"
 
 if ($ouputToNotepad)
