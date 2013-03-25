@@ -541,8 +541,8 @@ Column::Ptr OffsetColumn(	Column::Ptr column, TablePartition::Ptr partition,
 							ColumnItem::Ptr defaultValue )
 {
 	Column::Ptr newColumn = new Column( "", 0, 0, column->Type );
-	vector<int>& partitions = partition->Rows;
-	int partIdx = 0;
+	vector<size_t>& partitions = partition->Rows;
+	size_t partIdx = 0;
 	assert( partitions.size() > 1 );
 	assert( partitions[partitions.size() - 1] >= (int) column->Items.size() );
 	Column::Ptr columnCount = column->getCount();
@@ -555,7 +555,7 @@ Column::Ptr OffsetColumn(	Column::Ptr column, TablePartition::Ptr partition,
 	vector<llong> newColumnToColumnMap;
 	for( size_t idx = 0; idx < column->Items.size(); ++idx )
 	{
-		if( (int) idx >= partitions[partIdx + 1] )
+		if( idx >= partitions[partIdx + 1] )
 		{
 			++partIdx;
 			assert( partitions[partIdx] - partitions[partIdx-1] > 0 );
@@ -565,24 +565,24 @@ Column::Ptr OffsetColumn(	Column::Ptr column, TablePartition::Ptr partition,
 		//Offset rows behind the first row in column[idx]
 		//(remember that each column[idx] can represent more than 1 row)
 		llong offset = offsetVal;
-		llong itemIndex = (llong) idx - 1;
-		while( (itemIndex >= partitions[partIdx]) &&
-			(offset > columnCount->Items[itemIndex]->numval) )
+		size_t itemIndex = (idx > 0) ? idx - 1 : std::string::npos;
+		while((itemIndex != std::string::npos) && (itemIndex >= partitions[partIdx]) && (offset > columnCount->Items[itemIndex]->numval) )
 		{
-			offset -= (int) columnCount->Items[itemIndex]->numval;
+			offset -= static_cast<llong>(columnCount->Items[itemIndex]->numval);
 			--itemIndex;
 		}
+
 		//lag and create new rows as needed
 		llong count = 1;
 		if( columnCount )
-			count = (llong) columnCount->Items[idx]->numval;
+			count = static_cast<llong>(columnCount->Items[idx]->numval);
 		llong unsolvedItems = count;
 		bool solvedItemsInIdx = false;
 		while( unsolvedItems > 0 )
 		{	
 			ColumnItem::Ptr lagItem = defaultValue;
 			//get the item as long as it doesn't pass the upper partition boundary
-			if( itemIndex >= partitions[partIdx] )
+			if ((itemIndex != std::string::npos) && (itemIndex >= partitions[partIdx]))
 				lagItem = column->Items[itemIndex];
 			else
 				if( firstValue )
@@ -620,7 +620,7 @@ Column::Ptr OffsetColumn(	Column::Ptr column, TablePartition::Ptr partition,
 			unsolvedItems -= solveItems;
 			++itemIndex;
 		}
-		assert( itemIndex <= (llong) idx + 1 );
+		assert( itemIndex <= (idx + 1) );
 	}
 
 	assert( newColumn->Items.size() >= column->Items.size() );
@@ -661,14 +661,14 @@ void FirstValueVerb::changeResult(	Table::Ptr table,
 	else
 	{
 		//UNBOUNDED PRECEDING
-		Column::Ptr newColumn = new Column( "", 0, column->Size, column->Type );
-		vector<int>& partitions = partition->Rows;
+		Column::Ptr newColumn = new Column( "", static_cast<unsigned int>(0), static_cast<unsigned int>(column->Size), column->Type );
+		vector<size_t>& partitions = partition->Rows;
 		int partIdx = 0;
 		assert( partitions.size() > 1 );
-		assert( partitions[partitions.size() - 1] >= (int) column->Items.size() );
+		assert( partitions[partitions.size() - 1] >= column->Items.size() );
 		for( size_t idx = 0; idx < column->Items.size(); ++idx )
 		{
-			if( (int) idx >= partitions[partIdx + 1] )
+			if( idx >= partitions[partIdx + 1] )
 			{
 				++partIdx;
 				assert( partitions[partIdx] - partitions[partIdx-1] > 0 );
@@ -739,10 +739,10 @@ void LagVerb::changeResult(	Table::Ptr table,
 		case COL_TYPE_DATE2:
 		case COL_TYPE_DATE3:
 		case COL_TYPE_DOUBLE:
-			defaultValue = new ColumnItem(this->Default->right->data.val_int);
+			defaultValue = new ColumnItem(static_cast<double>(this->Default->data.val_int));
 			break;
 		case COL_TYPE_VARCHAR:
-			defaultValue = new ColumnItem(this->Default->right->data.val_str);
+			defaultValue = new ColumnItem(this->Default->data.val_str);
 			break;
 		}
 	}
@@ -779,9 +779,9 @@ void RowNumberVerb::changeResult(	Table::Ptr table,
 	Column::Ptr newColumn = new Column( COL_TYPE_BIG_INT );
 	for( size_t idx = 0; idx + 1 < partition->Rows.size(); ++idx )
 	{
-		int rowNumber = 0;
-		for( int idx2 = partition->Rows[idx]; idx2 < partition->Rows[idx+1]; ++idx2 )
-			for( int idx3 = 0; idx3 < (llong) count->Items[idx2]->numval; ++idx3 )
+		size_t rowNumber = 0;
+		for( size_t idx2 = partition->Rows[idx]; idx2 < partition->Rows[idx+1]; ++idx2 )
+			for( size_t idx3 = 0; idx3 < (size_t)count->Items[idx2]->numval; ++idx3 )
 				newColumn->Items.push_back( new ColumnItem( (double) ++rowNumber ) );
 	}
 

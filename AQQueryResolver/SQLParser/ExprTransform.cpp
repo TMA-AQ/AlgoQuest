@@ -67,24 +67,25 @@ int get_thesaurus_for_column(	Column& thesaurus,
 int get_thesaurus_info_for_column_reference( tnode *pNode, Base* baseDesc, 
 											unsigned int *pnTableId, unsigned int *pnColumnId, 
 											unsigned int *pnColumnSize, 
-											ColumnType *peColumnType, int *pErr ) {
+											ColumnType *peColumnType, int *pErr ) 
+{
 
-												if ( is_column_reference( pNode ) == 0 ) {
-													if ( pErr != NULL )
-														*pErr = EXPR_TR_ERR_NOT_COLUMN_REFERENCE;
-													return -1;
-												}
+	if ( is_column_reference( pNode ) == 0 ) {
+		if ( pErr != NULL )
+			*pErr = EXPR_TR_ERR_NOT_COLUMN_REFERENCE;
+		return -1;
+	}
 
-												if ( get_table_and_column_id_from_table_array(	baseDesc, pNode->left->data.val_str /*tbl_name*/,
-													pNode->right->data.val_str /*column_name*/, 
-													pnTableId, pnColumnId, pnColumnSize,
-													peColumnType ) == -1 ) {
-														if ( pErr != NULL )
-															*pErr = EXPR_TR_ERR_TBL_OR_COL_ID_NOT_FOUND;
-														return -1;
-												}
+	if ( get_table_and_column_id_from_table_array(	baseDesc, pNode->left->data.val_str /*tbl_name*/,
+		pNode->right->data.val_str /*column_name*/, 
+		pnTableId, pnColumnId, pnColumnSize,
+		peColumnType ) == -1 ) {
+			if ( pErr != NULL )
+				*pErr = EXPR_TR_ERR_TBL_OR_COL_ID_NOT_FOUND;
+			return -1;
+	}
 
-												return 0;
+	return 0;
 }
 
 //------------------------------------------------------------------------------

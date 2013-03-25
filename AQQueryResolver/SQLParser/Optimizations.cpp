@@ -8,7 +8,7 @@ using namespace std;
 using namespace boost;
 
 //-------------------------------------------------------------------------------
-ColumnItem::Ptr getMinMaxFromThesaurus(	int tableIdx, int colIdx, int partIdx, bool min, Base& BaseDesc, TProjectSettings& Settings )
+ColumnItem::Ptr getMinMaxFromThesaurus(	size_t tableIdx, size_t colIdx, size_t partIdx, bool min, Base& BaseDesc, TProjectSettings& Settings )
 {
 	ColumnItem::Ptr minMax = NULL;
 	string fileName = getThesaurusFileName( Settings.szThesaurusPath, 
@@ -19,8 +19,8 @@ ColumnItem::Ptr getMinMaxFromThesaurus(	int tableIdx, int colIdx, int partIdx, b
 	FileCloser fileCloser(pFIn);
 	Column::Ptr column = BaseDesc.Tables[tableIdx].Columns[colIdx];
 
-	int binItemSize	= 0;
-	int tmpBufSize = 1000;
+	size_t binItemSize	= 0;
+	size_t tmpBufSize = 1000;
 	switch( column->Type )
 	{
 	case COL_TYPE_INT: 
@@ -48,10 +48,10 @@ ColumnItem::Ptr getMinMaxFromThesaurus(	int tableIdx, int colIdx, int partIdx, b
 		//get the file size
 		if( fseek( pFIn, 0, SEEK_END ) != 0 )
 			assert( 0 );
-		int fileSize = ftell( pFIn );
+		long fileSize = ftell( pFIn );
 		if( fileSize == -1 )
 			assert( 0 );
-		if( fseek( pFIn, fileSize - binItemSize, SEEK_SET ) != 0 )
+		if( fseek( pFIn, fileSize - static_cast<long>(binItemSize), SEEK_SET ) != 0 )
 			assert( 0 );
 	}
 	if( fread( pTmpBuf, 1, binItemSize, pFIn ) != binItemSize )
@@ -114,8 +114,8 @@ Table::Ptr solveOptimalMinMax(	VerbNode::Ptr spTree, Base& BaseDesc,
 	}while( spNode->getBrother() );
 
 	ColumnVerb::Ptr columnVerb = dynamic_pointer_cast<ColumnVerb>( verb2 );
-	int tableIdx = BaseDesc.getTableIdx( columnVerb->getTableName() );
-	int colIdx = BaseDesc.Tables[tableIdx].getColumnIdx( columnVerb->getColumnOnlyName() );
+	size_t tableIdx = BaseDesc.getTableIdx( columnVerb->getTableName() );
+	size_t colIdx = BaseDesc.Tables[tableIdx].getColumnIdx( columnVerb->getColumnOnlyName() );
 	Column::Ptr column = BaseDesc.Tables[tableIdx].Columns[colIdx];
 	ColumnItem::Ptr minMax = NULL;
 	bool min = verb1->getVerbType() == K_MIN;

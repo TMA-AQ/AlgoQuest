@@ -60,7 +60,7 @@ int rc;
 
 char name_log [ k_taille_message ];
 //-------------------------------------------------------------------------------
-int cut_in_col (const char * iniFilename, unsigned int num_table, unsigned int num_column) 
+int cut_in_col (const char * iniFilename, size_t num_table, size_t num_column) 
 {
 	// parametres des emplacement des fichiers 
 	char *param_file;

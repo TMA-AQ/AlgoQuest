@@ -21,9 +21,9 @@ int get_column_id_from_table( Table& pTD, char* pszColumnName, unsigned int *pnC
 		return -1;
 
 	if ( pnColumnId != NULL )
-		*pnColumnId = pTD.Columns[idx]->ID;
+		*pnColumnId = static_cast<unsigned int>(pTD.Columns[idx]->ID);
 	if ( pnColumnSize != NULL )
-		*pnColumnSize = pTD.Columns[idx]->Size;
+		*pnColumnSize = static_cast<unsigned int>(pTD.Columns[idx]->Size);
 	if ( peColumnType != NULL )
 		*peColumnType = pTD.Columns[idx]->Type;
 
@@ -32,22 +32,18 @@ int get_column_id_from_table( Table& pTD, char* pszColumnName, unsigned int *pnC
 
 //------------------------------------------------------------------------------
 /* Return -1 on error, 0 on success */
-int get_table_and_column_id_from_table_array( Base* baseDesc, char *pszTableName,
-												  char *pszColumnName, unsigned int *pnTableId, 
+int get_table_and_column_id_from_table_array( Base* baseDesc, 
+													char *pszTableName,
+												  char *pszColumnName, 
+													unsigned int *pnTableId, 
 												  unsigned int *pnColumnId, 
 												  unsigned int *pnColumnSize,
 												  ColumnType *peColumnType ) {
 	
-	int idx = baseDesc->getTableIdx( string(pszTableName) );
-	if ( idx < 0 ) {
-#ifdef CREATE_LOG
-		Log( "get_table_and_column_id_from_table_array() : Function find_table_in_table_array( T:<%s> ) returned NULL !\n", pszTableName );
-#endif
-		return -1;
-	}
+	size_t idx = baseDesc->getTableIdx( string(pszTableName) );
 
 	if ( pnTableId != NULL )
-		*pnTableId = baseDesc->Tables[idx].ID;
+		*pnTableId = static_cast<unsigned int>(baseDesc->Tables[idx].ID);
 
 	if ( get_column_id_from_table( baseDesc->Tables[idx], pszColumnName, pnColumnId, pnColumnSize, peColumnType ) != 0 ) {
 #ifdef CREATE_LOG
@@ -246,13 +242,7 @@ TColumn2TablesArray* add_table_columns_to_column2tables_array(	TColumn2TablesArr
 	unsigned int iColumn;
 	TColumn2Tables *pC2T;
 	
-	int tableIdx = baseDesc->getTableIdx( string(pszTableName) );
-	if ( tableIdx < 0 ) {
-#ifdef CREATE_LOG
-		Log( "add_table_columns_to_column2tables_array() : Function find_table_in_table_array( T:<%s> ) returned NULL !\n", pszTableName );
-#endif
-		return NULL;
-	}
+	size_t tableIdx = baseDesc->getTableIdx( string(pszTableName) );
 	Table& pTD = baseDesc->Tables[tableIdx];
 
 	for ( iColumn = 0; iColumn < pTD.Columns.size(); iColumn++ ) {

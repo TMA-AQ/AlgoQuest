@@ -136,7 +136,7 @@ tnode* set_string_data( tnode* pNode, const char* pszStr ) {
 //------------------------------------------------------------------------------
 tnode* append_string_data( tnode* pNode, char* pszStr ) {
 	if ( pNode != NULL ) {
-		unsigned int nLen, nLen1;
+		size_t nLen, nLen1;
 
 		if ( pNode->eNodeDataType != NODE_DATA_STRING || pszStr == NULL )
 			return set_string_data( pNode, pszStr );

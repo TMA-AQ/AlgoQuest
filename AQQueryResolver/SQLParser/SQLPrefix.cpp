@@ -60,7 +60,6 @@ char* realloc_string_buffer( char* pszStr, unsigned int *pncbBuf, unsigned int n
 // Returns NULL on error !
 void show_node( tnode *pNode, string& str, char* szTmpBuf, char* szBuffer )
 {
-	size_t nLen;
 	char *pszToAdd;
 	
 	memset(szBuffer, 0, STR_BUF_SIZE);

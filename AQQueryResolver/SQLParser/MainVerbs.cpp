@@ -846,10 +846,10 @@ void HavingVerb::changeResult(	Table::Ptr table,
 	table->updateColumnsContent( newColumns );
 
 	//update group by partitions
-	std::vector<int>& oldRows = table->Partition->Rows;
+	std::vector<size_t>& oldRows = table->Partition->Rows;
 	assert( oldRows.size() > 0 );
-	std::vector<int> rows;
-	int skipped = 0;
+	std::vector<size_t> rows;
+	size_t skipped = 0;
 	for( size_t idx = 0; idx < oldRows.size() - 1; ++idx )
 		if( !rv->ValidRows[oldRows[idx]] )
 		{
@@ -857,7 +857,7 @@ void HavingVerb::changeResult(	Table::Ptr table,
 		}
 		else
 		{
-			int last = oldRows[idx] - skipped;
+			size_t last = oldRows[idx] - skipped;
 			if( rows.size() == 0 || rows[rows.size() - 1] != last )
 				rows.push_back( last );
 			rows.push_back( oldRows[idx + 1] - skipped );

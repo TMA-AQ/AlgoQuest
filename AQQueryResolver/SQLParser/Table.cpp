@@ -35,7 +35,7 @@ namespace
 			: m_lessThanColumn(lessThanColumn)
 		{
 		}
-		bool operator()(int idx1, int idx2)
+		bool operator()(size_t idx1, size_t idx2)
 		{
 			return lessThan(m_lessThanColumn.Items[idx1].get(), m_lessThanColumn.Items[idx2].get(), m_lessThanColumn.Type);
 		}
@@ -603,12 +603,12 @@ Column::Ptr Column::getCount()
 void Column::loadFromFile( const std::string& file )
 {
 	FILE				*pFIn;
-	long				nFileSize;
-	unsigned int		nItemCount;
+	size_t           nFileSize;
+	size_t           nItemCount;
 	unsigned char		*pLineBuf;
 	unsigned char		*pTmpBuf;
-	unsigned int		nTmpBufSize;
-	unsigned int		nBinItemSize;
+	size_t           nTmpBufSize;
+	size_t           nBinItemSize;
 	char				ch;
 
 	pTmpBuf			= NULL;
@@ -711,7 +711,7 @@ void Column::loadFromFile( const std::string& file )
 }
 
 //------------------------------------------------------------------------------
-void Column::saveToFile(	const std::string& file, int startIdx, int endIdx, 
+void Column::saveToFile(	const std::string& file, size_t startIdx, size_t endIdx, 
 							bool append )
 {
 	size_t totalCount = 0;
@@ -720,13 +720,10 @@ void Column::saveToFile(	const std::string& file, int startIdx, int endIdx,
 			totalCount += (int) this->Count->Items[idx]->numval;
 	else
 		totalCount = this->Items.size();
-	if( endIdx == -1 )
+	if( endIdx == std::string::npos )
 		endIdx = totalCount;
-	if( startIdx < 0 ||
-		endIdx > totalCount )
+	if( (startIdx < 0) || (endIdx > totalCount) )
 		throw generic_error(generic_error::GENERIC, "");
-
-	int	idx;
 
 	FILE	*pFIn;
 	if( append )
@@ -743,8 +740,8 @@ void Column::saveToFile(	const std::string& file, int startIdx, int endIdx,
 			countLimit += (int) this->Count->Items[countIdx++]->numval;
 	}
 
-	int realIdx;
-	for( idx = startIdx; idx < endIdx; ++idx )
+	size_t realIdx;
+	for(size_t idx = startIdx; idx < endIdx; ++idx )
 	{
 		if( this->Count )
 		{
@@ -803,7 +800,7 @@ void Column::saveToFile(	const std::string& file, int startIdx, int endIdx,
 
 void Column::addItem(size_t index, const TProjectSettings& settings, const Base& BaseDesc)
 {
-	unsigned int numPack = index / ((size_t) settings.packSize);
+	size_t numPack = index / ((size_t) settings.packSize);
 	this->packOffset = index % settings.packSize;
 
 	if( numPack != this->currentNumPack )
@@ -826,8 +823,8 @@ void Column::addItem(size_t index, const TProjectSettings& settings, const Base&
 	}
 
 
-	int prmOffset = ((long) this->packOffset * this->prmFileItemSize);
-	int theOffset;
+	size_t prmOffset = this->packOffset * this->prmFileItemSize;
+	size_t theOffset;
 	prmMapper->read(&theOffset, prmOffset, prmFileItemSize);
 
 	switch( this->Type )
@@ -892,7 +889,7 @@ const aq::data_holder_t Scalar::getValue() const
 	case aq::COL_TYPE_DATE2:
 	case aq::COL_TYPE_DATE3:
 	case aq::COL_TYPE_DATE4:
-		data.val_int = static_cast<double>(Item.numval);
+		data.val_int = static_cast<llong>(Item.numval);
 		break;
 	case aq::COL_TYPE_DOUBLE:
 		data.val_number = Item.numval;
@@ -943,7 +940,7 @@ int Table::getColumnIdx( const std::string& name )
 	Trim( auxName );
 	for( size_t idx = 0; idx < this->Columns.size(); ++idx )
 		if( auxName == this->Columns[idx]->getName() )
-			return idx;
+			return static_cast<int>(idx);
 	return -1;
 }
 
@@ -1027,12 +1024,7 @@ void Table::loadFromTableAnswerByRow(aq::AQMatrix& aqMatrix, const std::vector<l
 	{
 		Column::Ptr c(new Column(*columnTypes[i]));
 
-		int idxColumn = -1;
-		int tableIdx = BaseDesc.getTableIdx(c->getTableName());
-		if (tableIdx == -1)
-		{
-			throw generic_error(generic_error::INVALID_TABLE, "cannot find table");
-		}
+		size_t tableIdx = BaseDesc.getTableIdx(c->getTableName());
 		c->TableID = BaseDesc.Tables[tableIdx].ID;
 		this->Columns.push_back(c);
 	}
@@ -1141,17 +1133,17 @@ void Table::loadFromTableAnswerByColumn(aq::AQMatrix& table, const vector<llong>
 		aq::Timer realValuesTimer;
 
 		//get table idx for this column
-		int idxColumn = -1;
+		size_t idxColumn = 0;
 		string tableName = columnTypes[idx]->getTableName();
-		int tableIdx = BaseDesc.getTableIdx( tableName );
-		int tableID = BaseDesc.Tables[tableIdx].ID;
+		size_t tableIdx = BaseDesc.getTableIdx( tableName );
+		size_t tableID = BaseDesc.Tables[tableIdx].ID;
 		for( size_t idx2 = 0; idx2 < tableIDs.size(); ++idx2 )
 			if( tableID == tableIDs[idx2] )
 			{
 				idxColumn = idx2;
 				break;
 			}
-		if( idxColumn < 0 )
+		if( idxColumn == tableIDs.size() )
 			throw generic_error(generic_error::GENERIC, "");
 			
 		Column::Ptr newColumn = new Column(*columnTypes[idx]);
@@ -1172,7 +1164,7 @@ void Table::loadFromTableAnswerByColumn(aq::AQMatrix& table, const vector<llong>
 		std::vector<size_t> v = table.getColumn(table.getNbColumn() - 1);
 		for(std::vector<size_t>::const_iterator it = v.begin(); it != v.end(); ++it)
 		{
-			c->Items.push_back(new ColumnItem(*it));
+			c->Items.push_back(new ColumnItem(static_cast<double>(*it)));
 		}
 		this->Columns.push_back(c);
 	}
@@ -1336,17 +1328,16 @@ void Table::loadColumn(Column::Ptr col, const Table& aqMatrix, const std::vector
 
 void Table::loadColumn(Column::Ptr col, const std::vector<size_t>& uniqueIndex, const std::vector<size_t>& mapToUniqueIndex, const Column::Ptr columnType, const TProjectSettings& pSettings, const Base& BaseDesc)
 {		
-	int idxColumn = -1;
 	string tableName = columnType->getTableName();
-	int tableIdx = BaseDesc.getTableIdx( tableName );
-	int tableID = BaseDesc.Tables[tableIdx].ID;
+	size_t tableIdx = BaseDesc.getTableIdx( tableName );
+	size_t tableID = BaseDesc.Tables[tableIdx].ID;
 
 	//load the required column values
 	llong currentNumPack = -1;
 
 	unsigned char		*pTmpBuf = NULL;
-	unsigned int		nTmpBufSize = 0;
-	unsigned int		nBinItemSize = 0;
+	size_t           nTmpBufSize = 0;
+	size_t           nBinItemSize = 0;
 
 	pTmpBuf			  = NULL;
 	nBinItemSize	= 0;
@@ -1382,7 +1373,7 @@ void Table::loadColumn(Column::Ptr col, const std::vector<size_t>& uniqueIndex, 
 	for( size_t idx2 = 0; idx2 < uniqueIndex.size(); ++idx2 )
 	{
 		llong absRaw = uniqueIndex[idx2];
-		unsigned int numPack = (size_t) (absRaw / pSettings.packSize);
+		size_t numPack = (size_t) (absRaw / pSettings.packSize);
 		llong packOffset = absRaw % pSettings.packSize;
 
 		// aq::Logger::getInstance().log(AQ_DEBUG, "process row %u => unique index %ld on packet %u offset %ld\n", idx2, absRaw, numPack, packOffset);
@@ -1782,11 +1773,11 @@ void Table::unravel( TablePartition::Ptr partition )
 	vector<Column::Ptr> newColumns = this->getColumnsTemplate();
 	Column::Ptr count = this->Columns[this->Columns.size() - 1];
 
-	int rowIdx = 0;
-	int partitionRowIdx = 0;
+	size_t rowIdx = 0;
+	size_t partitionRowIdx = 0;
 	for( size_t idx = 0; idx < this->Columns[0]->Items.size(); ++idx )
 	{
-		llong nrItems = (llong) count->Items[idx]->numval;
+		size_t nrItems = (size_t) count->Items[idx]->numval;
 		rowIdx = rowIdx + nrItems;
 		if( idx + 1 == partition->Rows[partitionRowIdx+1] )
 		{
@@ -1906,13 +1897,13 @@ void Table::orderBy(	std::vector<Column::Ptr> columns,
 	if( !partition )
 		partition = new TablePartition();
 
-	std::vector<int>& partitions = partition->Rows;
+	std::vector<size_t>& partitions = partition->Rows;
 	if( partitions.size() == 0 )
 	{
 		partitions.push_back( 0 );
 		partitions.push_back( index.size() );
 	}
-	std::vector<int> oldPartitions;
+	std::vector<size_t> oldPartitions;
 
 	for( size_t idx = 0; idx < columns.size(); ++idx )
 	{
@@ -1926,13 +1917,13 @@ void Table::orderBy(	std::vector<Column::Ptr> columns,
 		assert( oldPartitions.size() > 1 );
 		for( size_t idx2 = 0; idx2 < oldPartitions.size() - 1; ++idx2 )
 		{
-			int pos1 = oldPartitions[idx2];
-			int pos2 = oldPartitions[idx2 + 1];
+			size_t pos1 = oldPartitions[idx2];
+			size_t pos2 = oldPartitions[idx2 + 1];
 			assert( pos1 < pos2 );
 			sort( index.begin() + pos1, index.begin() + pos2, cmp);
 			//detect new partitions within this old partition
 			partitions.push_back( pos1 );
-			for( int idx3 = pos1 + 1; idx3 < pos2; ++idx3 )
+			for( size_t idx3 = pos1 + 1; idx3 < pos2; ++idx3 )
 				if( !equal(	columns[idx]->Items[index[idx3 - 1]].get(),
 							columns[idx]->Items[index[idx3]].get(),
 							columns[idx]->Type ) )
@@ -1973,7 +1964,7 @@ char* SkipToNextLine_sFirstChar( char* pszStr ) {
 // Return pointer to string after the terminating Quotation mark ! Or NULL on error !
 char* ExtractStringFromQuotes( char* pszStr, char* pszExtractedStr, unsigned int cbExtractedStr ) {
 	char *pszTmp;
-	unsigned int nLen;
+	size_t nLen;
 
 	if ( pszExtractedStr == NULL )
 		return NULL;
@@ -2007,7 +1998,7 @@ char* ExtractStringFromQuotes( char* pszStr, char* pszExtractedStr, unsigned int
 }
 
 //------------------------------------------------------------------------------
-int Base::getTableIdx( const std::string& name ) const
+size_t Base::getTableIdx( const std::string& name ) const
 {
 	string auxName = name;
 	strtoupr( auxName );
@@ -2015,7 +2006,7 @@ int Base::getTableIdx( const std::string& name ) const
 	for( size_t idx = 0; idx < this->Tables.size(); ++idx )
 		if( auxName == this->Tables[idx].getName() )
 			return idx;
-	return -1;
+	throw generic_error(generic_error::INVALID_TABLE, "cannot find table %s", name.c_str());
 }
 
 //------------------------------------------------------------------------------

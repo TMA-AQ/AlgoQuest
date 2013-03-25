@@ -165,7 +165,7 @@ void getConnectionArray(	std::string inputString,
 			}
 		if( !found )
 		{
-			CL.lineId = CA.size();
+			CL.lineId = static_cast<int>(CA.size());
 			CA.push_back(CL);
 		}
 		CL = nextConnectionLine( inputString );

@@ -208,13 +208,15 @@ void init_format_column_short ( char *format , s_prefixe *prefixe )
 void   CleanSpaceAtEnd ( char *my_field )
 {
 	// discard all space at the end
-	int max_size = strlen( my_field);
-	int i;
-	// beware >0, must have at least one char
-	for ( i = max_size -1; i > 0 ; i -- )
+	size_t max_size = strlen( my_field);
+	if (max_size > 0)
 	{
-		if ( my_field [ i ] == ' ' ) my_field [ i ] = '\0';
-		else return;
+		// beware >0, must have at least one char
+		for ( size_t i = max_size - 1; i > 0 ; i -- )
+		{
+			if ( my_field [ i ] == ' ' ) my_field [ i ] = '\0';
+			else return;
+		}
 	}
 	//at this point  my_field is empty 
 	//need this ;   strcpy ( my_field, "NULL" ); ?
@@ -248,7 +250,7 @@ void ChangeCommaToDot (  char *string )
 	if (p != NULL )  *p = '.' ;
 }
 //-------------------------------------------------------------------------------
-void check_args (const char * iniFilename, unsigned int table, unsigned int column)
+void check_args (const char * iniFilename, size_t table, size_t column)
 {
 	FILE *fp = NULL;
 	char line[1024];
@@ -277,12 +279,14 @@ void check_args (const char * iniFilename, unsigned int table, unsigned int colu
 			strcpy( rside, posChr + 1 );
 
 			while (lside[0]==' ') strcpy(lside, lside+1);
-			int l = strlen(lside);
-			while (lside[l-1]==' ') lside[l---1]='\0';
+			size_t l = strlen(lside);
+			if (l > 0)
+				while (lside[l-1]==' ') lside[l---1]='\0';
 
 			while (rside[0]==' ') strcpy(rside, rside+1);
 			l = strlen(rside);
-			while (rside[l-1]<=' ') rside[l---1]='\0';
+			if (l > 0)
+				while (rside[l-1]<=' ') rside[l---1]='\0';
 
 			// printf("%s = %s\n", lside, rside);
 
@@ -298,12 +302,13 @@ void check_args (const char * iniFilename, unsigned int table, unsigned int colu
 			else if ( strcmp(lside, "loader") == 0 ) // loader batch
 			{
 				strcpy( k_batch_loader , rside);
-				int len = strlen( k_batch_loader );
-				for( int idx = 1; idx < len - 1; ++idx )
-					if( k_batch_loader[idx-1] == '"' && 
-						k_batch_loader[idx] == ',' &&
-						k_batch_loader[idx+1] == '"' )
-						k_batch_loader[idx] = ' ';
+				size_t len = strlen( k_batch_loader );
+				if (len > 0)
+					for( int idx = 1; idx < len - 1; ++idx )
+						if( k_batch_loader[idx-1] == '"' && 
+							k_batch_loader[idx] == ',' &&
+							k_batch_loader[idx+1] == '"' )
+							k_batch_loader[idx] = ' ';
 			}
 			else if (strcmp(lside, "root-folder") == 0)
 			{
@@ -455,7 +460,7 @@ char* nettoie_nom_vite( char* strval )
 {
 	if( !strval )
 		return NULL;
-	int len = strlen( strval );
+	size_t len = strlen( strval );
 	if( len < 2 )
 		return NULL;
 	if( strval[0] != '"' || strval[len - 1] != '"' )

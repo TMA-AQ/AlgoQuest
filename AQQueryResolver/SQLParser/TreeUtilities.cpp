@@ -138,9 +138,7 @@ void solveSelectStar(	tnode* pNode,
 	for( size_t idx = 0; idx < tables.size(); ++idx )
 	{
 		assert( tables[idx] && tables[idx]->tag == K_IDENT );
-		int tableIdx = BaseDesc.getTableIdx( tables[idx]->data.val_str );
-		if( tableIdx < 0 )
-			throw generic_error(generic_error::INVALID_TABLE, "");
+		size_t tableIdx = BaseDesc.getTableIdx( tables[idx]->data.val_str );
 		std::vector<Column::Ptr>& columns = BaseDesc.Tables[tableIdx].Columns;
 		for( size_t idx2 = 0; idx2 < columns.size(); ++idx2 )
 		{
@@ -198,7 +196,7 @@ void solveOneTableInFrom( tnode* pStart, Base& BaseDesc )
 	if( tables.size() != 1 || !tables[0] || tables[0]->tag != K_IDENT )
 		return;
 	char* tName = tables[0]->data.val_str;
-	int tIdx = BaseDesc.getTableIdx( tName );
+	size_t tIdx = BaseDesc.getTableIdx( tName );
 	if( BaseDesc.Tables[tIdx].Columns.size() == 0 )
 		return;
 	Column::Ptr col = BaseDesc.Tables[tIdx].Columns[0];
@@ -585,7 +583,7 @@ void SolveMinMaxGroupBy::modifyTmpFiles(	const char* tmpPath,
 	if( GetFiles( tmpPath, files ) != 0 )
 		throw generic_error(generic_error::INVALID_FILE, "");*/
 
-	int tIdx1 = BaseDesc.getTableIdx( this->tableName );
+	size_t tIdx1 = BaseDesc.getTableIdx( this->tableName );
 	/*vector<llong> rows;
 	/* read tmp file
 	for( size_t idx = 0; idx < files.size(); ++idx )

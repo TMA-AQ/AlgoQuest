@@ -67,7 +67,7 @@ double MonAtoF  ( char *string ); // , int nb_decim );
 double str2num(char *c); //capable de lire toute les valeurs !
 //-------------------------------------------------------------------------------
 double monatof_V0(char *string);
-void check_args(const char * iniFilename, unsigned int table, unsigned column);
+void check_args(const char * iniFilename, size_t table, size_t column);
 //-------------------------------------------------------------------------------
 FILE* fopenUTF8(const char* filename, const char* mode);
 

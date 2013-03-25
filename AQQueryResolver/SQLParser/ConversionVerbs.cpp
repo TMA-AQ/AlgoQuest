@@ -210,7 +210,7 @@ void NvlVerb::changeResult( Table::Ptr table,
 		{
 			Column::Ptr column = static_pointer_cast<Column>( resLeft );
 			Column::Ptr newColumn = new Column( "",
-				column->ID, column->Size, column->Type );
+				static_cast<unsigned int>(column->ID), static_cast<unsigned int>(column->Size), column->Type );
 
 			switch( resRight->getType() )
 			{

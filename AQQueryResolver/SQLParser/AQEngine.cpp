@@ -143,10 +143,7 @@ void AQEngine::call(TProjectSettings& settings, tnode *pNode, int mode, int sele
 
 void AQEngine::generateAQMatrixFromPRM(const std::string tableName, tnode * whereNode)
 {
-	int tableIdx = this->baseDesc.getTableIdx(tableName);
-	if (tableIdx == -1) 
-		throw generic_error(generic_error::INVALID_TABLE, tableName.c_str());
-
+	size_t tableIdx = this->baseDesc.getTableIdx(tableName);
 	size_t nbRows = this->baseDesc.Tables[tableIdx].TotalCount;
 	this->aqMatrix->simulate(nbRows, 2);
 	this->tableIDs.clear();

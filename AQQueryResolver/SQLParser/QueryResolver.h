@@ -46,10 +46,10 @@ private:
 
 	/// Solve Insert Statement
 	void SolveInsert(	tnode* pNode );
-	void SolveInsertAux(	Table& table, int tableIdx, int colIdx, int packNumber,
-							std::vector<int>& reverseValuePos,
-							Column& nullColumn, Table& valuesToInsert, int startIdx, 
-							int endIdx, bool append );
+	void SolveInsertAux(	Table& table, size_t tableIdx, size_t colIdx, size_t packNumber,
+							std::vector<size_t>& reverseValuePos,
+							Column& nullColumn, Table& valuesToInsert, size_t startIdx, 
+							size_t endIdx, bool append );
 
 	/// Solve Update and Delete Statement
 	void SolveUpdateDelete(	tnode* pNode );

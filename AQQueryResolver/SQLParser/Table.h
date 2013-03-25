@@ -113,15 +113,15 @@ public:
 	void loadFromFile( const std::string& file );
 	//endIdx == -1 means 'number of items in the column'
 	void saveToFile(	const std::string& file, 
-						int startIdx = 0, int endIdx = -1, 
+						size_t startIdx = 0, size_t endIdx = std::string::npos, 
 						bool append = false );
   
 	void dump( std::ostream& os );
 
 	std::vector<ColumnItem::Ptr>	Items;
-	unsigned int	TableID;
-	unsigned int	ID;
-	unsigned int	Size;	//maximum size of the text, not number of items
+	size_t	TableID;
+	size_t	ID;
+	size_t	Size;	//maximum size of the text, not number of items
 	aq::ColumnType		Type;
 	
 private:
@@ -201,7 +201,7 @@ public:
 	{
 	}
 
-	std::vector<int>	Rows;
+	std::vector<size_t>	Rows;
 	//Column::Ptr	LastColumn; //last column by which partitioning was done
 
 	//window frame specification
@@ -244,7 +244,7 @@ class Table: public Object
 public:
 	typedef std::vector<Column::Ptr> columns_t;
 
-	unsigned int	ID;
+	size_t  	ID;
 	bool			HasCount; //last column is "Count"
 	columns_t Columns;
 	llong			TotalCount;
@@ -315,7 +315,7 @@ public:
 	tables_t Tables;
 	std::string Name;
 
-	int getTableIdx( const std::string& name ) const ;
+	size_t getTableIdx( const std::string& name ) const ;
 
 	/// The standard content of this file is defined below :
 	/// 

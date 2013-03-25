@@ -166,7 +166,7 @@ void TProjectSettings::load(const std::string& iniFile)
 	catch (const boost::property_tree::ptree_error& e)
 	{
     std::ostringstream oss;
-    oss << "invalid properties file: " << iniFile << std::endl;
+    oss << "invalid properties file: " << iniFile << " [" << e.what() << "]" << std::endl;
     throw aq::generic_error(aq::generic_error::INVALID_FILE, oss.str());
 	}
 }

@@ -23,7 +23,7 @@ namespace
 			: m_lessThanColumn(lessThanColumn)
 		{
 		}
-		bool operator()(int idx1, int idx2)
+		bool operator()(size_t idx1, size_t idx2)
 		{
 			return m_lessThanColumn[idx1] < m_lessThanColumn[idx2];
 		}

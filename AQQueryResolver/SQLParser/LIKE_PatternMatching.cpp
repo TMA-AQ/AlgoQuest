@@ -346,7 +346,7 @@ int PatternMatchingCreate( char* pszPattern, int cEscape, TPatternDescription *p
 
 //------------------------------------------------------------------------------
 /* Returns -1 on error, 0 not matched, 1 on match */
-int MatchSubStringWithPattern( const char* pszToMatch, unsigned int nToMatchStrLen, TMatchOp *pMatchOp ) {
+int MatchSubStringWithPattern( const char* pszToMatch, size_t nToMatchStrLen, TMatchOp *pMatchOp ) {
 	unsigned int i;
 	int nRet;
 

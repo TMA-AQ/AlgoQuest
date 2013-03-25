@@ -331,8 +331,8 @@ void QueryResolver::getColumnTypes( tnode* pNode, vector<Column::Ptr>& columnTyp
 		assert( colNode );
 		assert( colNode->left && colNode->left->tag == K_IDENT );
 		assert( colNode->right && colNode->right->tag == K_COLUMN );
-		int tableIdx = BaseDesc.getTableIdx( colNode->left->data.val_str );
-		assert( tableIdx >= 0 && tableIdx < (int) BaseDesc.Tables.size() ); //debug13 possible wrong query formatting, should throw
+		size_t tableIdx = BaseDesc.getTableIdx( colNode->left->data.val_str );
+		assert( tableIdx < BaseDesc.Tables.size() ); //debug13 possible wrong query formatting, should throw
 		Table& table = BaseDesc.Tables[tableIdx];
 		bool found = false;
 		Column auxCol;
@@ -409,11 +409,20 @@ Table::Ptr QueryResolver::SolveSelectRegular( int nSelectLevel )
 	
 	VerbNode::Ptr spTree = QueryResolver::BuildVerbsTree( this->sqlStatement, this->BaseDesc, this->pSettings );
 	
+	syntax_tree_to_prefix_form( this->sqlStatement, str );
+	std::cout << str << std::endl;
+
 	// TODO: optimize tree by detecting identical subtrees
 	spTree->changeQuery();
 	
+	syntax_tree_to_prefix_form( this->sqlStatement, str );
+	std::cout << str << std::endl;
+
 	QueryResolver::cleanQuery( this->sqlStatement );
 	
+	syntax_tree_to_prefix_form( this->sqlStatement, str );
+	std::cout << str << std::endl;
+
 	aq::Logger::getInstance().log(AQ_INFO, "Query Preprocessing: Time elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
 
 	//
@@ -654,10 +663,9 @@ Table::Ptr QueryResolver::SolveSelect()
 void   QueryResolver::CleanSpaceAtEnd ( char *my_field )
 {
 	// discard all space at the end
-	int max_size = strlen( my_field);
-	int i;
+	size_t max_size = strlen( my_field);
 	// beware >0, must have at least one char
-	for ( i = max_size -1; i > 0 ; i -- )
+	for ( size_t i = max_size -1; i > 0 ; i -- )
 	{
 		if ( my_field [ i ] == ' ' ) my_field [ i ] = '\0';
 		else return;
@@ -777,10 +785,10 @@ void QueryResolver::FileWriteEnreg( aq::ColumnType col_type, const int col_size,
 }
 
 //------------------------------------------------------------------------------
-void QueryResolver::SolveInsertAux(	Table& table, int tableIdx, int colIdx, int packNumber,
-						vector<int>& reverseValuePos,
-						Column& nullColumn, Table& valuesToInsert, int startIdx, 
-						int endIdx, bool append )
+void QueryResolver::SolveInsertAux(	Table& table, size_t tableIdx, size_t colIdx, size_t packNumber,
+						vector<size_t>& reverseValuePos,
+						Column& nullColumn, Table& valuesToInsert, size_t startIdx, 
+						size_t endIdx, bool append )
 {
 	sprintf( szBuffer, "%s%sB001T%.4uC%.4uP%.12u", pSettings->szRootPath.c_str(), 
 		"data_orga\\columns\\", table.ID, table.Columns[colIdx]->ID, packNumber );
@@ -802,9 +810,7 @@ void QueryResolver::SolveInsert(	tnode* pNode )
 {
 	if( !pNode || pNode->tag != K_INSERT )
 		return;
-	int tableIdx = BaseDesc.getTableIdx( pNode->left->data.val_str );
-	if( tableIdx < 0 )
-		throw generic_error(generic_error::INVALID_TABLE, "");
+	size_t tableIdx = BaseDesc.getTableIdx( pNode->left->data.val_str );
 	vector<tnode*> columns;
 	commaListToNodeArray( pNode->right->left, columns );
 	reverse( columns.begin(), columns.end() );
@@ -849,7 +855,7 @@ void QueryResolver::SolveInsert(	tnode* pNode )
 			case COL_TYPE_DATE2:
 			case COL_TYPE_DATE3:
 			case COL_TYPE_DOUBLE:
-				column->Items.push_back( new ColumnItem(pNode->data.val_int) );
+				column->Items.push_back( new ColumnItem(static_cast<double>(pNode->data.val_int)) );
 				break;
 			case COL_TYPE_VARCHAR:
 				column->Items.push_back( new ColumnItem(pNode->data.val_str) );
@@ -866,7 +872,7 @@ void QueryResolver::SolveInsert(	tnode* pNode )
 	BaseDesc.saveToBaseDesc( pSettings->szDBDescFN );
 
 	//write rows to table file
-	vector<int> reverseValuePos;
+	vector<size_t> reverseValuePos;
 	reverseValuePos.resize( nrColumns, -1 );
 	for( size_t idx = 0; idx < valuePos.size(); ++idx )
 		reverseValuePos[valuePos[idx]] = idx;
@@ -889,8 +895,8 @@ void QueryResolver::SolveInsert(	tnode* pNode )
 			{
 				if( pSettings->csvFormat )
 					row += "\"";
-				if( reverseValuePos[idx2] < 0  )
-					row += "NULL";
+				//if( reverseValuePos[idx2] < 0  ) // this is not possible
+				//	row += "NULL";
 				else
 				{
 					Column& column = *valuesToInsert->Columns[reverseValuePos[idx2]];
@@ -952,9 +958,7 @@ void QueryResolver::SolveInsert(	tnode* pNode )
 //------------------------------------------------------------------------------
 void QueryResolver::SolveUpdateDelete(	tnode* pNode )
 {
-	int tableIdx = BaseDesc.getTableIdx( pNode->left->data.val_str );
-	if( tableIdx < 0 )
-		throw generic_error(generic_error::INVALID_TABLE, "");
+	size_t tableIdx = BaseDesc.getTableIdx( pNode->left->data.val_str );
 	vector<Column::Ptr>& columns = BaseDesc.Tables[tableIdx].Columns;
 	Table& table = BaseDesc.Tables[tableIdx];
 
@@ -970,8 +974,8 @@ void QueryResolver::SolveUpdateDelete(	tnode* pNode )
 		throw generic_error(generic_error::COULD_NOT_OPEN_FILE, "");
 
 	vector<tnode*> updates;
-	vector<int> updateToTableMap;
-	vector<int> tableToUpdateMap;
+	vector<size_t> updateToTableMap;
+	vector<size_t> tableToUpdateMap;
 	if( pNode->tag == K_UPDATE )
 	{
 		commaListToNodeArray( pNode->right->left, updates );
@@ -1065,7 +1069,7 @@ void QueryResolver::SolveUpdateDelete(	tnode* pNode )
 					case COL_TYPE_DATE2:
 					case COL_TYPE_DATE3:
 					case COL_TYPE_DOUBLE:
-						newCol->Items.push_back( new ColumnItem(conditions[idx]->right->data.val_int) );
+						newCol->Items.push_back( new ColumnItem(static_cast<double>(conditions[idx]->right->data.val_int)) );
 						break;
 					case COL_TYPE_VARCHAR:
 						newCol->Items.push_back( new ColumnItem(conditions[idx]->right->data.val_str) );
@@ -1287,7 +1291,7 @@ void QueryResolver::SolveUnionMinus(	tnode* pNode )
 					{
 						if( table->HasCount )
 						{
-							int countCol = table->Columns.size()-1;
+							size_t countCol = table->Columns.size()-1;
 							Column& count = *table->Columns[countCol];
 							ColumnItem& item = *count.Items[idx2];
 							totalTable->TotalCount += (llong) item.numval;

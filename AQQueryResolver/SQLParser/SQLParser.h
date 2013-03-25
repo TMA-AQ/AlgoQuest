@@ -26,7 +26,7 @@ typedef struct tnode {
 	struct tnode	*right;			// fils droit
 
 	TNodeDataType	eNodeDataType;
-	unsigned int	nStrBufCb;		// String Buffer (data.val_str) allocated bytes
+	size_t	nStrBufCb;		// String Buffer (data.val_str) allocated bytes
 	aq::data_holder_t data;		 // - feuille - le contenu du noeud
 	struct tnode	*next;			// arbre suivant : le frère
 	int				inf;			// used by Verbs to exchange information
