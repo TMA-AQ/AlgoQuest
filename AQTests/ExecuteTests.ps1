@@ -19,7 +19,7 @@ $resultsFolder = "Results"
 $expectedFolder = "Expected"
 $requestAnswerFolder = "calculus\test\"
 $requestFile = "request.txt"
-$resultFilesStart = @("New_Request", "Answer", "sql2prefix.log")
+$resultFilesStart = @("New_Request", "Answer", "aq_query_resolver.log")
 $deleteFiles = @("Answer_log.txt")
 $logName = "TestLog_"
 $logExt = ".txt"
@@ -109,7 +109,7 @@ Function CheckResult($logFile, $testName, $fileName, $folderResult, $execTime, [
 			}
 			else
 			{
-				Write-Warning $($testName + " SQL2Prefix FAILED")
+				Write-Warning $($testName + " SQL2Prefix FAILED (BUT AQENGINE Not Checked)")
 				Add-Content $logFile ($testName + " SQL2Prefix ERROR: actual response does not match expected response (BUT AQENGINE Not Checked)")
             }
 			++$errors.Value
@@ -194,10 +194,18 @@ Function DeleteExtraFiles($requestAnswerFolderFull)
 #******************************************************************************
 Function DeletePreviousResults($testFolder)
 {
-    $previousAnswers = Join-Path $testFolder (Join-Path $resultsFolder "*.txt")
-    if( Test-Path $previousAnswers )
+	$previousFolder = Join-Path $testFolder $resultsFolder
+	if (Test-Path $previousFolder)
 	{
-	   Remove-Item $previousAnswers
+		$previousAnswers = Join-Path $testFolder (Join-Path $resultsFolder "*.txt")
+		if( Test-Path $previousAnswers )
+		{
+		Remove-Item $previousAnswers
+		}
+	}
+	else
+	{
+		New-Item $previousFolder -ItemType directory
 	}
 }
 
