@@ -9,8 +9,8 @@ Param([Boolean]$help,
 	  [String]$cutInCol,
 	  [String]$loader,
 	  [String]$logFile,
-	  [String]$onlyFile,
-	  [String]$excludeFile,
+	  [String]$checkFile,
+	  [String]$skipFile,
 	  [Boolean]$outputToNotepad)
 
 # Global Settings default values
@@ -21,7 +21,7 @@ $requestAnswerFolder = "calculus\test\"
 $requestFile = "request.txt"
 $resultFilesStart = @("New_Request", "Answer", "aq_query_resolver.log")
 $deleteFiles = @("Answer_log.txt")
-$logName = "TestLog_"
+$logName = "./Logs/TestLog_"
 $logExt = ".txt"
 
 $iniFile = "sql2prefix-batch.ini"
@@ -222,8 +222,8 @@ if ($help)
 	Write-Host "	-aqengine         			"
 	Write-Host "	-testsFolder      			"
 	Write-Host "	-logFile          			"
-	Write-Host "	-onlyFile         			requests 	to check"
-	Write-Host "	-excludeFile      			requests to skip"
+	Write-Host "	-checkFile         			requests to check"
+	Write-Host "	-skipFile	      			requests to skip"
 	Write-Host "	-outputToNotepad  			"
 	return
 }
@@ -254,8 +254,8 @@ if ($settings)
 		if (!$loader        					-and ($el1.CompareTo("loader")	        				-eq 0) ) { $loader	        = $el2 ; continue }
 		if (!$testsFolder     					-and ($el1.CompareTo("testsFolder")     				-eq 0) ) { $testsFolder     = $el2 ; continue }
 		if (!$logFile         					-and ($el1.CompareTo("logFile")         				-eq 0) ) { $logFile         = $el2 ; continue }
-		if (!$onlyFile        					-and ($el1.CompareTo("onlyFile")        				-eq 0) ) { $onlyFile        = $el2 ; continue }
-		if (!$excludeFile     					-and ($el1.CompareTo("excludeFile")     				-eq 0) ) { $excludeFile     = $el2 ; continue }
+		if (!$checkFile        					-and ($el1.CompareTo("check")	        				-eq 0) ) { $checkFile       = $el2 ; continue }
+		if (!$skipFile	     					-and ($el1.CompareTo("skip")		     				-eq 0) ) { $skipFile     	= $el2 ; continue }
 		if (!$outputToNotePad 					-and ($el1.CompareTo("outputToNotePad") 				-eq 0) ) 
 		{ 
 			if ($el2.CompareTo("1") -eq 0) { $outputToNotePad = $True }
@@ -285,8 +285,8 @@ Write-Host "databasesFolder:  $databasesFolder"
 Write-Host "sql2prefix:       $sql2prefix"
 Write-Host "aqengine:         $aqengine"
 Write-Host "logFile:          $logFile"
-Write-Host "onlyFile:         $onlyFile"
-Write-Host "excludeFile:      $excludeFile"
+Write-Host "onlyFile:         $checkFile"
+Write-Host "excludeFile:      $skipFile"
 Write-Host ""
 
 Write-Host "Continue? [y/n]"
@@ -299,11 +299,11 @@ if( ! ($selection -eq "y" ) )
 
 #
 # Get Request to exclude
-$excludeRequests = LoadRequests $excludeFile
+$excludeRequests = LoadRequests $skipFile
 
 #
 # Get Requests to tests
-$requestsToCheck = LoadRequests $onlyFile
+$requestsToCheck = LoadRequests $checkFile
 
 #
 # Get databases
