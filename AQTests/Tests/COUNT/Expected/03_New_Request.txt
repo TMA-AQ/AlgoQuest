@@ -1,2 +1,2 @@
 FROM , People Cities
-WHERE K_JEQ . People City . Cities CityName 
+WHERE K_JEQ K_INNER . PEOPLE CITY K_INNER . CITIES CITYNAME 
