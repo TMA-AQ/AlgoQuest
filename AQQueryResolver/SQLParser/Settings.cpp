@@ -18,6 +18,7 @@ TProjectSettings::TProjectSettings()
   szCutInColPath(""),
   szLoaderPath(""),
 	worker(1),
+	group_by_process_size(100000),
   packSize(1048576), 
   maxRecordSize(40960),
   computeAnswer(true),
@@ -47,6 +48,7 @@ TProjectSettings::TProjectSettings(const TProjectSettings& obj)
   szLoaderPath(obj.szLoaderPath),
 	fieldSeparator(obj.fieldSeparator),
 	worker(obj.worker),
+	group_by_process_size(obj.group_by_process_size),
 	packSize(obj.packSize),
 	maxRecordSize(obj.maxRecordSize),
 	computeAnswer(obj.computeAnswer),
@@ -94,6 +96,7 @@ TProjectSettings& TProjectSettings::operator=(const TProjectSettings& obj)
 		::strcpy(szEngineParamsDisplay, obj.szEngineParamsDisplay);
 		::strcpy(szEngineParamsNoDisplay, obj.szEngineParamsNoDisplay);
 		worker = obj.worker;
+		group_by_process_size = obj.group_by_process_size;
 		packSize = obj.packSize;
 		maxRecordSize = obj.maxRecordSize;
 		computeAnswer = obj.computeAnswer;
@@ -127,11 +130,11 @@ void TProjectSettings::load(const std::string& iniFile)
     this->szLoaderPath = pt.get<std::string>(boost::property_tree::ptree::path_type("loader"));
 		
 		// optional
-    this->worker = pt.get_optional<unsigned int>(boost::property_tree::ptree::path_type("worker"));
-		if (!this->worker.is_initialized())
-		{
-			this->worker = 1;
-		}
+		boost::optional<size_t> opt;
+    opt = pt.get_optional<size_t>(boost::property_tree::ptree::path_type("worker"));
+		if (opt.is_initialized()) this->worker = opt.get();
+    opt = pt.get_optional<size_t>(boost::property_tree::ptree::path_type("group-by-process-size"));
+		if (opt.is_initialized()) this->group_by_process_size = opt.get();
 
     //
     // Change '\' by '/'

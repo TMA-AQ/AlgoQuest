@@ -2,6 +2,7 @@
 #define __AQ_SETTINGS_H__
 
 #include <string>
+#include <cstdint>
 #include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
 
@@ -30,9 +31,13 @@ struct TProjectSettings {
 	char szEngineParamsNoDisplay[ STR_BUF_SIZE ];
 	char fieldSeparator;
 	static const int MAX_COLUMN_NAME_SIZE = 255;
-	boost::optional<unsigned int> worker;
+	
+	size_t worker;
+	size_t group_by_process_size;
+
 	int packSize;
 	int maxRecordSize;
+
 	bool computeAnswer;
 	bool csvFormat;
 	bool executeNestedQuery;
