@@ -38,6 +38,8 @@ FileMapper::FileMapper(const char * _filename)
 FileMapper::~FileMapper()
 {
 	aq::Logger::getInstance().log(AQ_DEBUG, "%s: %u remaping\n", this->filename.c_str(), this->nbRemap);
+	if (this->pView != NULL)
+		::UnmapViewOfFile(this->pView);
 	if (hmap)
 		::CloseHandle(hmap);
 	if (hfile)
