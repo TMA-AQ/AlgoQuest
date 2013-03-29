@@ -118,7 +118,7 @@ int processAQMatrix(const std::string& query, const std::string& aqMatrixFileNam
 
 	strcpy(settings.szAnswerFN, aqMatrixFileName.c_str());
 
-	boost::shared_ptr<aq::AQMatrix> aqMatrix(new aq::AQMatrix);
+	boost::shared_ptr<aq::AQMatrix> aqMatrix(new aq::AQMatrix(settings));
 	std::vector<llong> tableIDs;
 	
 	aq::Timer timer;
@@ -428,7 +428,7 @@ int main(int argc, char**argv)
 		desc.add_options()
 			("help", "produce help message")
 			("log-output", po::value<std::string>(&mode)->default_value("STDOUT"), "[STDOUT|LOCALFILE|SYSLOG]")
-			("log-level", po::value<unsigned int>(&level)->default_value(LOG_NOTICE), "CRITICAL(2), ERROR(3), WARNING(4), NOTICE(5), INFO(6), DEBUG(7)")
+			("log-level", po::value<unsigned int>(&level)->default_value(AQ_LOG_NOTICE), "CRITICAL(2), ERROR(3), WARNING(4), NOTICE(5), INFO(6), DEBUG(7)")
 			("log-lock", po::bool_switch(&lock_mode), "for multithread program")
 			("log-date", po::bool_switch(&date_mode), "add date to log")
 			("log-pid", po::bool_switch(&pid_mode), "add thread id to log")
@@ -544,7 +544,7 @@ int main(int argc, char**argv)
 		else
 		{
 			aq::Logger::getInstance().log(AQ_INFO, "Use aq engine: '%s'\n", settings.szEnginePath.c_str());
-			aq_engine = new AQEngine(baseDesc);
+			aq_engine = new AQEngine(baseDesc, settings);
 		}
 
 		//
@@ -555,7 +555,7 @@ int main(int argc, char**argv)
 			// Log file
 			 std::string logFilename = settings.szRootPath + "/calculus/" + queryIdent + "/aq_query_resolver.log";
 			 aq::Logger::getInstance().setLocalFile(logFilename.c_str());
-			 aq::Logger::getInstance().setLevel(LOG_DEBUG);
+			 aq::Logger::getInstance().setLevel(AQ_LOG_DEBUG);
 
 			 std::cout << "log in " << logFilename << std::endl;
 
