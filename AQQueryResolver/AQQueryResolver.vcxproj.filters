@@ -126,6 +126,18 @@
     <ClCompile Include="SQLParser\QueryResolver.cpp">
       <Filter>Source Files\SQLParser</Filter>
     </ClCompile>
+    <ClCompile Include="SQLParser\ColumnMapper.cpp">
+      <Filter>Source Files\SQLParser</Filter>
+    </ClCompile>
+    <ClCompile Include="SQLParser\ColumnItem.cpp">
+      <Filter>Source Files\SQLParser</Filter>
+    </ClCompile>
+    <ClCompile Include="SQLParser\Column.cpp">
+      <Filter>Source Files\SQLParser</Filter>
+    </ClCompile>
+    <ClCompile Include="SQLParser\VerbResult.cpp">
+      <Filter>Source Files\SQLParser</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SQLParser\AggregateVerbs.h">
@@ -228,6 +240,18 @@
       <Filter>Header Files\SQLParser</Filter>
     </ClInclude>
     <ClInclude Include="SQLParser\QueryResolver.h">
+      <Filter>Header Files\SQLParser</Filter>
+    </ClInclude>
+    <ClInclude Include="SQLParser\ColumnMapper.h">
+      <Filter>Header Files\SQLParser</Filter>
+    </ClInclude>
+    <ClInclude Include="SQLParser\ColumnItem.h">
+      <Filter>Header Files\SQLParser</Filter>
+    </ClInclude>
+    <ClInclude Include="SQLParser\Column.h">
+      <Filter>Header Files\SQLParser</Filter>
+    </ClInclude>
+    <ClInclude Include="SQLParser\VerbResult.h">
       <Filter>Header Files\SQLParser</Filter>
     </ClInclude>
   </ItemGroup>

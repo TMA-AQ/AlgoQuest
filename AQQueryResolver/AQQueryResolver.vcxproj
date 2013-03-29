@@ -296,7 +296,10 @@
     <ClCompile Include="SQLParser\ArithmeticVerbs.cpp" />
     <ClCompile Include="SQLParser\AuxiliaryVerbs.cpp" />
     <ClCompile Include="SQLParser\CaseVerb.cpp" />
+    <ClCompile Include="SQLParser\Column.cpp" />
     <ClCompile Include="SQLParser\Column2Table.cpp" />
+    <ClCompile Include="SQLParser\ColumnItem.cpp" />
+    <ClCompile Include="SQLParser\ColumnMapper.cpp" />
     <ClCompile Include="SQLParser\ComparisonVerbs.cpp" />
     <ClCompile Include="SQLParser\ConversionVerbs.cpp" />
     <ClCompile Include="SQLParser\DateVerbs.cpp" />
@@ -332,6 +335,7 @@
     <ClCompile Include="SQLParser\Table.cpp" />
     <ClCompile Include="SQLParser\TreeUtilities.cpp" />
     <ClCompile Include="SQLParser\Verb.cpp" />
+    <ClCompile Include="SQLParser\VerbResult.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="SQLParser\SQL92_Grm.y">
@@ -395,7 +399,10 @@
     <ClInclude Include="SQLParser\ArithmeticVerbs.h" />
     <ClInclude Include="SQLParser\AuxiliaryVerbs.h" />
     <ClInclude Include="SQLParser\CaseVerb.h" />
+    <ClInclude Include="SQLParser\Column.h" />
     <ClInclude Include="SQLParser\Column2Table.h" />
+    <ClInclude Include="SQLParser\ColumnItem.h" />
+    <ClInclude Include="SQLParser\ColumnMapper.h" />
     <ClInclude Include="SQLParser\ComparisonVerbs.h" />
     <ClInclude Include="SQLParser\ConversionVerbs.h" />
     <ClInclude Include="SQLParser\DateVerbs.h" />
@@ -419,6 +426,7 @@
     <ClInclude Include="SQLParser\Table.h" />
     <ClInclude Include="SQLParser\TreeUtilities.h" />
     <ClInclude Include="SQLParser\Verb.h" />
+    <ClInclude Include="SQLParser\VerbResult.h" />
     <ClInclude Include="SQLParser\VerbVisitor.h" />
   </ItemGroup>
   <ItemGroup>
