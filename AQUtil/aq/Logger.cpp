@@ -208,22 +208,22 @@ void Logger::printWithColor(const char * buf, int facility) const
 {
   switch (facility)
   {
-  case LOG_CRIT:
+  case AQ_LOG_CRIT:
     ::fprintf(stderr, "%c[%d;%d;%dm%s\033[0m", 0x1B, BRIGHT, FG_YELLOW, BG_RED, buf);
     break;
-  case LOG_ERR:
+  case AQ_LOG_ERR:
     ::fprintf(stderr, "%c[%d;%dm%s\033[0m", 0x1B, BRIGHT, FG_RED, buf);
     break;
-  case LOG_WARNING:
+  case AQ_LOG_WARNING:
     ::fprintf(stderr, "%c[%d;%dm%s\033[0m", 0x1B, BRIGHT, FG_YELLOW, buf);
     break;
-  case LOG_NOTICE:
+  case AQ_LOG_NOTICE:
     ::fprintf(stderr, "%c[%d;%dm%s\033[0m", 0x1B, BRIGHT, FG_GREEN, buf);
     break;
-  case LOG_INFO:
+  case AQ_LOG_INFO:
     ::fprintf(stderr, "%c[%d;%dm%s\033[0m", 0x1B, BRIGHT, FG_CYAN, buf);
     break;
-  case LOG_DEBUG:
+  case AQ_LOG_DEBUG:
     ::fprintf(stderr, "%c[%d;%dm%s\033[0m", 0x1B, BRIGHT, FG_MAGENTA, buf);
     break;
   default:

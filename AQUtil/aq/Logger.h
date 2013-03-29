@@ -78,25 +78,21 @@ namespace aq
 
 }
 
-#ifndef __FreeBSD__
-
 enum log_facilities {
-  LOG_CRIT = 2,
-  LOG_ERR,
-  LOG_WARNING,
-  LOG_NOTICE,
-  LOG_INFO,
-  LOG_DEBUG,
+  AQ_LOG_CRIT = 2,
+  AQ_LOG_ERR,
+  AQ_LOG_WARNING,
+  AQ_LOG_NOTICE,
+  AQ_LOG_INFO,
+  AQ_LOG_DEBUG,
 };
 
-#endif
-
-#define AQ_CRITICAL __FILE__, __FUNCTION__, __LINE__, LOG_CRIT
-#define AQ_ERROR __FILE__, __FUNCTION__, __LINE__, LOG_ERR
-#define AQ_WARNING __FILE__, __FUNCTION__, __LINE__, LOG_WARNING
-#define AQ_NOTICE __FILE__, __FUNCTION__, __LINE__, LOG_NOTICE
-#define AQ_INFO __FILE__, __FUNCTION__, __LINE__, LOG_INFO
-#define AQ_DEBUG __FILE__, __FUNCTION__, __LINE__, LOG_DEBUG
+#define AQ_CRITICAL __FILE__, __FUNCTION__, __LINE__, AQ_LOG_CRIT
+#define AQ_ERROR __FILE__, __FUNCTION__, __LINE__, AQ_LOG_ERR
+#define AQ_WARNING __FILE__, __FUNCTION__, __LINE__, AQ_LOG_WARNING
+#define AQ_NOTICE __FILE__, __FUNCTION__, __LINE__, AQ_LOG_NOTICE
+#define AQ_INFO __FILE__, __FUNCTION__, __LINE__, AQ_LOG_INFO
+#define AQ_DEBUG __FILE__, __FUNCTION__, __LINE__, AQ_LOG_DEBUG
 
 #ifdef _DEBUG
 # define AQ_LOG_DEBUG(args) \
