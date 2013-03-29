@@ -13,10 +13,10 @@ using namespace aq;
 using namespace std;
 
 
-AQEngine::AQEngine(Base& _baseDesc)
+AQEngine::AQEngine(Base& _baseDesc, TProjectSettings& settings)
 	: baseDesc(_baseDesc)
 {
-	aqMatrix.reset(new aq::AQMatrix);
+	aqMatrix.reset(new aq::AQMatrix(settings));
 }
 
 
@@ -28,9 +28,11 @@ void AQEngine::call(TProjectSettings& settings, tnode *pNode, int mode, int sele
 {
 	string str;
 	syntax_tree_to_prefix_form( pNode, str );
-	std::cout << std::endl << str << std::endl << std::endl;
 	ParseJeq( str );
 	
+	if (str.size() < 2048) // fixme
+		aq::Logger::getInstance().log(AQ_DEBUG, "\n%s\n", str.c_str());
+
 #if defined(_DEBUG)
 	std::cout << std::endl << str << std::endl << std::endl;
 	std::string queryStr; 

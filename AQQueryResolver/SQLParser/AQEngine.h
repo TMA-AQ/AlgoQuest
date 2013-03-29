@@ -7,7 +7,7 @@
 class AQEngine : public AQEngine_Intf
 {
 public:
-	AQEngine(Base& _baseDesc);
+	AQEngine(Base& _baseDesc, TProjectSettings& settings);
 	~AQEngine();
 
 	void call(TProjectSettings& settings,
