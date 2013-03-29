@@ -10,6 +10,7 @@
 #include "TreeUtilities.h"
 #include "Optimizations.h"
 #include "AQEngine_Intf.h"
+#include "ColumnMapper.h"
 
 #include <aq/Exceptions.h>
 #include <aq/Logger.h>
@@ -408,21 +409,9 @@ Table::Ptr QueryResolver::SolveSelectRegular( int nSelectLevel )
 	timer.start();
 	
 	VerbNode::Ptr spTree = QueryResolver::BuildVerbsTree( this->sqlStatement, this->BaseDesc, this->pSettings );
-	
-	syntax_tree_to_prefix_form( this->sqlStatement, str );
-	std::cout << str << std::endl;
-
 	// TODO: optimize tree by detecting identical subtrees
 	spTree->changeQuery();
-	
-	syntax_tree_to_prefix_form( this->sqlStatement, str );
-	std::cout << str << std::endl;
-
 	QueryResolver::cleanQuery( this->sqlStatement );
-	
-	syntax_tree_to_prefix_form( this->sqlStatement, str );
-	std::cout << str << std::endl;
-
 	aq::Logger::getInstance().log(AQ_INFO, "Query Preprocessing: Time elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
 
 	//
@@ -1438,11 +1427,28 @@ Table::Ptr QueryResolver::solveAQMatriceByRows(VerbNode::Ptr spTree)
 	assert(pSettings->useRowResolver);
 	aq::Timer timer;
 
-	// get select columns from query
+	// Prepare Columns
 	vector<Column::Ptr> columnTypes;
 	this->getColumnTypes( this->sqlStatement, columnTypes, this->BaseDesc );
 	
-	//
+	std::map<size_t, std::vector<std::pair<size_t, aq::ColumnType> > > columnsByTableId;
+	for (std::vector<Column::Ptr>::const_iterator it = columnTypes.begin(); it != columnTypes.end(); ++it)
+	{
+		(*it)->TableID = BaseDesc.getTableIdx((*it)->getTableName());
+		(*it)->TableID = BaseDesc.Tables[(*it)->TableID].ID;
+		columnsByTableId[(*it)->TableID].push_back(std::make_pair((*it)->ID, (*it)->Type));
+	}
+
+	std::vector<aq::ColumnMapper::Ptr> columnsMapper;
+	for (std::map<size_t, std::vector<std::pair<size_t, aq::ColumnType> > >::const_iterator it_t = columnsByTableId.begin(); it_t != columnsByTableId.end(); ++it_t)
+	{
+		for (std::vector<std::pair<size_t, aq::ColumnType> >::const_iterator it_c = it_t->second.begin(); it_c != it_t->second.end(); ++it_c)
+		{
+			ColumnMapper::Ptr cm(new ColumnMapper(aq::ColumnMapper(pSettings->szThesaurusPath, it_t->first, it_c->first, it_c->second, pSettings->packSize)));
+			columnsMapper.push_back(cm);
+		}
+	}
+
 	// result
 	Table::Ptr table = new Table();
 
@@ -1454,26 +1460,19 @@ Table::Ptr QueryResolver::solveAQMatriceByRows(VerbNode::Ptr spTree)
 	if (this->hasGroupBy)
 	{
 		timer.start();
-		std::map<size_t, std::vector<size_t> > columnsByTableId;
-		for (std::vector<Column::Ptr>::const_iterator it = columnTypes.begin(); it != columnTypes.end(); ++it)
-		{
-			(*it)->TableID = BaseDesc.getTableIdx((*it)->getTableName());
-			columnsByTableId[(*it)->TableID].push_back((*it)->ID);
-		}
-
 		std::vector<Column::Ptr> columnGroupBy;
 		tnode * nodeGroup = find_main_node(this->sqlStatement, K_GROUP);
 		std::vector<tnode**> columnNodes;
 		getAllColumnNodes(nodeGroup, columnNodes);
 
-		aq_engine->getAQMatrix()->groupBy(columnsByTableId); // FIXME : the group by must be ordered according to the group by clause
+		aq_engine->getAQMatrix()->groupBy(columnsMapper); // FIXME : the group by must be ordered according to the group by clause
 		aq::Logger::getInstance().log(AQ_INFO, "AQMatrix Group By: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
 	}
 
 	boost::shared_ptr<aq::RowProcessing> rowProcessing(new aq::RowProcessing(pSettings->output == "stdout" ? pSettings->output : pSettings->szAnswerFN));
 	rowProcessing->setColumn(columnTypes);
 	timer.start();
-	table->loadFromTableAnswerByRow(*(aq_engine->getAQMatrix()), aq_engine->getTablesIDs(), columnTypes, *pSettings, BaseDesc, rowProcessing );
+	table->loadFromTableAnswerByRow(*(aq_engine->getAQMatrix()), aq_engine->getTablesIDs(), columnsMapper, columnTypes, *pSettings, BaseDesc, rowProcessing );
 	aq::Logger::getInstance().log(AQ_INFO, "Load From Answer: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
 	return Table::Ptr(); // empty
 }

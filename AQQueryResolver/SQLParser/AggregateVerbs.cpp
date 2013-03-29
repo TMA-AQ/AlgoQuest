@@ -52,8 +52,8 @@ void AggregateVerb::changeResult(	Table::Ptr table,
 	}
 	if( partition )
 	{
-		if( partition->FrameStartType == TablePartition::UNBOUNDED &&
-			partition->FrameEndType == TablePartition::UNBOUNDED &&
+		if( partition->FrameStartType == TablePartition::AQ_UNBOUNDED &&
+			partition->FrameEndType == TablePartition::AQ_UNBOUNDED &&
 			partition->FrameUnits == TablePartition::ROWS )
 		{
 			Column::Ptr result = new Column();
@@ -126,12 +126,12 @@ Column::Ptr computeSumPartition(	Column::Ptr column,
 		double sumVal = 0;
 		//compute value of the first sum
 		llong start;
-		if( partition->FrameStartType == TablePartition::UNBOUNDED )
+		if( partition->FrameStartType == TablePartition::AQ_UNBOUNDED )
 			start = partitionStart;
 		else
 			start = partitionStart + partition->FrameStart;
 		llong end;
-		if( partition->FrameEndType == TablePartition::UNBOUNDED )
+		if( partition->FrameEndType == TablePartition::AQ_UNBOUNDED )
 			end = partitionEnd;
 		else
 			end = partitionStart + partition->FrameEnd + 1;
@@ -144,11 +144,11 @@ Column::Ptr computeSumPartition(	Column::Ptr column,
 		{
 			llong oldStart = start;
 			llong oldEnd = end;
-			if( partition->FrameStartType == TablePartition::UNBOUNDED )
+			if( partition->FrameStartType == TablePartition::AQ_UNBOUNDED )
 				start = partitionStart;
 			else
 				start = idx2 + partition->FrameStart;
-			if( partition->FrameEndType == TablePartition::UNBOUNDED )
+			if( partition->FrameEndType == TablePartition::AQ_UNBOUNDED )
 				end = partitionEnd;
 			else
 				end = idx2 + partition->FrameEnd + 1;
@@ -254,11 +254,11 @@ Column::Ptr computeCountPartition(	Column::Ptr column,
 		for( llong idx2 = partitionStart; idx2 < partitionEnd; ++idx2 )
 		{
 			llong start, end;
-			if( partition->FrameStartType == TablePartition::UNBOUNDED )
+			if( partition->FrameStartType == TablePartition::AQ_UNBOUNDED )
 				start = partitionStart;
 			else
 				start = max(partitionStart, idx2 + partition->FrameStart);
-			if( partition->FrameEndType == TablePartition::UNBOUNDED )
+			if( partition->FrameEndType == TablePartition::AQ_UNBOUNDED )
 				end = partitionEnd;
 			else
 				end = min(partitionEnd, idx2 + partition->FrameEnd + 1);
@@ -380,8 +380,8 @@ Column::Ptr computeMinMaxPartition(	Column::Ptr column,
 {
 	Column::Ptr minMaxCol = new Column(*column);
 
-	if( partition->FrameStartType == TablePartition::UNBOUNDED &&
-		partition->FrameEndType == TablePartition::RELATIVE )
+	if( partition->FrameStartType == TablePartition::AQ_UNBOUNDED &&
+		partition->FrameEndType == TablePartition::AQ_RELATIVE )
 	{
 		for( size_t idx = 0; idx < partition->Rows.size() - 1; ++idx )
 		{
@@ -411,8 +411,8 @@ Column::Ptr computeMinMaxPartition(	Column::Ptr column,
 			}
 		}
 	}
-	else if( partition->FrameStartType == TablePartition::RELATIVE &&
-		partition->FrameEndType == TablePartition::UNBOUNDED )
+	else if( partition->FrameStartType == TablePartition::AQ_RELATIVE &&
+		partition->FrameEndType == TablePartition::AQ_UNBOUNDED )
 	{
 		for( size_t idx = 0; idx < partition->Rows.size() - 1; ++idx )
 		{
@@ -445,8 +445,8 @@ Column::Ptr computeMinMaxPartition(	Column::Ptr column,
 				minMaxCol->Items.push_back( new ColumnItem(*tempCol[idx-1]) );
 		}
 	}
-	else if( partition->FrameStartType == TablePartition::RELATIVE &&
-		partition->FrameEndType == TablePartition::RELATIVE )
+	else if( partition->FrameStartType == TablePartition::AQ_RELATIVE &&
+		partition->FrameEndType == TablePartition::AQ_RELATIVE )
 	{
 		for( size_t idx = 0; idx < partition->Rows.size() - 1; ++idx )
 		{
@@ -456,11 +456,11 @@ Column::Ptr computeMinMaxPartition(	Column::Ptr column,
 			for( llong idx2 = partitionStart; idx2 < partitionEnd; ++idx2 )
 			{
 				llong start, end;
-				if( partition->FrameStartType == TablePartition::UNBOUNDED )
+				if( partition->FrameStartType == TablePartition::AQ_UNBOUNDED )
 					start = partitionStart;
 				else
 					start = max(partitionStart, idx2 + partition->FrameStart);
-				if( partition->FrameEndType == TablePartition::UNBOUNDED )
+				if( partition->FrameEndType == TablePartition::AQ_UNBOUNDED )
 					end = partitionEnd;
 				else
 					end = min(partitionEnd, idx2 + partition->FrameEnd + 1);
@@ -653,7 +653,7 @@ void FirstValueVerb::changeResult(	Table::Ptr table,
 	assert( column );
 	TablePartition::Ptr partition = dynamic_pointer_cast<TablePartition>(resRight);
 	assert( partition );
-	if( partition->FrameStartType == TablePartition::RELATIVE )
+	if( partition->FrameStartType == TablePartition::AQ_RELATIVE )
 	{
 		llong offset = partition->FrameStart >= 0 ? partition->FrameStart : -partition->FrameStart;
 		this->Result = OffsetColumn( column, partition, true, offset, table, NULL );

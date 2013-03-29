@@ -608,7 +608,7 @@ void OrderVerb::changeResult(	Table::Ptr table,
 	if( !partition )
 	{
 		partition = new TablePartition();
-		partition->FrameEndType = TablePartition::RELATIVE;
+		partition->FrameEndType = TablePartition::AQ_RELATIVE;
 		partition->Rows.push_back( 0 );
 		if( table->Columns.size() > 0 )
 			partition->Rows.push_back( (int) table->Columns[0]->Items.size() );
@@ -617,7 +617,7 @@ void OrderVerb::changeResult(	Table::Ptr table,
 	}
 	else
 		if( !partition->FrameUnitsInitialized )
-			partition->FrameEndType = TablePartition::RELATIVE;
+			partition->FrameEndType = TablePartition::AQ_RELATIVE;
 
 	TablePartition::Ptr partitionCopy = new TablePartition( *partition );
 	table->orderBy( columns, partitionCopy );

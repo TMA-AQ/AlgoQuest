@@ -186,9 +186,9 @@ void extractFrameTypeOffset(	tnode* bound, TablePartition::FrameBoundType& type,
 		case K_UNBOUNDED: 
 			if( !start )
 				throw verb_error( generic_error::VERB_BAD_SYNTAX, verbTag );
-			type = TablePartition::UNBOUNDED; offset = 0; break;
+			type = TablePartition::AQ_UNBOUNDED; offset = 0; break;
 		case K_INTEGER: 
-			type = TablePartition::RELATIVE;
+			type = TablePartition::AQ_RELATIVE;
 			offset = (int) -bound->left->data.val_int; 
 			break;
 		default: assert(0);
@@ -201,15 +201,15 @@ void extractFrameTypeOffset(	tnode* bound, TablePartition::FrameBoundType& type,
 		case K_UNBOUNDED: 
 			if( start )
 				throw verb_error( generic_error::VERB_BAD_SYNTAX, verbTag );
-			type = TablePartition::UNBOUNDED; offset = 0; break;
+			type = TablePartition::AQ_UNBOUNDED; offset = 0; break;
 		case K_INTEGER: 
-			type = TablePartition::RELATIVE;
+			type = TablePartition::AQ_RELATIVE;
 			offset = (int) bound->left->data.val_int; 
 			break;
 		default: assert(0);
 		}
 		break;
-	case K_CURRENT: type = TablePartition::RELATIVE; offset = 0; break;
+	case K_CURRENT: type = TablePartition::AQ_RELATIVE; offset = 0; break;
 	default:
 		assert( 0 );
 	}
@@ -252,7 +252,7 @@ bool FrameVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOrigi
 			extractFrameTypeOffset( startBound, type, offset, true, this->getVerbType() );
 			partition->FrameStartType = type;
 			partition->FrameStart = offset;
-			partition->FrameEndType = TablePartition::RELATIVE;
+			partition->FrameEndType = TablePartition::AQ_RELATIVE;
 		}
 		break;
 	default:

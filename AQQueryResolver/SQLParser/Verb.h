@@ -1,7 +1,9 @@
 #pragma once
 
-#include "SQLParser.h"
+#include "Object.h"
+#include "VerbResult.h"
 #include "Table.h"
+#include "SQLParser.h"
 #include "sql92_grm_tab.h"
 #include <aq/Exceptions.h>
 
@@ -157,31 +159,3 @@ private:
 //------------------------------------------------------------------------------
 #define VERB_IMPLEMENT( class_name )\
 	class_name::FactoryRegister##class_name class_name::FactoryRegisterObj##class_name;
-
-
-/*
-//--------------------------------------------------------------------------
-class Select: public Verb
-{
-	VERB_DECLARE( Select );
-/*	OBJECT_DECLARE( Select );
-private:
-	class FactoryRegisterSelect
-	{
-	public:
-	FactoryRegisterSelect()
-	{
-	VerbFactory::GetInstance().addVerb( new Select() );
-	}
-	};
-	static FactoryRegisterSelect FactoryRegisterObjSelect;
-public:
-	Select();
-	virtual Verb* clone() const { return new Select(*this); }
-public:
-	virtual int getVerbType() const{ return K_SELECT; };
-	virtual bool changeQuery( tnode* pStart, tnode*& pNode,
-		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext ){ return false; };
-	virtual void changeResult( Table::Ptr table, 
-		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext ){};
-};*/

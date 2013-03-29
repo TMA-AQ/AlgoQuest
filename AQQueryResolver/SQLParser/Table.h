@@ -1,9 +1,13 @@
-#ifndef __FIAN_TABLE_H__
-#define __FIAN_TABLE_H__
+#ifndef __AQ_TABLE_H__
+#define __AQ_TABLE_H__
 
 #include "Object.h"
 #include "Settings.h"
+#include "ColumnItem.h"
+#include "Column.h"
 #include "AQMatrix.h"
+#include "ColumnMapper.h"
+
 
 #include <aq/DBTypes.h>
 #include <aq/Utilities.h>
@@ -22,214 +26,6 @@ namespace aq
 
 //------------------------------------------------------------------------------
 class Base;
-
-//------------------------------------------------------------------------------
-#define EXPR_TR_ERR_NOT_COLUMN_REFERENCE			-2
-#define EXPR_TR_ERR_TBL_OR_COL_ID_NOT_FOUND			-3
-#define EXPR_TR_ERR_LOADING_THESAURUS				-4
-#define EXPR_TR_ERR_NOT_ENOUGH_MEMORY				-5
-#define EXPR_TR_ERR_NO_MATCH						-6
-#define EXPR_TR_ERR_CREATING_THESAURUS				-7
-#define EXPR_TR_ERR_THESAURUS_FILE_NOT_FOUND		-8
-#define EXPR_TR_ERR_READING_THESAURUS_FILE			-9
-#define EXPR_TR_ERR_INVALID_THESAURUS_FILE			-10
-#define EXPR_TR_ERR_PREPARING_PATTERN_MATCHING		-11
-#define EXPR_TR_ERR_PATTERN_MATCHING				-12
-
-//------------------------------------------------------------------------------
-class ColumnItem: public Object
-{
-	OBJECT_DECLARE( ColumnItem );
-public:
-	// data_holder_t data;
-	double numval;
-	std::string strval;
-
-	ColumnItem();
-	ColumnItem( char* strval, aq::ColumnType type );
-	ColumnItem( const std::string& strval );
-	ColumnItem( double numval );
-
-	void toString( char* buffer, const aq::ColumnType& type ) const;
-
-private:	
-	boost::variant<std::string, double> val;
-
-};
-
-bool lessThan( ColumnItem* first, ColumnItem* second, aq::ColumnType type );
-bool equal( ColumnItem* first, ColumnItem* second, aq::ColumnType type );
-
-//------------------------------------------------------------------------------
-class VerbResult: public Object
-{
-	OBJECT_DECLARE( VerbResult );
-public:
-	enum ResultType
-	{
-		COLUMN,
-		SCALAR,
-		TABLE_PARTITION,
-		SUB_TABLE,
-		ARRAY,
-		ASTERISK,
-		ROW_VALIDATION
-	};
-	// virtual int getType(){ assert(0); return -1; }; //abstract class semantics
-	virtual int getType() const = 0; // real abstract class
-};
-
-//------------------------------------------------------------------------------
-class Column: public VerbResult 
-{
-	OBJECT_DECLARE( Column );
-public:
-	virtual int getType() const { return VerbResult::COLUMN; }
-
-	Column();
-	Column( aq::ColumnType type );
-	Column(	const std::string& name, unsigned int ID,
-			unsigned int size, aq::ColumnType type);
-	Column( const Column& source );
-	Column& operator=(const Column& source);
-
-	void setName( const std::string& name );
-	void setDisplayName( const std::string& name );
-	std::string& getName();
-	std::string& getDisplayName();
-	std::string& getOriginalName();
-
-	void setTableName( const std::string& name );
-	std::string& getTableName();
-
-	int loadFromThesaurus( const char *pszFilePath, int nFileType, 
-		unsigned int nColumnSize, aq::ColumnType eColumnType, int *pErr );
-	void increase( size_t newSize );
-	void setCount( Column::Ptr count );
-	Column::Ptr getCount();
-
-	void addItem(size_t index, const TProjectSettings& pSettings, const Base& BaseDesc);
-
-	void loadFromFile( const std::string& file );
-	//endIdx == -1 means 'number of items in the column'
-	void saveToFile(	const std::string& file, 
-						size_t startIdx = 0, size_t endIdx = std::string::npos, 
-						bool append = false );
-  
-	void dump( std::ostream& os );
-
-	std::vector<ColumnItem::Ptr>	Items;
-	size_t	TableID;
-	size_t	ID;
-	size_t	Size;	//maximum size of the text, not number of items
-	aq::ColumnType		Type;
-	
-private:
-
-	void setBinItemSize();
-
-	std::string	Name;
-	std::string	OriginalName;
-	std::string	DisplayName;
-	Column::Ptr	Count;	//reference to count column
-	std::string	TableName;
-
-	boost::shared_ptr<aq::FileMapper> prmMapper;
-	boost::shared_ptr<aq::FileMapper> thesaurusMapper;
-
-	size_t prmFileItemSize;
-	size_t currentNumPack;
-	size_t packOffset;
-	size_t nBinItemSize;
-	char * pTmpBuf;
-
-public:
-	bool			Invisible;
-	bool			GroupBy;
-	bool			OrderBy;
-
-};
-
-//------------------------------------------------------------------------------
-class Scalar: public VerbResult
-{
-	OBJECT_DECLARE( Scalar );
-public:
-	virtual int getType() const { return VerbResult::SCALAR; }
-
-	std::string				Name;
-
-	Scalar( aq::ColumnType type ): Type(type){}
-	Scalar( aq::ColumnType type, const ColumnItem& item ): Type(type), Item(item){}
-	ColumnItem	Item;
-	aq::ColumnType	Type;
-
-	const aq::data_holder_t getValue() const;
-};
-
-//------------------------------------------------------------------------------
-class SubTable: public VerbResult
-{
-	OBJECT_DECLARE( SubTable );
-public:
-	virtual int getType() const { return VerbResult::SUB_TABLE; }
-
-	std::vector<int>	Rows;
-};
-
-//------------------------------------------------------------------------------
-class Asterisk: public VerbResult
-{
-	OBJECT_DECLARE( Asterisk );
-public:
-	virtual int getType() const { return VerbResult::ASTERISK; }
-};
-
-//------------------------------------------------------------------------------
-class TablePartition: public VerbResult
-{
-	OBJECT_DECLARE( TablePartition );
-public:
-	virtual int getType() const { return VerbResult::TABLE_PARTITION; }
-
-	TablePartition()
-		: FrameUnits(ROWS), 
-			FrameStartType(UNBOUNDED),
-			FrameEndType(UNBOUNDED), 
-			// FrameEndType(RELATIVE), 
-			FrameStart(0), FrameEnd(0)
-	{
-	}
-
-	std::vector<size_t>	Rows;
-	//Column::Ptr	LastColumn; //last column by which partitioning was done
-
-	//window frame specification
-	enum FrameBoundType
-	{
-		RELATIVE,
-		UNBOUNDED
-	};
-	enum FrameUnitsType
-	{
-		ROWS,
-		RANGE
-	};
-	FrameUnitsType		FrameUnits;
-	llong	FrameStart, FrameEnd;
-	FrameBoundType	FrameStartType, FrameEndType;
-	bool FrameUnitsInitialized;
-};
-
-//------------------------------------------------------------------------------
-class RowValidation: public VerbResult
-{
-	OBJECT_DECLARE( RowValidation );
-public:
-	virtual int getType() const { return ROW_VALIDATION; };
-
-	std::vector<bool> ValidRows;
-};
 
 //------------------------------------------------------------------------------
 namespace aq
@@ -261,7 +57,9 @@ public:
 	
 	void loadFromAnswerRaw(	const char *filePath, char fieldSeparator, std::vector<llong>& tableIDs, bool add = false );
 	
-	void loadFromTableAnswerByRow(aq::AQMatrix& aqMatrix, const std::vector<llong>& tableIDs, const std::vector<Column::Ptr>& columnTypes, const TProjectSettings& pSettings, const Base& BaseDesc, 
+	void loadFromTableAnswerByRow(aq::AQMatrix& aqMatrix, const std::vector<llong>& tableIDs, 
+																std::vector<aq::ColumnMapper::Ptr>& columnsMapper,
+																const std::vector<Column::Ptr>& columnTypes, const TProjectSettings& pSettings, const Base& BaseDesc, 
 																boost::shared_ptr<aq::RowProcessing> rowProcessing);
 
 	void loadFromTableAnswerByColumn(aq::AQMatrix& aqMatrix, const std::vector<llong>& tableIDs, const std::vector<Column::Ptr>& columnTypes, const TProjectSettings& pSettings, const Base& BaseDesc);
@@ -294,16 +92,6 @@ private:
 	std::string		OriginalName;
 	std::vector<size_t> Index;
 	char szBuffer[STR_BUF_SIZE];
-};
-
-//------------------------------------------------------------------------------
-class VerbResultArray: public VerbResult
-{
-	OBJECT_DECLARE( VerbResultArray );
-public:
-	virtual int getType() const { return VerbResult::ARRAY; }
-
-	std::deque<VerbResult::Ptr>	Results;
 };
 
 //------------------------------------------------------------------------------

@@ -24,887 +24,6 @@ using namespace std;
 //------------------------------------------------------------------------------
 #define STR_BIG_BUF_SIZE 1048576
 
-//-----------------------------------------------------------------------------
-namespace 
-{
-
-	struct column_cmp_t
-	{
-	public:
-		column_cmp_t(Column& lessThanColumn)
-			: m_lessThanColumn(lessThanColumn)
-		{
-		}
-		bool operator()(size_t idx1, size_t idx2)
-		{
-			return lessThan(m_lessThanColumn.Items[idx1].get(), m_lessThanColumn.Items[idx2].get(), m_lessThanColumn.Type);
-		}
-	private:
-		Column& m_lessThanColumn;
-	};
-
-	struct column_cmp_2_t
-	{
-	public:
-		column_cmp_2_t(Column& lessThanColumn)
-			: m_lessThanColumn(lessThanColumn)
-		{
-		}
-		bool operator()(ColumnItem::Ptr item1, ColumnItem::Ptr item2)
-		{
-			return lessThan(item1.get(), item2.get(), m_lessThanColumn.Type );
-		}
-	private:
-		Column& m_lessThanColumn;
-	};
-
-}
-
-//------------------------------------------------------------------------------
-ColumnItem::ColumnItem()
-{
-	//memset( this, 0, sizeof(this) ); 
-}
-
-//------------------------------------------------------------------------------
-ColumnItem::ColumnItem( char* str, ColumnType type )
-{
-	switch( type )
-	{
-	case COL_TYPE_INT: 
-	case COL_TYPE_BIG_INT:
-	case COL_TYPE_DOUBLE:
-		StrToDouble(str, &this->numval);
-		break;
-	case COL_TYPE_DATE1:
-	case COL_TYPE_DATE2:
-	case COL_TYPE_DATE3:
-		{
-			DateType dateType;
-			llong intval;
-			dateToBigInt( str, &dateType, &intval );
-			this->numval = (double) intval;
-		}
-		break;
-	case COL_TYPE_VARCHAR: 
-		this->strval = str; 
-		break;
-	default:
-		throw generic_error(generic_error::NOT_IMPLEMENED, "");
-	}
-}
-
-//------------------------------------------------------------------------------
-ColumnItem::ColumnItem( const std::string& strval )
-{
-	this->strval = strval;
-}
-
-//------------------------------------------------------------------------------
-ColumnItem::ColumnItem( double numval )
-{
-	this->numval = numval;
-}
-
-//------------------------------------------------------------------------------
-void ColumnItem::toString( char* buffer, const ColumnType& type ) const
-{
-	int res = 0;
-	switch( type )
-	{
-		case COL_TYPE_BIG_INT:
-		case COL_TYPE_INT:
-			res = sprintf( buffer, "%lld", (llong) this->numval );
-			break;
-		case COL_TYPE_DOUBLE:
-			doubleToString( buffer, this->numval );
-			break;
-		case COL_TYPE_DATE1:
-			bigIntToDate( (long long) this->numval, DDMMYYYY_HHMMSS, buffer );
-			break;
-		case COL_TYPE_DATE2:
-			bigIntToDate( (long long) this->numval, DDMMYYYY, buffer );
-			break;
-		case COL_TYPE_DATE3:
-			bigIntToDate( (long long) this->numval, DDMMYY, buffer );
-			break;
-		case COL_TYPE_VARCHAR:
-			res = sprintf( buffer, this->strval.c_str() );
-			break;
-		default:
-			assert( 0 );
-	}
-	if( res < 0 )
-		throw generic_error(generic_error::GENERIC, "");
-}
-
-//------------------------------------------------------------------------------
-bool lessThan( ColumnItem* first, ColumnItem* second, ColumnType type )
-{
-	if( !first || !second )
-		return false;
-	switch( type )
-	{
-	case COL_TYPE_INT:
-	case COL_TYPE_BIG_INT:
-	case COL_TYPE_DOUBLE:
-	case COL_TYPE_DATE1:
-	case COL_TYPE_DATE2:
-	case COL_TYPE_DATE3:
-		return first->numval < second->numval;
-	case COL_TYPE_VARCHAR:
-		return first->strval < second->strval;
-		break;
-	default:
-		assert( 0 );
-		return false;
-	}
-}
-
-//------------------------------------------------------------------------------
-bool equal( ColumnItem* first, ColumnItem* second, ColumnType type )
-{
-	if( !first || !second )
-		return false;
-	switch( type )
-	{
-	case COL_TYPE_INT:
-	case COL_TYPE_BIG_INT:
-	case COL_TYPE_DOUBLE:
-	case COL_TYPE_DATE1:
-	case COL_TYPE_DATE2:
-	case COL_TYPE_DATE3:
-		return first->numval == second->numval;
-	case COL_TYPE_VARCHAR:
-		return first->strval == second->strval;
-		break;
-	default:
-		assert( 0 );
-		return false;
-	}
-}
-
-//------------------------------------------------------------------------------
-Column::Column()
-	:	
-	ID(0), 
-	Size(0), 
-	Type(COL_TYPE_INT), 
-	prmFileItemSize(4),
-	currentNumPack(-1),
-	packOffset(0),
-	nBinItemSize(0),
-	pTmpBuf(NULL),
-	Invisible(false), 
-	GroupBy(false), 
-	OrderBy(false)
-{
-	this->setBinItemSize();
-	this->pTmpBuf = static_cast<char*>(malloc(128 * sizeof(char)));
-}
-
-//------------------------------------------------------------------------------
-Column::Column(	const std::string& name, unsigned int ID, unsigned int size, ColumnType type)
-	: 
-	ID(ID), 
-	Size(size), 
-	Type(type),
-	prmFileItemSize(4),
-	currentNumPack(-1),
-	packOffset(0),
-	nBinItemSize(0),
-	pTmpBuf(NULL), 
-	Invisible(false), 
-	GroupBy(false), 
-	OrderBy(false)
-{
-	this->setBinItemSize();
-	this->setName( name );
-	this->pTmpBuf = static_cast<char*>(malloc(128 * sizeof(char)));
-}
-
-//------------------------------------------------------------------------------
-Column::Column( ColumnType type )
-	: 
-	ID(0),
-	Size(0),
-	Type(type),
-	prmFileItemSize(4),
-	currentNumPack(-1),
-	packOffset(0),
-	nBinItemSize(0),
-	pTmpBuf(NULL), 
-	Invisible(false), 
-	GroupBy(false),
-	OrderBy(false)
-{
-	this->setBinItemSize();
-	this->pTmpBuf = static_cast<char*>(malloc(128 * sizeof(char)));
-}
-
-//------------------------------------------------------------------------------
-Column::Column( const Column& source )
-	:
-	ID(source.ID),
-	Size(source.Size),
-	Type(source.Type),
-	Invisible(false),
-	GroupBy(false),
-	OrderBy(false),
-	Name(source.Name),
-	OriginalName(source.OriginalName),
-	DisplayName(source.DisplayName),
-	Count(source.Count),
-	TableName(source.TableName),
-	prmFileItemSize(source.prmFileItemSize),
-	currentNumPack(source.currentNumPack),
-	packOffset(source.packOffset),
-	nBinItemSize(source.nBinItemSize)
-{
-	this->setBinItemSize();
-	this->pTmpBuf = static_cast<char*>(malloc(128 * sizeof(char)));
-}
-
-//------------------------------------------------------------------------------
-Column& Column::operator=(const Column& source)
-{
-	if (this != &source)
-	{
-		this->ID = source.ID;
-		this->Size = source.Size;
-		this->Type = source.Type;
-		this->Invisible = false;
-		this->GroupBy = false;
-		this->OrderBy = false;
-		this->Name = source.Name;
-		this->OriginalName = source.OriginalName;
-		this->DisplayName = source.DisplayName;
-		this->Count = source.Count;
-		this->TableName = source.TableName;
-		this->prmFileItemSize = source.prmFileItemSize;
-		this->currentNumPack = source.currentNumPack,
-		this->packOffset = source.packOffset;
-		this->nBinItemSize = source.nBinItemSize;
-		this->setBinItemSize();
-		this->pTmpBuf = static_cast<char*>(malloc(128 * sizeof(char)));
-	}
-	return *this;
-}
-
-void Column::setBinItemSize()
-{
-	switch( this->Type )
-	{
-	case COL_TYPE_INT:
-		nBinItemSize	= 4;
-		break;
-	case COL_TYPE_BIG_INT:
-	case COL_TYPE_DATE1:
-	case COL_TYPE_DATE2:
-	case COL_TYPE_DATE3:
-	case COL_TYPE_DOUBLE:
-		nBinItemSize	= 8;
-		break;
-	case COL_TYPE_VARCHAR:
-		nBinItemSize	= this->Size;
-		break;
-	}
-}
-
-//------------------------------------------------------------------------------
-void Column::setName( const string& name )
-{
-	this->OriginalName = name;
-	this->Name = name;
-	strtoupr( this->Name );
-	Trim( this->Name );
-}
-
-//------------------------------------------------------------------------------
-void Column::setDisplayName( const string& name )
-{
-	this->DisplayName = name;
-}
-
-//------------------------------------------------------------------------------
-std::string& Column::getName()
-{
-	return this->Name;
-}
-
-//------------------------------------------------------------------------------
-std::string& Column::getOriginalName()
-{
-	return this->OriginalName;
-}
-
-
-//------------------------------------------------------------------------------
-std::string& Column::getDisplayName()
-{
-	if( this->DisplayName == "" )
-		if( this->OriginalName == "" )
-			return this->Name;
-		else
-			return this->OriginalName;
-	else
-		return this->DisplayName;
-}
-
-//------------------------------------------------------------------------------
-void Column::setTableName( const std::string& name )
-{
-	this->TableName = name;
-	strtoupr( this->TableName );
-	Trim( this->TableName );
-}
-
-//------------------------------------------------------------------------------
-std::string& Column::getTableName()
-{
-	return this->TableName;
-}
-
-//------------------------------------------------------------------------------
-void big_endian_to_little_endian( unsigned int *pnVal ) {
-	unsigned char nTmp;
-	unsigned char *pTmp;
-
-	if ( pnVal == NULL )
-		return;
-
-	pTmp = (unsigned char*)pnVal;
-
-	nTmp = pTmp[ 0 ];
-	pTmp[ 0 ] = pTmp[ 3 ];
-	pTmp[ 3 ] = nTmp;
-
-	nTmp = pTmp[ 1 ];
-	pTmp[ 1 ] = pTmp[ 2 ];
-	pTmp[ 2 ] = nTmp;
-}
-
-//------------------------------------------------------------------------------
-/* Return NULL on error */
-int Column::loadFromThesaurus(	const char *pszFilePath, int nFileType, 
-								unsigned int nColumnSize, ColumnType eColumnType, 
-								int *pErr ) {
-	FILE				*pFIn;
-	long				nFileSize;
-	unsigned int		nItemCount, i;
-	char				*psz;
-	unsigned char		*pLineBuf;
-	unsigned char		*pTmpBuf;
-	unsigned int		nTmpBufSize;
-	unsigned int		nBinItemSize;
-
-
-	pTmpBuf			= NULL;
-	nBinItemSize	= 0;
-	if ( eColumnType == COL_TYPE_INT ) {
-		nTmpBufSize		= 1000;
-		nBinItemSize	= 4;
-	} else if ( eColumnType == COL_TYPE_BIG_INT || 
-				eColumnType == COL_TYPE_DATE1 || 
-				eColumnType == COL_TYPE_DATE2 || 
-				eColumnType == COL_TYPE_DATE3 || 
-				eColumnType == COL_TYPE_DOUBLE ) {
-		nTmpBufSize		= 1000;
-		nBinItemSize	= 8;
-	} else {
-		nTmpBufSize		= nColumnSize + 1000;
-		nBinItemSize	= nColumnSize;
-	}
-
-	pTmpBuf = new unsigned char[nTmpBufSize];
-	if ( pTmpBuf == NULL ) {
-		if ( pErr != NULL )
-			*pErr = EXPR_TR_ERR_NOT_ENOUGH_MEMORY;
-		return -1;
-	}
-	boost::scoped_array<unsigned char> pTmpBufDel( pTmpBuf );
-
-	pLineBuf = new unsigned char[nTmpBufSize];
-	if ( pLineBuf == NULL ) {
-		if ( pErr != NULL )
-			*pErr = EXPR_TR_ERR_NOT_ENOUGH_MEMORY;
-		return -1;
-	}
-	boost::scoped_array<unsigned char> pLineBufDel( pLineBuf );
-
-	/* Set the Column Type */
-	this->Type = eColumnType;
-	if( this->Type == COL_TYPE_BIG_INT )
-		this->Type = COL_TYPE_INT;
-
-	/* Open in binary mode */
-	pFIn = fopen( pszFilePath, "rb" );
-	FileCloser fileCloser(pFIn);
-	if ( pFIn == NULL ) {
-		if ( pErr != NULL )
-			*pErr = EXPR_TR_ERR_THESAURUS_FILE_NOT_FOUND;
-		return -1;
-	}
-
-	/* Get the file size */
-	if ( fseek( pFIn, 0, SEEK_END ) != 0 ) {
-		if ( pErr != NULL )
-			*pErr = EXPR_TR_ERR_READING_THESAURUS_FILE;
-		return -1;
-	}
-
-	nFileSize = ftell( pFIn );
-	if ( nFileSize == -1 ) {
-		if ( pErr != NULL )
-			*pErr = EXPR_TR_ERR_INVALID_THESAURUS_FILE;
-		return -1;
-	}
-
-	/* Seek back to the beginning of the file */
-	if ( fseek( pFIn, 0, SEEK_SET ) != 0 ) {
-		if ( pErr != NULL )
-			*pErr = EXPR_TR_ERR_READING_THESAURUS_FILE;
-		return -1;
-	}
-
-	if ( nFileType == 0 ) {
-		/* Binary File */
-
-		if ( eColumnType == COL_TYPE_INT ) {
-			/* Define the Data pointer in our buffer ! */
-			int *pnItemData;
-			pnItemData = (int*)( pTmpBuf );
-
-			nItemCount	= (unsigned int)nFileSize / nBinItemSize;
-			for ( i = 0; i < nItemCount; i++ ) {
-				if ( fread( pTmpBuf, 1, nBinItemSize, pFIn ) != nBinItemSize ) {
-					if ( pErr != NULL )
-						*pErr = EXPR_TR_ERR_READING_THESAURUS_FILE;
-					return -1;
-				}
-
-				this->Items.push_back( new ColumnItem( *pnItemData ) );
-			}
-		} else if ( eColumnType == COL_TYPE_DATE1 || eColumnType == COL_TYPE_DATE2 || 
-			eColumnType == COL_TYPE_DATE3 || eColumnType == COL_TYPE_BIG_INT ) {
-			/* Define the Data pointer in our buffer ! */
-			long long *pnItemData;
-			pnItemData = (long long*)( pTmpBuf );
-
-			nItemCount	= (unsigned int)nFileSize / nBinItemSize;
-			for ( i = 0; i < nItemCount; i++ ) {
-				if ( fread( pTmpBuf, 1, nBinItemSize, pFIn ) != nBinItemSize ) {
-					if ( pErr != NULL )
-						*pErr = EXPR_TR_ERR_READING_THESAURUS_FILE;
-					return -1;
-				}
-
-				this->Items.push_back( new ColumnItem( (double) *pnItemData ) );
-			}
-		} else if ( eColumnType == COL_TYPE_DOUBLE ) {
-			/* Define the Data pointer in our buffer ! */
-			double *pdItemData;
-			pdItemData = (double*)( pTmpBuf );
-
-			nItemCount	= (unsigned int)nFileSize / nBinItemSize;
-			for ( i = 0; i < nItemCount; i++ ) {
-				if ( fread( pTmpBuf, 1, nBinItemSize, pFIn ) != nBinItemSize ) {
-					if ( pErr != NULL )
-						*pErr = EXPR_TR_ERR_READING_THESAURUS_FILE;
-					return -1;
-				}
-
-				this->Items.push_back( new ColumnItem( *pdItemData ) );
-			}
-		} else { // COL_TYPE_VARCHAR
-			nItemCount = (unsigned int)nFileSize / nBinItemSize;
-			for ( i = 0; i < nItemCount; i++ ) {
-				if ( fread( pTmpBuf, 1, nBinItemSize, pFIn ) != nBinItemSize ) {
-					if ( pErr != NULL )
-						*pErr = EXPR_TR_ERR_READING_THESAURUS_FILE;
-					return -1;
-				}
-
-				pTmpBuf[ nColumnSize ] = '\0';	// Not -1 !
-				this->Items.push_back( new ColumnItem((char*)pTmpBuf) );
-			}
-		}
-	} else {
-		/* Text File */
-		FILE *pFIn; //redeclare so that FileCloser works correctly
-
-		/* Open in text mode */
-		pFIn = fopenUTF8( pszFilePath, "rt" );
-		FileCloser fileCloser( pFIn );
-		if ( pFIn == NULL ) {
-			if ( pErr != NULL )
-				*pErr = EXPR_TR_ERR_THESAURUS_FILE_NOT_FOUND;
-			return -1;
-		}
-
-		while ( fgets( (char*)pLineBuf, nTmpBufSize, pFIn ) != NULL ) {
-			/* Skip whitespace from the begin of the line ! */
-			psz = (char*)pLineBuf;
-			while ( *psz != '\0' && ( *psz == ' ' || *psz == '\t' ) )
-				psz++;
-
-			/* Check if valid line ! */
-			if ( *psz == '\0' || *psz == '\n' || *psz == '\r' ) {
-				pLineBuf[ 0 ] = '\0';
-				continue;
-			}
-
-			if ( sscanf( psz, "%s", pTmpBuf ) != 1 ) {
-				if ( pErr != NULL )
-					*pErr = EXPR_TR_ERR_INVALID_THESAURUS_FILE;
-				return -1;
-			}
-
-			this->Items.push_back( new ColumnItem((char*)pTmpBuf) );
-		}
-	}
-
-	if ( this->Items.size() == 0 ) {
-		if ( pErr != NULL )
-			*pErr = EXPR_TR_ERR_INVALID_THESAURUS_FILE;
-		return -1;
-	}
-
-	//debug13 - for date type, the items aren't sorted for some reason
-	column_cmp_2_t cmp(*this);
-	sort( this->Items.begin(), this->Items.end(), cmp );
-
-	return 0;
-}
-//------------------------------------------------------------------------------
-void Column::increase( size_t newSize )
-{
-	assert( this->Items.size() > 0 );
-	for( size_t idx = this->Items.size() ; idx < newSize; ++idx )
-		this->Items.push_back( this->Items[0] );
-}
-
-//------------------------------------------------------------------------------
-void Column::setCount( Column::Ptr count )
-{
-	if( count->Type != COL_TYPE_BIG_INT )
-		throw generic_error(generic_error::TYPE_MISMATCH, 
-			"Count column set to type other than INT.");
-	this->Count = count;
-}
-
-//------------------------------------------------------------------------------
-Column::Ptr Column::getCount()
-{
-	return this->Count;
-}
-
-//------------------------------------------------------------------------------
-void Column::loadFromFile( const std::string& file )
-{
-	FILE				*pFIn;
-	size_t           nFileSize;
-	size_t           nItemCount;
-	unsigned char		*pLineBuf;
-	unsigned char		*pTmpBuf;
-	size_t           nTmpBufSize;
-	size_t           nBinItemSize;
-	char				ch;
-
-	pTmpBuf			= NULL;
-	nBinItemSize	= 0;
-	switch( this->Type )
-	{
-	case COL_TYPE_INT:
-		nTmpBufSize		= 1000;
-		nBinItemSize	= 4;
-		break;
-	case COL_TYPE_BIG_INT:
-	case COL_TYPE_DATE1:
-	case COL_TYPE_DATE2:
-	case COL_TYPE_DATE3:
-	case COL_TYPE_DOUBLE:
-		nTmpBufSize		= 1000;
-		nBinItemSize	= 8;
-		break;
-	case COL_TYPE_VARCHAR:
-		nTmpBufSize		= this->Size + 1000;	// reserve 1000 bytes extra space for text mode !
-		nBinItemSize	= this->Size;
-		break;
-	default:
-		assert( 0 );
-	}
-
-	pTmpBuf = new unsigned char[nTmpBufSize];
-	boost::scoped_array<unsigned char> pTmpBufDel( pTmpBuf ); //!!!debug13
-
-	pLineBuf = new unsigned char[nTmpBufSize];
-	boost::scoped_array<unsigned char> pLineBufDel( pLineBuf ); //!!!debug13
-
-	/* Open in binary mode */
-	pFIn = fopenUTF8( file.c_str(), "rb" );
-	FileCloser fileCloser(pFIn);
-
-	fseek( pFIn, 0, SEEK_END );
-	nFileSize = ftell( pFIn );
-	fseek( pFIn, 0, SEEK_SET );
-	nItemCount	= (unsigned int)nFileSize / nBinItemSize;
-
-	switch( this->Type )
-	{
-	case COL_TYPE_INT:
-		int *pnItemData;
-		pnItemData = (int*)( pTmpBuf );
-		for( size_t idx = 0; idx < nItemCount; ++idx ) 
-		{
-			fread( pTmpBuf, 1, nBinItemSize, pFIn );
-			this->Items.push_back( new ColumnItem( *pnItemData ) );
-		}
-		break;
-	case COL_TYPE_BIG_INT:
-	case COL_TYPE_DATE1:
-	case COL_TYPE_DATE2:
-	case COL_TYPE_DATE3:
-		{
-			long long *pnItemData;
-			pnItemData = (long long*)( pTmpBuf );
-			for( size_t idx = 0; idx < nItemCount; ++idx )
-			{
-				fread( pTmpBuf, 1, nBinItemSize, pFIn );
-				this->Items.push_back( new ColumnItem( (double) *pnItemData ) );
-			}
-		}
-		break;
-	case COL_TYPE_DOUBLE:
-		{
-			double *pdItemData;
-			pdItemData = (double*)( pTmpBuf );
-			nItemCount	= (unsigned int)nFileSize / nBinItemSize;
-			for( size_t idx = 0; idx < nItemCount; ++idx )
-			{
-				fread( pTmpBuf, 1, nBinItemSize, pFIn );
-				this->Items.push_back( new ColumnItem( *pdItemData ) );
-			}
-		}
-		break;
-	case COL_TYPE_VARCHAR:
-		do
-		{
-			size_t idx2 = 0;
-			do 
-			{
-				fread( &ch, 1, sizeof(char), pFIn );
-				if( feof(pFIn) )
-					break;
-				pTmpBuf[idx2++] = ch;
-			} while( ch != '\0' );
-			if( ch != '\0' )
-				pTmpBuf[idx2] = '\0';
-			if( idx2 > 0 )
-				this->Items.push_back( new ColumnItem((char*)pTmpBuf) );
-		}
-		while( !feof(pFIn) );
-		break;
-	default:
-		assert( 0 );
-	}
-}
-
-//------------------------------------------------------------------------------
-void Column::saveToFile(	const std::string& file, size_t startIdx, size_t endIdx, 
-							bool append )
-{
-	size_t totalCount = 0;
-	if( this->Count )
-		for( size_t idx = 0; idx < this->Count->Items.size(); ++idx )
-			totalCount += (int) this->Count->Items[idx]->numval;
-	else
-		totalCount = this->Items.size();
-	if( endIdx == std::string::npos )
-		endIdx = totalCount;
-	if( (startIdx < 0) || (endIdx > totalCount) )
-		throw generic_error(generic_error::GENERIC, "");
-
-	FILE	*pFIn;
-	if( append )
-		pFIn = fopen( file.c_str(), "ab" );
-	else
-		pFIn = fopen( file.c_str(), "wb" );
-	FileCloser fileCloser(pFIn);
-
-	int countLimit = 0;
-	int countIdx = 0;
-	if( this->Count )
-	{
-		while( countLimit < startIdx )
-			countLimit += (int) this->Count->Items[countIdx++]->numval;
-	}
-
-	size_t realIdx;
-	for(size_t idx = startIdx; idx < endIdx; ++idx )
-	{
-		if( this->Count )
-		{
-			if( idx >= countLimit )
-				countLimit += (int) this->Count->Items[countIdx++]->numval;
-			realIdx = countIdx - 1;
-		}
-		else
-			realIdx = idx;
-	
-		switch( this->Type )
-		{
-		case COL_TYPE_INT:
-			{
-				int val = 'NULL';
-				if( this->Items[realIdx] )
-					val = (int) this->Items[realIdx]->numval;
-				fwrite( &val, 1, sizeof(int), pFIn );
-			}
-			break;
-		case COL_TYPE_BIG_INT:
-		case COL_TYPE_DATE1:
-		case COL_TYPE_DATE2:
-		case COL_TYPE_DATE3:
-			{
-				llong val = 'NULL';
-				if( this->Items[realIdx] )
-					val = (llong) this->Items[realIdx]->numval;
-				fwrite( &val, 1, sizeof(llong), pFIn );
-			}
-			break;
-		case COL_TYPE_DOUBLE:
-			{
-				double val = 'NULL';
-				if( this->Items[realIdx] )
-					val = this->Items[realIdx]->numval;
-				fwrite( &val, 1, sizeof(double), pFIn );
-			}
-			break;
-		case COL_TYPE_VARCHAR:
-			{
-				string val;
-				if( this->Items[realIdx] )
-					fwrite( this->Items[realIdx]->strval.c_str(), sizeof(char), 
-					this->Items[realIdx]->strval.length(), pFIn );
-				else
-					fwrite( "NULL", sizeof(char), strlen("NULL"), pFIn );
-				fputc( '\0', pFIn );
-			}
-			break;
-		default:
-			assert( 0 );
-		}
-	}
-}
-
-void Column::addItem(size_t index, const TProjectSettings& settings, const Base& BaseDesc)
-{
-	size_t numPack = index / ((size_t) settings.packSize);
-	this->packOffset = index % settings.packSize;
-
-	if( numPack != this->currentNumPack )
-	{
-		char szBuffer[128]; // fixme
-		string dataPath = settings.szRootPath;
-		sprintf( szBuffer, "data_orga\\vdg\\data\\B001T%.4uC%.4uV01P%.12u", this->TableID, this->ID, numPack );
-		dataPath += szBuffer;
-
-		string prmFilePath = dataPath + ".prm";
-		string theFilePath = dataPath + ".the";
-
-		aq::Logger::getInstance().log(AQ_DEBUG, "Open prm file %s\n", prmFilePath.c_str());
-		aq::Logger::getInstance().log(AQ_DEBUG, "Open thesaurus %s\n", theFilePath.c_str());
-
-		prmMapper.reset(new aq::FileMapper(prmFilePath.c_str()));
-		thesaurusMapper.reset(new aq::FileMapper(theFilePath.c_str()));
-
-		this->currentNumPack = numPack;
-	}
-
-
-	size_t prmOffset = this->packOffset * this->prmFileItemSize;
-	size_t theOffset;
-	prmMapper->read(&theOffset, prmOffset, prmFileItemSize);
-
-	switch( this->Type )
-	{
-	case COL_TYPE_INT:
-		{
-			int *pnItemData;
-			pnItemData = (int*)( this->pTmpBuf );
-			thesaurusMapper->read(this->pTmpBuf, this->nBinItemSize * theOffset, this->nBinItemSize);
-			if( *pnItemData == 'NULL' )
-				this->Items.push_back( NULL );
-			else
-				this->Items.push_back( new ColumnItem( *pnItemData ) );
-		}
-		break;
-	case COL_TYPE_BIG_INT:
-	case COL_TYPE_DATE1:
-	case COL_TYPE_DATE2:
-	case COL_TYPE_DATE3:
-		{
-			long long *pnItemData;
-			pnItemData = (long long*)( this->pTmpBuf );
-			thesaurusMapper->read(this->pTmpBuf, this->nBinItemSize * theOffset, this->nBinItemSize);
-			if( *pnItemData == 'NULL' )
-				this->Items.push_back( NULL );
-			else
-				this->Items.push_back( new ColumnItem( (double) *pnItemData ) );
-		}
-		break;
-	case COL_TYPE_DOUBLE:
-		{
-			double *pdItemData;
-			pdItemData = (double*)( this->pTmpBuf );
-			thesaurusMapper->read(this->pTmpBuf, this->nBinItemSize * theOffset, this->nBinItemSize);
-			if( *pdItemData == 'NULL' )
-				this->Items.push_back( NULL );
-			else
-				this->Items.push_back( new ColumnItem( *pdItemData ) );
-		}
-		break;
-	case COL_TYPE_VARCHAR:
-		{	
-			thesaurusMapper->read(this->pTmpBuf, this->nBinItemSize * theOffset, this->nBinItemSize);
-			if( strcmp((char*)this->pTmpBuf, "NULL") == 0 )
-				this->Items.push_back( NULL );
-			else
-				this->Items.push_back( new ColumnItem( string((char*)this->pTmpBuf) ) );
-		}
-		break;
-	}
-}
-
-//------------------------------------------------------------------------------
-const aq::data_holder_t Scalar::getValue() const
-{
-	aq::data_holder_t data;
-	switch (Type)
-	{
-	case aq::COL_TYPE_INT:
-	case aq::COL_TYPE_BIG_INT:
-	case aq::COL_TYPE_DATE1:
-	case aq::COL_TYPE_DATE2:
-	case aq::COL_TYPE_DATE3:
-	case aq::COL_TYPE_DATE4:
-		data.val_int = static_cast<llong>(Item.numval);
-		break;
-	case aq::COL_TYPE_DOUBLE:
-		data.val_number = Item.numval;
-		break;
-	case aq::COL_TYPE_VARCHAR:
-		// if (data.val_str) free(data.val_str);
-		data.val_str = static_cast<char*>(::malloc((Item.strval.size() + 1) * sizeof(char)));
-		strcpy(data.val_str, Item.strval.c_str());
-		break;
-	default:
-		break;
-	}
-	return data;
-}
-
 //------------------------------------------------------------------------------
 Table::Table(): 
 	ID(0), 
@@ -960,7 +79,7 @@ void Table::computeUniqueRow(Table& aqMatrix, vector<vector<size_t> >& mapToUniq
 		uniqueIndex.push_back( vector<size_t>() );
 		if( aqMatrix.Columns[idx]->Items.size() < 1 )
 			continue;
-		column_cmp_t cmp(*(aqMatrix.Columns[idx].get()));
+		Column::inner_column_cmp_t cmp(*(aqMatrix.Columns[idx].get()));
 		vector<size_t> index;
 		for( size_t idx2 = 0; idx2 < aqMatrix.Columns[idx]->Items.size(); ++idx2 )
 			index.push_back( idx2 );
@@ -981,7 +100,9 @@ void Table::computeUniqueRow(Table& aqMatrix, vector<vector<size_t> >& mapToUniq
 }
 
 //------------------------------------------------------------------------------
-void Table::loadFromTableAnswerByRow(aq::AQMatrix& aqMatrix, const std::vector<llong>& tableIDs, const std::vector<Column::Ptr>& columnTypes, const TProjectSettings& pSettings, const Base& BaseDesc, 
+void Table::loadFromTableAnswerByRow(aq::AQMatrix& aqMatrix, const std::vector<llong>& tableIDs, 
+																		 std::vector<aq::ColumnMapper::Ptr>& columnsMapper,
+			                               const std::vector<Column::Ptr>& columnTypes, const TProjectSettings& pSettings, const Base& BaseDesc, 
 																		 boost::shared_ptr<aq::RowProcessing> rowProcessing)
 {
 	aq::Timer timer;
@@ -1031,7 +152,7 @@ void Table::loadFromTableAnswerByRow(aq::AQMatrix& aqMatrix, const std::vector<l
 
 	//
 	// Get the last column
-	std::vector<size_t> count = aqMatrix.getColumn(aqMatrix.getNbColumn() - 1);
+	const std::vector<size_t>& count = aqMatrix.getCount();
 
 	//
 	// Special case for Count only
@@ -1046,42 +167,89 @@ void Table::loadFromTableAnswerByRow(aq::AQMatrix& aqMatrix, const std::vector<l
 	
 	//
 	// Get group by index
-	const std::vector<size_t>& groupByIndex = aqMatrix.getGroupBy();
-	std::set<size_t> groupByIds;
-	std::for_each(groupByIndex.begin(), groupByIndex.end(), [&] (size_t gbid) { groupByIds.insert(gbid); });
+	const AQMatrix::group_by_t& groupByIndex = aqMatrix.getGroupBy();
 
-	assert((groupByIndex.size() == 0) || (groupByIndex.size() == mapToUniqueIndex[0].size()));
-
-	//
-	// For each Row
-	size_t previous_gid = groupByIndex[0];
-	aq::RowProcessing::row_t row;
-	row.resize(aqMatrix.hasCountColumn() ? this->Columns.size() + 1 : this->Columns.size());
-	for (size_t i = 0; i < size; ++i)
+	// For each group by id
+	for (AQMatrix::group_by_t::const_iterator itGrp = groupByIndex.begin(); itGrp != groupByIndex.end(); ++itGrp)
 	{
+		aq::RowProcessing::row_t row(aqMatrix.hasCountColumn() ? this->Columns.size() + 1 : this->Columns.size(), std::make_pair(ColumnItem::Ptr(), COL_TYPE_BIG_INT));
 
-		for (size_t j = 0; j < mapToUniqueIndex.size(); ++j) 
+		// For each Row
+		for (std::vector<size_t>::const_iterator itRow = itGrp->second.begin(); itRow != itGrp->second.end(); ++itRow)
 		{
-			for (size_t c = 0; c < this->Columns.size(); ++c)
+			for (size_t j = 0; j < mapToUniqueIndex.size(); ++j) 
 			{
-				assert(mapToUniqueIndex[j][i] < uniqueIndex[j].size());
-				if (this->Columns[c]->TableID == tableIDs[j])
+				assert(*itRow < mapToUniqueIndex[j].size());
+				for (size_t c = 0; c < this->Columns.size(); ++c)
 				{
-					this->Columns[c]->addItem(uniqueIndex[j][mapToUniqueIndex[j][i]], pSettings, BaseDesc);
-					row[c] = std::make_pair(*this->Columns[c]->Items.rbegin(), columnTypes[c]->Type);
+					if (this->Columns[c]->TableID == tableIDs[j])
+					{
+						if (uniqueIndex[j][mapToUniqueIndex[j][*itRow]] != *itRow) exit(-1); // FIXME
+						row[c] = std::make_pair(columnsMapper[c]->loadValue(uniqueIndex[j][mapToUniqueIndex[j][*itRow]]), columnsMapper[c]->getType());
+						// this->Columns[c]->addItem(uniqueIndex[j][mapToUniqueIndex[j][*itRow]], pSettings, BaseDesc);
+						// row[c] = std::make_pair(*this->Columns[c]->Items.rbegin(), columnTypes[c]->Type);
+						// this->Columns[c]->Items.erase(--(this->Columns[c]->Items.end()));
+					}
 				}
 			}
+			if (aqMatrix.hasCountColumn())
+			{
+				if (row[this->Columns.size()].first != NULL)
+				{
+					row[this->Columns.size()].first->numval += static_cast<double>(count[*itRow]);
+				}
+				else
+				{
+					ColumnItem::Ptr item(new ColumnItem(static_cast<double>(count[*itRow])));
+					row[this->Columns.size()] = std::make_pair(item, COL_TYPE_BIG_INT);
+				}
+			}
+			// perform a group by processing
+			
+			rowProcessing->process(row); // FIXME
 		}
 
-		if (aqMatrix.hasCountColumn())
-		{
-			ColumnItem::Ptr item(new ColumnItem((double)count[i]));
-			row[this->Columns.size()] = std::make_pair(item, COL_TYPE_BIG_INT);
-		}
+		// process only last row
+		// rowProcessing->process(row);
 
-		if ((i == 0) || (previous_gid < groupByIndex[i]))
+		continue;
+		
+
+		// For each Row
+		for (size_t i = 0; i < size; ++i)
 		{
-			if (rowProcessing->process(row) == 0)
+
+			for (size_t j = 0; j < mapToUniqueIndex.size(); ++j) 
+			{
+				for (size_t c = 0; c < this->Columns.size(); ++c)
+				{
+					assert(mapToUniqueIndex[j][i] < uniqueIndex[j].size());
+					if (this->Columns[c]->TableID == tableIDs[j])
+					{
+						// this->Columns[c]->addItem(uniqueIndex[j][mapToUniqueIndex[j][i]], pSettings, BaseDesc);
+						row[c] = std::make_pair(*this->Columns[c]->Items.rbegin(), columnTypes[c]->Type);
+					}
+				}
+			}
+
+			if (aqMatrix.hasCountColumn())
+			{
+				ColumnItem::Ptr item(new ColumnItem((double)count[i]));
+				row[this->Columns.size()] = std::make_pair(item, COL_TYPE_BIG_INT);
+			}
+
+			if (i == 0)
+			{
+				if (rowProcessing->process(row) == 0)
+				{
+					for (size_t c = 0; c < this->Columns.size(); ++c)
+					{
+						assert(this->Columns[c]->Items.size());
+						this->Columns[c]->Items.erase(--(this->Columns[c]->Items.end()));
+					}
+				}
+			}
+			else
 			{
 				for (size_t c = 0; c < this->Columns.size(); ++c)
 				{
@@ -1089,17 +257,8 @@ void Table::loadFromTableAnswerByRow(aq::AQMatrix& aqMatrix, const std::vector<l
 					this->Columns[c]->Items.erase(--(this->Columns[c]->Items.end()));
 				}
 			}
-		}
-		else
-		{
-			for (size_t c = 0; c < this->Columns.size(); ++c)
-			{
-				assert(this->Columns[c]->Items.size());
-				this->Columns[c]->Items.erase(--(this->Columns[c]->Items.end()));
-			}
-		}
 
-		previous_gid = groupByIndex[i];
+		}
 	}
 }
 
@@ -1161,7 +320,7 @@ void Table::loadFromTableAnswerByColumn(aq::AQMatrix& table, const vector<llong>
 	{
 		Column::Ptr c(new Column(COL_TYPE_BIG_INT));
 		c->setName("Count");
-		std::vector<size_t> v = table.getColumn(table.getNbColumn() - 1);
+		const std::vector<size_t>& v = table.getCount();
 		for(std::vector<size_t>::const_iterator it = v.begin(); it != v.end(); ++it)
 		{
 			c->Items.push_back(new ColumnItem(static_cast<double>(*it)));
@@ -1881,6 +1040,8 @@ void Table::orderBy(	std::vector<Column::Ptr> columns,
 						TablePartition::Ptr partition,
 						std::vector<size_t>& index )
 {
+	aq::Timer timer;
+
 	if( this->Columns.size() < 1 || this->Columns[0]->Items.size() < 2 )
 		return; //nothing to sort
 
@@ -1905,15 +1066,14 @@ void Table::orderBy(	std::vector<Column::Ptr> columns,
 	}
 	std::vector<size_t> oldPartitions;
 
+	timer.start();
 	for( size_t idx = 0; idx < columns.size(); ++idx )
 	{
-		column_cmp_t cmp(*(columns[idx].get()));
+		Column::inner_column_cmp_t cmp(*(columns[idx].get()));
 
 		oldPartitions = partitions;
 		partitions.clear();
 
-		vector<size_t>::iterator itBegin = index.begin();
-		vector<size_t>::iterator itEnd = index.begin();
 		assert( oldPartitions.size() > 1 );
 		for( size_t idx2 = 0; idx2 < oldPartitions.size() - 1; ++idx2 )
 		{
@@ -1931,15 +1091,19 @@ void Table::orderBy(	std::vector<Column::Ptr> columns,
 		}
 		partitions.push_back( index.size() );
 	}
+	aq::Logger::getInstance().log(AQ_INFO, "generate ordered indexes: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
 
 	//recreate table
+	timer.start();
 	vector<Column::Ptr> newColumns = this->getColumnsTemplate();
-
 	for( size_t idx = 0; idx < index.size(); ++idx )
 		for( size_t idx2 = 0; idx2 < this->Columns.size(); ++idx2 )
 			newColumns[idx2]->Items.push_back( this->Columns[idx2]->Items[index[idx]] );
-
+	aq::Logger::getInstance().log(AQ_INFO, "Recreate Table: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
+			
+	timer.start();
 	this->updateColumnsContent( newColumns );
+	aq::Logger::getInstance().log(AQ_INFO, "Update ColumnsContent: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
 }
 
 //------------------------------------------------------------------------------
