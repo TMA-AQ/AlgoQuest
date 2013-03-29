@@ -449,7 +449,7 @@ bool isMonoTable(tnode * query, std::string& tableName)
 }
 
 //------------------------------------------------------------------------------
-SolveMinMaxGroupBy::SolveMinMaxGroupBy(): pGroupBy(NULL), min(true)
+SolveMinMaxGroupBy::SolveMinMaxGroupBy(): pGroupBy(NULL), _min(true)
 {
 }
 
@@ -481,7 +481,7 @@ bool SolveMinMaxGroupBy::checkAndClear( tnode* pSelect )
 			auxColumns[idx]->left->tag == K_MAX) )
 			return false;
 		minMaxCol = idx;
-		min = auxColumns[idx]->left->tag == K_MIN;
+		_min = auxColumns[idx]->left->tag == K_MIN;
 		++nrMinMaxCols;
 	}
 	if( nrMinMaxCols != 1 )
@@ -646,7 +646,7 @@ void SolveMinMaxGroupBy::modifyTmpFiles(	const char* tmpPath,
   std::vector<std::string> answerFiles;
   answerFiles.push_back(Settings.szAnswerFN);
 
-	aq::AQMatrix aqMatrix;
+	aq::AQMatrix aqMatrix(Settings);
 	vector<llong> tableIDs;
 	for (std::vector<std::string>::const_iterator it = answerFiles.begin(); it != answerFiles.end(); ++it)
 	{
@@ -668,7 +668,7 @@ void SolveMinMaxGroupBy::modifyTmpFiles(	const char* tmpPath,
 	{
 		size_t selIdx = partition->Rows[idx];
 		for( size_t idx2 = partition->Rows[idx] + 1; idx2 < partition->Rows[idx+1]; ++idx2 )
-			if( this->min )
+			if( this->_min )
 			{
 				if( lessThan(	table.Columns[minMaxCol]->Items[idx2].get(),
 								table.Columns[minMaxCol]->Items[selIdx].get(),

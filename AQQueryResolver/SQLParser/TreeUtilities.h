@@ -37,7 +37,7 @@ public:
 private:
 	tnode* pGroupBy;
 	std::vector<tnode*> columns;
-	bool min;
+	bool _min;
 	size_t minMaxCol;
 	std::string tableName;
 };
