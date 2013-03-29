@@ -358,7 +358,18 @@ void doubleToString( char* strVal, double dVal )
 }
 
 //------------------------------------------------------------------------------
-std::string getThesaurusFileName( char* path, size_t tableIdx, size_t columnIdx, size_t partIdx )
+std::string getPrmFileName( const char* path, size_t tableIdx, size_t columnIdx, size_t partIdx )
+{
+	char szFN[ _MAX_PATH ];
+	if( path )
+		sprintf( szFN, "%sB001T%.4uC%.4uV01P%.12u.prm", path, tableIdx, columnIdx, partIdx );
+	else
+		sprintf( szFN, "B001T%.4uC%.4uV01P%.12u.prm", tableIdx, columnIdx, partIdx );
+	return szFN;
+}
+
+//------------------------------------------------------------------------------
+std::string getThesaurusFileName( const char* path, size_t tableIdx, size_t columnIdx, size_t partIdx )
 {
 	char szFN[ _MAX_PATH ];
 	if( path )
