@@ -423,7 +423,7 @@ void WriteJeq(	string& inputString,
 				output += " ";
 				output += cL.tableAndCol1[idx2];
 			}
-			output += ' ';
+			output += '\n';
 		}
 	}
 
