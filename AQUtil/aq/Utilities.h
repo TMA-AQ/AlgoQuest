@@ -50,6 +50,9 @@ int StrToInt( const char* psz, llong* pnVal );
 int StrToDouble( const char* psz, double* pdVal  );
 
 //------------------------------------------------------------------------------
+std::wstring string2Wstring(const std::string& s);
+
+//------------------------------------------------------------------------------
 class FileCloser
 {
 public:

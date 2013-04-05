@@ -58,7 +58,7 @@ int FileMapper::read(void * buffer, size_t offset, size_t len)
 	// Check if offset is in the current window
 	if ((pView == NULL ) || (offset < windowOffset) || ((offset + len) > (windowOffset + cbView)))
 	{
-		unsigned long long off_tmp = offset - (offset % cbView);
+		size_t off_tmp = offset - (offset % cbView);
 		this->remap(off_tmp);
 	}
 	

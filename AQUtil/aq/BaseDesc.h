@@ -3,6 +3,8 @@
 
 #include "symbole.h"
 #include <cstdio>
+#include <vector>
+#include <sstream>
 
 namespace aq
 {
@@ -15,33 +17,6 @@ typedef struct s_col_double
 	char decimale_separator ; // if Float, double 
 } s_col_double;
 
-typedef struct s_col_struct_v2
-{
-	char *nom;
-	int num;
-	symbole type; // Chaine, entier, réel, date etc
-	char cadrage[1+1];// G(auche) ou D(roite)
-	int taille; // taille max du champs en caractère (pour sizeof)
-	// s_col_double double_info; // float or double
-} s_col_struct_v2;
-
-typedef struct s_table_struct_v2
-{
-	char *nom;
-	int num;
-	int nb_enreg; // nombre 'enreg dans la table au loading
-	int nb_cols;
-	s_col_struct_v2 *colonne; // une colonne par enregistrement
-} s_table_struct_v2;
-
-typedef struct s_base_v2
-{
-	char *nom;
-	int num;
-	int nb_tables;
-	s_table_struct_v2 *table; //une table par enregistrement
-} s_base_v2;
-
 typedef struct s_prefixe
 {
 	char *base  ;      // nbre de bases max 999
@@ -51,7 +26,6 @@ typedef struct s_prefixe
 	char *paquet  ;      // nbre de paquets  max 999....999
 } s_prefixe;
 
-// --------  s_list_int -----------
 typedef struct s_list_int
 {
 	// symbole status_sort;
@@ -61,9 +35,43 @@ typedef struct s_list_int
 	int *part ;
 } s_list_int;
 
+// -------------------------------------------------------------
+// BaseDesc
+struct base_t
+{
+  struct table_t
+  {
+    struct col_t
+    {
+      std::string nom;
+      int num;
+      symbole type; // Chaine, entier, réel, date etc
+      char cadrage[2];// G(auche) ou D(roite)
+      int taille; // taille max du champs en caractère (pour sizeof)
+    };
+    typedef std::vector<col_t> cols_t;
+
+    std::string nom;
+    int num;
+    int nb_enreg; // nombre 'enreg dans la table au loading
+    int nb_cols;
+    cols_t colonne; // une colonne par enregistrement
+  };
+  typedef std::vector<table_t> tables_t;
+
+	std::string nom;
+	int num;
+	int nb_tables;
+	tables_t table; //une table par enregistrement
+};
+
 /// Lit le fichier de description d'une base et le place dans une structure s_base_v2
 /// Argument : le nom du fichier de description
-void construis_base ( FILE* fp, s_base_v2 *base );
+void construis_base ( const char * fname, base_t& base );
+
+void construis_base ( FILE* fp, base_t& base );
+
+void dump_base(std::ostream& oss, const base_t& base);
 
 }
 
