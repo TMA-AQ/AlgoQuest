@@ -3,6 +3,7 @@
 #include "Connection.h"
 #include <cstdio>
 #include <boost/bind.hpp>
+#include<boost/tokenizer.hpp>
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,18 +37,49 @@ RETCODE SQL_API SQLDriverConnect(SQLHDBC         pConn,
 		
 	if (pInConnStr && (pInConnStrLen > 0))
 	{
+    if (pOutConnStr == NULL)
+      pOutConnStr = static_cast<SQLCHAR*>(::malloc(strlen((const char *)pInConnStr) + 1));
 		strcpy((char *)pOutConnStr, (const char *)pInConnStr);
 		*pOutConnStrLenPtr = (SQLSMALLINT)strlen((const char *)pInConnStr);
 	}
 	
 	AqHandleConn * c = (AqHandleConn*)pConn;
-	AQ_ODBC_LOG("hdbc id: %d [%x]\n", c->Conn, c);
-	
-	c->connection->connect("localhost", 9999);
 
-	c->connection->write("show\n");
-	aq::Connection::buffer_t buf;
-	c->connection->read(buf);
+  std::string connectStr((const char *)pInConnStr);
+  boost::char_separator<char> sep(";");
+  boost::tokenizer<boost::char_separator<char> > tok(connectStr, sep);
+  
+  for (boost::tokenizer<boost::char_separator<char> >::iterator it = tok.begin(); it != tok.end(); ++it)
+  {
+    std::string::size_type pos = (*it).find("=");
+    if (pos != std::string::npos) 
+    {
+      if ((*it).substr(0, pos) == "DATABASE") 
+        c->connection->schema = (*it).substr(pos + 1);
+      else if ((*it).substr(0, pos) == "AQ_DB_PATH")
+        c->connection->db_path = (*it).substr(pos + 1);
+      else if ((*it).substr(0, pos) == "AQ_CFG_PATH")
+        c->connection->cfg_path = (*it).substr(pos + 1);
+      else if ((*it).substr(0, pos) == "AQ_RSLV")
+        c->connection->query_resolver = (*it).substr(pos + 1);
+      else if ((*it).substr(0, pos) == "SERVER")
+        c->connection->server = (*it).substr(pos + 1);
+      else if ((*it).substr(0, pos) == "PORT")
+        c->connection->port = (*it).substr(pos + 1);
+      else if ((*it).substr(0, pos) == "UID")
+        c->connection->uid = (*it).substr(pos + 1);
+      else if ((*it).substr(0, pos) == "PWD")
+        c->connection->pwd = (*it).substr(pos + 1);
+    }
+  }
+	
+  AQ_ODBC_LOG("hdbc id: %d [%x]\n", c->Conn, c);
+	
+	//c->connection->connect("localhost", 9999);
+
+	//c->connection->write("show\n");
+	//aq::Connection::buffer_t buf;
+	//c->connection->read(buf);
 
 	// c->ioThread.reset(new boost::thread(boost::bind(&boost::asio::io_service::run, c->ioService)));
 

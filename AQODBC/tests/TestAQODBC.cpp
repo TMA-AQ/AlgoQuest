@@ -1,17 +1,20 @@
-#include <conio.h>
-#include <stdio.h>
-#include <tchar.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <iostream>
+#include <sstream>
 #include <list>
 
 #include <windows.h>
-
 #include <sqlext.h>                                     // required for ODBC calls
 
+#include <aq/Exceptions.h>
 #include <aq/Logger.h>
 #include <boost/array.hpp>
 #include <boost/program_options.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/ini_parser.hpp>
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/replace.hpp>
 
 namespace po = boost::program_options;
 
@@ -26,12 +29,13 @@ namespace po = boost::program_options;
 	/* goto Cleanup; */ \
 	}\
 	if ( status == SQL_ERROR ) { \
-	goto Cleanup;\
+	throw aq::generic_error(aq::generic_error::GENERIC, szMsg);\
 	} \
 }
 
-// ---------------------------------- structure -------------------------------
-typedef struct BindColInfo {
+// -----------------------------------------------------------------------------
+typedef struct BindColInfo 
+{
 	SQLSMALLINT			    iColTitleSize;				// size of column title
 	char*				        szColTitle;					// column title
 	SQLLEN	            iColDisplaySize;            // size to display
@@ -42,10 +46,12 @@ typedef struct BindColInfo {
 } BIND_COL_INFO;
 
 // -------------------------- function prototypes -----------------------------
-void        ShowDiagMessages        ( SQLSMALLINT hType, SQLHANDLE hValue, SQLRETURN iStatus, char* szMsg );
-
-SQLRETURN	ShowFullResults			( HSTMT hStmt );
-void		FreeBindings			( BIND_COL_INFO* pBindColInfo );
+void ShowDiagMessages(SQLSMALLINT hType, SQLHANDLE hValue, SQLRETURN iStatus, char* szMsg);
+SQLRETURN	ShowDatabases(SQLHANDLE hStmt, SQLHANDLE hConn, std::ostream& os);
+SQLRETURN	ShowDatabase(SQLHANDLE hStmt, SQLHANDLE hConn, const char * dbName, std::ostream& os);
+SQLRETURN	ShowFullResults(HSTMT hStmt);
+void FreeBindings(BIND_COL_INFO* pBindColInfo);
+void LoadODBCConnections(const char * odbcConnectionsFile, std::string& odbcConnection);
 
 // ----------------------------------------------------------------------------
 int main ( int argc, char* argv[] )
@@ -57,10 +63,8 @@ int main ( int argc, char* argv[] )
 	SQLHANDLE       hStmt = 0;
 
 	SQLCHAR         szConnStrOut[1024];
-	SQLSMALLINT     x;
+	SQLSMALLINT     x = 0;
 	
-	std::list<std::string> tables_names;
-
 	memset(szConnStrOut, 0, 1024 * sizeof(SQLCHAR));
 
 	//
@@ -68,15 +72,16 @@ int main ( int argc, char* argv[] )
 	std::string mode;
 	std::string ident;
 	unsigned int level;
-	unsigned int worker;
 	bool lock_mode = false;
 	bool date_mode = false;
 	bool pid_mode = false;
-
+  
 	//
 	// odbc options
-	std::string odbcConnection;
 	std::string query;
+	std::string odbcConnection;
+  std::string odbcConnectionsFile;
+  bool showDB;
 
 	po::variables_map vm;
 	po::options_description desc("Allowed options");
@@ -85,13 +90,15 @@ int main ( int argc, char* argv[] )
 		desc.add_options()
 			("help", "produce help message")
 			("log-output", po::value<std::string>(&mode)->default_value("STDOUT"), "[STDOUT|LOCALFILE|SYSLOG]")
-			("log-level", po::value<unsigned int>(&level)->default_value(LOG_NOTICE), "CRITICAL(2), ERROR(3), WARNING(4), NOTICE(5), INFO(6), DEBUG(7)")
+			("log-level", po::value<unsigned int>(&level)->default_value(AQ_LOG_INFO), "CRITICAL(2), ERROR(3), WARNING(4), NOTICE(5), INFO(6), DEBUG(7)")
 			("log-lock", po::bool_switch(&lock_mode), "for multithread program")
 			("log-date", po::bool_switch(&date_mode), "add date to log")
 			("log-pid", po::bool_switch(&pid_mode), "add thread id to log")
 			("log-ident", po::value<std::string>(&ident)->default_value("sql2prefix.log"), "")
-			("odbc", po::value<std::string>(&odbcConnection), "ex: \"Driver={AQ ODBC Driver 0};SERVER=locahost;PORT=9999;DATABASE=test;UID=tma;PWD=tma;\"")
+			("odbc", po::value<std::string>(&odbcConnection), "ex: \"Driver={AQ ODBC Driver 0};SERVER=locahost;PORT=9999;DATABASE=BNP;UID=tma;PWD=tma;\"")
+			("odbc-connections-file", po::value<std::string>(&odbcConnectionsFile)->default_value("odbc-connections.ini"), "Store ODBC Connection string")
 			("query", po::value<std::string>(&query), "ex: \"select * from table1;\"")
+      ("show-db", po::bool_switch(&showDB), "show description of database")
 			;
 
 		po::positional_options_description p;
@@ -120,143 +127,200 @@ int main ( int argc, char* argv[] )
 	aq::Logger::getInstance().setLockMode(lock_mode);
 	aq::Logger::getInstance().setDateMode(date_mode);
 	aq::Logger::getInstance().setPidMode(pid_mode);
+  
+  try
+  {
 
-	// BEFORE U CONNECT
+    // Load Connections file, and store choosen connection in odbcConnection
+    if (odbcConnection == "")
+      LoadODBCConnections(odbcConnectionsFile.c_str(), odbcConnection);
+    
+    aq::Logger::getInstance().log(AQ_INFO,  "Starting ODBC client [%s]\n", odbcConnection.c_str());
 
-	// allocate ENVIRONMENT
-	status = SQLAllocHandle ( SQL_HANDLE_ENV, SQL_NULL_HANDLE, &hEnv );
-	ODBC_CHK_ERROR(SQL_HANDLE_ENV, hEnv, status, "");
+    // connect to odbc driver and prepare handlers
+    status = SQLAllocHandle (SQL_HANDLE_ENV, SQL_NULL_HANDLE, &hEnv);
+    ODBC_CHK_ERROR(SQL_HANDLE_ENV, hEnv, status, "");
 
-	// set the ODBC version for behaviour expected
-	status = SQLSetEnvAttr ( hEnv,  SQL_ATTR_ODBC_VERSION, (SQLPOINTER)SQL_OV_ODBC3, 0 );
-	ODBC_CHK_ERROR(SQL_HANDLE_ENV, hEnv, status, "");
+    status = SQLSetEnvAttr (hEnv,  SQL_ATTR_ODBC_VERSION, (SQLPOINTER)SQL_OV_ODBC3, 0);
+    ODBC_CHK_ERROR(SQL_HANDLE_ENV, hEnv, status, "");
 
-	// allocate CONNECTION
-	status = SQLAllocHandle ( SQL_HANDLE_DBC, hEnv, &hConn );
-	ODBC_CHK_ERROR(SQL_HANDLE_DBC, hConn, status, "");
+    status = SQLAllocHandle (SQL_HANDLE_DBC, hEnv, &hConn);
+    ODBC_CHK_ERROR(SQL_HANDLE_DBC, hConn, status, "");
 
-	status = SQLDriverConnect ( 
-		hConn, 
-		SQL_NULL_HANDLE, 
-		(SQLCHAR*)odbcConnection.c_str(), 
-		SQL_NTS, 
-		szConnStrOut, 
-		1024, &x, 
-		SQL_DRIVER_NOPROMPT );
+    status = SQLDriverConnect(hConn, SQL_NULL_HANDLE, (SQLCHAR*)odbcConnection.c_str(), SQL_NTS, szConnStrOut, 1024, &x, SQL_DRIVER_NOPROMPT );
+    ODBC_CHK_ERROR(SQL_HANDLE_DBC, hConn, status, "");
+    aq::Logger::getInstance().log(AQ_INFO,  "connection string length %d [%s]\n", x, szConnStrOut);
 
-	ODBC_CHK_ERROR(SQL_HANDLE_DBC, hConn, status, "");
-	aq::Logger::getInstance().log(AQ_INFO,  "connection string length %d [%s]\n", x, szConnStrOut);
+    status = SQLAllocHandle ( SQL_HANDLE_STMT, hConn, &hStmt );
+    ODBC_CHK_ERROR(SQL_HANDLE_DBC, hConn, status, "");
 
-	// allocate STATEMENT
-	status = SQLAllocHandle ( SQL_HANDLE_STMT, hConn, &hStmt );
-	ODBC_CHK_ERROR(SQL_HANDLE_DBC, hConn, status, "");
+    if (showDB)
+    {
+      // show database description
+      status = ShowDatabases(hStmt, hConn, std::cout);
+    }
+    
+    if (query != "")
+    {
+      // execute the statement
+      status = SQLExecDirect(hStmt, (SQLCHAR*)query.c_str(), SQL_NTS);
+      ODBC_CHK_ERROR(SQL_HANDLE_STMT, hConn, status, "");
+    
+      // show the full results row by row
+      status = ShowFullResults(hStmt);
+    }
 
-	// retrieve information from the database
-	SQLINTEGER l = 65;
-	char c1[65];
-	char c2[65];
-	char c3[65];
-	char c4[65];
-	char c5[65];
-	char c6[65];
-	char c7[65];
-	char c8[65];
+    // check for error
+    ODBC_CHK_ERROR(SQL_HANDLE_STMT, hStmt, status, "");
 
-	status = SQLTables(hStmt, (SQLCHAR*)"test", SQL_NTS, NULL, 0, NULL, 0, (SQLCHAR*)"\'TABLE\',\'VIEW\',\'SYNONYM\'", 24);
-
-	SQLSMALLINT iColCount;
-	status = SQLNumResultCols (hStmt, &iColCount);
-	ODBC_CHK_ERROR(SQL_HANDLE_STMT, hConn, status, "");
-
-	printf("%u\n", iColCount);
-
-	status = SQLBindCol(hStmt, 1, SQL_C_CHAR, (SQLPOINTER) &c1, 65, &l);
-	ODBC_CHK_ERROR(SQL_HANDLE_STMT, hConn, status, "");
-
-	status = SQLBindCol(hStmt, 2, SQL_C_CHAR, (SQLPOINTER) &c2, 65, &l);
-	ODBC_CHK_ERROR(SQL_HANDLE_STMT, hConn, status, "");
-
-	status = SQLBindCol(hStmt, 3, SQL_C_CHAR, (SQLPOINTER) &c3, 65, &l);
-	ODBC_CHK_ERROR(SQL_HANDLE_STMT, hConn, status, "");
-
-	status = SQLBindCol(hStmt, 4, SQL_C_CHAR, (SQLPOINTER) &c4, 65, &l);
-	ODBC_CHK_ERROR(SQL_HANDLE_STMT, hConn, status, "");
-
-	status = SQLBindCol(hStmt, 5, SQL_C_CHAR, (SQLPOINTER) &c5, 65, &l);
-	ODBC_CHK_ERROR(SQL_HANDLE_STMT, hConn, status, "");
-
-	while ((status = SQLFetch (hStmt)) != SQL_NO_DATA_FOUND)
-	{
-		// printf("[%s] [%s] [%s] [%s] [%s]\n", c1, c2, c3, c4, c5);
-		ODBC_CHK_ERROR(SQL_HANDLE_STMT, hConn, status, "");
-		tables_names.push_back(c3);
-	}
-	
-	for (std::list<std::string>::const_iterator it = tables_names.begin(); it != tables_names.end(); ++it)
-	{
-		status = SQLColumns(hStmt, (SQLCHAR*)"test", 4, NULL, 0, (SQLCHAR*)(*it).c_str(), (*it).size(), NULL, 0);
-		ODBC_CHK_ERROR(SQL_HANDLE_STMT, hConn, status, "");
-
-		status = SQLBindCol(hStmt, 4, SQL_C_CHAR, (SQLPOINTER) &c1, 65, &l);
-		ODBC_CHK_ERROR(SQL_HANDLE_STMT, hConn, status, "");
-
-		status = SQLBindCol(hStmt, 5, SQL_C_CHAR, (SQLPOINTER) &c2, 65, &l);
-		ODBC_CHK_ERROR(SQL_HANDLE_STMT, hConn, status, "");
-
-		printf("%s\n", (*it).c_str());
-		while ((status = SQLFetch (hStmt)) != SQL_NO_DATA_FOUND)
-		{
-			printf("\t[%s] [%s]\n", c1, c2);
-			ODBC_CHK_ERROR(SQL_HANDLE_STMT, hConn, status, "");
-		}
-	}
-
-	exit(0);
-
-	// execute the statement
-	status = SQLExecDirect ( hStmt, (SQLCHAR*)query.c_str(), SQL_NTS );
-	ODBC_CHK_ERROR(SQL_HANDLE_STMT, hConn, status, "");
-
-	// show the full results row by row
-	status = ShowFullResults ( hStmt );
-
-	// check for error
-	ODBC_CHK_ERROR(SQL_HANDLE_STMT, hStmt, status, "");
-
-Cleanup:
+  }
+  catch (const aq::generic_error& e)
+  {
+    aq::Logger::getInstance().log(AQ_ERROR, e.what());
+  }
 
 	// release statement
-	if ( hStmt )
+	if (hStmt)
 	{
-		SQLFreeStmt ( hStmt, SQL_CLOSE );
+		SQLFreeStmt(hStmt, SQL_CLOSE);
 	}
 
 	// release connection
-	if ( hConn )
+	if (hConn)
 	{
-		SQLDisconnect ( hConn );
-
-		SQLFreeConnect ( hConn );
+		SQLDisconnect(hConn);
+		SQLFreeConnect(hConn);
 	}
 
 	// release environment
-	if ( hEnv ) 
+	if (hEnv) 
 	{
-		SQLFreeEnv ( hEnv );
+		SQLFreeEnv(hEnv);
 	}
 
 	return EXIT_SUCCESS;
 }
 
 // ----------------------------------------------------------------------------
+// to display the database description
+// ----------------------------------------------------------------------------
+
+SQLRETURN	ShowDatabases(SQLHANDLE hStmt, SQLHANDLE hConn, std::ostream& os)
+{
+	SQLRETURN status;
+	std::list<std::string> db_names;
+
+  // get databases
+  std::string dbName = "%";
+  aq::Logger::getInstance().log(AQ_DEBUG, "get tables of base '%s'\n", dbName.c_str());
+  status = SQLTables(hStmt, (SQLCHAR*)dbName.c_str(), SQL_NTS, NULL, 0, NULL, 0, (SQLCHAR*)"\'TABLE\',\'VIEW\',\'SYNONYM\'", 24);
+
+  SQLSMALLINT iColCount;
+  status = SQLNumResultCols (hStmt, &iColCount);
+  ODBC_CHK_ERROR(SQL_HANDLE_STMT, hConn, status, "");
+
+  printf("%u\n", iColCount);
+  std::vector<char*> cols;
+  cols.resize(iColCount);
+  SQLLEN len = 65;
+  for (SQLSMALLINT i = 0; i < iColCount; ++i)
+  {
+    cols[i] = static_cast<char*>(::malloc(len * sizeof(char)));
+    ::memset(cols[i], 0, len);
+    status = SQLBindCol(hStmt, i + 1, SQL_C_CHAR, (SQLPOINTER) cols[i], len, &len);
+    ODBC_CHK_ERROR(SQL_HANDLE_STMT, hConn, status, "");
+  }
+
+  while ((status = SQLFetch (hStmt)) != SQL_NO_DATA_FOUND)
+  {
+    ODBC_CHK_ERROR(SQL_HANDLE_STMT, hConn, status, "");
+    for (std::vector<char*>::const_iterator it = cols.begin(); it != cols.end(); ++it)
+    {
+      aq::Logger::getInstance().log(AQ_DEBUG, "[%s] ", *it);
+    }
+    aq::Logger::getInstance().log(AQ_DEBUG, "\n");
+    db_names.push_back(cols[0]);
+  }
+ 
+  for (std::list<std::string>::const_iterator it = db_names.begin(); it != db_names.end(); ++it)
+  {
+    os << "==========================" << std::endl;
+    os << "BASE " << (*it) << std::endl;
+    ShowDatabase(hStmt, hConn, (*it).c_str(), os);
+  }
+
+  return SQL_SUCCESS;
+}
+
+SQLRETURN	ShowDatabase(SQLHANDLE hStmt, SQLHANDLE hConn, const char * dbName, std::ostream& os)
+{ 
+	SQLRETURN status;
+	std::list<std::string> tables_names;
+
+  // get tables
+  aq::Logger::getInstance().log(AQ_DEBUG, "get tables of base '%s'\n", dbName);
+  status = SQLTables(hStmt, NULL, 0, (SQLCHAR*)dbName, SQL_NTS, NULL, 0, (SQLCHAR*)"\'TABLE\',\'VIEW\',\'SYNONYM\'", 24);
+
+  SQLSMALLINT iColCount;
+  status = SQLNumResultCols (hStmt, &iColCount);
+  ODBC_CHK_ERROR(SQL_HANDLE_STMT, hConn, status, "");
+
+  std::vector<char*> cols;
+  cols.resize(iColCount);
+  SQLLEN len = 65;
+  for (SQLSMALLINT i = 0; i < iColCount; ++i)
+  {
+    cols[i] = static_cast<char*>(::malloc(len * sizeof(char)));
+    ::memset(cols[i], 0, len);
+    status = SQLBindCol(hStmt, i + 1, SQL_C_CHAR, (SQLPOINTER) cols[i], len, &len);
+    ODBC_CHK_ERROR(SQL_HANDLE_STMT, hConn, status, "");
+  }
+
+  while ((status = SQLFetch (hStmt)) != SQL_NO_DATA_FOUND)
+  {
+    ODBC_CHK_ERROR(SQL_HANDLE_STMT, hConn, status, "");
+    tables_names.push_back(cols[2]);
+  }
+
+  // get columns
+  SQLCHAR* columnName = static_cast<SQLCHAR*>(::malloc(len * sizeof(SQLCHAR)));
+  int      columnType;
+  SQLCHAR* columnTypeName = static_cast<SQLCHAR*>(::malloc(len * sizeof(SQLCHAR)));;
+  for (std::list<std::string>::const_iterator it = tables_names.begin(); it != tables_names.end(); ++it)
+  {
+    aq::Logger::getInstance().log(AQ_DEBUG, "get columns of table '%s'\n", (*it).c_str());
+
+    status = SQLColumns(hStmt, (SQLCHAR*)dbName, SQL_NTS, NULL, 0, (SQLCHAR*)(*it).c_str(), SQL_NTS, NULL, 0);
+    ODBC_CHK_ERROR(SQL_HANDLE_STMT, hConn, status, "");
+
+    status = SQLBindCol(hStmt, 4, SQL_C_CHAR, (SQLPOINTER) columnName, 65, &len);
+    ODBC_CHK_ERROR(SQL_HANDLE_STMT, hConn, status, "");
+
+    status = SQLBindCol(hStmt, 5, SQL_C_SSHORT, (SQLPOINTER) &columnType, sizeof(int), &len);
+    ODBC_CHK_ERROR(SQL_HANDLE_STMT, hConn, status, "");
+    
+    status = SQLBindCol(hStmt, 6, SQL_C_CHAR, (SQLPOINTER) columnTypeName, 65, &len);
+    ODBC_CHK_ERROR(SQL_HANDLE_STMT, hConn, status, "");
+
+    os << "\t" << "TABLE " << (*it) << std::endl;
+    while ((status = SQLFetch (hStmt)) != SQL_NO_DATA_FOUND)
+    {
+      os << "\t" << "\t" << columnName << " " << columnType << " " << columnTypeName << std::endl;
+      ODBC_CHK_ERROR(SQL_HANDLE_STMT, hConn, status, "");
+    }
+  }
+  
+  return SQL_SUCCESS;
+}
+
+// ----------------------------------------------------------------------------
 // to display the full results row by row
 // ----------------------------------------------------------------------------
 
-SQLRETURN	ShowFullResults ( SQLHANDLE hStmt )
+SQLRETURN	ShowFullResults(SQLHANDLE hStmt)
 {
 	int					i, iCol;
-	int					rows;
-	int         lineSize = 0;
+	size_t      lineSize = 0;
 
 	BIND_COL_INFO*		head = NULL;
 	BIND_COL_INFO*		last = NULL;
@@ -272,86 +336,81 @@ SQLRETURN	ShowFullResults ( SQLHANDLE hStmt )
 	// ALLOCATE SPACE TO FETCH A COMPLETE ROW
 
 	// get number of cols
-	if (( status = SQLNumResultCols ( hStmt, &iColCount )) != SQL_SUCCESS )
+	if ((status = SQLNumResultCols(hStmt, &iColCount)) != SQL_SUCCESS)
 		return status;
 
 
 	// loop to allocate binding info structure
-	for ( iCol = 1; iCol <= iColCount; iCol ++ ) {
-
+	for (iCol = 1; iCol <= iColCount; iCol ++) 
+  {
 		// alloc binding structure
-		curr = ( BIND_COL_INFO* )calloc ( 1, sizeof(BIND_COL_INFO));
-		if ( curr == NULL ) {
-			fprintf ( stderr, "Out of memory!\n" );
-			return SQL_SUCCESS;							// its not an ODBC error so no diags r required
+		curr = (BIND_COL_INFO*)calloc(1, sizeof(BIND_COL_INFO));
+		if (curr == NULL) 
+    {
+			fprintf(stderr, "Out of memory!\n");
+			return SQL_SUCCESS; // its not an ODBC error so no diags r required
 		}
 
 		// maintain link list
-		if ( iCol == 1 )
-			head = curr;								// first col, therefore head of list
+		if (iCol == 1)
+			head = curr; // first col, therefore head of list
 		else
-			last->next = curr;							// attach
+			last->next = curr; // attach
 
-		last = curr;									// tail    
+		last = curr; // tail    
 
-		// get column title size
-		if (( status = SQLColAttribute ( hStmt, iCol, SQL_DESC_NAME, NULL, 0, &( curr->iColTitleSize ), NULL )) != SQL_SUCCESS ) {
-			FreeBindings ( head );
+    status = SQLColAttribute(hStmt, iCol, SQL_DESC_NAME, NULL, 0, &(curr->iColTitleSize), NULL);
+		if ((status != SQL_SUCCESS) && (status != SQL_SUCCESS_WITH_INFO))
+    {
+			FreeBindings(head);
 			return status;
 		}
-		else ++ curr->iColTitleSize;					// allow space for null char
+		else 
+    {
+      ++ curr->iColTitleSize; // allow space for null char
+    }
 
-		// allocate buffer for title
-		curr->szColTitle  = ( char* ) calloc ( 1, curr->iColTitleSize * sizeof( char ));
-		if ( curr->szColTitle == NULL ) {
-			FreeBindings ( head );
-			fprintf ( stderr, "Out of memory!\n" );
+		curr->szColTitle  = (char*)calloc(1, curr->iColTitleSize * sizeof(char));
+		if (curr->szColTitle == NULL) 
+    {
+			FreeBindings(head);
+			fprintf(stderr, "Out of memory!\n");
 			return SQL_SUCCESS;							// its not an ODBC error so no diags r required
 		}
 
-		// get column title
-		if (( status = SQLColAttribute ( hStmt, iCol, SQL_DESC_NAME, curr->szColTitle, curr->iColTitleSize, &( curr->iColTitleSize ), NULL )) != SQL_SUCCESS ) {
-			FreeBindings ( head );
+		if ((status = SQLColAttribute(hStmt, iCol, SQL_DESC_NAME, curr->szColTitle, curr->iColTitleSize, &(curr->iColTitleSize), NULL)) != SQL_SUCCESS) 
+    {
+			FreeBindings(head);
 			return status;
 		}
-		// get col length 
-		if (( status = SQLColAttribute ( hStmt, iCol, SQL_DESC_DISPLAY_SIZE, NULL, 0, NULL, &( curr->iColDisplaySize ))) != SQL_SUCCESS ) {
-			FreeBindings ( head );
+		if ((status = SQLColAttribute(hStmt, iCol, SQL_DESC_DISPLAY_SIZE, NULL, 0, NULL, &( curr->iColDisplaySize ))) != SQL_SUCCESS) 
+    {
+			FreeBindings(head);
 			return status;
 		}
-
-		// print column title
-		printf ( "| %s ", curr->szColTitle );		// check col type basically char or non-char
-
-		// arbitrary limit on display size
-		if ( curr->iColDisplaySize > _DISPLAY_MAX )  curr->iColDisplaySize = _DISPLAY_MAX;
-
+		printf("| %s ", curr->szColTitle);		// check col type basically char or non-char
+		if (curr->iColDisplaySize > _DISPLAY_MAX) 
+      curr->iColDisplaySize = _DISPLAY_MAX;
 		for (unsigned int i = 0; i < (curr->iColDisplaySize - strlen(curr->szColTitle)); ++i)
 			printf(" ");
-
-		// allocate buffer for col data + NULL terminator
-		curr->szColData = ( char* ) calloc ( 1, ( curr->iColDisplaySize + 1 ) * sizeof(char));
-		if ( curr->szColData == NULL ) {
-			FreeBindings ( head );
-			fprintf ( stderr, "Out of memory!\n" );
+		curr->szColData = (char*)calloc(1, (curr->iColDisplaySize + 1) * sizeof(char));
+		if (curr->szColData == NULL) 
+    {
+			FreeBindings(head);
+			fprintf(stderr, "Out of memory!\n");
 			return SQL_SUCCESS;							// its not an ODBC error so no diags r required
 		}
-
-		// get col type, not used now but can be checked to print value right aligned etcc
-		if (( status = SQLColAttribute ( hStmt, iCol, SQL_DESC_CONCISE_TYPE, NULL, 0, NULL, &iType )) != SQL_SUCCESS ) {
-			FreeBindings ( head );
+		if ((status = SQLColAttribute(hStmt, iCol, SQL_DESC_CONCISE_TYPE, NULL, 0, NULL, &iType)) != SQL_SUCCESS) 
+    {
+			FreeBindings(head);
 			return status;
 		}
-
-		// set col type indicator in struct
-		curr->fChar = ( iType == SQL_CHAR || iType == SQL_VARCHAR || iType == SQL_LONGVARCHAR );
-
-		// bind the col buffer so that the driver feeds it with col value on every fetch and use generic char binding for every column
-		if (( status = SQLBindCol ( hStmt, iCol, SQL_C_CHAR, ( SQLPOINTER )curr->szColData, ( curr->iColDisplaySize+1 ) * sizeof(char), &( curr->indPtr ))) != SQL_SUCCESS ) {
-			FreeBindings ( head );
+		curr->fChar = (iType == SQL_CHAR || iType == SQL_VARCHAR || iType == SQL_LONGVARCHAR);
+		if ((status = SQLBindCol(hStmt, iCol, SQL_C_CHAR, ( SQLPOINTER )curr->szColData, ( curr->iColDisplaySize+1 ) * sizeof(char), &( curr->indPtr ))) != SQL_SUCCESS) 
+    {
+			FreeBindings(head);
 			return status;
 		}
-
 		lineSize += curr->iColDisplaySize + 3;
 	}
 
@@ -363,41 +422,33 @@ SQLRETURN	ShowFullResults ( SQLHANDLE hStmt )
 
 	printf("\n");
 
-	// number of rows to show in one shot
-	rows = 1;
-
 	// loop to print all the rows one by one
-	for ( i = 1, rows = 1; true; i ++ ) {
-
-		// fetch the next row
-		if (( status = SQLFetch ( hStmt )) == SQL_NO_DATA_FOUND )
+	for (i = 1; true; ++i) 
+  {
+		if ((status = SQLFetch(hStmt)) == SQL_NO_DATA_FOUND)
 			break;													// no more rows so break
-
-		// check for error
-		else if ( status == SQL_ERROR ) {							// fetch failed
-			FreeBindings ( head );
+		else if (status == SQL_ERROR) // fetch failed 
+    {
+			FreeBindings(head);
 			return status;
 		}
 
-
-		for ( curr = head, iCol = 0; iCol < iColCount; iCol ++, curr = curr->next )
+		//for ( curr = head, iCol = 0; iCol < iColCount; iCol ++, curr = curr->next )
+		//{
+		//	printf ( "| %s ", curr->szColData );		// check col type basically char or non-char
+		//	for (unsigned int i = 0; i < (curr->iColDisplaySize - strlen(curr->szColData)); ++i)
+		//		printf(" ");
+		//}
+		//printf(" |");
+    
+		for (curr = head, iCol = 0; iCol < iColCount; iCol ++, curr = curr->next)
 		{
-			printf ( "| %s ", curr->szColData );		// check col type basically char or non-char
-
-			for (unsigned int i = 0; i < (curr->iColDisplaySize - strlen(curr->szColData)); ++i)
-				printf(" ");
-
-		}
-
-		printf(" |");
-
-		// row separator
-		printf ( "\n" );
+			printf("%s ", curr->szColData);		// check col type basically char or non-char
+    }
+		printf("\n");
 
 	}
-
-	// free the allocated bindings
-	FreeBindings ( head );
+	FreeBindings(head);
 
 	return SQL_SUCCESS;
 }
@@ -407,37 +458,27 @@ SQLRETURN	ShowFullResults ( SQLHANDLE hStmt )
 // to free the col info allocated by ShowFullResults
 // ----------------------------------------------------------------------------
 
-void FreeBindings ( BIND_COL_INFO* pBindColInfo )
+void FreeBindings(BIND_COL_INFO* pBindColInfo)
 {
 	BIND_COL_INFO* next;
-
-	// precaution 
-	if ( pBindColInfo ) {
-
-		do {
-
-			// get the next col binding
+	if (pBindColInfo) 
+  {
+		do 
+    {
 			next = pBindColInfo->next;
-
-			// free any buffer for col title
-			if ( pBindColInfo->szColTitle ) {
-				free ( pBindColInfo->szColTitle );
+			if (pBindColInfo->szColTitle) 
+      {
+				free(pBindColInfo->szColTitle);
 				pBindColInfo->szColTitle = NULL;
 			}
-
-			// free any col data
-			if ( pBindColInfo->szColData ) {
-				free ( pBindColInfo->szColData );
+			if (pBindColInfo->szColData)
+      {
+				free(pBindColInfo->szColData);
 				pBindColInfo->szColData = NULL;
 			}
-
-			// free the current binding
-			free ( pBindColInfo );
-
-			// make next the current
+			free(pBindColInfo);
 			pBindColInfo = next;
-
-		} while ( pBindColInfo );
+		} while (pBindColInfo);
 	}
 }
 
@@ -445,28 +486,39 @@ void FreeBindings ( BIND_COL_INFO* pBindColInfo )
 // to show the ODBC diagnostic messages
 // ----------------------------------------------------------------------------
 
-void ShowDiagMessages ( SQLSMALLINT hType, SQLHANDLE hValue, SQLRETURN iStatus, char* szMsg )
+void ShowDiagMessages(SQLSMALLINT hType, SQLHANDLE hValue, SQLRETURN iStatus, char* szMsg)
 {
 	SQLSMALLINT	iRec = 0;
 	SQLINTEGER	iError;
 	SQLCHAR     szMessage[1024];
 	SQLCHAR     szState[SQL_SQLSTATE_SIZE + 1];
 
-	// header
-	printf ( "\nDiagnostics:\n" );
-
-	// in case of an invalid handle, no message can be extracted
-	if ( iStatus == SQL_INVALID_HANDLE ) {
-		fprintf ( stderr, "ODBC Error: Invalid handle!\n" );
+	printf("\nDiagnostics:\n");
+	if (iStatus == SQL_INVALID_HANDLE) 
+  {
+		fprintf(stderr, "ODBC Error: Invalid handle!\n");
 		return;
 	}
-
-	// loop to get all diag messages from driver/driver manager
-	while ( SQLGetDiagRec ( hType, hValue, ++ iRec, szState, &iError, szMessage, 1024, ( SQLSMALLINT* )NULL) == SQL_SUCCESS )
+	while (SQLGetDiagRec(hType, hValue, ++ iRec, szState, &iError, szMessage, 1024, ( SQLSMALLINT* )NULL) == SQL_SUCCESS)
+  {
 		fprintf ( stderr, "[%5.5s] %s (%d)\n", szState, szMessage, iError );
-	// fwprintf ( stderr, TEXT("%s (%d)\n"), szMessage, iError );
-
-	// gap
-	printf ( "\n" );
+  }
+	printf("\n");
 }
 
+void LoadODBCConnections(const char * odbcConnectionsFile, std::string& odbcConnection)
+{
+  try
+  {
+    std::ifstream fin(odbcConnectionsFile, std::ifstream::in);
+    boost::property_tree::ptree pt;
+    boost::property_tree::ini_parser::read_ini(fin, pt);
+    odbcConnection = pt.get<std::string>(boost::property_tree::ptree::path_type("active.odbc-connection"));
+    odbcConnection = pt.get<std::string>(boost::property_tree::ptree::path_type(odbcConnection));
+  }
+  catch (const boost::property_tree::ptree_error& e)
+  {
+    aq::Logger::getInstance().log(AQ_CRITICAL, "cannot load odbc connections ini file: '%s' [error:%s]", odbcConnectionsFile, e.what());
+    throw aq::generic_error(aq::generic_error::INVALID_FILE, "cannot load odbc connections ini file");
+  }
+}

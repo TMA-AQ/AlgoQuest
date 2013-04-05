@@ -12,7 +12,7 @@ SQLBulkOperations
 SQLCancel
 SQLCloseCursor
 SQLColAttribute
-SQLColAttributes
+; SQLColAttributes
 SQLColumnPrivileges
 SQLColumns
 SQLConnect

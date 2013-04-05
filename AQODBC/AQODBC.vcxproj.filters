@@ -20,11 +20,8 @@
       <UniqueIdentifier>{18c298c9-d2f4-408a-a650-84d994ad631e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Fichiers sources\tests">
-      <UniqueIdentifier>{07b9f5f3-13a4-4207-959e-872a09fbfa5c}</UniqueIdentifier>
+      <UniqueIdentifier>{ba4568b2-e7d4-4a1b-9943-2cc4ccb1e5c9}</UniqueIdentifier>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -59,9 +56,6 @@
     <ClCompile Include="driver\SQLConn.cpp">
       <Filter>Fichiers sources\driver</Filter>
     </ClCompile>
-    <ClCompile Include="driver\SQLDesc.cpp">
-      <Filter>Fichiers sources\driver</Filter>
-    </ClCompile>
     <ClCompile Include="driver\SQLDiag.cpp">
       <Filter>Fichiers sources\driver</Filter>
     </ClCompile>
@@ -75,9 +69,6 @@
       <Filter>Fichiers sources\driver</Filter>
     </ClCompile>
     <ClCompile Include="driver\Connection.cpp">
-      <Filter>Fichiers sources\driver</Filter>
-    </ClCompile>
-    <ClCompile Include="driver\SQLConnectW.cpp">
       <Filter>Fichiers sources\driver</Filter>
     </ClCompile>
     <ClCompile Include="driver\ResultSet.cpp">

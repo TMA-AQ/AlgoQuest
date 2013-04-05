@@ -1,8 +1,11 @@
 #include "stdafx.h"
 #include "ResultSet.h"
+#include <iostream>
 #include <aq/Logger.h>
+#include <aq/Utilities.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/filesystem.hpp>
 
 using namespace aq;
 
@@ -25,11 +28,32 @@ ResultSet::~ResultSet()
 {
 }
 
-bool ResultSet::bindCol(unsigned short c, void * ptr, void * len_ptr)
+void ResultSet::setQuery(const char * _query)
+{
+  this->query = _query;
+}
+
+bool ResultSet::get(unsigned short c, void * ptr, size_t len, void * len_ptr, SQLSMALLINT type)
 {
 	if ((c > 0) && (c <= headers.size()))
 	{
 		--c;
+    if (headers[c].type != type)
+      aq::Logger::getInstance().log(AQ_WARNING, "target type differs from internal type: %d != %d", type, headers[c].type);
+		memcpy(ptr, currentRow[c].valueBind, std::min((size_t)128, len)); // FIXME
+		memcpy(len_ptr, currentRow[c].sizeBind, sizeof(size_t));
+		return true;
+	}
+	return false;
+}
+
+bool ResultSet::bindCol(unsigned short c, void * ptr, void * len_ptr, SQLSMALLINT type)
+{
+	if ((c > 0) && (c <= headers.size()))
+	{
+		--c;
+    if (headers[c].type != type)
+      aq::Logger::getInstance().log(AQ_WARNING, "target type differs from internal type: %d != %d", type, headers[c].type);
 		headers[c].valueBind = ptr;
 		headers[c].sizeBind = len_ptr;
 		return true;
@@ -37,27 +61,86 @@ bool ResultSet::bindCol(unsigned short c, void * ptr, void * len_ptr)
 	return false;
 }
 
+bool ResultSet::moreResults() const
+{
+	if ((resultIt == results.end()) || ((*resultIt).size() != headers.size()))
+  {
+    if ((this->fd == NULL) || feof(this->fd))
+    {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool ResultSet::fetch()
 {
 	if ((resultIt == results.end()) || ((*resultIt).size() != headers.size()))
-		return false;
+  {
+    if ((this->fd == NULL) || feof(this->fd))
+    {
+      return false;
+    }
+    else
+    {
 
-	assert(headers.size() == (*resultIt).size());
-	for (size_t i = 0; i < headers.size(); ++i)
-	{
-		if ((headers[i].valueBind == 0) || (headers[i].sizeBind == 0))
-		{
-			aq::Logger::getInstance().log(AQ_ERROR, "column %u not binded\n", i);
-			continue;
-		}
-		size_t size = (*resultIt)[i].value.size();
-		memcpy(headers[i].valueBind, (*resultIt)[i].value.c_str(), size);
-		((char*)(headers[i].valueBind))[size] = 0;
-		memcpy(headers[i].sizeBind, &size, sizeof(size_t));
-	}
-
-	++resultIt;
-
+      // read rows
+      char buf[1024];
+      int size = 1024;
+      int trimEnd = 1;
+      ReadValidLine(fd, buf, size, trimEnd);
+      if (!feof(this->fd))
+      {
+        char * tokens = strtok(buf, ";");
+        size_t pos = 0;
+        while (tokens != NULL)
+        {
+          if (pos >= headers.size())
+            return false;
+          void * value_ptr = headers[pos].valueBind;
+          void * size_ptr = headers[pos].sizeBind;
+          if ((value_ptr == NULL) && (size_ptr == NULL))
+          {
+            value_ptr = currentRow[pos].valueBind;
+            size_ptr = currentRow[pos].sizeBind;
+          }
+          std::string token_str(tokens);
+          boost::algorithm::trim(token_str);
+          size_t size = token_str.size();
+          memcpy(value_ptr, token_str.c_str(), size);
+          if (headers[pos].type == SQL_C_CHAR)
+            ((char*)(value_ptr))[size] = 0;
+          memcpy(size_ptr, &size, sizeof(size_t));
+          tokens = strtok(NULL, ";");
+          ++pos;
+        }
+      }
+      else
+      {
+        return false;
+      }
+    }
+  }
+  else
+  {
+    assert(headers.size() == (*resultIt).size());
+    for (size_t i = 0; i < headers.size(); ++i)
+    {
+      if ((headers[i].valueBind == 0) || (headers[i].sizeBind == 0))
+      {
+        aq::Logger::getInstance().log(AQ_DEBUG, "column %u not binded\n", i);
+        continue;
+      }
+      size_t size = (*resultIt)[i].len;
+      void * ptr_from = (*resultIt)[i].buf;
+      void * ptr_dest = headers[i].valueBind;
+      memcpy(ptr_dest, ptr_from, size);
+      if (headers[i].type == SQL_C_CHAR)
+        ((char*)(ptr_dest))[size] = 0;
+      memcpy(headers[i].sizeBind, &size, sizeof(size_t));
+    }
+    ++resultIt;
+  }
 	return true;
 }
 
@@ -88,12 +171,7 @@ void ResultSet::pushResult(const char * buf, size_t size)
 			{
 				if (val < cur)
 				{
-					col_attr_t attr;
-					attr.name = std::string(val, cur - val);
-					val = cur + 1;
-					attr.size = 32; // fixme
-					attr.valueBind = (void*)0;
-					attr.sizeBind = (void*)0;
+					col_attr_t attr(std::string(val, cur - val).c_str(), 32, SQL_C_CHAR);
 					aq::Logger::getInstance().log(AQ_INFO, "add column: %s\n", attr.name.c_str());
 					headers.push_back(attr);
 				}
@@ -176,304 +254,199 @@ void ResultSet::pushResult(const char * buf, size_t size)
 
 }
 
-// -----------------------------------------------------------------------------------------------
-// TESTS PURPOSE
+void ResultSet::loadCatalg(const char * db)
+{
+  std::string db_base_desc(db);
+  db_base_desc += "/base_struct/base";
+  construis_base(db_base_desc.c_str(), baseDesc);
+  // dump_base(std::cout, baseDesc);
+}
 
-void ResultSet::fillSimulateResultTables1()
+void ResultSet::fillBases(const char * path)
 {
 	// clean
+  headers.clear();
 	results.clear();
 
-	// fill
-	{
-		col_attr_t c1_attr;
-		c1_attr.name = "TABLE_SCHEM";
-		c1_attr.size = 32;
-		headers.push_back(c1_attr);
-		std::vector<col_t> line;
-		col_t c1("test");
-		line.push_back(c1);
-		results.push_back(line);
-		results.push_back(line);
-		results.push_back(line);
-	}
+  // fill headers
+  headers.push_back(col_attr_t("TABLE_SCHEM", 32, SQL_C_CHAR));
+
+  // fill rows
+  boost::filesystem::path p(path);
+  if (boost::filesystem::exists(p) && boost::filesystem::is_directory(p))
+  {
+    std::vector<boost::filesystem::path> dbs;
+    std::copy(boost::filesystem::directory_iterator(p), boost::filesystem::directory_iterator(), std::back_inserter(dbs));
+    for (std::vector<boost::filesystem::path>::const_iterator it = dbs.begin(); it != dbs.end(); ++it)
+    {
+      const boost::filesystem::path& db = *it;
+      if (boost::filesystem::is_directory(db))
+      {
+        std::vector<col_t> line;
+        col_t c1(db.filename().generic_string());
+        line.push_back(c1);
+        results.push_back(line);
+      }
+    }
+  }
 
 	// set cursor
 	resultIt = results.begin();
 }
 
-void ResultSet::fillSimulateResultTables2()
+void ResultSet::fillTables()
 {
 	// clean
+  headers.clear();
 	results.clear();
+  
+  // fill headers
+  headers.push_back(col_attr_t("TABLE_CAT", 32, SQL_C_CHAR));
+  headers.push_back(col_attr_t("TABLE_SCHEM", 32, SQL_C_CHAR));
+  headers.push_back(col_attr_t("TABLE_NAME", 32, SQL_C_CHAR));
+  headers.push_back(col_attr_t("TABLE_TYPE", 32, SQL_C_CHAR));
+  headers.push_back(col_attr_t("REMARKS", 32, SQL_C_CHAR));
 
-	{
-		col_attr_t c1;
-		c1.name = "TABLE_CAT";
-		c1.size = 32;
-		headers.push_back(c1);
-	}
-
-	{
-		col_attr_t c1;
-		c1.name = "TABLE_SCHEM";
-		c1.size = 32;
-		headers.push_back(c1);
-	}
-
-	{
-		col_attr_t c1;
-		c1.name = "TABLE_NAME";
-		c1.size = 32;
-		headers.push_back(c1);
-	}
-
-	{
-		col_attr_t c1;
-		c1.name = "TABLE_TYPE";
-		c1.size = 32;
-		headers.push_back(c1);
-	}
-
-	{
-		col_attr_t c1;
-		c1.name = "REMARKS";
-		c1.size = 32;
-		headers.push_back(c1);
-	}
-
-	std::vector<col_t> l1;
-	l1.push_back(col_t("NULL"));
-	l1.push_back(col_t("test"));
-	l1.push_back(col_t("table1"));
-	l1.push_back(col_t("TABLE"));
-	l1.push_back(col_t(""));
-
-	std::vector<col_t> l2;
-	l2.push_back(col_t("NULL"));
-	l2.push_back(col_t("test"));
-	l2.push_back(col_t("table2"));
-	l2.push_back(col_t("TABLE"));
-	l2.push_back(col_t(""));
-
-	std::vector<col_t> l3;
-	l3.push_back(col_t("NULL"));
-	l3.push_back(col_t("test"));
-	l3.push_back(col_t("table3"));
-	l3.push_back(col_t("TABLE"));
-	l3.push_back(col_t(""));
-
-	results.push_back(l1);
-	results.push_back(l2);
-	results.push_back(l3);
+  // fill rows
+  for (aq::base_t::tables_t::const_iterator it = baseDesc.table.begin(); it != baseDesc.table.end(); ++it)
+  {
+    const base_t::table_t& table = *it;
+    std::vector<col_t> row;
+    row.push_back(col_t("NULL"));
+    row.push_back(col_t(baseDesc.nom));
+    row.push_back(col_t(table.nom));
+    row.push_back(col_t("TABLE"));
+    row.push_back(col_t(""));
+    results.push_back(row);
+  }
 
 	// set cursor
 	resultIt = results.begin();
 }
 
-void ResultSet::fillSimulateResultColumns(const char * TableName, size_t NameLength)
+void ResultSet::fillColumns(const char * tableName)
 {
 	// clean
+  headers.clear();
 	results.clear();
-	std::string tableName(TableName, TableName + NameLength);
-
-	{
-		col_attr_t c1;
-		c1.name = "TABLE_CAT";
-		c1.size = 32;
-		c1.valueBind = (void*)0;
-		c1.sizeBind = (void*)0;
-		headers.push_back(c1);
-	}
-
-	{
-		col_attr_t c1;
-		c1.name = "TABLE_SCHEM";
-		c1.size = 32;
-		c1.valueBind = (void*)0;
-		c1.sizeBind = (void*)0;
-		headers.push_back(c1);
-	}
-
-	{
-		col_attr_t c1;
-		c1.name = "TABLE_NAME";
-		c1.size = 32;
-		c1.valueBind = (void*)0;
-		c1.sizeBind = (void*)0;
-		headers.push_back(c1);
-	}
-
-	{
-		col_attr_t c1;
-		c1.name = "COLUMN_NAME";
-		c1.size = 32;
-		c1.valueBind = (void*)0;
-		c1.sizeBind = (void*)0;
-		headers.push_back(c1);
-	}
-
-	{
-		col_attr_t c1;
-		c1.name = "DATA_TYPE";
-		c1.size = 32;
-		c1.valueBind = (void*)0;
-		c1.sizeBind = (void*)0;
-		headers.push_back(c1);
-	}
+  
+  // fill headers
+	headers.push_back(col_attr_t("TABLE_CAT", 32, SQL_C_CHAR));
+	headers.push_back(col_attr_t("TABLE_SCHEM", 32, SQL_C_CHAR));
+	headers.push_back(col_attr_t("TABLE_NAME", 32, SQL_C_CHAR));
+	headers.push_back(col_attr_t("COLUMN_NAME", 32, SQL_C_CHAR));
+	headers.push_back(col_attr_t("DATA_TYPE", 32, SQL_C_SSHORT));
+	headers.push_back(col_attr_t("TYPE_NAME ", 32, SQL_C_CHAR));
+	headers.push_back(col_attr_t("COLUMN_SIZE", 32, SQL_C_SLONG));
+	headers.push_back(col_attr_t("BUFFER_LENGTH", 32, SQL_C_SLONG));
+	headers.push_back(col_attr_t("DECIMAL_DIGITS", 32, SQL_C_SLONG));
+	headers.push_back(col_attr_t("NUM_PREC_RADIX", 32, SQL_C_CHAR));
+	headers.push_back(col_attr_t("NULLABLE", 32, SQL_C_CHAR));
+	headers.push_back(col_attr_t("REMARKS", 32, SQL_C_CHAR));
+	headers.push_back(col_attr_t("COLUMN_DEF", 32, SQL_C_CHAR));
+	headers.push_back(col_attr_t("SQL_DATA_TYPE", 32, SQL_C_CHAR));
+	headers.push_back(col_attr_t("SQL_DATETIME_SUB", 32, SQL_C_CHAR));
+	headers.push_back(col_attr_t("CHAR_OCTET_LENGTH", 32, SQL_C_CHAR));
+	headers.push_back(col_attr_t("ORDINAL_POSITION", 32, SQL_C_CHAR));
+	headers.push_back(col_attr_t("IS_NULLABLE", 32, SQL_C_CHAR));
+	headers.push_back(col_attr_t("REMARKS", 32, SQL_C_CHAR));
 	
-	{
-		col_attr_t c1;
-		c1.name = "TYPE_NAME";
-		c1.size = 32;
-		c1.valueBind = (void*)0;
-		c1.sizeBind = (void*)0;
-		headers.push_back(c1);
-	}
-	
-	{
-		col_attr_t c1;
-		c1.name = "COLUMN_SIZE";
-		c1.size = 32;
-		c1.valueBind = (void*)0;
-		c1.sizeBind = (void*)0;
-		headers.push_back(c1);
-	}
-	
-	{
-		col_attr_t c1;
-		c1.name = "BUFFER_LENGTH";
-		c1.size = 32;
-		c1.valueBind = (void*)0;
-		c1.sizeBind = (void*)0;
-		headers.push_back(c1);
-	}
-	
-	{
-		col_attr_t c1;
-		c1.name = "DECIMAL_DIGITS";
-		c1.size = 32;
-		c1.valueBind = (void*)0;
-		c1.sizeBind = (void*)0;
-		headers.push_back(c1);
-	}
-	
-	{
-		col_attr_t c1;
-		c1.name = "NUM_PREC_RADIX";
-		c1.size = 32;
-		c1.valueBind = (void*)0;
-		c1.sizeBind = (void*)0;
-		headers.push_back(c1);
-	}
-	
-	{
-		col_attr_t c1;
-		c1.name = "NULLABLE";
-		c1.size = 32;
-		c1.valueBind = (void*)0;
-		c1.sizeBind = (void*)0;
-		headers.push_back(c1);
-	}
-	
-	{
-		col_attr_t c1;
-		c1.name = "REMARKS";
-		c1.size = 32;
-		c1.valueBind = (void*)0;
-		c1.sizeBind = (void*)0;
-		headers.push_back(c1);
-	}
-	
-	{
-		col_attr_t c1;
-		c1.name = "COLUMN_DEF";
-		c1.size = 32;
-		c1.valueBind = (void*)0;
-		c1.sizeBind = (void*)0;
-		headers.push_back(c1);
-	}
-	
-	{
-		col_attr_t c1;
-		c1.name = "SQL_DATA_TYPE";
-		c1.size = 32;
-		c1.valueBind = (void*)0;
-		c1.sizeBind = (void*)0;
-		headers.push_back(c1);
-	}
-	
-	{
-		col_attr_t c1;
-		c1.name = "SQL_DATETIME_SUB";
-		c1.size = 32;
-		c1.valueBind = (void*)0;
-		c1.sizeBind = (void*)0;
-		headers.push_back(c1);
-	}
-	
-	{
-		col_attr_t c1;
-		c1.name = "CHAR_OCTET_LENGTH";
-		c1.size = 32;
-		c1.valueBind = (void*)0;
-		c1.sizeBind = (void*)0;
-		headers.push_back(c1);
-	}
-	
-	{
-		col_attr_t c1;
-		c1.name = "ORDINAL_POSITION";
-		c1.size = 32;
-		c1.valueBind = (void*)0;
-		c1.sizeBind = (void*)0;
-		headers.push_back(c1);
-	}
-	
-	{
-		col_attr_t c1;
-		c1.name = "IS_NULLABLE";
-		c1.size = 32;
-		c1.valueBind = (void*)0;
-		c1.sizeBind = (void*)0;
-		headers.push_back(c1);
-	}
-	
-	std::list<std::string> c;
-	c.push_back("id");
-	c.push_back("val_1");
-	c.push_back("val_2");
-
-	if (strncmp(TableName, "table2", NameLength) == 0)
-	{
-		c.push_back("id_t1");
-	}
-	else if (strncmp(TableName, "table3", NameLength) == 0)
-	{
-		c.push_back("id_t2");
-	}
-
-	std::for_each (c.begin(), c.end(), [&] (std::string colName)
-	{
-		std::vector<col_t> l1;
-		l1.push_back(col_t("NULL"));
-		l1.push_back(col_t("test"));
-		l1.push_back(col_t(TableName));
-		l1.push_back(col_t(colName));
-		l1.push_back(col_t("4"));
-		l1.push_back(col_t("INTEGER"));
-		for (unsigned int i = 6; i <= 19; ++i)
-		{
-			l1.push_back(col_t(""));
-		}
-		results.push_back(l1);
-	});
+  // fill rows
+  for (aq::base_t::tables_t::const_iterator it_table = baseDesc.table.begin(); it_table != baseDesc.table.end(); ++it_table)
+  {
+    const base_t::table_t& table = *it_table;
+    if (table.nom == tableName)
+    {
+      for (aq::base_t::table_t::cols_t::const_iterator it_col = table.colonne.begin(); it_col != table.colonne.end(); ++it_col)
+      {
+        const base_t::table_t::col_t& column = *it_col;
+        std::vector<col_t> row;
+        row.push_back(col_t("NULL"));
+        row.push_back(col_t(baseDesc.nom));
+        row.push_back(col_t(tableName));
+        row.push_back(col_t(column.nom));
+        switch(column.type)
+        {
+        case t_int:
+          row.push_back(col_t(SQL_INTEGER));
+          row.push_back(col_t("INTEGER"));
+          break;
+        case t_double:
+          row.push_back(col_t(SQL_DOUBLE));
+          row.push_back(col_t("DOUBLE"));
+          break;
+        case t_date1: 
+        case t_date2: 
+        case t_date3:
+          row.push_back(col_t(SQL_DATE));
+          row.push_back(col_t("DATE"));
+          break;
+        case t_char: 
+          row.push_back(col_t(SQL_VARCHAR));
+          row.push_back(col_t("VARCHAR"));
+          break;
+        case t_long_long: 
+          row.push_back(col_t(SQL_INTEGER));
+          row.push_back(col_t("LONG"));
+          break;
+        case t_raw:
+          row.push_back(col_t(SQL_VARBINARY));
+          row.push_back(col_t("RAW"));
+          break;
+        default:
+          aq::Logger::getInstance().log(AQ_ERROR, "invalid type %d for column", column.type);
+          row.push_back(col_t(0));
+          row.push_back(col_t(""));
+        }
+        for (unsigned int i = 6; i < headers.size(); ++i) // TODO
+        {
+          row.push_back(col_t(""));
+        }
+        results.push_back(row);
+      }
+    }
+  }
 
 	// set cursor
 	resultIt = results.begin();
 }
 
-void ResultSet::fillSimulateResultTypeInfos()
+void ResultSet::openResultCursor(const char * resultFilename)
+{
+  // clean
+  currentRow.clear(); // fixme : delete binding if not null
+  headers.clear();
+  results.clear();
+
+  // open cursor
+  this->fd = fopen(resultFilename, "r");
+  if (this->fd != NULL)
+  {
+    // read rows description
+    char buf[1024];
+    int size = 1024;
+    int trimEnd = 1;
+    ReadValidLine(fd, buf, size, trimEnd);
+    char * tokens = strtok(buf, ";");
+    while (tokens != NULL)
+    {
+      aq::Logger::getInstance().log(AQ_DEBUG, "read column '%s'\n", tokens);
+      std::string token_str(tokens);
+      boost::algorithm::trim(token_str);
+      headers.push_back(col_attr_t(token_str.c_str(), 32, SQL_C_CHAR)); // FIXME
+      currentRow.push_back(col_attr_t(token_str.c_str(), 32, SQL_C_CHAR)); // FIXME
+      currentRow.rbegin()->valueBind = static_cast<void*>(::malloc(128)); // FIXME
+      currentRow.rbegin()->sizeBind = static_cast<void*>(::malloc(sizeof(size_t)));
+      this->bindCol(headers.size(), currentRow.rbegin()->valueBind, currentRow.rbegin()->sizeBind, SQL_C_CHAR);
+      tokens = strtok(NULL, ";");
+    }
+  }
+
+  // set cursor
+  resultIt = results.begin();
+}
+
+void ResultSet::fillTypeInfos()
 {
 	// clean
 	results.clear();
@@ -499,34 +472,15 @@ void ResultSet::fillSimulateResultTypeInfos()
 	l.push_back("SQL_DATETIME_SUB");
 	l.push_back("NUM_PREC_RADIX");
 	l.push_back("INTERVAL_PRECISION");
-
-	std::for_each(l.begin(), l.end(), [&] (std::string colname)
-	{
-		col_attr_t c1;
-		c1.name = "type";
-		c1.size = 32;
-		c1.valueBind = (void*)0;
-		c1.sizeBind = (void*)0;
-		headers.push_back(c1);
-	});
-	
+  
 	std::vector<col_t> l1;
-	std::for_each(l.begin(), l.end(), [&] (std::string colname)
-	{
+	for (std::list<std::string>::const_iterator it = l.begin(); it != l.end(); ++it)
+  {
+		col_attr_t c1((*it).c_str(), 32, SQL_C_CHAR);
+		headers.push_back(c1);
 		l1.push_back(col_t(""));
-	});
+	}
 	results.push_back(l1);
-
-	// set cursor
-	resultIt = results.begin();
-}
-
-void ResultSet::fillSimulateResultQuery()
-{
-	// clean
-	results.clear();
-
-	// fill
 
 	// set cursor
 	resultIt = results.begin();

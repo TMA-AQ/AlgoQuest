@@ -19,15 +19,17 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 											LPVOID lpReserved
 											)
 {
-	aq::Logger::getInstance().setLevel(LOG_INFO);
-
 	switch (ul_reason_for_call)
 	{
 	case DLL_PROCESS_ATTACH:
-		AQ_ODBC_LOG("DLL_PROCESS_ATTACH\n");
+    aq::Logger::getInstance().setLevel(AQ_LOG_DEBUG);
+    aq::Logger::getInstance().setLocalFile("E:/Project_AQ/Logs/AQODBC.log"); // FIXME
+    AQ_ODBC_LOG("DLL_PROCESS_ATTACH\n");
 		break;
 
 	case DLL_THREAD_ATTACH: 
+    aq::Logger::getInstance().setLevel(AQ_LOG_DEBUG);
+    aq::Logger::getInstance().setLocalFile("E:/Project_AQ/Logs/AQODBC.log"); // FIXME
 		AQ_ODBC_LOG("DLL_THREAD_ATTACH\n");
 		break;
 
@@ -97,16 +99,6 @@ SQLRETURN  SQL_API SQLDataSources(SQLHENV EnvironmentHandle,
 	return SQL_SUCCESS;
 }
 
-SQLRETURN  SQL_API SQLDescribeCol(SQLHSTMT StatementHandle,
-																	SQLUSMALLINT ColumnNumber, _Out_writes_opt_(BufferLength) SQLCHAR *ColumnName,
-																	SQLSMALLINT BufferLength, _Out_opt_ SQLSMALLINT *NameLength,
-																	_Out_opt_ SQLSMALLINT *DataType, _Out_opt_ SQLULEN *ColumnSize,
-																	_Out_opt_ SQLSMALLINT *DecimalDigits, _Out_opt_ SQLSMALLINT *Nullable)
-{
-	AQ_ODBC_LOG("%s called\n", __FUNCTION__);
-	return SQL_SUCCESS;
-}
-
 SQLRETURN  SQL_API SQLDisconnect(SQLHDBC ConnectionHandle)
 {
 	AQ_ODBC_LOG("%s called\n", __FUNCTION__);
@@ -125,12 +117,6 @@ SQLRETURN  SQL_API SQLError(SQLHENV EnvironmentHandle,
 														_Out_writes_(6) SQLCHAR *Sqlstate, _Out_opt_ SQLINTEGER *NativeError,
 														_Out_writes_opt_(BufferLength) SQLCHAR *MessageText, SQLSMALLINT BufferLength,
 														_Out_opt_ SQLSMALLINT *TextLength)
-{
-	AQ_ODBC_LOG("%s called\n", __FUNCTION__);
-	return SQL_SUCCESS;
-}
-
-SQLRETURN  SQL_API SQLExecute(SQLHSTMT StatementHandle)
 {
 	AQ_ODBC_LOG("%s called\n", __FUNCTION__);
 	return SQL_SUCCESS;
@@ -193,15 +179,6 @@ SQLRETURN  SQL_API SQLGetCursorName(SQLHSTMT StatementHandle,
 	return SQL_SUCCESS;
 }
 
-SQLRETURN  SQL_API SQLGetData(SQLHSTMT StatementHandle,
-															SQLUSMALLINT ColumnNumber, SQLSMALLINT TargetType,
-															_Out_writes_opt_(_Inexpressible_(BufferLength)) SQLPOINTER TargetValue, SQLLEN BufferLength,
-															_Out_opt_ SQLLEN *StrLen_or_IndPtr)
-{
-	AQ_ODBC_LOG("%s called\n", __FUNCTION__);
-	return SQL_SUCCESS;
-}
-
 SQLRETURN  SQL_API SQLGetDescField(SQLHDESC DescriptorHandle,
 																	 SQLSMALLINT RecNumber, SQLSMALLINT FieldIdentifier,
 																	 _Out_writes_opt_(_Inexpressible_(BufferLength)) SQLPOINTER Value, SQLINTEGER BufferLength,
@@ -236,23 +213,8 @@ SQLRETURN  SQL_API SQLParamData(SQLHSTMT StatementHandle,
 	return SQL_SUCCESS;
 }
 
-SQLRETURN  SQL_API SQLPrepare(SQLHSTMT StatementHandle,
-															_In_reads_(TextLength) SQLCHAR* StatementText,
-															SQLINTEGER TextLength)
-{
-	AQ_ODBC_LOG("%s called\n", __FUNCTION__);
-	return SQL_SUCCESS;
-}
-
 SQLRETURN  SQL_API SQLPutData(SQLHSTMT StatementHandle,
 															_In_reads_(_Inexpressible_(StrLen_or_Ind)) SQLPOINTER Data, SQLLEN StrLen_or_Ind)
-{
-	AQ_ODBC_LOG("%s called\n", __FUNCTION__);
-	return SQL_SUCCESS;
-}
-
-SQLRETURN  SQL_API SQLRowCount(_In_ SQLHSTMT StatementHandle,
-															 _Out_ SQLLEN* RowCount)
 {
 	AQ_ODBC_LOG("%s called\n", __FUNCTION__);
 	return SQL_SUCCESS;
@@ -328,17 +290,6 @@ SQLRETURN  SQL_API SQLSetStmtAttr(SQLHSTMT StatementHandle,
 
 SQLRETURN  SQL_API SQLSetStmtOption(SQLHSTMT StatementHandle,
 																		SQLUSMALLINT Option, SQLULEN Value)
-{
-	AQ_ODBC_LOG("%s called\n", __FUNCTION__);
-	return SQL_SUCCESS;
-}
-
-SQLRETURN  SQL_API SQLSpecialColumns(SQLHSTMT StatementHandle,
-																		 SQLUSMALLINT IdentifierType, 
-																		 _In_reads_opt_(NameLength1) SQLCHAR *CatalogName, SQLSMALLINT NameLength1,
-																		 _In_reads_opt_(NameLength2) SQLCHAR *SchemaName, SQLSMALLINT NameLength2, 
-																		 _In_reads_opt_(NameLength3) SQLCHAR *TableName, SQLSMALLINT NameLength3, 
-																		 SQLUSMALLINT Scope, SQLUSMALLINT Nullable)
 {
 	AQ_ODBC_LOG("%s called\n", __FUNCTION__);
 	return SQL_SUCCESS;

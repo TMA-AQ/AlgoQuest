@@ -4,6 +4,8 @@
 #include "ResultSet.h"
 #include "Connection.h"
 
+#include <aq/Logger.h>
+
 #include <windows.h>
 #include <sqlext.h>
 #include <odbcinst.h>
@@ -19,6 +21,7 @@
 #define AQ_ODBC_LOG(args, ...) \
 	do \
 	{ \
+    aq::Logger::getInstance().log(AQ_DEBUG, args, ## __VA_ARGS__); \
 		/* printf("[%s:%s:%u]: ", __FILE__, __FUNCTION__, __LINE__); */ \
 		/* printf(args, ## __VA_ARGS__); */ \
 	} \
@@ -73,10 +76,6 @@ struct AqHandleConn
 	aq::Connection * connection;
 	boost::asio::io_service * ioService;
 	boost::thread * ioThread;
-
-	//boost::shared_ptr<aq::Connection> connection;
-	//boost::shared_ptr<boost::asio::io_service> ioService;
-	//boost::shared_ptr<boost::thread> ioThread;
 
 	AqHandleEnv * env;
 };

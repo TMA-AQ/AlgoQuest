@@ -1,6 +1,7 @@
 #ifndef __CONNECTION_H__
 #define __CONNECTION_H__
 
+#include <string>
 #include <vector>
 #include <list>
 #include <boost/asio.hpp>
@@ -13,7 +14,7 @@ namespace aq
 class Connection
 {
 public:
-
+  
 	// type definitions
 	typedef boost::array<char, 2048> buffer_t;
 public:
@@ -25,6 +26,16 @@ public:
 
 	void write(const char * stmt);
 	void read(buffer_t& buf);
+  
+  std::string query_resolver;
+  std::string schema;
+  std::string db_path;
+  std::string cfg_path;
+  std::string server;
+  std::string port;
+  std::string uid;
+  std::string pwd;
+
 private:
 	boost::asio::io_service& io_service;
 	boost::asio::ip::tcp::socket socket;

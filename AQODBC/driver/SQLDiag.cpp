@@ -67,7 +67,7 @@ SQLRETURN  SQL_API SQLGetDiagField(SQLSMALLINT HandleType,
 		return SQL_ERROR;
 	}
 
-	return SQL_SUCCESS;
+	return SQL_NO_DATA;
 }
 
 SQLRETURN  SQL_API SQLGetDiagRec(SQLSMALLINT HandleType,
@@ -81,7 +81,7 @@ SQLRETURN  SQL_API SQLGetDiagRec(SQLSMALLINT HandleType,
 																 SQLSMALLINT *TextLength)
 {
 	AQ_ODBC_LOG("%s called\n", __FUNCTION__);
-	return SQL_SUCCESS;
+	return SQL_NO_DATA;
 }
 
 SQLRETURN  SQL_API SQLGetFunctions(SQLHDBC ConnectionHandle,
