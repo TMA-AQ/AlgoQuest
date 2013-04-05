@@ -144,10 +144,10 @@ bool equal( ColumnItem * first, ColumnItem * second, ColumnType type )
 	case COL_TYPE_DATE1:
 	case COL_TYPE_DATE2:
 	case COL_TYPE_DATE3:
-		return first->numval < second->numval;
+		return first->numval == second->numval;
 		break;
 	case COL_TYPE_VARCHAR: 
-		return first->strval < second->strval;
+		return first->strval == second->strval;
 		break;
 	default:
 		throw generic_error(generic_error::NOT_IMPLEMENED, "");
