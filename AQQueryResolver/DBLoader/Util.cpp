@@ -109,31 +109,6 @@ void redirect_std_out ( char *name_out, FILE *f_out )
 //  
 //  strcpy ( cible, source );
 // }
-//-------------------------------------------------------------------------------
-void display_base (  s_base_v2 *base)
-{
-	printf ("base %s, nb table : %u \n", base->nom, base->nb_tables);
-	s_base_v2 *p_base;
-	s_table_struct_v2 *p_table;
-
-	int nb_col;
-	int nb_tables;
-	int i,  j;
-	p_base = base;
-
-	nb_tables = base->nb_tables; 
-	for ( i = 0; i < nb_tables ; i++)
-	{
-
-		p_table = base->table + i ;
-
-		printf ("\nTable  %s  :\n",    p_table->nom );
-		nb_col = p_table->nb_cols;
-
-		for ( j = 0;  j < nb_col ; j++ )   printf (" colonne : %s \n ",  ( p_table->colonne+ j )->nom);
-
-	}
-}
 // -----------------------------------------------------------------------------------------------------------
 void nettoie_nom (char *nom)
 { 

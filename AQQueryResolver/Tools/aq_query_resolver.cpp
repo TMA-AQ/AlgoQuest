@@ -37,6 +37,7 @@ int yyerror( const char *pszMsg )
 	return 0;
 }
 
+size_t failedQueries = 0;
 boost::mutex parserMutex;
 
 // -------------------------------------------------------------------------------------------------
@@ -50,17 +51,17 @@ public:
 		std::string str;
 		syntax_tree_to_prefix_form(pNode, str);
 
-		aq::Logger::getInstance().log(AQ_INFO, "---");
-		aq::Logger::getInstance().log(AQ_INFO, "Get prefix form of query");
-		aq::Logger::getInstance().log(AQ_INFO, str.c_str());
+		aq::Logger::getInstance().log(AQ_INFO, "---\n");
+		aq::Logger::getInstance().log(AQ_INFO, "Get prefix form of query\n");
+		aq::Logger::getInstance().log(AQ_INFO, "%s\n", str.c_str());
 
 		//
 		// Process with parse jeq
 		ParseJeq(str);
 
-		aq::Logger::getInstance().log(AQ_INFO, "---");
-		aq::Logger::getInstance().log(AQ_INFO, "Get prefix form of query after jeq parser");
-		aq::Logger::getInstance().log(AQ_INFO, str.c_str());
+		aq::Logger::getInstance().log(AQ_INFO, "---\n");
+		aq::Logger::getInstance().log(AQ_INFO, "Get prefix form of query after jeq parser\n");
+		aq::Logger::getInstance().log(AQ_INFO, "%s\n", str.c_str());
 
 	}
 	
@@ -96,14 +97,12 @@ int processAQMatrix(const std::string& query, const std::string& aqMatrixFileNam
 	tnode	*pNode;
 	int	nRet;
 
-	std::cout << query << std::endl << std::endl;
-	
 	//
 	// Parse SQL request
 	{
 
 		boost::mutex::scoped_lock lock(parserMutex);
-		aq::Logger::getInstance().log(AQ_INFO, "parse sql query %s\n", query.c_str());
+		aq::Logger::getInstance().log(AQ_INFO, "parse sql query: '%s'\n", query.c_str());
 		if ((nRet = SQLParse(query.c_str(), &pNode)) != 0 ) 
 		{
 			aq::Logger::getInstance().log(AQ_ERROR, "error parsing sql request '%s'\n", query.c_str());
@@ -126,11 +125,11 @@ int processAQMatrix(const std::string& query, const std::string& aqMatrixFileNam
 	answerFile.push_back(aqMatrixFileName);
 	for (std::vector<std::string>::const_iterator it = answerFile.begin(); it != answerFile.end(); ++it)
 	{
-		// aqMatrix->load((*it).c_str(), settings.fieldSeparator, tableIDs);
+		aqMatrix->load((*it).c_str(), settings.fieldSeparator, tableIDs);
 	}
-	aqMatrix->simulate(113867938, 2);
+	// aqMatrix->simulate(113867938, 2);
 	// aqMatrix->simulate(10, 2);
-	tableIDs.push_back(8);
+	// tableIDs.push_back(8);
 	aq::Logger::getInstance().log(AQ_INFO, "Load AQ Matrix: Elapsed Time = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
 
 	AQEngineSimulate aqEngine;
@@ -154,10 +153,7 @@ int processAQMatrix(const std::string& query, const std::string& aqMatrixFileNam
 }
 
 // -------------------------------------------------------------------------------------------------
-int transformQuery(
-	const std::string& query,
-	TProjectSettings& settings, 
-	Base& baseDesc)
+int transformQuery(const std::string& query, TProjectSettings& settings, Base& baseDesc)
 {
 	tnode	*pNode;
 	int	nRet;
@@ -196,39 +192,48 @@ int transformQuery(
 }
 
 // -------------------------------------------------------------------------------------------------
-int prepareQuery(
-	const TProjectSettings& settingsBase, 
-	Base& baseDesc,
-	TProjectSettings& settings, 
-	std::string& displayFile)
+int prepareQuery(const TProjectSettings& settingsBase, Base& baseDesc, TProjectSettings& settings, std::string& displayFile, const std::string queryIdentStr, bool force)
 {		
 	//
 	// generate ident and ini file
-	std::string queryIdentStr = "";
-	boost::uuids::uuid queryIdent = boost::uuids::random_generator()();
-	std::ostringstream queryIdentOSS;
-	queryIdentOSS << queryIdent;
-	queryIdentStr = queryIdentOSS.str();
-	settings.changeIdent(queryIdentOSS.str());
+  std::string queryIdentTmp = queryIdentStr;
+	if (queryIdentTmp == "")
+  {
+    boost::uuids::uuid queryIdent = boost::uuids::random_generator()();
+    std::ostringstream queryIdentOSS;
+    queryIdentOSS << queryIdent;
+    queryIdentTmp = queryIdentOSS.str();
+    settings.changeIdent(queryIdentOSS.str());
+  }
+  else
+  {
+    settings.changeIdent(queryIdentTmp);
+  }
 
 	//
 	// create directories
 	std::list<fs::path> lpaths;
-	lpaths.push_back(fs::path(settings.szRootPath + "/calculus/" + queryIdentOSS.str()));
+	lpaths.push_back(fs::path(settings.szRootPath + "/calculus/" + queryIdentTmp));
 	lpaths.push_back(fs::path(settings.szTempPath1));
 	lpaths.push_back(fs::path(settings.szTempPath2));
 	for (std::list<fs::path>::const_iterator dir = lpaths.begin(); dir != lpaths.end(); ++dir)
 	{
 		if (fs::exists(*dir))
 		{
-			aq::Logger::getInstance().log(AQ_ERROR, "directory already exist '%s'", (*dir).c_str());
-			return EXIT_FAILURE;
+			aq::Logger::getInstance().log(AQ_ERROR, "directory already exist '%s'\n", (*dir).c_str());
+      if (!force)
+      {
+        return EXIT_FAILURE;
+      }
 		}
 
 		if (!fs::create_directory(*dir))
 		{
-			aq::Logger::getInstance().log(AQ_ERROR, "cannot create directory '%s'", (*dir).c_str());
-			return EXIT_FAILURE;
+			aq::Logger::getInstance().log(AQ_ERROR, "cannot create directory '%s'\n", (*dir).c_str());
+      if (!force)
+      {
+        return EXIT_FAILURE;
+      }
 		}
 	}
 
@@ -247,14 +252,8 @@ int prepareQuery(
 }
 
 // -------------------------------------------------------------------------------------------------
-int processQuery( 
-	const std::string& query,
-	TProjectSettings& settings, 
-	Base& baseDesc,
-	AQEngine_Intf * aq_engine,
-	const std::string& answer,
-	bool display,
-	bool clean)
+int processQuery(const std::string& query, TProjectSettings& settings, Base& baseDesc, AQEngine_Intf * aq_engine,
+                 const std::string& answer, bool display, bool clean)
 {
 	try
 	{
@@ -339,14 +338,9 @@ int processQuery(
 }
 
 // -------------------------------------------------------------------------------------------------
-int processSQLQueries(
-	std::list<std::string>::const_iterator itBegin, 
-	std::list<std::string>::const_iterator itEnd, 
-	const TProjectSettings& settingsBase, 
-	Base& baseDesc,
-	AQEngine_Intf * aq_engine,
-	bool display,
-	bool clean)
+int processSQLQueries(std::list<std::string>::const_iterator itBegin, std::list<std::string>::const_iterator itEnd, 
+                      const TProjectSettings& settingsBase, Base& baseDesc, AQEngine_Intf * aq_engine,
+                      bool display, bool clean, const std::string queryIdent, bool force)
 {
 
 	unsigned int i = 1;
@@ -361,7 +355,7 @@ int processSQLQueries(
 		// prepare and process query
 		std::string answer;
 		TProjectSettings settings(settingsBase);
-		if (!((prepareQuery(settingsBase, baseDesc, settings, answer) == EXIT_SUCCESS) &&
+		if (!((prepareQuery(settingsBase, baseDesc, settings, answer, queryIdent, force) == EXIT_SUCCESS) &&
 				  (processQuery(*it, settings, baseDesc, aq_engine, answer, display, clean) == EXIT_SUCCESS)))
 		{
 			queriesKO.push_back(*it);
@@ -379,7 +373,8 @@ int processSQLQueries(
 		std::for_each(queriesKO.begin(), queriesKO.end(), [] (const std::string& q) {
 			aq::Logger::getInstance().log(AQ_ERROR, "%s\n", q.c_str());
 		});
-	}
+    failedQueries += queriesKO.size();
+  }
 
 	return EXIT_SUCCESS;
 }
@@ -420,6 +415,7 @@ int main(int argc, char**argv)
 		bool transform = false;
 		bool skipNestedQuery = false;
 		bool loadDatabase = false;
+    bool force = false;
 
 		// old args for backward compatibility
 		std::vector<std::string> oldArgs;
@@ -435,6 +431,7 @@ int main(int argc, char**argv)
 			("log-ident", po::value<std::string>(&ident)->default_value("aq_query_resolver"), "")
 			("aq-ini", po::value<std::string>(&propertiesFile), "")
 			("query-ident", po::value<std::string>(&queryIdent), "")
+      ("force", po::bool_switch(&force), "force use of directory if it already exists")
 			("simulate-aq-engine", po::bool_switch(&simulateAQEngine), "")
 			("sql-query", po::value<std::string>(&sqlQuery), "")
 			("sql-queries-file", po::value<std::string>(&sqlQueriesFile), "")
@@ -655,7 +652,7 @@ int main(int argc, char**argv)
 			{
 				// std::advance(itEnd, queries.size() / worker); // fixme: doesn't work under visual !!!
 				for (unsigned int i = 0; (i < queries.size() / worker) && (itEnd != queries.end()); i++) ++itEnd;
-				grp.create_thread(boost::bind(processSQLQueries, itBegin, itEnd, settings, baseDesc, aq_engine, display, clean));
+				grp.create_thread(boost::bind(processSQLQueries, itBegin, itEnd, settings, baseDesc, aq_engine, display, clean, queryIdent, force));
 				itBegin = itEnd;
 			}
 			grp.join_all();
@@ -682,5 +679,6 @@ int main(int argc, char**argv)
 		return EXIT_FAILURE;
 	}
 
+  if (failedQueries) return EXIT_FAILURE;
 	return EXIT_SUCCESS;
 }

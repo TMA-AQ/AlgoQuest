@@ -6,8 +6,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <ctime>
-
-using namespace aq;
+#include <algorithm>
 
 // Version 1.0 : Decoupe en colonne les tables origine (OK)
 // Version 1.1 : Remplace les end_of_record ( 'CR' et/ou 'LF') par '0'  (OK)
@@ -96,7 +95,7 @@ int cut_in_col (const char * iniFilename, size_t num_table, size_t num_column)
 	my_dir_root  = (char *) safecalloc (k_file_name_size_max, sizeof(char)); 
 
 	// init
-	s_prefixe prefixe;
+	aq::s_prefixe prefixe;
 	allocate_and_init_prefixe( &prefixe);
 
 	// info on curent column in parameters
@@ -124,7 +123,7 @@ int cut_in_col (const char * iniFilename, size_t num_table, size_t num_column)
 	int n_paquet = 0;
 
 	// Declaration de la description de la base
-	s_base_v2 *my_base;
+	aq::base_t my_base;
 	// ------------------------------------------------------------------------------------------------------------
 	// Ouverture du fichier parametres et remplissage de source et cible
 	// ------------------------------------------------------------------------------------------------------------
@@ -201,8 +200,7 @@ int cut_in_col (const char * iniFilename, size_t num_table, size_t num_column)
 		sprintf ( a_message, "error opening file %s\n",base_desc_file );
 		die_with_error ( a_message );
 	}
-	my_base = (s_base_v2 *) safecalloc( 1, sizeof ( s_base_v2 ) ) ;
-	construis_base ( fp , my_base ); 
+	aq::construis_base ( fp , my_base );
 	fclose (fp); // fermeture du fichier base_desc
 
 	// -------------------------------------------------------------------------------------- 
@@ -210,7 +208,7 @@ int cut_in_col (const char * iniFilename, size_t num_table, size_t num_column)
 	// -------------------------------------------------------------------------------------- 
 	printf ("\n");
 	// printf ("step 1 \n");
-	max_nb_table =  my_base->nb_tables;
+	max_nb_table =  my_base.nb_tables;
 	char *cust_name;
 	cust_name = (char *) safecalloc ( k_file_name_size_max, sizeof(char));
 	// alloc cust_file_name
@@ -221,27 +219,28 @@ int cut_in_col (const char * iniFilename, size_t num_table, size_t num_column)
 	}
 
 	// preparation des noms de fichiers
-	for ( i = 0 ; i < max_nb_table; ++i )
-	{
-		strcpy ( cust_name, (my_base->table + i )->nom );
+  i = 0;
+  std::for_each (my_base.table.begin(), my_base.table.end(), [&] (const aq::base_t::table_t& table) {
+		strcpy ( cust_name, table.nom.c_str() );
 		nettoie_nom (cust_name); // ote les " " 
 		strcat ( cust_name,".txt");  
-		// strcpy ( cust_file_name[ i + 1], cust_name );
 		strcpy ( cust_file_name[ i ], cust_name );
-	}
-
+    ++i;
+	});
+  
 	// load num_table from base_struct
-	s_list_int  l_n_table;
+	aq::s_list_int  l_n_table;
 	// allocate 
 	l_n_table.max_size = max_nb_table;
 	l_n_table.used_size = max_nb_table;
 	l_n_table.part = ( int * ) safecalloc( max_nb_table, sizeof( int ) );       
 	// load n_table as declared in base_struct   
-	for ( i = 0 ; i < max_nb_table; i++ )
-	{
-		*( l_n_table.part + i ) = (my_base->table + i )->num ; 
-	}
-
+  i = 0;
+  std::for_each (my_base.table.begin(), my_base.table.end(), [&] (const aq::base_t::table_t& table) {
+    *( l_n_table.part + i ) = table.num ; 
+    ++i;
+	});
+  
 	// printf ("step 2 \n");
 	// declaration des repertoire source et cible
 	strcpy (my_dir_source ,rep_source);
@@ -293,8 +292,8 @@ int cut_in_col (const char * iniFilename, size_t num_table, size_t num_column)
 		// creation des noms de fichiers : nouvelle structure
 		sprintf ( my_col, format_file_name , my_col_dir,  n_base, n_table, num_column, n_paquet);
 		// init col infos
-		col_type =  ( ( my_base->table + i_table )->colonne + num_column - 1)->type;
-		col_size = ( ( my_base->table + i_table )->colonne + num_column - 1)->taille;
+		col_type = my_base.table[i_table].colonne[num_column - 1].type;
+		col_size = my_base.table[i_table].colonne[num_column - 1].taille;
 		printf( "%s max_size: %d\n", my_col, col_size );
 		if( (fcol = fopen ( my_col ,"w+b")) == NULL )  //  '+ ' : erase former file if exist 2009/10/27
 		{

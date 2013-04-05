@@ -42,7 +42,12 @@ public:
 	void simulate(size_t rows, size_t nbTables);
 
 	void load(const char * filePath, const char fieldSeparator, std::vector<long long>& tableIDs);
+  
+	/// Each column in the table holds a list of row indexes.
+	/// Compute a column containing unique and sorted row indexes.
+	/// Also compute a mapping between the original row indexes and the sorted and unique indexes
 	void computeUniqueRow(std::vector<std::vector<size_t> >& mapToUniqueIndex, std::vector<std::vector<size_t> >& uniqueIndex) const;
+
 	const group_by_t getGroupBy() const { return this->groupByIndex; }
 
 	// void groupBy(const std::map<size_t, std::vector<std::pair<size_t, aq::ColumnType> > >& columnsByTableId);
@@ -61,8 +66,8 @@ private:
 	{
 		size_t table_id;
 		std::vector<size_t> indexes;
-		std::vector<size_t> grpId;
-		std::vector<size_t> orderId;
+		std::vector<size_t> grpKey;
+		std::vector<size_t> orderKey;
 	};
 
 	typedef std::vector<column_t> matrix_t;

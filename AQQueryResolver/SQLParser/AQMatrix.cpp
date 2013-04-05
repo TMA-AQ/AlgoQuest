@@ -113,18 +113,18 @@ AQMatrix& AQMatrix::operator=(const AQMatrix& source)
 
 void AQMatrix::simulate(size_t rows, size_t nbTables)
 {
-	this->hasCount = true;
-	this->totalCount = rows;
-	this->nbRows = rows;
-	this->matrix.resize(nbTables);
-	for (size_t i = 0; i < rows; ++i)
-	{
-		std::for_each(this->matrix.begin(), this->matrix.end() - 1 , [&] (column_t& c) {
-			c.indexes.push_back(i);
-			c.grpId.push_back(i % (rows / 100));
-		});
-	}
-	this->count.resize(rows, 1);
+	//this->hasCount = true;
+	//this->totalCount = rows;
+	//this->nbRows = rows;
+	//this->matrix.resize(nbTables);
+	//for (size_t i = 0; i < rows; ++i)
+	//{
+	//	std::for_each(this->matrix.begin(), this->matrix.end() - 1 , [&] (column_t& c) {
+	//		c.indexes.push_back(i);
+	//		c.grpKey.push_back(i % (rows / 100));
+	//	});
+	//}
+	//this->count.resize(rows, 1);
 }
 
 void AQMatrix::load(const char * filePath, const char fieldSeparator, std::vector<long long>& tableIDs)
@@ -195,12 +195,14 @@ void AQMatrix::load(const char * filePath, const char fieldSeparator, std::vecto
 							c.table_id = tableID;
 							description.push_back(std::make_pair(1, tableID));
 						}
-						else if (field.find("Group") != std::string::npos)
+						else if (field.find("Group_Key") != std::string::npos)
 						{
+							c.table_id = tableID;
 							description.push_back(std::make_pair(2, tableID));
 						}
-						else if (field.find("Order") != std::string::npos)
+						else if (field.find("Order_Key") != std::string::npos)
 						{
+							c.table_id = tableID;
 							description.push_back(std::make_pair(3, tableID));
 						}
 						else
@@ -209,7 +211,8 @@ void AQMatrix::load(const char * filePath, const char fieldSeparator, std::vecto
 						}
 					}
 
-					this->matrix.push_back(c);
+          if (std::find_if(this->matrix.begin(), this->matrix.end(), boost::bind(std::equal_to<size_t>(), c.table_id, boost::bind(&column_t::table_id, _1))) == this->matrix.end())
+            this->matrix.push_back(c);
 				}
 				continue;
 			}
@@ -246,8 +249,8 @@ void AQMatrix::load(const char * filePath, const char fieldSeparator, std::vecto
 			switch (description[idx].first)
 			{
 			case 1: this->matrix[idx].indexes.push_back(nVal); break;
-			case 2: this->matrix[idx].indexes.push_back(nVal); break;
-			case 3: this->matrix[idx].indexes.push_back(nVal); break;
+			case 2: this->matrix[idx].grpKey.push_back(nVal); break;
+			case 3: this->matrix[idx].orderKey.push_back(nVal); break;
 			case 4: this->count.push_back(nVal); break;
 			default: assert(false);
 			}
@@ -257,16 +260,10 @@ void AQMatrix::load(const char * filePath, const char fieldSeparator, std::vecto
 
 void AQMatrix::computeUniqueRow(std::vector<std::vector<size_t> >& mapToUniqueIndex, std::vector<std::vector<size_t> >& uniqueIndex) const
 {
-	//each column in the table holds a list of row indexes
-	//compute a column containing unique and sorted row indexes
-	//also compute a mapping between the original row indexes and the
-	//sorted and unique indexes
 	size_t nrColumns = this->matrix.size();
-	if( this->hasCount )
-		--nrColumns;
 	for( size_t idx = 0; idx < nrColumns; ++idx )
 	{
-		mapToUniqueIndex.push_back( std::vector<size_t>() );
+    mapToUniqueIndex.push_back( std::vector<size_t>() );
 		uniqueIndex.push_back( std::vector<size_t>() );
 		if( this->matrix[idx].indexes.size() < 1 )
 			continue;

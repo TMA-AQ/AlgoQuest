@@ -44,7 +44,7 @@ void ChangeCommaToDot (  char *string );
 
 //void my_copie_secure ( char * source, char *cible );
 //-------------------------------------------------------------------------------
-void display_base (  aq::s_base_v2 *base);
+void display_base (  aq::base_t *base);
 // -----------------------------------------------------------------------------------------------------------
 void nettoie_nom (char *nom);
 
