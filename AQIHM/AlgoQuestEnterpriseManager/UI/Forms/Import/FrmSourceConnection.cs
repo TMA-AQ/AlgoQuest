@@ -37,6 +37,8 @@ namespace AlgoQuest.UI.Forms.Import
                 blnOpenTreeview = connectOracle();
             else if (_sgbdType == Connector.SgbdType.MySql)
                 blnOpenTreeview = connectMySql();
+            else if (_sgbdType == Connector.SgbdType.AlgoQuest)
+                blnOpenTreeview = connectAlgoQuest();
             Cursor.Current = Cursors.Default;
 
             if (blnOpenTreeview)
@@ -90,6 +92,10 @@ namespace AlgoQuest.UI.Forms.Import
             {
                 showMySqlControls();
                 _sgbdType = Connector.SgbdType.MySql;
+            }
+            else if ((string)cbDbChoice.SelectedItem == "AlgoQuest")
+            {
+                _sgbdType = Connector.SgbdType.AlgoQuest;
             }
         }
 
@@ -147,6 +153,26 @@ namespace AlgoQuest.UI.Forms.Import
             bool blnConnection = false;
             IConnector _conn = Connector.GetConnector(Connector.SgbdType.MySql);
             _connectionString = String.Format("datasource={0};username={1};password={2};database={3}", txtDataSource.Text, txtUserId.Text, txtPassword.Text, txtDatabase.Text);
+            _conn.Initialize(_connectionString);
+            try
+            {
+                _conn.TestConnection();
+                blnConnection = true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("La connexion à la base a échoué : \n" + ex.Message, "Erreur de connexion", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally { _conn = null; }
+
+            return blnConnection;
+        }
+
+        private bool connectAlgoQuest()
+        {
+            bool blnConnection = false;
+            IConnector _conn = Connector.GetConnector(Connector.SgbdType.AlgoQuest);
+            _connectionString = "Driver={AQ ODBC Driver 0};AQ_RSLV=E:/Project_AQ/Bin/AQTools.exe;AQ_DB_PATH=E:/AQ_DATABASES/DB/;AQ_CFG_PATH=E:/AQ_DATABASES/CFG/;DATABASE=MSALGOQUEST";
             _conn.Initialize(_connectionString);
             try
             {

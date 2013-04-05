@@ -12,7 +12,8 @@ namespace AlgoQuest.Core.Import
             SqlServer,
             Oracle,
             MySql,
-            Db2
+            Db2,
+            AlgoQuest
         }
 
         public static IConnector GetConnector(SgbdType type)
@@ -25,6 +26,8 @@ namespace AlgoQuest.Core.Import
                     return new MySqlConnector();
                 case SgbdType.Oracle :
                     return new OracleConnector();
+                case SgbdType.AlgoQuest:
+                    return new AQConnector();
                 default :
                     return null;
             }

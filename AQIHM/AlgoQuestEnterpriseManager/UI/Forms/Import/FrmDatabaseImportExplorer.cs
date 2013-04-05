@@ -46,6 +46,8 @@ namespace AlgoQuest.UI.Forms.Import
                 return _appReader.GetValue("OracleTablesQuery", typeof(System.String)).ToString();
             else if (_sgbdType == Connector.SgbdType.MySql)
                 return _appReader.GetValue("MySqlTablesQuery", typeof(System.String)).ToString();
+            else if (_sgbdType == Connector.SgbdType.AlgoQuest)
+                return _appReader.GetValue("AlgoQuestTablesQuery", typeof(System.String)).ToString();
             else
                 return null;
         }
@@ -58,6 +60,8 @@ namespace AlgoQuest.UI.Forms.Import
                 return _appReader.GetValue("OracleColumnsQuery", typeof(System.String)).ToString();
             else if (_sgbdType == Connector.SgbdType.MySql)
                 return _appReader.GetValue("MySqlColumnsQuery", typeof(System.String)).ToString();
+            else if (_sgbdType == Connector.SgbdType.AlgoQuest)
+                return _appReader.GetValue("AlgoQuestColumnQuery", typeof(System.String)).ToString();
             else
                 return null;
         }

@@ -10,6 +10,7 @@ using gudusoft.gsqlparser;
 using gudusoft.gsqlparser.Units;
 using AlgoQuest.Core.DatabaseManagement;
 using AlgoQuest.Core.Compute;
+using AlgoQuest.Configuration.Core;
 using System.Diagnostics;
 using System.Threading;
 using System.IO;
@@ -22,6 +23,7 @@ namespace AlgoQuest.UI.Forms
         private string _selectedBase;
         private List<RequestData> _requestList;
         private string _pathFile;
+        private string _odbc_conn_str;
         private string _multiThreadResult = string.Empty;
 
         public FrmSqlEditor(string SelectedBase)
@@ -31,6 +33,24 @@ namespace AlgoQuest.UI.Forms
             this.Text = String.Format("Analyseur de requêtes - {0}", _selectedBase);
             populateRequestList();
             scSql.Panel2.ClientSizeChanged += new EventHandler(Panel2_ClientSizeChanged);
+
+            // fill odbc connections
+            try
+            {
+                AppSettingsReader _appReader = new AppSettingsReader();
+                OdbcConnectionSection section = (OdbcConnectionSection)ConfigurationManager.GetSection("OdbcConnectionSection");
+                if (section != null)
+                {
+                    List<OdbcConnectionElement> _listMapElement = section.MapItems.AsQueryable().Cast<OdbcConnectionElement>().ToList<OdbcConnectionElement>();
+                    foreach (OdbcConnectionElement e in _listMapElement)
+                    {
+                        this.odbcCombo.Items.Add(e.value);
+                    }
+                }
+            }
+            catch (ConfigurationErrorsException)
+            {
+            }
         }
 
        
@@ -251,10 +271,18 @@ namespace AlgoQuest.UI.Forms
                 AppSettingsReader _appReader = new AppSettingsReader();
                 String cfgPath = _appReader.GetValue("ConfigPath", typeof(System.String)).ToString();
                 Int32 nbRecordsToPrint = (Int32)_appReader.GetValue("NbRecordsToPrint", typeof(int));
-                SelectRequest sr = new SelectRequest(cfgPath, _selectedBase, nbRecordsToPrint);
                 string request = (string)state;
                 Stopwatch watch = new Stopwatch();
                 watch.Start();
+                ISelectRequest sr;
+                if ((_odbc_conn_str == null) || (_odbc_conn_str == ""))
+                {
+                    sr = new SelectRequest(cfgPath, _selectedBase, nbRecordsToPrint);
+                }
+                else
+                {
+                    sr = new OdbcRequest(_odbc_conn_str);
+                }
                 System.Data.DataTable dt = sr.Execute(request);
                 watch.Stop();
                 ssResult.Invoke(new Action(() => { ssResult.Visible = true; }));
@@ -327,6 +355,11 @@ namespace AlgoQuest.UI.Forms
         void Panel2_ClientSizeChanged(object sender, EventArgs e)
         {
             dgResult.MaximumSize = new Size(scSql.Panel2.ClientSize.Width, scSql.Panel2.ClientSize.Height - ssResult.Height);
+        }
+
+        private void odbcCombo_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            _odbc_conn_str = this.odbcCombo.SelectedItem.ToString();
         }
     }
 }

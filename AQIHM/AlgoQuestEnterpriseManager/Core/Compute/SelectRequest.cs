@@ -9,7 +9,7 @@ using System.Data;
 
 namespace AlgoQuest.Core.Compute
 {
-    public class SelectRequest
+    public class SelectRequest : ISelectRequest
     {
         string _cfgPath;
         IniProperties _ip;

@@ -122,7 +122,8 @@
             this.cbDbChoice.Items.AddRange(new object[] {
             "SQL Server",
             "Oracle",
-            "MySql"});
+            "MySql",
+            "AlgoQuest"});
             this.cbDbChoice.Location = new System.Drawing.Point(223, 12);
             this.cbDbChoice.Name = "cbDbChoice";
             this.cbDbChoice.Size = new System.Drawing.Size(134, 21);

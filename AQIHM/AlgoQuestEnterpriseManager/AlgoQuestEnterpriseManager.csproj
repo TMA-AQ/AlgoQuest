@@ -93,12 +93,17 @@
     <Compile Include="Configuration\Core\DataTypeElement.cs" />
     <Compile Include="Configuration\Core\DataTypeSection.cs" />
     <Compile Include="Configuration\Core\IniProperties.cs" />
+    <Compile Include="Configuration\Core\OdbcConnectionElement.cs" />
+    <Compile Include="Configuration\Core\OdbcConnectionCollection.cs" />
+    <Compile Include="Configuration\Core\OdbcConnectionSection.cs" />
     <Compile Include="Configuration\Core\SqlAnalysisKeyWordCollection.cs" />
     <Compile Include="Configuration\Core\SqlAnalysisKeyWordElement.cs" />
     <Compile Include="Configuration\Core\SqlAnalysisSection.cs" />
     <Compile Include="Configuration\Import\DataTypeMappingCollection.cs" />
     <Compile Include="Configuration\Import\DataTypeMappingElement.cs" />
     <Compile Include="Configuration\Import\DataTypeMappingSection.cs" />
+    <Compile Include="Core\Compute\ISelectRequest.cs" />
+    <Compile Include="Core\Compute\OdbcRequest.cs" />
     <Compile Include="Core\Compute\Resources.cs" />
     <Compile Include="Core\Compute\SelectRequest.cs" />
     <Compile Include="Core\DatabaseManagement\DataBase.cs" />
@@ -106,6 +111,7 @@
     <Compile Include="Core\DatabaseManagement\DataTable.cs" />
     <Compile Include="Core\DatabaseManagement\DataType.cs" />
     <Compile Include="Core\DatabaseManagement\Request.cs" />
+    <Compile Include="Core\Import\AQConnector.cs" />
     <Compile Include="Core\Import\Connector.cs" />
     <Compile Include="Core\Import\CutInCol.cs" />
     <Compile Include="Core\Import\DataImportColumn.cs" />
