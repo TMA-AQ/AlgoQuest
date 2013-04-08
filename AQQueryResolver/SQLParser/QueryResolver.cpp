@@ -166,7 +166,7 @@ QueryResolver::QueryResolver(tnode * _sqlStatement, TProjectSettings * _pSetting
 //------------------------------------------------------------------------------
 QueryResolver::~QueryResolver()
 {
-	aq::Logger::getInstance().log(AQ_NOTICE, "Query Resolver: Time elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
+	aq::Logger::getInstance().log(AQ_INFO, "Query Resolver: Time elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
 }
 
 //------------------------------------------------------------------------------
