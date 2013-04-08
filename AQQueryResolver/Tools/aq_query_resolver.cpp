@@ -300,7 +300,7 @@ int processQuery(const std::string& query, TProjectSettings& settings, Base& bas
 
 		if (display)
 		{
-			std::ifstream fin(answer.c_str());
+			std::ifstream fin(settings.szAnswerFN);
 			std::string line;
 			while (std::getline(fin, line))
 			{
