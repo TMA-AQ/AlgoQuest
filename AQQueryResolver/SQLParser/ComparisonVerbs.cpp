@@ -35,7 +35,7 @@ bool ComparisonVerb::changeQuery(	tnode* pStart, tnode* pNode,
 		newNode = expression_transform( pNodeClone, this->m_baseDesc, this->m_settings->szThesaurusPath, &pErr );
 		boost::posix_time::ptime end(boost::posix_time::microsec_clock::local_time());
 		std::ostringstream oss;
-		oss << "expression_transform elapsed time: " << (end - begin) << " ms" << std::endl;
+		oss << "expression_transform elapsed time: " << (end - begin) << " ms";
 		aq::Logger::getInstance().log(AQ_INFO, "%s\n", oss.str().c_str());
 	}
 	
