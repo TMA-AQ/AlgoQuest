@@ -26,12 +26,12 @@ AQEngine::~AQEngine(void)
 
 void AQEngine::call(TProjectSettings& settings, tnode *pNode, int mode, int selectLevel)
 {
-	string str;
-	syntax_tree_to_prefix_form( pNode, str );
-	ParseJeq( str );
+	string query;
+	syntax_tree_to_prefix_form( pNode, query );
+	ParseJeq( query );
 	
-	if (str.size() < 2048) // fixme
-		aq::Logger::getInstance().log(AQ_DEBUG, "\n%s\n", str.c_str());
+	if (query.size() < 2048) // fixme
+		aq::Logger::getInstance().log(AQ_DEBUG, "\n%s\n", query.c_str());
 
 #if defined(_DEBUG)
 	std::cout << std::endl << str << std::endl << std::endl;
@@ -42,7 +42,7 @@ void AQEngine::call(TProjectSettings& settings, tnode *pNode, int mode, int sele
 
 	//
 	//
-	SaveFile( settings.szOutputFN, str.c_str() );
+	SaveFile( settings.szOutputFN, query.c_str() );
 
 	//
 	// get temporary files created by previous calls
@@ -81,6 +81,8 @@ void AQEngine::call(TProjectSettings& settings, tnode *pNode, int mode, int sele
 			std::ostringstream oss;
 			oss << "call to aq engine failed: '" << cmd << "' [ExitCode:" << rc << "]";
 			aq::Logger::getInstance().log(AQ_ERROR, "%s\n", oss.str().c_str());
+      if (query.size() < 2048) // fixme
+        aq::Logger::getInstance().log(AQ_ERROR, "%s\n", query.c_str());
 			throw generic_error(generic_error::AQ_ENGINE, oss.str());
 		}
 	}
