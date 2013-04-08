@@ -1,4 +1,4 @@
-MSALGOQUEST
+-- MSALGOQUEST
 SELECT Count (table_1.val_1)
 FROM   table_1,
        table_2,
