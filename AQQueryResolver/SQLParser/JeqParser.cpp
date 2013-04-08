@@ -402,7 +402,8 @@ void WriteJeq(	string& inputString,
 	assert( currentNrCon <= totalNrCon );
 	for( size_t idx = currentNrCon; idx < totalNrCon; ++idx )
 		output += andClause;
-
+  
+  output += '\n';
 	for( size_t idx = 0; idx < orderedConnections.size(); ++idx )
 	{
 		const kjeqConnection& kC = orderedConnections[idx];
