@@ -3,8 +3,7 @@ Param([Boolean]$help,
 	  [String]$settings, 
 	  [String]$testsFolder,
 	  [String]$databasesFolder,
-	  [String]$sql2prefix,
-	  [String]$sql2prefixAdditionalParams,
+	  [String]$aq_query_resolver,
 	  [String]$aqengine,
 	  [String]$cutInCol,
 	  [String]$loader,
@@ -19,12 +18,12 @@ $resultsFolder = "Results"
 $expectedFolder = "Expected"
 $requestAnswerFolder = "calculus\test\"
 $requestFile = "request.txt"
-$resultFilesStart = @("New_Request", "Answer", "aq_query_resolver.log")
+$resultFilesStart = @("New_Request", "Answer", "aq_query_resolver.log", $requestFile)
 $deleteFiles = @("Answer_log.txt")
 $logName = "./Logs/TestLog_"
 $logExt = ".txt"
 
-$iniFile = "sql2prefix-batch.ini"
+$iniFile = "aq_query_resolver.ini"
 $rootFolderKey = "root-folder"
 $tmpFolderKey = "tmp-folder"
 $fieldSeparatorKey = "field-separator"
@@ -96,8 +95,8 @@ Function CheckResult($logFile, $testName, $fileName, $folderResult, $execTime, [
 					}
 					else
 					{
-						Write-Warning $($testName + " SQL2Prefix FAILED")
-						Add-Content $logFile ($testName + " SQL2Prefix ERROR: actual response does not match expected response")
+						Write-Warning $($testName + " aq_query_resolver FAILED")
+						Add-Content $logFile ($testName + " aq_query_resolver ERROR: actual response does not match expected response")
 					}
 				}
 				else
@@ -109,8 +108,8 @@ Function CheckResult($logFile, $testName, $fileName, $folderResult, $execTime, [
 			}
 			else
 			{
-				Write-Warning $($testName + " SQL2Prefix FAILED (BUT AQENGINE Not Checked)")
-				Add-Content $logFile ($testName + " SQL2Prefix ERROR: actual response does not match expected response (BUT AQENGINE Not Checked)")
+				Write-Warning $($testName + " aq_query_resolver FAILED (BUT AQENGINE Not Checked)")
+				Add-Content $logFile ($testName + " aq_query_resolver ERROR: actual response does not match expected response (BUT AQENGINE Not Checked)")
             }
 			++$errors.Value
         }
@@ -197,15 +196,14 @@ Function DeletePreviousResults($testFolder)
 	$previousFolder = Join-Path $testFolder $resultsFolder
 	if (Test-Path $previousFolder)
 	{
-		$previousAnswers = Join-Path $testFolder (Join-Path $resultsFolder "*.txt")
-		if( Test-Path $previousAnswers )
+		foreach($ext in @("*.txt", "*.sql", "*.log", "*.ini"))
 		{
-		Remove-Item $previousAnswers
+			$previousAnswers = Join-Path $testFolder (Join-Path $resultsFolder $ext)
+			if( Test-Path $previousAnswers )
+			{
+				Remove-Item $previousAnswers
+			}
 		}
-	}
-	else
-	{
-		New-Item $previousFolder -ItemType directory
 	}
 }
 
@@ -217,8 +215,7 @@ if ($help)
 	Write-Host "Usage:"
 	Write-Host "	-settings         			"
 	Write-Host "	-databasesFolder  			"
-	Write-Host "	-sql2prefix       			"
-	Write-Host "    -sql2prefixAdditionalParams	"
+	Write-Host "	-aq_query_resolver 			"
 	Write-Host "	-aqengine         			"
 	Write-Host "	-testsFolder      			"
 	Write-Host "	-logFile          			"
@@ -246,16 +243,16 @@ if ($settings)
 		$el2 = $line.SubString($pos+1)
 		$el1 = $el1.Trim()
 		$el2 = $el2.Trim()
-		if (!$databasesFolder 					-and ($el1.CompareTo("databasesFolder") 				-eq 0) ) { $databasesFolder = $el2 ; continue }
-		if (!$sql2prefix      					-and ($el1.CompareTo("sql2prefix")      				-eq 0) ) { $sql2prefix      = $el2 ; continue }
-		if (!$sql2prefixAdditionalParams      	-and ($el1.CompareTo("sql2prefixAdditionalParams")      -eq 0) ) { $sql2prefix      = $el2 ; continue }
-		if (!$aqengine        					-and ($el1.CompareTo("aqengine")        				-eq 0) ) { $aqengine        = $el2 ; continue }
-		if (!$cutInCol        					-and ($el1.CompareTo("cutInCol")        				-eq 0) ) { $cutInCol        = $el2 ; continue }
-		if (!$loader        					-and ($el1.CompareTo("loader")	        				-eq 0) ) { $loader	        = $el2 ; continue }
-		if (!$testsFolder     					-and ($el1.CompareTo("testsFolder")     				-eq 0) ) { $testsFolder     = $el2 ; continue }
-		if (!$logFile         					-and ($el1.CompareTo("logFile")         				-eq 0) ) { $logFile         = $el2 ; continue }
-		if (!$checkFile        					-and ($el1.CompareTo("check")	        				-eq 0) ) { $checkFile       = $el2 ; continue }
-		if (!$skipFile	     					-and ($el1.CompareTo("skip")		     				-eq 0) ) { $skipFile     	= $el2 ; continue }
+		if (!$databasesFolder 					-and ($el1.CompareTo("databasesFolder") 				-eq 0) ) { $databasesFolder 			= $el2 ; continue }
+		if (!$aq_query_resolver      			-and ($el1.CompareTo("aq_query_resolver")      				-eq 0) ) { $aq_query_resolver      			= $el2 ; continue }
+		if (!$aq_query_resolver_params      	-and ($el1.CompareTo("aq_query_resolver_params")	    -eq 0) ) { $aq_query_resolver_params    = $el2 ; continue }
+		if (!$aqengine        					-and ($el1.CompareTo("aqengine")        				-eq 0) ) { $aqengine        			= $el2 ; continue }
+		if (!$cutInCol        					-and ($el1.CompareTo("cutInCol")        				-eq 0) ) { $cutInCol        			= $el2 ; continue }
+		if (!$loader        					-and ($el1.CompareTo("loader")	        				-eq 0) ) { $loader	        			= $el2 ; continue }
+		if (!$testsFolder     					-and ($el1.CompareTo("testsFolder")     				-eq 0) ) { $testsFolder     			= $el2 ; continue }
+		if (!$logFile         					-and ($el1.CompareTo("logFile")         				-eq 0) ) { $logFile         			= $el2 ; continue }
+		if (!$checkFile        					-and ($el1.CompareTo("check")	        				-eq 0) ) { $checkFile       			= $el2 ; continue }
+		if (!$skipFile	     					-and ($el1.CompareTo("skip")		     				-eq 0) ) { $skipFile     				= $el2 ; continue }
 		if (!$outputToNotePad 					-and ($el1.CompareTo("outputToNotePad") 				-eq 0) ) 
 		{ 
 			if ($el2.CompareTo("1") -eq 0) { $outputToNotePad = $True }
@@ -268,7 +265,7 @@ if ($settings)
 #
 # Check Values are setted
 if ((!$databasesFolder) -or
-	(!$sql2prefix) -or
+	(!$aq_query_resolver) -or
 	(!$aqengine) -or
 	(!$cutInCol) -or
 	(!$loader) -or
@@ -280,13 +277,13 @@ if ((!$databasesFolder) -or
 
 Write-Host "Settings:"
 Write-Host "========="
-Write-Host "testsFolder:      $testsFolder"
-Write-Host "databasesFolder:  $databasesFolder"
-Write-Host "sql2prefix:       $sql2prefix"
-Write-Host "aqengine:         $aqengine"
-Write-Host "logFile:          $logFile"
-Write-Host "onlyFile:         $checkFile"
-Write-Host "excludeFile:      $skipFile"
+Write-Host "testsFolder:      		$testsFolder"
+Write-Host "databasesFolder:  		$databasesFolder"
+Write-Host "aq_query_resolver:		$aq_query_resolver"
+Write-Host "aqengine:         		$aqengine"
+Write-Host "logFile:          		$logFile"
+Write-Host "onlyFile:         		$checkFile"
+Write-Host "excludeFile:      		$skipFile"
 Write-Host ""
 
 Write-Host "Continue? [y/n]"
@@ -336,7 +333,12 @@ foreach($testFolder in $selectedFolders)
 	$testFolder = Join-Path $testsFolder $testFolder
 	$folder = Join-Path $testFolder $requestsFolder
 	$requests = @(dir $folder | where {!$_.PsIsContainer})
-    DeletePreviousResults $testFolder
+	$previousFolder = Join-Path $testFolder $resultsFolder
+	if (!(Test-Path -path $previousFolder))
+	{
+		New-Item $previousFolder -ItemType directory
+	}
+    DeletePreviousResults $previousFolder
 	foreach($request in $requests)
 	{
 		$requestFullName = Join-Path $folder $request.Name
@@ -382,8 +384,9 @@ foreach($testFolder in $selectedFolders)
 			continue
 		}
 	        
-		#write test to where sql2prefix reads it from
+		#write test to where aq_query_resolver reads it from
 	    $requestAnswerFolderFull = Join-Path $databasesFolder (Join-Path $database $requestAnswerFolder)
+		DeletePreviousResults $requestAnswerFolderFull
 		$targetRequest = Join-Path $requestAnswerFolderFull $requestFile
 		Set-Content -Encoding UTF8 $targetRequest $file[1 .. $file.length]
         
@@ -393,16 +396,16 @@ foreach($testFolder in $selectedFolders)
 		
 		
 		#
-		# run sql2prefix
+		# run aq_query_resolver
 		$beforeExecution = Get-Date
 		
 		$psi = New-Object System.Diagnostics.ProcessStartInfo
-		$psi.FileName = $sql2prefix
+		$psi.FileName = $aq_query_resolver
 		$psi.RedirectStandardOutput = $true
 		$psi.RedirectStandardError = $true
 		$psi.WorkingDirectory = (Get-Location).Path;
 		$psi.UseShellExecute = $false
-		$psi.Arguments = "$iniFile test $sql2prefixAdditionalParams"
+		$psi.Arguments = "$iniFile test $aq_query_resolver_params"
 		$p = New-Object System.Diagnostics.Process
 		$p.StartInfo = $psi
 		$p.Start() | Out-Null
@@ -450,7 +453,7 @@ foreach($testFolder in $selectedFolders)
 		{
 			++$warnings
 			# ++$errors
-			$line = $requestFullName + " WARNING: [" + $sql2prefix + " " + $iniFile + " test ] return exit code [" + $p.ExitCode + "]"
+			$line = $requestFullName + " WARNING: [" + $aq_query_resolver + " " + $iniFile + " test ] return exit code [" + $p.ExitCode + "]"
 			Write-Warning $line
 			Add-Content $logFile $line
 			
