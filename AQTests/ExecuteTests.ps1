@@ -143,7 +143,6 @@ Function CreateIniFile($database, $absolute)
 	Add-Content $iniFile ($tmpFolderKey + " = " + (Join-Path $databasesFolder $database) + "\data_orga\tmp\")
 	Add-Content $iniFile ($fieldSeparatorKey + " = ;")
 	Add-Content $iniFile ($aqEngineKey + " = `"" + $aqengine + "`"")
-	Add-Content $iniFile ($cutInColKey + " = `"" + $cutInCol + "`"")
 	Add-Content $iniFile ($loaderKey + " = `"" + $loader + "`"")
 }
 
