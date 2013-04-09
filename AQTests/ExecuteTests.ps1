@@ -28,8 +28,7 @@ $rootFolderKey = "root-folder"
 $tmpFolderKey = "tmp-folder"
 $fieldSeparatorKey = "field-separator"
 $aqEngineKey = "aq-engine"
-$cutInColKey = "cut-in-col"
-$loaderKey = "loader"
+$loaderKey = "aq-loader"
 
 $answerFileName = "Answer.txt"
 
