@@ -1,8 +1,11 @@
 #ifndef __SYNC_SERVER_H__
 #define __SYNC_SERVER_H__
 
+#define WIN32_LEAN_AND_MEAN
+
 #include "SyncSession.h"
 #include "../Configuration.h"
+
 #include <boost/asio.hpp>
 
 namespace aq {

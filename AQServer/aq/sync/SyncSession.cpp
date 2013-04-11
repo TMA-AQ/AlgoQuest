@@ -1,13 +1,13 @@
+#include "SyncSession.h"
+
 #include <SQLParser/AQEngine.h>
 #include <SQLParser/SQLParser.h>
 #include <SQLParser/SQLPrefix.h>
 #include <SQLParser/Column2Table.h>
-#include <SQLParser/NestedQueries.h>
+#include <SQLParser/QueryResolver.h>
 #include <SQLParser/JeqParser.h>
-#include <SQLParser/Exceptions.h>
+#include <aq/Exceptions.h>
 #include <aq/Logger.h>
-
-#include "SyncSession.h"
 
 #include <fstream>
 #include <boost/lexical_cast.hpp>
@@ -126,7 +126,7 @@ void Session::onDesc(std::string& args)
 	std::ostringstream oss;
 	if (this->m_current_db_cfg)
 	{
-		this->m_current_db_cfg->baseDesc->dump(oss);
+		this->m_current_db_cfg->baseDesc->dumpXml(oss);
 	}
 	else
 	{
@@ -248,14 +248,27 @@ void Session::processSQL(std::string& sqlQuery)
 
 			//
 			// Transform SQL request in prefix form
-			QueryResolver queryResolver(&settings, this->m_current_db_cfg->m_aq_engine, *this->m_current_db_cfg->baseDesc.get());
+			QueryResolver queryResolver(pNode, &settings, this->m_current_db_cfg->m_aq_engine, *this->m_current_db_cfg->baseDesc.get());
 			aq::Logger::getInstance().log(AQ_INFO, "execute query %s\n", sqlQuery.c_str());
-			if( (nRet = queryResolver.SolveSQLStatement(pNode)) != 0 )
+			if( (nRet = queryResolver.SolveSQLStatement()) != 0 )
 			{
 				oss << "error converting into prefix form sql query '" << sqlQuery << "'" << std::endl;
 				aq::Logger::getInstance().log(AQ_ERROR, oss.str().c_str());
 				throw generic_error(generic_error::GENERIC, oss.str());
 			}
+
+      //
+      // Generate result file
+      Table::Ptr result = queryResolver.getResult();
+      if (result)
+      {
+        aq::Timer timer;
+        result->saveToAnswer(settings.szAnswerFN, settings.fieldSeparator);
+        aq::Logger::getInstance().log(AQ_INFO, "Save Answer: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
+        std::ofstream fresult(settings.szAnswerFN, std::ios::app);
+        fresult << "EOS";
+        fresult.close();
+      }
 
 			//
 			// read result file and deliver on the socket

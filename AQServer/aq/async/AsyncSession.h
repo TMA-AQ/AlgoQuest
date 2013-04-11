@@ -1,9 +1,12 @@
 #ifndef __ASYNC_SESSION_H__
 #define __ASYNC_SESSION_H__
 
+#define WIN32_LEAN_AND_MEAN
+
 #include "../Configuration.h"
 #include "../protocol/Demuxer.h"
 #include "../protocol/CommandHandler.h"
+
 #include <boost/bind.hpp>
 #include <boost/array.hpp>
 #include <boost/asio.hpp>

@@ -1,13 +1,13 @@
 #include "Configuration.h"
+#include <SQLParser/AQEngine.h>
 #include <aq/Logger.h>
-#include <SQLParser/Exceptions.h>
+#include <aq/Exceptions.h>
 #include <fstream>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
-#include <SQLParser/AQEngine.h>
 
 using namespace aq;
 
@@ -52,10 +52,9 @@ void Configuration::load()
 			std::string iniFile = itDB->second.get<std::string>("iniFile");
 			boost::algorithm::to_lower(dbName);
 			base_cfg::Ptr cfg(new base_cfg);
-			// settings->load(iniFile, "[QUERY_IDENT]");
-			cfg->settings->load(iniFile, "test"); // tma FIXME
-			cfg->baseDesc->loadFromBaseDesc(cfg->settings->szDBDescFN);
-			cfg->m_aq_engine = new AQEngine(); 
+			cfg->settings->load(iniFile);
+			cfg->baseDesc->loadFromRawFile(cfg->settings->szDBDescFN);
+			cfg->m_aq_engine = new AQEngine(*cfg->baseDesc, *cfg->settings); 
 			this->m_cfgs.insert(std::make_pair(dbName, cfg));
 		}
 	}

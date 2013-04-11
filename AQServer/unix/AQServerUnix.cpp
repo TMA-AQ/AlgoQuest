@@ -1,21 +1,24 @@
+#define WIN32_LEAN_AND_MEAN
+
 #include <SQLParser/AQEngine.h>
 #include <SQLParser/SQLParser.h>
 #include <SQLParser/SQLPrefix.h>
 #include <SQLParser/Column2Table.h>
-#include <SQLParser/NestedQueries.h>
+#include <SQLParser/QueryResolver.h>
 #include <SQLParser/JeqParser.h>
-#include <SQLParser/Exceptions.h>
+#include <aq/Exceptions.h>
 
 #include <aq/sync/SyncServer.h>
 #include <aq/async/AsyncServer.h>
 #include <aq/Configuration.h>
+#include <aq/Logger.h>
+
+#include "aq/Link.h" // tma FIXME: just for link issue with AQQueryResolver library
+
 #include <cstdlib>
 #include <iostream>
 #include <boost/asio/io_service.hpp>
 #include <boost/program_options.hpp>
-#include <aq/Logger.h>
-
-#include "aq/Link.h" // tma FIXME: just for link issue with SQL2Prefix library
 
 extern int yylineno;
 int yyerror( const char *pszMsg ) 
@@ -45,7 +48,7 @@ int main(int argc, char ** argv)
 	desc.add_options()
 		("help", "produce help message")
 		("log-output", po::value<std::string>(&mode)->default_value("STDOUT"), "")
-		("log-level", po::value<unsigned int>(&level)->default_value(LOG_INFO), "")
+		("log-level", po::value<unsigned int>(&level)->default_value(AQ_LOG_INFO), "")
 		("log-lock", po::bool_switch(&lock_mode), "")
 		("log-date", po::bool_switch(&date_mode), "")
 		("log-pid", po::bool_switch(&pid_mode), "")
@@ -93,7 +96,7 @@ int main(int argc, char ** argv)
 		}
 		grp.join_all();
 	}
-	catch (const generic_error& ex)
+	catch (const aq::generic_error& ex)
 	{
 		aq::Logger::getInstance().log(AQ_ERROR, ex.what());
 		return EXIT_FAILURE;

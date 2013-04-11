@@ -1,7 +1,7 @@
 #ifndef __CONFIGURATION_H__
 #define __CONFIGURATION_H__
 
-#include <SQLParser/Utilities.h>
+#include <aq/Utilities.h>
 #include <SQLParser/Table.h>
 #include <SQLParser/AQEngine_Intf.h>
 

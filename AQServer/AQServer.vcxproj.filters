@@ -134,4 +134,9 @@
       <Filter>Fichiers de ressources</Filter>
     </Xml>
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="AQServer.rc">
+      <Filter>Fichiers de ressources</Filter>
+    </ResourceCompile>
+  </ItemGroup>
 </Project>
