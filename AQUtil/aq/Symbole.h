@@ -1,6 +1,9 @@
 #ifndef __AQ_SYMBOLE_H__
 #define __AQ_SYMBOLE_H__
 
+namespace aq
+{
+
 // ----- symbole -----------------
 typedef enum 
 {
@@ -35,5 +38,7 @@ typedef enum
 	copy/*, type le 17/10/04 */ , vdg, troncat/*trunc*/, name,
 	file, t_row_id, precision, t_star, last_symbole
 } symbole;
+
+}
 
 #endif

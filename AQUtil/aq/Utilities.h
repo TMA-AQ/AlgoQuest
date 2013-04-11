@@ -1,6 +1,8 @@
 #ifndef __AQ_UTILITIES_H__
 #define __AQ_UTILITIES_H__
 
+#include "Symbole.h"
+#include "DBTypes.h"
 #include <string>
 #include <vector>
 
@@ -84,6 +86,8 @@ void doubleToString( char* strVal, double dVal );
 //------------------------------------------------------------------------------
 std::string getPrmFileName( const char* path, size_t tableIdx, size_t columnIdx, size_t partIdx );
 std::string getThesaurusFileName( const char* path, size_t tableIdx, size_t columnIdx, size_t partIdx );
+
+aq::ColumnType symbole_to_column_type(aq::symbole s);
 
 }
 

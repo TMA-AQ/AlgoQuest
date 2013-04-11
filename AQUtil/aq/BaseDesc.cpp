@@ -14,14 +14,16 @@
 #include <cstring>
 #include <cstdlib>
 #include <algorithm>
+#include <boost/property_tree/xml_parser.hpp>
 
 #define k_size_max 1024
 
 using namespace aq;
 
 //-------------------------------------------------------------------------------
-namespace
+namespace // anonymous namespace
 {
+
 void *safecalloc(size_t nb, size_t size)
 {
 	void *p = (void *) calloc(nb, size);
@@ -32,11 +34,13 @@ void *safecalloc(size_t nb, size_t size)
 	}
 	return p;
 }
+
 void remove_double_quote(std::string& s)
 {
   if (s[0] = '\"') s.erase(0, 1);
   if (s[s.size() - 1] = '\"') s.erase(s.size() - 1, 1);
 }
+
 void clean(base_t& base)
 {
   base.nb_tables = 0;
@@ -44,24 +48,27 @@ void clean(base_t& base)
   base.num = -1;
   base.table.clear();
 }
+
+const char * type_to_string(symbole type)
+{
+  switch (type)
+  {
+  case t_int: return "INT"; break;
+  case t_long_long: return "BIG_INT"; break;
+  case t_date1: return "DATE1"; break;
+  case t_date2: return "DATE2"; break;
+  case t_date3: return "DATE3"; break;
+  case t_char: return "VARCHAR"; break;
+  case t_double: return "REAL"; break;
+  case t_raw: return "RAW"; break;
+  default:
+    return "unknown";
+    break;
+  }
 }
 
-// -----------------------------------------------------------------------------------------------------------
-// lecture du base_desc
-// -----------------------------------------------------------------------------------------------------------
-// Lit le fichier de description d'une base et le place dans une structure s_base_v2
-// Argument : le nom du fichier de description
-void construis_colonne ( FILE* fp, base_t::table_t::col_t *colonne )
+void fill_column_type(base_t::table_t::col_t * colonne, const char * type_aux)
 {
-	// Lecture des informations au niveau de la colonne
-	// Nom de la colonne, numero, taille en char, type 
-	// la cadrage est deduis du type de la colonne
-
-	char nom[k_size_max], type_aux[k_size_max];
-	fscanf(fp,"%s %d %d %s", nom, &(colonne->num), &(colonne->taille), type_aux);
-	colonne->nom = nom;
-  remove_double_quote(colonne->nom);
-
 	// Type connus
 	// serie numbers 
 	if ((strcmp ( type_aux ,"INT" ) == 0) || (strcmp(type_aux,"NUMBER") == 0))
@@ -133,6 +140,24 @@ void construis_colonne ( FILE* fp, base_t::table_t::col_t *colonne )
   }
 }
 
+// -----------------------------------------------------------------------------------------------------------
+// lecture du base_desc
+// -----------------------------------------------------------------------------------------------------------
+// Lit le fichier de description d'une base et le place dans une structure s_base_v2
+// Argument : le nom du fichier de description
+void construis_colonne ( FILE* fp, base_t::table_t::col_t *colonne )
+{
+	// Lecture des informations au niveau de la colonne
+	// Nom de la colonne, numero, taille en char, type 
+	// la cadrage est deduis du type de la colonne
+
+	char nom[k_size_max], type_aux[k_size_max];
+	fscanf(fp,"%s %d %d %s", nom, &(colonne->num), &(colonne->taille), type_aux);
+	colonne->nom = nom;
+  remove_double_quote(colonne->nom);
+  fill_column_type(colonne, type_aux);
+}
+
 //-----------------------------------------------------------
 void construis_table ( FILE* fp, base_t::table_t * table )
 {
@@ -150,16 +175,19 @@ void construis_table ( FILE* fp, base_t::table_t * table )
     table->colonne.push_back(c);
 	}
 }
+
+} // end anonynous namespace
+
 //-----------------------------------------------------------
 namespace aq
 {
   
-void construis_base ( const char * fname, base_t& base )
+void build_base_from_raw ( const char * fname, base_t& base )
 {
   FILE * fp = fopenUTF8(fname, "r");
   if (fp != NULL)
   {
-    construis_base(fp, base);
+    build_base_from_raw(fp, base);
   }
   else // leave base empty
   {
@@ -167,7 +195,7 @@ void construis_base ( const char * fname, base_t& base )
   }
 }
 
-void construis_base ( FILE* fp, base_t& base )
+void build_base_from_raw ( FILE* fp, base_t& base )
 {
    clean(base);
 	// Lecture des informations au niveau de la base
@@ -194,6 +222,51 @@ void dump_base(std::ostream& oss, const base_t& base)
       oss << "  " << "  " << column.nom << std::endl;
     });
   });
+}
+
+void build_base_from_xml ( std::istream& is, base_t& base )
+{
+  clean(base);
+  boost::property_tree::ptree parser;
+  boost::property_tree::xml_parser::read_xml(is, parser);
+  base.nom = parser.get<std::string>("Database.<xmlattr>.Name");
+  boost::property_tree::ptree tables = parser.get_child("Database.Tables");
+  std::for_each(tables.begin(), tables.end(), [&] (const boost::property_tree::ptree::value_type& ptTable) {
+    base_t::table_t table;
+    table.nom = ptTable.second.get<std::string>("<xmlattr>.Name");
+    table.num = ptTable.second.get<int>("<xmlattr>.ID");
+    table.nb_enreg = ptTable.second.get<int>("<xmlattr>.NbRows");
+    boost::property_tree::ptree columns = ptTable.second.get_child("Columns");
+    std::for_each(columns.begin(), columns.end(), [&] (const boost::property_tree::ptree::value_type& ptColumn) {
+      base_t::table_t::col_t col;
+      col.nom = ptColumn.second.get<std::string>("<xmlattr>.Name");
+      col.num = ptColumn.second.get<int>("<xmlattr>.ID");
+      col.taille = ptColumn.second.get<int>("<xmlattr>.Size");
+      std::string type = ptColumn.second.get<std::string>("<xmlattr>.Type");
+      fill_column_type(&col, type.c_str());
+      table.colonne.push_back(col);
+    });
+    table.nb_cols = static_cast<int>(table.colonne.size());
+    base.table.push_back(table);
+  });
+  base.nb_tables = static_cast<int>(base.table.size());
+}
+
+void dump_xml_base(std::ostream& oss, const base_t& base)
+{
+  oss << "<Database Name=\"" << base.nom << "\">" << std::endl;
+  oss << "<Tables>" << std::endl;
+  std::for_each(base.table.begin(), base.table.end(), [&] (const base_t::table_t& table) {
+    oss << "<Table Name=\"" << table.nom << "\" ID=\"" << table.num << "\" NbRows=\"" << table.nb_enreg << "\">" << std::endl;
+    oss << "<Columns>" << std::endl;
+    std::for_each(table.colonne.begin(), table.colonne.end(), [&] (const base_t::table_t::col_t& column) {
+      oss << "<Column Name=\"" << column.nom << "\" ID=\""<< column.num << "\" Size=\"" << column.taille << "\" Type=\"" << type_to_string(column.type) << "\"/>" << std::endl;
+    });
+    oss << "</Columns>" << std::endl;
+    oss << "</Table>" << std::endl;
+  });
+  oss << "</Tables>" << std::endl;
+  oss << "</Database>" << std::endl;
 }
 
 }

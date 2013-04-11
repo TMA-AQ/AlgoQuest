@@ -67,11 +67,12 @@ struct base_t
 
 /// Lit le fichier de description d'une base et le place dans une structure s_base_v2
 /// Argument : le nom du fichier de description
-void construis_base ( const char * fname, base_t& base );
+void build_base_from_raw ( const char * fname, base_t& base );
+void build_base_from_raw ( FILE* fp, base_t& base );
+void build_base_from_xml ( std::istream& is, base_t& base );
 
-void construis_base ( FILE* fp, base_t& base );
-
-void dump_base(std::ostream& oss, const base_t& base);
+void dump_raw_base(std::ostream& oss, const base_t& base);
+void dump_xml_base(std::ostream& oss, const base_t& base);
 
 }
 

@@ -1,9 +1,9 @@
 #include "Utilities.h"
 #include "Exceptions.h"
+#include "Logger.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <aq/Logger.h>
 #include <boost/filesystem.hpp>
 
 #include <Windows.h>
@@ -390,6 +390,23 @@ std::string getThesaurusFileName( const char* path, size_t tableIdx, size_t colu
 	else
 		sprintf( szFN, "B001T%.4uC%.4uV01P%.12u.the", tableIdx, columnIdx, partIdx );
 	return szFN;
+}
+
+//------------------------------------------------------------------------------
+aq::ColumnType symbole_to_column_type(symbole s)
+{
+  switch (s)
+  {
+  case t_int: return aq::COL_TYPE_INT; break;
+  case t_long_long: return aq::COL_TYPE_BIG_INT; break;
+  case t_date1: return aq::COL_TYPE_DATE1; break;
+  case t_date2: return aq::COL_TYPE_DATE1; break;
+  case t_date3: return aq::COL_TYPE_DATE1; break;
+  case t_char: return aq::COL_TYPE_VARCHAR; break;
+  case t_double: return aq::COL_TYPE_DOUBLE; break;
+  case t_raw: return aq::COL_TYPE_VARCHAR; break;
+  default: return aq::COL_TYPE_VARCHAR;
+  }
 }
 
 }
