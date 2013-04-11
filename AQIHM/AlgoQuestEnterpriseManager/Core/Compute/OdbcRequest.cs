@@ -15,6 +15,7 @@ namespace AlgoQuest.Core.Compute
         public OdbcRequest(string connectionString)
         {
             _connectionString = connectionString;
+            _nbRecords = 0;
         }
 
         public string PathFile { get; set; }
@@ -48,6 +49,7 @@ namespace AlgoQuest.Core.Compute
                         string s = dr[i].ToString();
                         row[i] = dr[i].ToString();
                     }
+                    _nbRecords++;
                     dt.Rows.Add(row);
                 }
                 dr.Close();

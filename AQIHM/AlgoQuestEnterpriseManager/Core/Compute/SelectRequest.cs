@@ -13,18 +13,14 @@ namespace AlgoQuest.Core.Compute
 
     public class SelectRequest : ISelectRequest
     {
-        [DllImport("E:/Project_AQ/AQSuite/x64/Release/AQLib.dll", CharSet = CharSet.Auto)]
+        [DllImport("AQLib.dll", CharSet = CharSet.Auto)]
         public static extern int solve_query(
-            string query, string iniFilename, string workingDirectory, 
-            string logIdent, string logMode, uint logLevel,
-            bool clean, bool force);
-
-        // [DllImport("E:\\Project_AQ\\AQSuite\\x64\\Release\\AQLib.dll", CharSet = CharSet.Auto)]
-        // public static extern int test_aq_lib();
-
-        // [DllImport("C:\\Users\\AlgoQuest\\Documents\\Visual Studio 2012\\Projects\\DLLTest\\Debug\\DLLTest.dll", CharSet = CharSet.Auto)]
-        [DllImport("C:/Users/AlgoQuest/Documents/Visual Studio 2012/Projects/DLLTest/x64/Debug/DLLTest.dll")]
-        public static extern int test_aq_lib();
+            [MarshalAs(UnmanagedType.LPStr)]string query,
+            [MarshalAs(UnmanagedType.LPStr)]string iniFilename,
+            [MarshalAs(UnmanagedType.LPStr)]string workingDirectory,
+            [MarshalAs(UnmanagedType.LPStr)]string logIdent,
+            [MarshalAs(UnmanagedType.LPStr)]string logMode, 
+            uint logLevel, bool clean, bool force);
 
         string _cfgPath;
         IniProperties _ip;
@@ -154,10 +150,9 @@ namespace AlgoQuest.Core.Compute
             string logMode = "LOCALFILE";
             uint logLevel = 7;
             bool clean = false;
-            bool force = false;
+            bool force = true;
 
-            int rc = test_aq_lib();
-            rc = solve_query(request, _ip.getFilename(), _randomIdFolder, logIdent, logMode, logLevel, clean, force);
+            int rc = solve_query(request, _ip.getFilename(), _randomIdFolder, logIdent, logMode, logLevel, clean, force);
 
             //ProcessStartInfo psi = new ProcessStartInfo(_ip.Keys["aq-tools"].ToString()
             //                             , _ip.getFilename() + " " + _randomIdFolder);

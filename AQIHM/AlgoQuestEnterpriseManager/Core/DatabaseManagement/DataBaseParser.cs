@@ -16,7 +16,6 @@ namespace AlgoQuest.Core.DatabaseManagement
             Byte[] data;
             String responseData = String.Empty;
             Int32 bytes = 0;
-            DataTable dt = null;
             TcpClient client = null;
             NetworkStream stream = null;
 

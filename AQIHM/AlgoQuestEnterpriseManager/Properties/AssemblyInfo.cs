@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("AlgoQuest")]
 [assembly: AssemblyProduct("AlgoQuestEnterpriseManager")]
-[assembly: AssemblyCopyright("Copyright © AlgoQuest 2012")]
+[assembly: AssemblyCopyright("Copyright ©  2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // Le GUID suivant est pour l'ID de la typelib si ce projet est exposé à COM
-[assembly: Guid("a3286620-033e-4021-9f00-b99b3695c438")]
+[assembly: Guid("0a991fd5-0fc4-4d95-80fb-87c736a74409")]
 
 // Les informations de version pour un assembly se composent des quatre valeurs suivantes :
 //
