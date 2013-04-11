@@ -112,8 +112,7 @@ private:
 	results_t::iterator resultIt;
   std::string query;
   FILE * fd;
-	unsigned long _n;
-	unsigned long _nlines;
+	unsigned long _nRows;
 	bool _eos;
 	bool headerFilled;
 	bool lineCount1Read;

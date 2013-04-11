@@ -69,7 +69,7 @@ SQLRETURN  SQL_API SQLColAttribute (SQLHSTMT StatementHandle,
 		*NumericAttribute = std::max(attr->size, attr->name.size());
 		break;
 	case SQL_DESC_CONCISE_TYPE:
-		*NumericAttribute = std::max(attr->size, attr->name.size());
+		*NumericAttribute = SQL_VARCHAR; // FIXME
 		break;
 	default:
 		AQ_ODBC_LOG("NOT SUPPORTED\n");

@@ -23,13 +23,13 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 	{
 	case DLL_PROCESS_ATTACH:
     aq::Logger::getInstance().setLevel(AQ_LOG_DEBUG);
-    aq::Logger::getInstance().setLocalFile("E:/Project_AQ/Logs/AQODBC.log"); // FIXME
+    aq::Logger::getInstance().setLocalFile("C:/TEMP/AQODBC.log"); // FIXME
     AQ_ODBC_LOG("DLL_PROCESS_ATTACH\n");
 		break;
 
 	case DLL_THREAD_ATTACH: 
     aq::Logger::getInstance().setLevel(AQ_LOG_DEBUG);
-    aq::Logger::getInstance().setLocalFile("E:/Project_AQ/Logs/AQODBC.log"); // FIXME
+    aq::Logger::getInstance().setLocalFile("C:/TEMP/AQODBC.log"); // FIXME
 		AQ_ODBC_LOG("DLL_THREAD_ATTACH\n");
 		break;
 

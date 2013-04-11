@@ -1,8 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LocalDebuggerCommand>E:\Project_AQ\AQIHM\AlgoQuestEnterpriseManager\bin\x64\Debug\AlgoQuestEnterpriseManager.exe</LocalDebuggerCommand>
+    <LocalDebuggerCommand>C:\Program Files (x86)\Microsoft Office\Office14\MSQRY32.EXE</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerWorkingDirectory>..\AQIHM\AlgoQuestEnterpriseManager\bin\x64\Debug</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerWorkingDirectory>..\AQSuite\Win32\Debug</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerCommandArguments>
+    </LocalDebuggerCommandArguments>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LocalDebuggerCommand>E:\Project_AQ\AQSuite\x64\Debug\AlgoQuestEnterpriseManager.exe</LocalDebuggerCommand>
+    <LocalDebuggerWorkingDirectory>..\AQSuite\x64\Debug</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
 </Project>

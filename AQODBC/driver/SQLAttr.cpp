@@ -4,16 +4,16 @@
 extern "C" {
 #endif
 
-	SQLRETURN  SQL_API SQLGetEnvAttr(SQLHENV EnvironmentHandle,
-		SQLINTEGER Attribute, _Out_writes_(_Inexpressible_(BufferLength)) SQLPOINTER Value,
-		SQLINTEGER BufferLength, _Out_opt_ SQLINTEGER *StringLength)
-	{
-		AQ_ODBC_LOG("%s called\n", __FUNCTION__);
-		return SQL_SUCCESS;
-	}
+  SQLRETURN  SQL_API SQLGetEnvAttr(SQLHENV EnvironmentHandle,
+    SQLINTEGER Attribute, _Out_writes_(_Inexpressible_(BufferLength)) SQLPOINTER Value,
+    SQLINTEGER BufferLength, _Out_opt_ SQLINTEGER *StringLength)
+  {
+    AQ_ODBC_LOG("%s called\n", __FUNCTION__);
+    return SQL_SUCCESS;
+  }
 
-	SQLRETURN  SQL_API SQLGetStmtAttr(SQLHSTMT StatementHandle,
-		SQLINTEGER Attribute, _Out_writes_opt_(_Inexpressible_(BufferLength)) SQLPOINTER Value,
+  SQLRETURN  SQL_API SQLGetStmtAttr(SQLHSTMT StatementHandle,
+    SQLINTEGER Attribute, _Out_writes_opt_(_Inexpressible_(BufferLength)) SQLPOINTER Value,
 		SQLINTEGER BufferLength, _Out_opt_ SQLINTEGER *StringLength)
 	{
 		AQ_ODBC_LOG("%s called\n", __FUNCTION__);

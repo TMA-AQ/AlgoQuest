@@ -13,12 +13,7 @@ SQLRETURN  SQL_API SQLTables(SQLHSTMT StatementHandle,
 	AQ_ODBC_LOG("%s called\n", __FUNCTION__);
 
 	aq::ResultSet * result = ((AqHandleStmt*)StatementHandle)->result;
-	// c->write("connect test\ndesc");
-
-	//while (!c->eos())
-	//{
-	//	TODO
-	//}
+	aq::Connection * conn = ((AqHandleStmt*)StatementHandle)->conn->connection;
 
   std::string catalog_name;
   if (CatalogName != NULL)
@@ -30,23 +25,42 @@ SQLRETURN  SQL_API SQLTables(SQLHSTMT StatementHandle,
 
   std::string db_path = ((AqHandleConn*)((AqHandleStmt*)StatementHandle)->conn)->connection->db_path;
   std::string cfg_path = ((AqHandleConn*)((AqHandleStmt*)StatementHandle)->conn)->connection->cfg_path;
-  if (catalog_name == "%")
+  
+  if (conn->server != "")
   {
-    result->fillBases(db_path.c_str());
+    //
+    // Send Request
+    std::string conn_str = "connect " + conn->schema + "\n";
+    std::string stmt_str = "desc\n";
+    conn->write(conn_str.c_str());
+    conn->write(stmt_str.c_str());
+
+    //
+    // Read Answer
+    aq::Connection::buffer_t buf;
+    while (!result->eos())
+    {
+      memset(buf.data(), 0, buf.size());
+      conn->read(buf);
+      result->pushResult(buf.data(), buf.size());
+    }
+
   }
   else
   {
-    if (db_name == "")
-      db_name = ((AqHandleStmt*)StatementHandle)->conn->connection->schema;
-    result->loadCatalg((db_path + db_name).c_str());
-    result->fillTables();
+    if (catalog_name == "%")
+    {
+      result->fillBases(db_path.c_str());
+    }
+    else
+    {
+      if (db_name == "")
+        db_name = ((AqHandleStmt*)StatementHandle)->conn->connection->schema;
+      result->loadCatalg((db_path + db_name).c_str());
+      result->fillTables();
+    }
   }
 
-	//if (strncmp((const char *)CatalogName, "test", NameLength1) == 0)
-	//	result->fillSimulateResultTables2();
-	//else
-	//	result->fillSimulateResultTables1();
-	 
 	return SQL_SUCCESS;
 }
 
@@ -58,16 +72,8 @@ SQLRETURN  SQL_API SQLColumns(SQLHSTMT StatementHandle,
 {
 	AQ_ODBC_LOG("%s called\n", __FUNCTION__);
 	aq::ResultSet * result = ((AqHandleStmt*)StatementHandle)->result;
-	// c->write("connect test\ndesc");
-
-	//while (!c->eos())
-	//{
-	//	TODO
-	//}
-
   std::string tn((const char *)TableName);
 	result->fillColumns(tn.c_str());
-	// result->fillSimulateResultColumns((const char *)TableName, NameLength3);
 	
   return SQL_SUCCESS;
 }
@@ -91,13 +97,6 @@ SQLRETURN  SQL_API SQLGetTypeInfo(SQLHSTMT StatementHandle,
 {
 	AQ_ODBC_LOG("%s called\n", __FUNCTION__);
 	aq::ResultSet * result = ((AqHandleStmt*)StatementHandle)->result;
-	// c->write("connect test\ndesc");
-
-	//while (!c->eos())
-	//{
-	//	TODO
-	//}
-
 	result->fillTypeInfos();
 	return SQL_SUCCESS;
 }

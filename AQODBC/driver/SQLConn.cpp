@@ -3,7 +3,8 @@
 #include "Connection.h"
 #include <cstdio>
 #include <boost/bind.hpp>
-#include<boost/tokenizer.hpp>
+#include <boost/tokenizer.hpp>
+#include <boost/lexical_cast.hpp>
 
 #ifdef __cplusplus
 extern "C" {
@@ -75,13 +76,20 @@ RETCODE SQL_API SQLDriverConnect(SQLHDBC         pConn,
 	
   AQ_ODBC_LOG("hdbc id: %d [%x]\n", c->Conn, c);
 	
-	//c->connection->connect("localhost", 9999);
-
-	//c->connection->write("show\n");
-	//aq::Connection::buffer_t buf;
-	//c->connection->read(buf);
-
-	// c->ioThread.reset(new boost::thread(boost::bind(&boost::asio::io_service::run, c->ioService)));
+  if (c->connection->server != "")
+  {
+    try
+    {
+      uint16_t port = 9999; // default value;
+      if (c->connection->port != "")
+        boost::lexical_cast<unsigned>(c->connection->port);
+      c->connection->connect(c->connection->server.c_str(), port);
+      c->ioThread = new boost::thread(boost::bind(&boost::asio::io_service::run, c->ioService));
+    }
+    catch (const boost::bad_lexical_cast& ex)
+    {
+    }
+  }
 
 	return SQL_SUCCESS;
 }

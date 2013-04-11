@@ -80,4 +80,9 @@
       <Filter>Fichiers de ressources</Filter>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="AQODBC.rc">
+      <Filter>Fichiers de ressources</Filter>
+    </ResourceCompile>
+  </ItemGroup>
 </Project>

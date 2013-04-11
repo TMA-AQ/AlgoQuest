@@ -11,8 +11,7 @@ using namespace aq;
 
 ResultSet::ResultSet()
 	:
-	_n(0),
-	_nlines(0),
+	_nRows(0),
 	_size(0), 
 	_eos(false),
 	headerFilled(false),
@@ -178,30 +177,20 @@ void ResultSet::pushResult(const char * buf, size_t size)
 				if (*cur == '\n')
 				{
 					results.push_back(std::vector<col_t>());
-					resultIt = results.begin();
+          resultIt = results.begin();
+
+          size_t numCol = 0;
+          for (results_header_t::const_iterator it = headers.begin(); it != headers.end(); ++it)
+          {
+            currentRow.push_back(col_attr_t("", 32, SQL_C_CHAR)); // FIXME
+            currentRow.rbegin()->valueBind = static_cast<void*>(::malloc(128)); // FIXME
+            currentRow.rbegin()->sizeBind = static_cast<void*>(::malloc(sizeof(size_t)));
+            this->bindCol(++numCol, currentRow.rbegin()->valueBind, currentRow.rbegin()->sizeBind, SQL_C_CHAR);
+          }
+
 					headerFilled = true;
 				}
-			}
-		}
-		else if (!lineCount1Read)
-		{
-			if (*cur == '\n')
-			{
-				std::string s(val, cur - val);
-				boost::algorithm::trim(s);
-				_nlines = boost::lexical_cast<unsigned long>(s);
-				val = cur + 1;
-				lineCount1Read = true;
-				aq::Logger::getInstance().log(AQ_INFO, "read %u lines\n", _nlines);
-			}
-		}
-		else if (!lineCount2Read)
-		{
-			if (*cur == '\n')
-			{
-				std::string s(val, cur - val);
-				val = cur + 1;
-				lineCount2Read = true;
+        val = cur + 1;
 			}
 		}
 		else if ((*cur == ';') || (*cur == '\n'))
@@ -211,13 +200,22 @@ void ResultSet::pushResult(const char * buf, size_t size)
 				// store value
 				std::string v(val, cur - val);
 				val = cur + 1;
+
+        // check eos
+        if (v == "EOS")
+        {
+          _eos = true;
+          val = cur;
+          break;
+        }
+
 				col_t c(v);
 
 				(*resultIt).push_back(c);
 				if ((*resultIt).size() == headers.size()) 
 				{
 					assert (*cur == '\n');
-					++_n;
+					++_nRows;
 					results.push_back(std::vector<col_t>());
 					resultIt = results.end();
 					--resultIt;
@@ -244,8 +242,6 @@ void ResultSet::pushResult(const char * buf, size_t size)
 		_size = 0;
 	}
 
-	_eos = firstDelimiterFind && headerFilled && lineCount1Read && lineCount2Read && (_n == _nlines);
-
 	if (_eos)
 	{
 		resultIt = results.begin();
@@ -258,7 +254,7 @@ void ResultSet::loadCatalg(const char * db)
 {
   std::string db_base_desc(db);
   db_base_desc += "/base_struct/base";
-  construis_base(db_base_desc.c_str(), baseDesc);
+  build_base_from_raw(db_base_desc.c_str(), baseDesc);
   // dump_base(std::cout, baseDesc);
 }
 
