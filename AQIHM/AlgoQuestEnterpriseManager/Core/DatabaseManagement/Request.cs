@@ -69,8 +69,14 @@ namespace AlgoQuest.Core.DatabaseManagement
                 xmlRequest.Load(_requestPath);
             else
             {
-                xmlRequest.LoadXml("<AlgoQuest></AlgoQuest>");
-                xmlRequest.Save(_requestPath);
+                try
+                {
+                    xmlRequest.LoadXml("<AlgoQuest></AlgoQuest>");
+                    xmlRequest.Save(_requestPath);
+                }
+                catch (IOException)
+                {
+                }
             }
 
             XmlNodeList xmlRequestList = xmlRequest.SelectNodes("//Request");

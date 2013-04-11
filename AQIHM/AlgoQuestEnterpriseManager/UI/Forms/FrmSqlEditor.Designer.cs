@@ -36,13 +36,12 @@
             this.tsbSave = new System.Windows.Forms.ToolStripButton();
             this.tsbOpen = new System.Windows.Forms.ToolStripButton();
             this.tlcRequest = new System.Windows.Forms.ToolStripComboBox();
+            this.odbcCombo = new System.Windows.Forms.ToolStripComboBox();
             this.scSql = new System.Windows.Forms.SplitContainer();
             this.ssResult = new System.Windows.Forms.StatusStrip();
             this.tsslDuration = new System.Windows.Forms.ToolStripStatusLabel();
             this.tsslNumber = new System.Windows.Forms.ToolStripStatusLabel();
             this.dgResult = new System.Windows.Forms.DataGridView();
-            this.odbcCombo = new System.Windows.Forms.ComboBox();
-            this.odbcLabel = new System.Windows.Forms.Label();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.scSql)).BeginInit();
             this.scSql.Panel1.SuspendLayout();
@@ -68,11 +67,13 @@
             this.tsbExecute,
             this.tsbSave,
             this.tsbOpen,
-            this.tlcRequest});
+            this.tlcRequest,
+            this.odbcCombo});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.MaximumSize = new System.Drawing.Size(0, 25);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(724, 25);
+            this.toolStrip1.Stretch = true;
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -124,6 +125,13 @@
             this.tlcRequest.Name = "tlcRequest";
             this.tlcRequest.Size = new System.Drawing.Size(121, 25);
             this.tlcRequest.SelectedIndexChanged += new System.EventHandler(this.tlcRequest_SelectedIndexChanged);
+            // 
+            // odbcCombo
+            // 
+            this.odbcCombo.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.odbcCombo.Name = "odbcCombo";
+            this.odbcCombo.Size = new System.Drawing.Size(480, 25);
+            this.odbcCombo.SelectedIndexChanged += new System.EventHandler(this.odbcCombo_SelectedIndexChanged);
             // 
             // scSql
             // 
@@ -186,33 +194,11 @@
             this.dgResult.Size = new System.Drawing.Size(150, 46);
             this.dgResult.TabIndex = 0;
             // 
-            // odbcCombo
-            // 
-            this.odbcCombo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.odbcCombo.FormattingEnabled = true;
-            this.odbcCombo.Location = new System.Drawing.Point(283, -2);
-            this.odbcCombo.Name = "odbcCombo";
-            this.odbcCombo.Size = new System.Drawing.Size(440, 21);
-            this.odbcCombo.TabIndex = 3;
-            this.odbcCombo.SelectedIndexChanged += new System.EventHandler(this.odbcCombo_SelectedIndexChanged);
-            // 
-            // odbcLabel
-            // 
-            this.odbcLabel.AutoSize = true;
-            this.odbcLabel.Location = new System.Drawing.Point(246, 6);
-            this.odbcLabel.Name = "odbcLabel";
-            this.odbcLabel.Size = new System.Drawing.Size(31, 13);
-            this.odbcLabel.TabIndex = 4;
-            this.odbcLabel.Text = "odbc";
-            // 
             // FrmSqlEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(724, 576);
-            this.Controls.Add(this.odbcLabel);
-            this.Controls.Add(this.odbcCombo);
             this.Controls.Add(this.scSql);
             this.Controls.Add(this.toolStrip1);
             this.Name = "FrmSqlEditor";
@@ -246,7 +232,6 @@
         private System.Windows.Forms.ToolStripStatusLabel tsslDuration;
         private System.Windows.Forms.ToolStripStatusLabel tsslNumber;
         private System.Windows.Forms.ToolStripButton tsbOpen;
-        private System.Windows.Forms.ComboBox odbcCombo;
-        private System.Windows.Forms.Label odbcLabel;
+        private System.Windows.Forms.ToolStripComboBox odbcCombo;
     }
 }

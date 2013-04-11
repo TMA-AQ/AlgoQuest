@@ -30,7 +30,7 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmMdi));
-            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("Serveur");
+            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Serveur");
             this.cmsServer = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.tsmCreateDataBase = new System.Windows.Forms.ToolStripMenuItem();
             this.actualiserToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -45,6 +45,11 @@
             this.extraireToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.iniPropertiesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fenetresToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.réorganiserToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cascadeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mosaïqueHorizontaleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mosaïqueVerticaleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsbRequest = new System.Windows.Forms.ToolStripButton();
             this.ofdSqlScript = new System.Windows.Forms.OpenFileDialog();
@@ -56,11 +61,6 @@
             this.tsmImport = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmExistingFiles = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmConnexion = new System.Windows.Forms.ToolStripMenuItem();
-            this.fenetresToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.réorganiserToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.cascadeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.mosaïqueHorizontaleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.mosaïqueVerticaleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cmsServer.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
@@ -74,19 +74,19 @@
             this.tsmCreateDataBase,
             this.actualiserToolStripMenuItem});
             this.cmsServer.Name = "cmsServer";
-            this.cmsServer.Size = new System.Drawing.Size(201, 48);
+            this.cmsServer.Size = new System.Drawing.Size(192, 48);
             // 
             // tsmCreateDataBase
             // 
             this.tsmCreateDataBase.Name = "tsmCreateDataBase";
-            this.tsmCreateDataBase.Size = new System.Drawing.Size(200, 22);
+            this.tsmCreateDataBase.Size = new System.Drawing.Size(191, 22);
             this.tsmCreateDataBase.Text = "Créer une nouvelle base";
             this.tsmCreateDataBase.Click += new System.EventHandler(this.tsmCreateDataBase_Click);
             // 
             // actualiserToolStripMenuItem
             // 
             this.actualiserToolStripMenuItem.Name = "actualiserToolStripMenuItem";
-            this.actualiserToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
+            this.actualiserToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
             this.actualiserToolStripMenuItem.Text = "Actualiser";
             this.actualiserToolStripMenuItem.Click += new System.EventHandler(this.actualiserToolStripMenuItem_Click);
             // 
@@ -110,20 +110,20 @@
             this.déconnecterToolStripMenuItem,
             this.ouvrirToolStripMenuItem});
             this.fichiersToolStripMenuItem.Name = "fichiersToolStripMenuItem";
-            this.fichiersToolStripMenuItem.Size = new System.Drawing.Size(54, 20);
+            this.fichiersToolStripMenuItem.Size = new System.Drawing.Size(50, 20);
             this.fichiersToolStripMenuItem.Text = "Fichier";
             // 
             // connecterToolStripMenuItem
             // 
             this.connecterToolStripMenuItem.Name = "connecterToolStripMenuItem";
-            this.connecterToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.connecterToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
             this.connecterToolStripMenuItem.Text = "Connecter";
             this.connecterToolStripMenuItem.Visible = false;
             // 
             // déconnecterToolStripMenuItem
             // 
             this.déconnecterToolStripMenuItem.Name = "déconnecterToolStripMenuItem";
-            this.déconnecterToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.déconnecterToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
             this.déconnecterToolStripMenuItem.Text = "Déconnecter";
             this.déconnecterToolStripMenuItem.Visible = false;
             // 
@@ -133,20 +133,20 @@
             this.scriptSQLToolStripMenuItem});
             this.ouvrirToolStripMenuItem.Enabled = false;
             this.ouvrirToolStripMenuItem.Name = "ouvrirToolStripMenuItem";
-            this.ouvrirToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.ouvrirToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
             this.ouvrirToolStripMenuItem.Text = "Ouvrir";
             // 
             // scriptSQLToolStripMenuItem
             // 
             this.scriptSQLToolStripMenuItem.Name = "scriptSQLToolStripMenuItem";
-            this.scriptSQLToolStripMenuItem.Size = new System.Drawing.Size(128, 22);
+            this.scriptSQLToolStripMenuItem.Size = new System.Drawing.Size(123, 22);
             this.scriptSQLToolStripMenuItem.Text = "Script SQL";
             this.scriptSQLToolStripMenuItem.Click += new System.EventHandler(this.scriptSQLToolStripMenuItem_Click);
             // 
             // editionToolStripMenuItem
             // 
             this.editionToolStripMenuItem.Name = "editionToolStripMenuItem";
-            this.editionToolStripMenuItem.Size = new System.Drawing.Size(56, 20);
+            this.editionToolStripMenuItem.Size = new System.Drawing.Size(51, 20);
             this.editionToolStripMenuItem.Text = "Edition";
             this.editionToolStripMenuItem.Visible = false;
             // 
@@ -157,20 +157,20 @@
             this.importerToolStripMenuItem,
             this.iniPropertiesToolStripMenuItem});
             this.outilsToolStripMenuItem.Name = "outilsToolStripMenuItem";
-            this.outilsToolStripMenuItem.Size = new System.Drawing.Size(98, 20);
+            this.outilsToolStripMenuItem.Size = new System.Drawing.Size(87, 20);
             this.outilsToolStripMenuItem.Text = "Administration";
             // 
             // extraireToolStripMenuItem
             // 
             this.extraireToolStripMenuItem.Name = "extraireToolStripMenuItem";
-            this.extraireToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.extraireToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
             this.extraireToolStripMenuItem.Text = "Extraire";
             this.extraireToolStripMenuItem.Visible = false;
             // 
             // importerToolStripMenuItem
             // 
             this.importerToolStripMenuItem.Name = "importerToolStripMenuItem";
-            this.importerToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.importerToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
             this.importerToolStripMenuItem.Text = "Importer";
             this.importerToolStripMenuItem.Visible = false;
             // 
@@ -178,9 +178,48 @@
             // 
             this.iniPropertiesToolStripMenuItem.Enabled = false;
             this.iniPropertiesToolStripMenuItem.Name = "iniPropertiesToolStripMenuItem";
-            this.iniPropertiesToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.iniPropertiesToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
             this.iniPropertiesToolStripMenuItem.Text = "Ini.Properties";
             this.iniPropertiesToolStripMenuItem.Click += new System.EventHandler(this.iniPropertiesToolStripMenuItem_Click);
+            // 
+            // fenetresToolStripMenuItem
+            // 
+            this.fenetresToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.réorganiserToolStripMenuItem});
+            this.fenetresToolStripMenuItem.Name = "fenetresToolStripMenuItem";
+            this.fenetresToolStripMenuItem.Size = new System.Drawing.Size(62, 20);
+            this.fenetresToolStripMenuItem.Text = "Fenêtres";
+            // 
+            // réorganiserToolStripMenuItem
+            // 
+            this.réorganiserToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.cascadeToolStripMenuItem,
+            this.mosaïqueHorizontaleToolStripMenuItem,
+            this.mosaïqueVerticaleToolStripMenuItem});
+            this.réorganiserToolStripMenuItem.Name = "réorganiserToolStripMenuItem";
+            this.réorganiserToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
+            this.réorganiserToolStripMenuItem.Text = "Réorganiser";
+            // 
+            // cascadeToolStripMenuItem
+            // 
+            this.cascadeToolStripMenuItem.Name = "cascadeToolStripMenuItem";
+            this.cascadeToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+            this.cascadeToolStripMenuItem.Text = "Cascade";
+            this.cascadeToolStripMenuItem.Click += new System.EventHandler(this.cascadeToolStripMenuItem_Click);
+            // 
+            // mosaïqueHorizontaleToolStripMenuItem
+            // 
+            this.mosaïqueHorizontaleToolStripMenuItem.Name = "mosaïqueHorizontaleToolStripMenuItem";
+            this.mosaïqueHorizontaleToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+            this.mosaïqueHorizontaleToolStripMenuItem.Text = "Mosaïque horizontale";
+            this.mosaïqueHorizontaleToolStripMenuItem.Click += new System.EventHandler(this.mosaïqueHorizontaleToolStripMenuItem_Click);
+            // 
+            // mosaïqueVerticaleToolStripMenuItem
+            // 
+            this.mosaïqueVerticaleToolStripMenuItem.Name = "mosaïqueVerticaleToolStripMenuItem";
+            this.mosaïqueVerticaleToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+            this.mosaïqueVerticaleToolStripMenuItem.Text = "Mosaïque verticale";
+            this.mosaïqueVerticaleToolStripMenuItem.Click += new System.EventHandler(this.mosaïqueVerticaleToolStripMenuItem_Click);
             // 
             // toolStrip1
             // 
@@ -198,7 +237,7 @@
             this.tsbRequest.Image = ((System.Drawing.Image)(resources.GetObject("tsbRequest.Image")));
             this.tsbRequest.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsbRequest.Name = "tsbRequest";
-            this.tsbRequest.Size = new System.Drawing.Size(117, 22);
+            this.tsbRequest.Size = new System.Drawing.Size(109, 22);
             this.tsbRequest.Text = "Nouvelle requête";
             this.tsbRequest.TextImageRelation = System.Windows.Forms.TextImageRelation.TextBeforeImage;
             this.tsbRequest.Click += new System.EventHandler(this.tsbRequest_Click);
@@ -225,11 +264,11 @@
             this.tvObjects.ImageList = this.imgTv;
             this.tvObjects.Location = new System.Drawing.Point(0, 0);
             this.tvObjects.Name = "tvObjects";
-            treeNode2.ContextMenuStrip = this.cmsServer;
-            treeNode2.Name = "Nœud0";
-            treeNode2.Text = "Serveur";
+            treeNode1.ContextMenuStrip = this.cmsServer;
+            treeNode1.Name = "Nœud0";
+            treeNode1.Text = "Files";
             this.tvObjects.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode2});
+            treeNode1});
             this.tvObjects.SelectedImageIndex = 0;
             this.tvObjects.Size = new System.Drawing.Size(198, 611);
             this.tvObjects.TabIndex = 0;
@@ -258,7 +297,7 @@
             this.cmsDataBase.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsmImport});
             this.cmsDataBase.Name = "cmsTable";
-            this.cmsDataBase.Size = new System.Drawing.Size(175, 26);
+            this.cmsDataBase.Size = new System.Drawing.Size(166, 26);
             // 
             // tsmImport
             // 
@@ -266,61 +305,22 @@
             this.tsmExistingFiles,
             this.tsmConnexion});
             this.tsmImport.Name = "tsmImport";
-            this.tsmImport.Size = new System.Drawing.Size(174, 22);
+            this.tsmImport.Size = new System.Drawing.Size(165, 22);
             this.tsmImport.Text = "Import de données";
             // 
             // tsmExistingFiles
             // 
             this.tsmExistingFiles.Name = "tsmExistingFiles";
-            this.tsmExistingFiles.Size = new System.Drawing.Size(224, 22);
+            this.tsmExistingFiles.Size = new System.Drawing.Size(212, 22);
             this.tsmExistingFiles.Text = "A partir de fichiers existants";
             this.tsmExistingFiles.Click += new System.EventHandler(this.tsmExistingFiles_Click);
             // 
             // tsmConnexion
             // 
             this.tsmConnexion.Name = "tsmConnexion";
-            this.tsmConnexion.Size = new System.Drawing.Size(224, 22);
+            this.tsmConnexion.Size = new System.Drawing.Size(212, 22);
             this.tsmConnexion.Text = "Depuis une base de données";
             this.tsmConnexion.Click += new System.EventHandler(this.tsmConnexion_Click);
-            // 
-            // fenetresToolStripMenuItem
-            // 
-            this.fenetresToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.réorganiserToolStripMenuItem});
-            this.fenetresToolStripMenuItem.Name = "fenetresToolStripMenuItem";
-            this.fenetresToolStripMenuItem.Size = new System.Drawing.Size(63, 20);
-            this.fenetresToolStripMenuItem.Text = "Fenêtres";
-            // 
-            // réorganiserToolStripMenuItem
-            // 
-            this.réorganiserToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.cascadeToolStripMenuItem,
-            this.mosaïqueHorizontaleToolStripMenuItem,
-            this.mosaïqueVerticaleToolStripMenuItem});
-            this.réorganiserToolStripMenuItem.Name = "réorganiserToolStripMenuItem";
-            this.réorganiserToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.réorganiserToolStripMenuItem.Text = "Réorganiser";
-            // 
-            // cascadeToolStripMenuItem
-            // 
-            this.cascadeToolStripMenuItem.Name = "cascadeToolStripMenuItem";
-            this.cascadeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.cascadeToolStripMenuItem.Text = "Cascade";
-            this.cascadeToolStripMenuItem.Click += new System.EventHandler(this.cascadeToolStripMenuItem_Click);
-            // 
-            // mosaïqueHorizontaleToolStripMenuItem
-            // 
-            this.mosaïqueHorizontaleToolStripMenuItem.Name = "mosaïqueHorizontaleToolStripMenuItem";
-            this.mosaïqueHorizontaleToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
-            this.mosaïqueHorizontaleToolStripMenuItem.Text = "Mosaïque horizontale";
-            this.mosaïqueHorizontaleToolStripMenuItem.Click += new System.EventHandler(this.mosaïqueHorizontaleToolStripMenuItem_Click);
-            // 
-            // mosaïqueVerticaleToolStripMenuItem
-            // 
-            this.mosaïqueVerticaleToolStripMenuItem.Name = "mosaïqueVerticaleToolStripMenuItem";
-            this.mosaïqueVerticaleToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
-            this.mosaïqueVerticaleToolStripMenuItem.Text = "Mosaïque verticale";
-            this.mosaïqueVerticaleToolStripMenuItem.Click += new System.EventHandler(this.mosaïqueVerticaleToolStripMenuItem_Click);
             // 
             // FrmMdi
             // 

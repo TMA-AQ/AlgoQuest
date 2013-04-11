@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Xml;
 using Microsoft.Win32;
 
 namespace AlgoQuest.Core.DatabaseManagement
@@ -21,16 +22,20 @@ namespace AlgoQuest.Core.DatabaseManagement
         private string _path;
         private string _cfgPath;
 
-        private string _baseStructPath;
+        private string _baseStructPathRaw;
+        private string _baseStructPathXml;
 
-        
+        private enum BaseDesc_t
+        {
+            RAW,
+            XML
+        }
 
+        private BaseDesc_t base_desc_type;
         private List<DataTable> _datatableList;
-
         private StreamReader _srProperties;
-
+        private XmlDocument _xmlReader;
         private int _tablecount;
-
         private string _baseStruct;
 
         public List<DataTable> DataTableList
@@ -92,7 +97,7 @@ namespace AlgoQuest.Core.DatabaseManagement
 
         private void writeBaseStruct(string value)
         {
-            StreamWriter sw = new StreamWriter(_baseStructPath, false);
+            StreamWriter sw = new StreamWriter(_baseStructPathRaw, false);
             sw.Write(value);
             sw.Flush();
             sw.Close();
@@ -101,7 +106,7 @@ namespace AlgoQuest.Core.DatabaseManagement
 
         private void readBaseStruct()
         {
-            StreamReader sr = new StreamReader(_baseStructPath);
+            StreamReader sr = new StreamReader(_baseStructPathRaw);
             _baseStruct = sr.ReadToEnd();
             sr.Close();
             sr.Dispose();
@@ -122,7 +127,8 @@ namespace AlgoQuest.Core.DatabaseManagement
                 DataBase db = new DataBase();
                 db._path = allDb[i];
                 db._cfgPath = cfgPath;
-                db._baseStructPath = Path.Combine(allDb[i], "base_struct\\base");
+                db._baseStructPathRaw = Path.Combine(allDb[i], "base_struct\\base");
+                db._baseStructPathXml = Path.Combine(allDb[i], "base_struct\\base.xml");
                 db.getProperties();
                 lstDb.Add(db);
             }
@@ -166,11 +172,27 @@ namespace AlgoQuest.Core.DatabaseManagement
 
         private void getProperties()
         {
-            _srProperties = new StreamReader(_baseStructPath);
-            if (!_srProperties.EndOfStream)
-                _name = _srProperties.ReadLine();
-            if (!_srProperties.EndOfStream)
-                _tablecount = int.Parse(_srProperties.ReadLine());
+            try
+            {
+                base_desc_type = DataBase.BaseDesc_t.XML;
+                _xmlReader = new XmlDocument();
+                _xmlReader.Load(@_baseStructPathXml);
+                this._name = _xmlReader.SelectSingleNode("Database/@Name").Value;
+
+            }
+            catch (FileNotFoundException)
+            {
+                base_desc_type = DataBase.BaseDesc_t.RAW;
+                _srProperties = new StreamReader(_baseStructPathRaw);
+                if (!_srProperties.EndOfStream)
+                    _name = _srProperties.ReadLine();
+                if (!_srProperties.EndOfStream)
+                    _tablecount = int.Parse(_srProperties.ReadLine());
+            }
+            catch (XmlException)
+            {
+                _xmlReader = null;
+            }
         }
 
         private void getDataTableList()
@@ -223,6 +245,33 @@ namespace AlgoQuest.Core.DatabaseManagement
                             }
                         }
                 }
+                else if (_xmlReader != null)
+                {
+                    _datatableList = new List<DataTable>();
+                    XmlNode tableListNode = _xmlReader.SelectSingleNode("//Tables");
+                    XmlNodeList tableList = tableListNode.SelectNodes("Table");
+                    foreach (XmlNode table in tableList)
+                    {
+                        dt = new DataTable();
+                        dt.DataColumns = new List<DataColumn>();
+                        dt.DataTableName = table.Attributes["Name"].Value;
+                        dt.Order = Int32.Parse(table.Attributes["ID"].Value);
+                        dt.RowCount = Int64.Parse(table.Attributes["NbRows"].Value);
+                        _datatableList.Add(dt);
+                        
+                        XmlNode columnListNode = table.SelectSingleNode("//Columns");
+                        XmlNodeList columnList = columnListNode.SelectNodes("Column");
+                        foreach (XmlNode column in columnList)
+                        {
+                            dc = new DataColumn();
+                            dc.ColumnName = column.Attributes["Name"].Value;
+                            dc.Order = Int32.Parse(column.Attributes["ID"].Value);
+                            dc.DataTypeName = column.Attributes["Type"].Value;
+                            dc.DataTypeLength = UInt64.Parse(column.Attributes["Size"].Value);
+                            dt.DataColumns.Add(dc);
+                        }
+                    }
+                }
                 else
                 {
                     throw new ApplicationException(
@@ -232,8 +281,11 @@ namespace AlgoQuest.Core.DatabaseManagement
             }
             finally
             {
-                _srProperties.Close();
-                _srProperties.Dispose();
+                if (_srProperties != null)
+                {
+                    _srProperties.Close();
+                    _srProperties.Dispose();
+                }
             }
 
         }

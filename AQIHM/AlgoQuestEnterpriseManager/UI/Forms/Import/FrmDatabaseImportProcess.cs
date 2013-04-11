@@ -39,11 +39,11 @@ namespace AlgoQuest.UI.Forms.Import
             foreach (DataImportTable table in tableList)
                 table.Count = conn.GetCount(table.Name);
             _columnsCount = tableList.Sum(t => t.Columns.Count);
-            pbCic.Maximum = _columnsCount;
 
             launch();
             Cursor.Current = Cursors.Default;
         }
+
         private void launch()
         {
             generateBaseStruct();
@@ -57,15 +57,6 @@ namespace AlgoQuest.UI.Forms.Import
                 lblAvancementCsv.Invoke(new Action(() =>
                 {
                     lblAvancementCsv.Text = "Toutes les tables ont été exportées.";
-                }));
-        }
-
-        private void isCicFinished()
-        {
-            if(!_tableList.Exists(t=>t.Columns.Exists(c => c.Loaded==false)))
-                lblAvancementCic.Invoke(new Action(() =>
-                {
-                    lblAvancementCic.Text = "Toutes les données ont été importées.";
                 }));
         }
 
@@ -123,12 +114,8 @@ namespace AlgoQuest.UI.Forms.Import
                     String.Format("{0} tables exportées sur {1}.", table.Order, _tableList.Count);
             }));
 
-            foreach (DataImportColumn column in table.Columns)
-            {
-                KeyValuePair<int, int> parameters = new KeyValuePair<int,int>(table.Order,column.Order);
-                ThreadPool.QueueUserWorkItem(new WaitCallback(cutInColMultiThreaded), parameters);
-            }
-
+            ThreadPool.QueueUserWorkItem(new WaitCallback(import), table.Order);
+            
             lock (_availableTableProcess)
             {
                 _availableTableProcess.Add(tableProcessKey);
@@ -137,19 +124,13 @@ namespace AlgoQuest.UI.Forms.Import
             isCsvFinished();
         }
 
-        private void cutInColMultiThreaded(object state)
+        private void import(object state)
         {
-            KeyValuePair<int, int> parameters = (KeyValuePair<int, int>)state;
+            int parameters = (int)state;
             CutInCol processCic = new CutInCol(_db);
 
-            processCic.Process(parameters.Key, parameters.Value);
-            pbCic.Invoke(new Action(() => { pbCic.Value++; }));
-            lblAvancementCic.Invoke(new Action(() => { 
-                lblAvancementCic.Text = String.Format("{0} colonnes importées sur {1}.", pbCic.Value, _columnsCount); 
-            }));
-            _tableList.Single(t => t.Order == parameters.Key).Columns.Single(c => c.Order == parameters.Value).Loaded = true;
+            processCic.Process(parameters);
             processCic = null;
-            isCicFinished();
         }
 
         private void generateBaseStruct()
@@ -343,7 +324,6 @@ namespace AlgoQuest.UI.Forms.Import
         private void launchCutInColOnly()
         {
             _columnsCount = _db.DataTableList.Sum(t => t.DataColumns.Count);
-            pbCic.Maximum = _columnsCount;
             lblAvancementCsv.Text = "Import des données en cours.";
 
             _appReader = new AppSettingsReader();
@@ -419,28 +399,12 @@ namespace AlgoQuest.UI.Forms.Import
             CutInCol processCic = new CutInCol(_db);
             processCic.Process(table.Order, column.Order);
             pb.Invoke(new Action(() => { pb.Value++; }));
-            pbCic.Invoke(new Action(() => { pbCic.Value++; }));
-            lbl.Invoke(new Action(() => { lbl.Text = String.Format("La colonne {0} de la table {1} a été importée. ", column.ColumnName, table.DataTableName); }));
-            lblAvancementCic.Invoke(new Action(() =>
-            {
-                lblAvancementCic.Text = String.Format("{0} colonnes importées sur {1}.", pbCic.Value, _columnsCount);
-            }));
             _columnCutInColList[column] = true;
-            isCutInColOnlyFinished();
             lock (_availableTableProcess)
             {
                 _availableTableProcess.Add(tableProcessKey);
             }
             
-        }
-
-        private void isCutInColOnlyFinished()
-        {
-            if (!_columnCutInColList.ContainsValue(false))
-                lblAvancementCic.Invoke(new Action(() =>
-                {
-                    lblAvancementCic.Text = "Toutes les données ont été importées.";
-                }));
         }
 
         #endregion

@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using AlgoQuest.UI.Forms;
+using System.Runtime.InteropServices;
 
 namespace AlgoQuest
 {
     static class Program
     {
+        
         /// <summary>
         /// Point d'entrée principal de l'application.
         /// </summary>

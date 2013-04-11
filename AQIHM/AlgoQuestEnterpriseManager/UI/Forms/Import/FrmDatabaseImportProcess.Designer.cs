@@ -32,20 +32,16 @@
             this.pbCsv = new System.Windows.Forms.ProgressBar();
             this.lblAvancementCsv = new System.Windows.Forms.Label();
             this.tlpProcess = new System.Windows.Forms.TableLayoutPanel();
-            this.pbCic = new System.Windows.Forms.ProgressBar();
-            this.lblAvancementCic = new System.Windows.Forms.Label();
             this.gbGlobalProcess.SuspendLayout();
             this.SuspendLayout();
             // 
             // gbGlobalProcess
             // 
-            this.gbGlobalProcess.Controls.Add(this.lblAvancementCic);
-            this.gbGlobalProcess.Controls.Add(this.pbCic);
             this.gbGlobalProcess.Controls.Add(this.pbCsv);
             this.gbGlobalProcess.Controls.Add(this.lblAvancementCsv);
             this.gbGlobalProcess.Location = new System.Drawing.Point(12, 12);
             this.gbGlobalProcess.Name = "gbGlobalProcess";
-            this.gbGlobalProcess.Size = new System.Drawing.Size(667, 90);
+            this.gbGlobalProcess.Size = new System.Drawing.Size(667, 59);
             this.gbGlobalProcess.TabIndex = 1;
             this.gbGlobalProcess.TabStop = false;
             this.gbGlobalProcess.Text = "Avancement général";
@@ -72,7 +68,7 @@
             this.tlpProcess.ColumnCount = 2;
             this.tlpProcess.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 46.62669F));
             this.tlpProcess.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 53.37331F));
-            this.tlpProcess.Location = new System.Drawing.Point(12, 108);
+            this.tlpProcess.Location = new System.Drawing.Point(12, 87);
             this.tlpProcess.Name = "tlpProcess";
             this.tlpProcess.RowCount = 1;
             this.tlpProcess.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
@@ -80,28 +76,13 @@
             this.tlpProcess.Size = new System.Drawing.Size(661, 36);
             this.tlpProcess.TabIndex = 2;
             // 
-            // pbCic
-            // 
-            this.pbCic.Location = new System.Drawing.Point(311, 49);
-            this.pbCic.Name = "pbCic";
-            this.pbCic.Size = new System.Drawing.Size(350, 23);
-            this.pbCic.TabIndex = 2;
-            // 
-            // lblAvancementCic
-            // 
-            this.lblAvancementCic.AutoSize = true;
-            this.lblAvancementCic.Location = new System.Drawing.Point(7, 58);
-            this.lblAvancementCic.Name = "lblAvancementCic";
-            this.lblAvancementCic.Size = new System.Drawing.Size(0, 13);
-            this.lblAvancementCic.TabIndex = 3;
-            // 
             // FrmDatabaseImportProcess
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
             this.AutoSize = true;
-            this.ClientSize = new System.Drawing.Size(691, 158);
+            this.ClientSize = new System.Drawing.Size(691, 138);
             this.Controls.Add(this.tlpProcess);
             this.Controls.Add(this.gbGlobalProcess);
             this.Name = "FrmDatabaseImportProcess";
@@ -119,7 +100,5 @@
         private System.Windows.Forms.Label lblAvancementCsv;
         private System.Windows.Forms.TableLayoutPanel tlpProcess;
         private System.Windows.Forms.ProgressBar pbCsv;
-        private System.Windows.Forms.ProgressBar pbCic;
-        private System.Windows.Forms.Label lblAvancementCic;
     }
 }

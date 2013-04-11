@@ -6,11 +6,26 @@ using System.IO;
 using AlgoQuest.Configuration.Core;
 using System.Diagnostics;
 using System.Data;
+using System.Runtime.InteropServices;
 
 namespace AlgoQuest.Core.Compute
 {
+
     public class SelectRequest : ISelectRequest
     {
+        [DllImport("E:/Project_AQ/AQSuite/x64/Release/AQLib.dll", CharSet = CharSet.Auto)]
+        public static extern int solve_query(
+            string query, string iniFilename, string workingDirectory, 
+            string logIdent, string logMode, uint logLevel,
+            bool clean, bool force);
+
+        // [DllImport("E:\\Project_AQ\\AQSuite\\x64\\Release\\AQLib.dll", CharSet = CharSet.Auto)]
+        // public static extern int test_aq_lib();
+
+        // [DllImport("C:\\Users\\AlgoQuest\\Documents\\Visual Studio 2012\\Projects\\DLLTest\\Debug\\DLLTest.dll", CharSet = CharSet.Auto)]
+        [DllImport("C:/Users/AlgoQuest/Documents/Visual Studio 2012/Projects/DLLTest/x64/Debug/DLLTest.dll")]
+        public static extern int test_aq_lib();
+
         string _cfgPath;
         IniProperties _ip;
         string _tmpFolder;
@@ -128,18 +143,30 @@ namespace AlgoQuest.Core.Compute
 
         public DataTable Execute(string request)
         {
+
             _randomIdFolder = getRandomIdFolder();
             writeRequest(request);
-            ProcessStartInfo psi = new ProcessStartInfo(_ip.Keys["aq-query-resolver"].ToString()
-                                         , _ip.getFilename() + " " + _randomIdFolder);
+            
+            string query = request;
+            string iniFilename = _ip.getFilename();
+            string workingDirectory = _randomIdFolder;
+            string logIdent = "aq_query_resolver";
+            string logMode = "LOCALFILE";
+            uint logLevel = 7;
+            bool clean = false;
+            bool force = false;
 
-            psi.RedirectStandardOutput = true;
-            psi.UseShellExecute = false;
-            psi.CreateNoWindow = true;
+            int rc = test_aq_lib();
+            rc = solve_query(request, _ip.getFilename(), _randomIdFolder, logIdent, logMode, logLevel, clean, force);
 
-            Process p = Process.Start(psi);
+            //ProcessStartInfo psi = new ProcessStartInfo(_ip.Keys["aq-tools"].ToString()
+            //                             , _ip.getFilename() + " " + _randomIdFolder);
+            //psi.RedirectStandardOutput = true;
+            //psi.UseShellExecute = false;
+            //psi.CreateNoWindow = true;
+            //Process p = Process.Start(psi);
+            //p.WaitForExit();
 
-            p.WaitForExit();
             clearTempFolder();
 
             return getResult();
@@ -149,7 +176,7 @@ namespace AlgoQuest.Core.Compute
         {
             _randomIdFolder = getRandomIdFolder();
             writeRequest(request);
-            ProcessStartInfo psi = new ProcessStartInfo(_ip.Keys["aq-query-resolver"].ToString()
+            ProcessStartInfo psi = new ProcessStartInfo(_ip.Keys["aq-tools"].ToString()
                                          , _ip.getFilename() + " " + _randomIdFolder);
 
             psi.RedirectStandardOutput = true;

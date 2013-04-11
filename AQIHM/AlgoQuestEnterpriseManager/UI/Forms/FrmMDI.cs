@@ -7,8 +7,11 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Configuration;
+using System.Security.Cryptography;
 using Aq = AlgoQuest.Core.DatabaseManagement;
 using AlgoQuest.UI.Forms.Import;
+using AlgoQuest.Core.DatabaseManagement;
+using AlgoQuest.Configuration.Connection;
 
 namespace AlgoQuest.UI.Forms
 {
@@ -53,7 +56,10 @@ namespace AlgoQuest.UI.Forms
 
         private bool connect()
         {
-            return true;
+            AppSettingsReader _appReader = new AppSettingsReader();
+            string pass = _appReader.GetValue("Password", typeof(System.String)).ToString();
+            string log = _appReader.GetValue("Login", typeof(System.String)).ToString();
+            if ((pass == "") && (log == "")) return true;
             bool connected = false;
             int attempts = 0;
             while (connected == false && attempts < 3)
@@ -62,12 +68,17 @@ namespace AlgoQuest.UI.Forms
                 DialogResult dg = frmConnexion.ShowDialog(this);
                 if (dg == DialogResult.OK)
                 {
+                    SHA256 mySHA256 = SHA256Managed.Create();
                     string login = frmConnexion.Login;
                     string password = frmConnexion.Password;
-                    AppSettingsReader _appReader = new AppSettingsReader();
-                    string pass = _appReader.GetValue("Password", typeof(System.String)).ToString();
-                    string log = _appReader.GetValue("Login", typeof(System.String)).ToString();
-                    if (login == log && pass == password)
+                    byte[] data = Encoding.UTF8.GetBytes(password);
+                    byte[] hashValue = mySHA256.ComputeHash(data);
+                    string hashString = String.Empty;
+                    foreach (byte x in hashValue)
+                    {
+                        hashString += String.Format("{0:x2}", x);
+                    }
+                    if (login == log && pass == hashString)
                         connected = true;
                     if (connected == false)
                     {
@@ -137,18 +148,20 @@ namespace AlgoQuest.UI.Forms
             tvObjects.Nodes[0].Nodes.Clear();
             try
             {
+                TreeNode trDb = null;
+                TreeNode trDt = null;
                 AppSettingsReader _appReader = new AppSettingsReader();
                 String dbPath = _appReader.GetValue("DataBasePath", typeof(System.String)).ToString();
                 String cfgPath = _appReader.GetValue("ConfigPath", typeof(System.String)).ToString();
                 _lstDb = Aq.DataBase.GetDatabases(dbPath, cfgPath);
                 foreach (Aq.DataBase db in _lstDb)
                 {
-                    TreeNode trDb = tvObjects.Nodes[0].Nodes.Add(db.Name, db.Name, 1, 1);
+                    trDb = tvObjects.Nodes[0].Nodes.Add(db.Name, db.Name, 1, 1);
                     trDb.ContextMenuStrip = cmsDataBase;
                     if (db.DataTableList != null)
                         foreach (Aq.DataTable dt in db.DataTableList)
                         {
-                            TreeNode trDt = trDb.Nodes.Add(dt.DataTableName, dt.DataTableName, 2, 2);
+                            trDt = trDb.Nodes.Add(dt.DataTableName, dt.DataTableName, 2, 2);
                             foreach (Aq.DataColumn dc in dt.DataColumns)
                             {
                                 trDt.Nodes.Add(dc.ColumnName
@@ -157,6 +170,23 @@ namespace AlgoQuest.UI.Forms
                                     , 3);
                             }
                         }
+                }
+
+                //
+                DataBaseParser dbParser = new DataBaseParser();
+                TreeNode server = new TreeNode("Servers");
+                tvObjects.Nodes.Add(server);
+
+                RemoteDatabaseSection section = (RemoteDatabaseSection)ConfigurationManager.GetSection("RemoteDatabaseSection");
+                if (section != null)
+                {
+                    List<RemoteDatabaseElement> _listMapElement = section.MapItems.AsQueryable().Cast<RemoteDatabaseElement>().ToList<RemoteDatabaseElement>();
+                    foreach (RemoteDatabaseElement e in _listMapElement)
+                    {
+                        trDb = server.Nodes.Add(e.host + ":" + e.port + ":" + e.dbname, e.host + ":" + e.port + ":" + e.dbname, 1, 1);
+                        trDb.ContextMenuStrip = cmsDataBase;
+                        dbParser.fill(trDb, e.host, UInt16.Parse(e.port), e.dbname);
+                    }
                 }
             }
             catch (Exception ex)

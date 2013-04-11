@@ -13,6 +13,7 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -25,7 +26,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -68,6 +68,25 @@
     <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
     <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+    <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="gudusoft.gsqlparser, Version=2.2.2.18244, Culture=neutral, PublicKeyToken=1e1734490a0fe9ed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -89,6 +108,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\Connection\RemoteDatabaseCollection.cs" />
+    <Compile Include="Configuration\Connection\RemoteDatabaseElement.cs" />
+    <Compile Include="Configuration\Connection\RemoteDatabaseSection.cs" />
     <Compile Include="Configuration\Core\DataTypeCollection.cs" />
     <Compile Include="Configuration\Core\DataTypeElement.cs" />
     <Compile Include="Configuration\Core\DataTypeSection.cs" />
@@ -102,14 +124,17 @@
     <Compile Include="Configuration\Import\DataTypeMappingCollection.cs" />
     <Compile Include="Configuration\Import\DataTypeMappingElement.cs" />
     <Compile Include="Configuration\Import\DataTypeMappingSection.cs" />
+    <Compile Include="Core\Compute\AnswerParser.cs" />
     <Compile Include="Core\Compute\ISelectRequest.cs" />
     <Compile Include="Core\Compute\OdbcRequest.cs" />
     <Compile Include="Core\Compute\Resources.cs" />
     <Compile Include="Core\Compute\SelectRequest.cs" />
+    <Compile Include="Core\Compute\SelectRequestRemote.cs" />
     <Compile Include="Core\DatabaseManagement\DataBase.cs" />
     <Compile Include="Core\DatabaseManagement\DataColumn.cs" />
     <Compile Include="Core\DatabaseManagement\DataTable.cs" />
     <Compile Include="Core\DatabaseManagement\DataType.cs" />
+    <Compile Include="Core\DatabaseManagement\DataBaseParser.cs" />
     <Compile Include="Core\DatabaseManagement\Request.cs" />
     <Compile Include="Core\Import\AQConnector.cs" />
     <Compile Include="Core\Import\Connector.cs" />

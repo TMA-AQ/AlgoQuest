@@ -20,6 +20,8 @@ namespace AlgoQuest.UI.Forms
 {
     public partial class FrmSqlEditor : Form
     {
+        private string _server;
+        private UInt16 _port;
         private string _selectedBase;
         private List<RequestData> _requestList;
         private string _pathFile;
@@ -30,7 +32,14 @@ namespace AlgoQuest.UI.Forms
         {
             InitializeComponent();
             _selectedBase = SelectedBase;
-            this.Text = String.Format("Analyseur de requêtes - {0}", _selectedBase);
+            string[] fields = SelectedBase.Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
+            if (fields.Length > 1)
+            {
+                _server = fields[0];
+                _port = UInt16.Parse(fields[1]);
+                _selectedBase = fields[2];
+            }
+            this.Text = String.Format("Analyseur de requêtes - {0}", SelectedBase);
             populateRequestList();
             scSql.Panel2.ClientSizeChanged += new EventHandler(Panel2_ClientSizeChanged);
 
@@ -224,7 +233,7 @@ namespace AlgoQuest.UI.Forms
             String dbPath = _appReader.GetValue("DataBasePath", typeof(System.String)).ToString();
             String cfgPath = _appReader.GetValue("ConfigPath", typeof(System.String)).ToString();
             Int32 nbRecordsToPrint = (Int32)_appReader.GetValue("NbRecordsToPrint", typeof(int));
-            SelectRequest sr = new SelectRequest(cfgPath, _selectedBase, nbRecordsToPrint);
+            // SelectRequest sr = new SelectRequest(cfgPath, _selectedBase, nbRecordsToPrint);
             try
             {
                 string request = rtbEditor.Text;
@@ -278,6 +287,7 @@ namespace AlgoQuest.UI.Forms
                 if ((_odbc_conn_str == null) || (_odbc_conn_str == ""))
                 {
                     sr = new SelectRequest(cfgPath, _selectedBase, nbRecordsToPrint);
+                    // sr = new SelectRequestRemote(_server, _port, _selectedBase, nbRecordsToPrint);
                 }
                 else
                 {
@@ -300,7 +310,7 @@ namespace AlgoQuest.UI.Forms
                         , watch.Elapsed.Seconds.ToString().PadLeft(2, '0')
                         );
                 }));
-                ssResult.Invoke(new Action(() => { tsslNumber.Text = String.Format("Nombre d'enregistrements : {0} (Affichage: {1})", sr.NbRecords, dt.Rows.Count.ToString()); }));
+                ssResult.Invoke(new Action(() => { tsslNumber.Text = String.Format("Nombre d'enregistrements : {0})", dt.Rows.Count.ToString()); }));
                 dgResult.Invoke(new Action(() => { dgResult.DataSource = dt; }));
                 _pathFile = sr.PathFile;
                 if (!string.IsNullOrEmpty(_pathFile))

@@ -19,14 +19,24 @@ namespace AlgoQuest.Core.Import
         {
             //récupération du chemin vers l'exécutable
             IniProperties ip = new IniProperties(db.IniPropertiesPath);
-            _cutInColPath = ip.Keys["cut-in-col"].ToString();
+            _cutInColPath = ip.Keys["aq-tools"].ToString();
             _iniPropertiesPath = db.IniPropertiesPath;
+        }
+
+        public void Process(int numTable)
+        {
+            ProcessStartInfo pInfo = new ProcessStartInfo(_cutInColPath, "--aq-ini=\"" + _iniPropertiesPath + "\" --load-db --load-table=" + numTable);
+            pInfo.RedirectStandardOutput = true;
+            pInfo.UseShellExecute = false;
+            pInfo.CreateNoWindow = true;
+            Process p = System.Diagnostics.Process.Start(pInfo);
+            p.WaitForExit();
         }
 
         public void Process(int numTable, int numColumn)
         {
             ProcessStartInfo pInfo = new ProcessStartInfo(_cutInColPath
-                ,"\"" + _iniPropertiesPath + "\" " + numTable.ToString() + " " + numColumn.ToString());
+                , "\"" + _iniPropertiesPath + "\" " + numTable.ToString() + " " + numColumn.ToString());
             pInfo.RedirectStandardOutput = true;
             pInfo.UseShellExecute = false;
             pInfo.CreateNoWindow = true;
