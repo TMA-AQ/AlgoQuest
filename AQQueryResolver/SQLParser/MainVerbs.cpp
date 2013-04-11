@@ -33,13 +33,13 @@ void getAllColumns( tnode* pNode, vector<tnode*>& columns )
 			if( !columns[idx] )
 				continue;
 
-			string table1(columns[idx]->left->data.val_str);
+			std::string table1(columns[idx]->left->data.val_str);
 			strtoupr( table1 );
-			string table2(pNode->left->data.val_str);
+			std::string table2(pNode->left->data.val_str);
 			strtoupr( table2 );
-			string col1(columns[idx]->right->data.val_str);
+			std::string col1(columns[idx]->right->data.val_str);
 			strtoupr( col1 );
-			string col2(pNode->right->data.val_str);
+			std::string col2(pNode->right->data.val_str);
 			strtoupr( col2 );
 
 			if( columns[idx]->tag == K_PERIOD &&
@@ -62,7 +62,7 @@ void getAllColumns( tnode* pNode, vector<tnode*>& columns )
 }
 
 //------------------------------------------------------------------------------
-void extractName( tnode* pNode, string& name )
+void extractName( tnode* pNode, std::string& name )
 {
 	if( !pNode )
 		return;
@@ -84,7 +84,7 @@ void extractName( tnode* pNode, string& name )
 	}
 	else
 	{
-		string idstr = string( id_to_string( pNode->tag ) );
+		std::string idstr = std::string( id_to_string( pNode->tag ) );
 		if( idstr != "" )
 		{
 			if( name != "" )
@@ -105,7 +105,7 @@ bool SelectVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOrig
 	getColumnsList( pStartOriginal->left, columns );
 	for( size_t idx = 0; idx < columns.size(); ++idx )
 	{
-		string name;
+		std::string name;
 		extractName( columns[idx], name );
 		this->ColumnsDisplay.push_back( name );
 	}
@@ -129,7 +129,7 @@ bool SelectVerb::changeQuery(	tnode* pStart, tnode* pNode,
 	getColumnsList( pNode->left, columns );
 	for( size_t idx = 0; idx < columns.size(); ++idx )
 	{
-		string name;
+		std::string name;
 		if( columns[idx]->tag == K_PERIOD )
 		{
 			name += columns[idx]->left->data.val_str;

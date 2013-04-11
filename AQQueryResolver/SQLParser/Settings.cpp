@@ -7,6 +7,7 @@
 #include <boost/property_tree/ini_parser.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/replace.hpp>
+#include <boost/filesystem.hpp>
 
 TProjectSettings::TProjectSettings()
   : 
@@ -15,7 +16,6 @@ TProjectSettings::TProjectSettings()
 	szRootPath(""),
 	szEnginePath(""),
   szTempRootPath(""),
-  szCutInColPath(""),
   szLoaderPath(""),
 	worker(1),
 	group_by_process_size(100000),
@@ -44,7 +44,6 @@ TProjectSettings::TProjectSettings(const TProjectSettings& obj)
 	szRootPath(obj.szRootPath),
 	szEnginePath(obj.szEnginePath),
   szTempRootPath(obj.szTempRootPath),
-  szCutInColPath(obj.szCutInColPath),
   szLoaderPath(obj.szLoaderPath),
 	fieldSeparator(obj.fieldSeparator),
 	worker(obj.worker),
@@ -82,7 +81,6 @@ TProjectSettings& TProjectSettings::operator=(const TProjectSettings& obj)
 		output = obj.output;
 		szRootPath = obj.szRootPath;
 		szTempRootPath = obj.szTempRootPath;
-		szCutInColPath = obj.szCutInColPath;
 		szLoaderPath = obj.szLoaderPath;
 		szSQLReqFN, obj.szSQLReqFN;
 		::strcpy(szDBDescFN, obj.szDBDescFN);
@@ -126,8 +124,7 @@ void TProjectSettings::load(const std::string& iniFile)
     this->fieldSeparator = pt.get<std::string>(boost::property_tree::ptree::path_type("field-separator")).at(0);
 		
     this->szEnginePath = pt.get<std::string>(boost::property_tree::ptree::path_type("aq-engine"));
-    this->szCutInColPath = pt.get<std::string>(boost::property_tree::ptree::path_type("cut-in-col"));
-    this->szLoaderPath = pt.get<std::string>(boost::property_tree::ptree::path_type("loader"));
+    this->szLoaderPath = pt.get<std::string>(boost::property_tree::ptree::path_type("aq-loader"));
 		
 		// optional
 		boost::optional<size_t> opt;
@@ -140,8 +137,6 @@ void TProjectSettings::load(const std::string& iniFile)
     // Change '\' by '/'
     boost::algorithm::replace_all(this->szEnginePath, "\\", "/");
     boost::algorithm::trim(this->szEnginePath);
-    boost::algorithm::replace_all(this->szCutInColPath, "\\", "/");
-    boost::algorithm::trim(this->szCutInColPath);
     boost::algorithm::replace_all(this->szLoaderPath, "\\", "/");
     boost::algorithm::trim(this->szLoaderPath);
 
@@ -158,8 +153,18 @@ void TProjectSettings::load(const std::string& iniFile)
 		//
 		// base desc file
 		strcpy( this->szDBDescFN, this->szRootPath.c_str() );
-		strcat( this->szDBDescFN, "base_struct/base." );
-		
+		strcat( this->szDBDescFN, "base_struct/base.xml" );
+    boost::filesystem::path bdf(this->szDBDescFN);
+    if (!boost::filesystem::exists(bdf))
+    {
+      strcpy( this->szDBDescFN, this->szRootPath.c_str() );
+      strcat( this->szDBDescFN, "base_struct/base." );
+    }
+
+    // FIXME
+    strcpy( this->szDBDescFN, this->szRootPath.c_str() );
+    strcat( this->szDBDescFN, "base_struct/base." );
+
 		//
 		// thesaurus path
 		strcpy( this->szThesaurusPath, this->szRootPath.c_str() );
@@ -222,7 +227,6 @@ void TProjectSettings::dump(std::ostream& os) const
 {
   os << "szRootPath: '" << szRootPath << "'" << std::endl;
 	os << "szTempRootPath: '" << szTempRootPath << "'" << std::endl;
-	os << "szCutInColPath: '" << szCutInColPath << "'" << std::endl;
 	os << "szLoaderPath: '" << szLoaderPath << "'" << std::endl;
 	os << "szSQLReqFN: '" << szSQLReqFN << "'" << std::endl;
 	os << "szDBDescFN: '" << szDBDescFN << "'" << std::endl;

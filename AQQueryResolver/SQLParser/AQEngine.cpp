@@ -26,7 +26,7 @@ AQEngine::~AQEngine(void)
 
 void AQEngine::call(TProjectSettings& settings, tnode *pNode, int mode, int selectLevel)
 {
-	string query;
+	std::string query;
 	syntax_tree_to_prefix_form( pNode, query );
 	ParseJeq( query );
 	
@@ -34,7 +34,7 @@ void AQEngine::call(TProjectSettings& settings, tnode *pNode, int mode, int sele
 		aq::Logger::getInstance().log(AQ_DEBUG, "\n%s\n", query.c_str());
 
 #if defined(_DEBUG)
-	std::cout << std::endl << str << std::endl << std::endl;
+	std::cout << std::endl << query << std::endl << std::endl;
 	std::string queryStr; 
 	// syntax_tree_to_sql_form(pNode, queryStr);
 	std::cout << std::endl << queryStr << std::endl << std::endl;
@@ -53,33 +53,59 @@ void AQEngine::call(TProjectSettings& settings, tnode *pNode, int mode, int sele
 
 	//
 	// If mono table query, read PRM or TMP files to get the rows indexes
-	std::string tableName;
-	tnode * constraint = find_main_node(pNode, K_WHERE);
-	if (isMonoTable(pNode, tableName) && (constraint == NULL))
-	{
-		this->generateAQMatrixFromPRM(tableName, constraint);
-		return;
-	} 
+	//std::string tableName;
+	//tnode * constraint = find_main_node(pNode, K_WHERE);
+	//if (isMonoTable(pNode, tableName) && (constraint == NULL))
+	//{
+	//	this->generateAQMatrixFromPRM(tableName, constraint);
+	//	return;
+	//} 
 
 	//
 	// create folders for the engine
 	mkdir( settings.szTempPath1 );
 	mkdir( settings.szTempPath2 );
-	vector<string> files;
+	vector<std::string> files;
 	
-	std::string cmd = settings.szEnginePath + " ";
-	cmd += (mode == 0 ? settings.szEngineParamsDisplay : settings.szEngineParamsNoDisplay);
 
 	aq::Timer timer;
-
 	if ((mode == 0) || (settings.executeNestedQuery))
 	{
-		aq::Logger::getInstance().log(AQ_DEBUG, "call aq engine: '%s'\n", cmd.c_str());
-		int rc = system( cmd.c_str());
-		if (rc != 0)
-		{
+    int rc = 1;
+    std::string prg = settings.szEnginePath;
+    std::string arg = mode == 0 ? settings.szEngineParamsDisplay : settings.szEngineParamsNoDisplay;
+
+    aq::Logger::getInstance().log(AQ_NOTICE, "call: '%s %s'\n", prg.c_str(), arg.c_str());
+
+#if defined(WIN32) && defined(USE_CREATE_PROCESS)
+    STARTUPINFOW si;
+    // LPSTARTUPINFOA si;
+    PROCESS_INFORMATION pi;
+    ZeroMemory(&si, sizeof(si));
+    si.cb = sizeof(si);
+    ZeroMemory(&pi, sizeof(pi));
+
+    std::wstring wprg = aq::string2Wstring(prg);
+    std::wstring warg = aq::string2Wstring(arg);
+    LPCWSTR prg_wstr = wprg.c_str();
+    LPCWSTR arg_wstr = warg.c_str();
+    //if (CreateProcess(prg.c_str(), (LPSTR)arg.c_str(), NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, si, &pi))
+    if (CreateProcessW(prg_wstr, (LPWSTR)arg_wstr, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi))
+    //if (CreateProcess(NULL, "E:/Project_AQ/Bin/AQ_Engine.exe E:/AQ_DATABASES/DB/MSALGOQUEST/calculus/test_aq_engine/aqengine.ini test_aq_engine Dpy", 
+    //  NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, si, &pi))
+    {
+      rc = WaitForSingleObject(pi.hProcess, INFINITE);
+      CloseHandle(pi.hProcess);
+      CloseHandle(pi.hThread);
+    }
+#else
+    rc = system((prg + " " + arg).c_str());
+#endif
+    
+    if (rc != 0)
+    {
 			std::ostringstream oss;
-			oss << "call to aq engine failed: '" << cmd << "' [ExitCode:" << rc << "]";
+			oss << "call to '" << prg << " " << arg << "' aq engine failed [ExitCode:" << rc << "]";
 			aq::Logger::getInstance().log(AQ_ERROR, "%s\n", oss.str().c_str());
       if (query.size() < 2048) // fixme
         aq::Logger::getInstance().log(AQ_ERROR, "%s\n", query.c_str());
@@ -124,8 +150,8 @@ void AQEngine::call(TProjectSettings& settings, tnode *pNode, int mode, int sele
 					files[idx].c_str() );
 				
 				char newFile[_MAX_PATH];
-				string substr1 = files[idx].substr(0, 9).c_str();
-				string substr2 = files[idx].substr(17, 14);
+				std::string substr1 = files[idx].substr(0, 9).c_str();
+				std::string substr2 = files[idx].substr(17, 14);
 				sprintf( newFile, "%s\\%stmp", path, 
 					substr1.c_str(), substr2.c_str() );
 				

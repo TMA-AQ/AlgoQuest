@@ -8,7 +8,7 @@
 #include "AQMatrix.h"
 #include "ColumnMapper.h"
 
-
+#include <aq/BaseDesc.h>
 #include <aq/DBTypes.h>
 #include <aq/Utilities.h>
 
@@ -51,7 +51,7 @@ public:
 	bool			NoAnswer;
 
 	Table();
-	Table(std::string& name, unsigned int ID );
+	Table(const std::string& name, unsigned int ID );
 
 	int getColumnIdx( const std::string& name );
 	
@@ -84,7 +84,9 @@ public:
 	void updateColumnsContent( const std::vector<Column::Ptr>& newColumns );
 	void unravel( TablePartition::Ptr partition );
   
-	void dump( std::ostream& os );
+	void dumpRaw( std::ostream& os );
+	void dumpXml( std::ostream& os );
+
 private:
 	void computeUniqueRow(Table& aqMatrix, std::vector<std::vector<size_t> >& mapToUniqueIndex, std::vector<std::vector<size_t> >& uniqueIndex) const;
 
@@ -125,9 +127,11 @@ public:
 	///
 	/// ...
 	///
-	void loadFromBaseDesc( const char* pszDataBaseFile );
-	void saveToBaseDesc( const char* pszDataBaseFile );
-	void dump( std::ostream& os );
+	void loadFromBaseDesc( const aq::base_t& base );
+	void loadFromRawFile( const char* pszDataBaseFile );
+	void saveToRawFile( const char* pszDataBaseFile );
+	void dumpRaw( std::ostream& os );
+	void dumpXml( std::ostream& os );
 };
 
 #endif

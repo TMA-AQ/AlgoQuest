@@ -5,6 +5,7 @@
 #include <SQLParser/QueryResolver.h>
 #include <SQLParser/JeqParser.h>
 #include <aq/Exceptions.h>
+#include <aq/BaseDesc.h>
 #include <DBLoader/DatabaseLoader.h>
 #include <iostream>
 #include <list>
@@ -192,7 +193,7 @@ int transformQuery(const std::string& query, TProjectSettings& settings, Base& b
 }
 
 // -------------------------------------------------------------------------------------------------
-int prepareQuery(const TProjectSettings& settingsBase, Base& baseDesc, TProjectSettings& settings, std::string& displayFile, const std::string queryIdentStr, bool force)
+int prepareQuery(const std::string& query, const TProjectSettings& settingsBase, Base& baseDesc, TProjectSettings& settings, std::string& displayFile, const std::string queryIdentStr, bool force)
 {		
 	//
 	// generate ident and ini file
@@ -236,6 +237,13 @@ int prepareQuery(const TProjectSettings& settingsBase, Base& baseDesc, TProjectS
       }
 		}
 	}
+
+  //
+  // write request file
+  std::string queryFilename(settings.szRootPath + "/calculus/" + queryIdentTmp + "/Request.sql");
+  std::ofstream queryFile(queryFilename.c_str());
+  queryFile << query;
+  queryFile.close();
 
 	//
 	// write ini file (it is needed for now by AQEngine)
@@ -355,7 +363,7 @@ int processSQLQueries(std::list<std::string>::const_iterator itBegin, std::list<
 		// prepare and process query
 		std::string answer;
 		TProjectSettings settings(settingsBase);
-		if (!((prepareQuery(settingsBase, baseDesc, settings, answer, queryIdent, force) == EXIT_SUCCESS) &&
+		if (!((prepareQuery(*it, settingsBase, baseDesc, settings, answer, queryIdent, force) == EXIT_SUCCESS) &&
 				  (processQuery(*it, settings, baseDesc, aq_engine, answer, display, clean) == EXIT_SUCCESS)))
 		{
 			queriesKO.push_back(*it);
@@ -408,6 +416,7 @@ int main(int argc, char**argv)
 		std::string answerFileName;
 		unsigned int worker;
 		unsigned int queryWorker;
+    unsigned int tableIdToLoad;
 		bool simulateAQEngine = false;
 		bool multipleAnswerFiles = false;
 		bool clean = false;
@@ -447,6 +456,7 @@ int main(int argc, char**argv)
 			("answer-file", po::value<std::string>(&answerFileName)->default_value("answer.txt"), "")
 			("use-row-resolver", po::bool_switch(&settings.useRowResolver), "")
 			("load-db", po::bool_switch(&loadDatabase), "")
+      ("load-table", po::value<unsigned int>(&tableIdToLoad)->default_value(0), "")
 			/*
 			("root-path", po::value<std::string>(&Settings.szRootPath), "old root.folder in properties.ini")
 			("engine-path", po::value<char *>(Settings.szEnginePath), "old exeTest.folder in properties.ini")
@@ -509,11 +519,23 @@ int main(int argc, char**argv)
 
 		//
 		// Load DB Schema
+		Base baseDesc;
 		if (baseDescr == "")
 			baseDescr = settings.szDBDescFN;
 		aq::Logger::getInstance().log(AQ_INFO, "load base %s\n", baseDescr.c_str());
-		Base baseDesc;
-		baseDesc.loadFromBaseDesc(baseDescr.c_str());
+    std::fstream bdFile(baseDescr.c_str());
+    aq::base_t baseDescHolder;
+    if (baseDescr.substr(baseDescr.size() - 4) == ".xml")
+    {
+      aq::build_base_from_xml(bdFile, baseDescHolder);
+      baseDesc.loadFromBaseDesc(baseDescHolder);
+    }
+    else
+    {
+      // aq::build_base_from_raw(baseDescr.c_str(), baseDescHolder);
+      baseDesc.loadFromRawFile(baseDescr.c_str());
+    }
+    // baseDesc.loadFromBaseDesc(baseDescHolder);
 		
 		//
 		// If Load database is invoked
@@ -521,9 +543,13 @@ int main(int argc, char**argv)
 		{
 			for (size_t t = 0; t < baseDesc.Tables.size(); ++t)
 			{
+        if ((tableIdToLoad != 0) && (tableIdToLoad != baseDesc.Tables[t].ID))
+        {
+          continue;
+        }
 				for (size_t c = 0; c < baseDesc.Tables[t].Columns.size(); ++c)
 				{
-					aq::Logger::getInstance().log(AQ_INFO, "loading column %d of table %d", c + 1, t + 1);
+					aq::Logger::getInstance().log(AQ_INFO, "loading column %d of table %d\n", c + 1, t + 1);
 					cut_in_col(propertiesFile.c_str(), t + 1, c + 1);
 				}
 			}

@@ -18,7 +18,6 @@ struct TProjectSettings {
 	std::string szEnginePath;
 	
 	std::string szTempRootPath;
-	std::string szCutInColPath;
 	std::string szLoaderPath;
 	char szSQLReqFN[ _MAX_PATH ];
 	char szDBDescFN[ _MAX_PATH ];

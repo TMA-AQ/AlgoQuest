@@ -81,7 +81,8 @@ public:
 						size_t startIdx = 0, size_t endIdx = std::string::npos, 
 						bool append = false );
   
-	void dump( std::ostream& os );
+	void dumpRaw( std::ostream& os );
+	void dumpXml( std::ostream& os );
 
 	std::vector<ColumnItem::Ptr>	Items;
 	size_t	TableID;

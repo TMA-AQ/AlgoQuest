@@ -32,11 +32,11 @@ extern char a_message [ k_taille_message ];
 extern char k_batch_loader [ k_batch_size_max ];
 
 //symbole ReadRecord ( FILE *fp2 , char *my_fic2 , char *my_record ,  int max_read );
-void FileWriteEnreg(symbole col_type, int col_size, char *my_field, FILE *fcol, int rowNr);
+void FileWriteEnreg(aq::symbole col_type, int col_size, char *my_field, FILE *fcol, int rowNr);
 void die_with_error( char *errorMessage );
 char* nettoie_nom_vite( char* strval ); //return NULL - failure
 
-symbole  NbFieldInRecord ( char *my_fic2 , char *my_record ,   int max_read, int *nb_fields  , int *nb_pack_col , int *nb_col_in_last_pack );
+aq::symbole  NbFieldInRecord ( char *my_fic2 , char *my_record ,   int max_read, int *nb_fields  , int *nb_pack_col , int *nb_col_in_last_pack );
 
 void redirect_std_out ( char *name_out, FILE *f_out );
 

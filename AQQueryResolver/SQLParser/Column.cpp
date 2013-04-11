@@ -154,7 +154,7 @@ void Column::setBinItemSize()
 }
 
 //------------------------------------------------------------------------------
-void Column::setName( const string& name )
+void Column::setName( const std::string& name )
 {
 	this->OriginalName = name;
 	this->Name = name;
@@ -163,7 +163,7 @@ void Column::setName( const string& name )
 }
 
 //------------------------------------------------------------------------------
-void Column::setDisplayName( const string& name )
+void Column::setDisplayName( const std::string& name )
 {
 	this->DisplayName = name;
 }
@@ -625,7 +625,7 @@ void Column::saveToFile(	const std::string& file, size_t startIdx, size_t endIdx
 			break;
 		case COL_TYPE_VARCHAR:
 			{
-				string val;
+				std::string val;
 				if( this->Items[realIdx] )
 					fwrite( this->Items[realIdx]->strval.c_str(), sizeof(char), 
 					this->Items[realIdx]->strval.length(), pFIn );
@@ -718,3 +718,49 @@ void Column::saveToFile(	const std::string& file, size_t startIdx, size_t endIdx
 //		break;
 //	}
 //}
+
+//------------------------------------------------------------------------------
+void Column::dumpRaw( std::ostream& os )
+{
+  std::string colName = this->getOriginalName();
+  size_t pos = colName.find('.');
+  if( pos != string::npos )
+    colName = colName.substr( pos + 1 );
+  os << colName << "\" " << this->ID << " " << this->Size << " ";
+  switch( this->Type )
+  {
+  case COL_TYPE_INT: os << "INT"; break;
+  case COL_TYPE_BIG_INT: os << "BIG_INT"; break;
+  case COL_TYPE_DOUBLE: os << "DOUBLE"; break;
+  case COL_TYPE_DATE1: os << "DATE1"; break;
+  case COL_TYPE_DATE2: os << "DATE2"; break;
+  case COL_TYPE_DATE3: os << "DATE3"; break;
+  case COL_TYPE_VARCHAR: os << "VARCHAR2"; break;
+  default:
+    throw generic_error(generic_error::NOT_IMPLEMENED, "");
+  }
+  os << std::endl;
+}
+
+//------------------------------------------------------------------------------
+void Column::dumpXml( std::ostream& os )
+{
+  std::string colName = this->getOriginalName();
+  size_t pos = colName.find('.');
+  if( pos != string::npos )
+    colName = colName.substr( pos + 1 );
+  os << "<Column Name=\"" << colName << "\" ID=\"" << this->ID << "\" Size=\"" << this->Size << "\" Type=\"";
+  switch( this->Type )
+  {
+  case COL_TYPE_INT: os << "INT"; break;
+  case COL_TYPE_BIG_INT: os << "BIG_INT"; break;
+  case COL_TYPE_DOUBLE: os << "DOUBLE"; break;
+  case COL_TYPE_DATE1: os << "DATE1"; break;
+  case COL_TYPE_DATE2: os << "DATE2"; break;
+  case COL_TYPE_DATE3: os << "DATE3"; break;
+  case COL_TYPE_VARCHAR: os << "VARCHAR2"; break;
+  default:
+    throw generic_error(generic_error::NOT_IMPLEMENED, "");
+  }
+  os << "\"/>" << std::endl;
+}

@@ -16,7 +16,7 @@ extern int yyerror ( const char *pszMsg );
 /* Return -1 on error or if not found, 0 on success */
 int get_column_id_from_table( Table& pTD, char* pszColumnName, unsigned int *pnColumnId,
 								  unsigned int *pnColumnSize, ColumnType *peColumnType ) {
-	int idx = pTD.getColumnIdx( string(pszColumnName) );
+	int idx = pTD.getColumnIdx( std::string(pszColumnName) );
 	if( idx < 0 )
 		return -1;
 
@@ -40,7 +40,7 @@ int get_table_and_column_id_from_table_array( Base* baseDesc,
 												  unsigned int *pnColumnSize,
 												  ColumnType *peColumnType ) {
 	
-	size_t idx = baseDesc->getTableIdx( string(pszTableName) );
+	size_t idx = baseDesc->getTableIdx( std::string(pszTableName) );
 
 	if ( pnTableId != NULL )
 		*pnTableId = static_cast<unsigned int>(baseDesc->Tables[idx].ID);
@@ -242,7 +242,7 @@ TColumn2TablesArray* add_table_columns_to_column2tables_array(	TColumn2TablesArr
 	unsigned int iColumn;
 	TColumn2Tables *pC2T;
 	
-	size_t tableIdx = baseDesc->getTableIdx( string(pszTableName) );
+	size_t tableIdx = baseDesc->getTableIdx( std::string(pszTableName) );
 	Table& pTD = baseDesc->Tables[tableIdx];
 
 	for ( iColumn = 0; iColumn < pTD.Columns.size(); iColumn++ ) {

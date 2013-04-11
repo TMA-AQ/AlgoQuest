@@ -99,7 +99,7 @@ int cut_in_col (const char * iniFilename, size_t num_table, size_t num_column)
 	allocate_and_init_prefixe( &prefixe);
 
 	// info on curent column in parameters
-	symbole col_type;
+	aq::symbole col_type;
 	int  col_size ;
 	char *my_col;
 	my_col  = (char*) safecalloc(k_file_name_size_max, sizeof(char));
@@ -160,7 +160,8 @@ int cut_in_col (const char * iniFilename, size_t num_table, size_t num_column)
 	fwrite("k_rep_racine_tmp=", 1, 17, fini);
 	fwrite(k_rep_racine, 1, strlen(k_rep_racine), fini);
 	fwrite("\n", 1, 1, fini);
-
+  fwrite("k_taille_nom_fichier=1024", 1, 25, fini);
+	fwrite("\n", 1, 1, fini);
 	fclose(fini);
 
 	// ----------------------
@@ -200,7 +201,7 @@ int cut_in_col (const char * iniFilename, size_t num_table, size_t num_column)
 		sprintf ( a_message, "error opening file %s\n",base_desc_file );
 		die_with_error ( a_message );
 	}
-	aq::construis_base ( fp , my_base );
+	aq::build_base_from_raw ( fp , my_base );
 	fclose (fp); // fermeture du fichier base_desc
 
 	// -------------------------------------------------------------------------------------- 
@@ -279,7 +280,7 @@ int cut_in_col (const char * iniFilename, size_t num_table, size_t num_column)
 
 
 		// calculate the number of fields in a record
-		if(  NbFieldInRecord ( my_fic2 , my_record ,  max_read,  &nb_fields  , &nb_pack_col , &nb_col_in_last_pack ) == t_continue )  continue;
+		if(  NbFieldInRecord ( my_fic2 , my_record ,  max_read,  &nb_fields  , &nb_pack_col , &nb_col_in_last_pack ) == aq::symbole::t_continue )  continue;
 		
 		// open source file and check if opened
 		if( (fp2 = fopenUTF8(my_fic2, "r")) == NULL )

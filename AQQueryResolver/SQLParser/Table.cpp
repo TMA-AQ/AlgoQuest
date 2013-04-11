@@ -38,7 +38,7 @@ Table::Table():
 }
 
 //------------------------------------------------------------------------------
-Table::Table( std::string& name, unsigned int ID ): 
+Table::Table( const std::string& name, unsigned int ID ): 
 	ID(ID), 
 	HasCount(false), 
 	TotalCount(0), 
@@ -54,9 +54,9 @@ Table::Table( std::string& name, unsigned int ID ):
 //------------------------------------------------------------------------------
 int Table::getColumnIdx( const std::string& name )
 {
-	string auxName = name;
+	std::string auxName = name;
 	strtoupr( auxName );
-	Trim( auxName );
+	aq::Trim( auxName );
 	for( size_t idx = 0; idx < this->Columns.size(); ++idx )
 		if( auxName == this->Columns[idx]->getName() )
 			return static_cast<int>(idx);
@@ -293,7 +293,7 @@ void Table::loadFromTableAnswerByColumn(aq::AQMatrix& table, const vector<llong>
 
 		//get table idx for this column
 		size_t idxColumn = 0;
-		string tableName = columnTypes[idx]->getTableName();
+		std::string tableName = columnTypes[idx]->getTableName();
 		size_t tableIdx = BaseDesc.getTableIdx( tableName );
 		size_t tableID = BaseDesc.Tables[tableIdx].ID;
 		for( size_t idx2 = 0; idx2 < tableIDs.size(); ++idx2 )
@@ -487,7 +487,7 @@ void Table::loadColumn(Column::Ptr col, const Table& aqMatrix, const std::vector
 
 void Table::loadColumn(Column::Ptr col, const std::vector<size_t>& uniqueIndex, const std::vector<size_t>& mapToUniqueIndex, const Column::Ptr columnType, const TProjectSettings& pSettings, const Base& BaseDesc)
 {		
-	string tableName = columnType->getTableName();
+	std::string tableName = columnType->getTableName();
 	size_t tableIdx = BaseDesc.getTableIdx( tableName );
 	size_t tableID = BaseDesc.Tables[tableIdx].ID;
 
@@ -539,12 +539,12 @@ void Table::loadColumn(Column::Ptr col, const std::vector<size_t>& uniqueIndex, 
 
 		if( numPack != currentNumPack )
 		{
-			string dataPath = pSettings.szRootPath;
+			std::string dataPath = pSettings.szRootPath;
 			sprintf( szBuffer, "data_orga\\vdg\\data\\B001T%.4uC%.4uV01P%.12u", tableID, columnType->ID, numPack );
 			dataPath += szBuffer;
 
-			string prmFilePath = dataPath + ".prm";
-			string theFilePath = dataPath + ".the";
+			std::string prmFilePath = dataPath + ".prm";
+			std::string theFilePath = dataPath + ".the";
 
 			 aq::Logger::getInstance().log(AQ_DEBUG, "Open prm file %s\n", prmFilePath.c_str());
 			 aq::Logger::getInstance().log(AQ_DEBUG, "Open thesaurus %s\n", theFilePath.c_str());
@@ -604,7 +604,7 @@ void Table::loadColumn(Column::Ptr col, const std::vector<size_t>& uniqueIndex, 
 				if( strcmp((char*)pTmpBuf, "NULL") == 0 )
 					columnValues->Items.push_back( NULL );
 				else
-					columnValues->Items.push_back( new ColumnItem( string((char*)pTmpBuf) ) );
+					columnValues->Items.push_back( new ColumnItem( std::string((char*)pTmpBuf) ) );
 			}
 			break;
 		}
@@ -661,9 +661,9 @@ void Table::loadFromAnswerRaw(	const char *filePath, char fieldSeparator,
 			if( fields.size() < 1 )
 				return;
 			//check for "Count"
-			string lastField = fields[fields.size() - 1];
+			std::string lastField = fields[fields.size() - 1];
 			strtoupr( lastField );
-			Trim(lastField);
+			aq::Trim(lastField);
 			if( lastField == "COUNT" )
 				this->HasCount = true;
 			else
@@ -693,8 +693,8 @@ void Table::loadFromAnswerRaw(	const char *filePath, char fieldSeparator,
 				else // add or check id table
 				{
 					char* tableNr = strchr(fields[idx], ':');
-					string tableNrStr( tableNr + 1 );
-					Trim( tableNrStr );
+					std::string tableNrStr( tableNr + 1 );
+					aq::Trim( tableNrStr );
 					llong tableID;
 					StrToInt( tableNrStr.c_str(), &tableID );
 
@@ -861,12 +861,12 @@ std::vector<Column::Ptr> Table::getColumnsByName( std::vector<Column::Ptr>& colu
 }
 
 //------------------------------------------------------------------------------
-void Table::setName( const string& name )
+void Table::setName( const std::string& name )
 {
 	this->OriginalName = name;
 	this->Name = name;
 	strtoupr( this->Name );
-	Trim( this->Name );
+	aq::Trim( this->Name );
 }
 
 //------------------------------------------------------------------------------
@@ -1164,9 +1164,9 @@ char* ExtractStringFromQuotes( char* pszStr, char* pszExtractedStr, unsigned int
 //------------------------------------------------------------------------------
 size_t Base::getTableIdx( const std::string& name ) const
 {
-	string auxName = name;
+	std::string auxName = name;
 	strtoupr( auxName );
-	Trim( auxName );
+	aq::Trim( auxName );
 	for( size_t idx = 0; idx < this->Tables.size(); ++idx )
 		if( auxName == this->Tables[idx].getName() )
 			return idx;
@@ -1174,7 +1174,21 @@ size_t Base::getTableIdx( const std::string& name ) const
 }
 
 //------------------------------------------------------------------------------
-void Base::loadFromBaseDesc( const char* pszDataBaseFile ) {
+void Base::loadFromBaseDesc(const aq::base_t& base) 
+{
+  this->Name = base.nom;
+  std::for_each(base.table.begin(), base.table.end(), [&] (const base_t::table_t& table) {
+		Table	pTD(table.nom, table.num );
+		pTD.TotalCount = table.nb_enreg;
+    std::for_each(table.colonne.begin(), table.colonne.end(), [&] (const base_t::table_t::col_t& column) {
+      pTD.Columns.push_back(new Column(column.nom, column.num, column.taille, aq::symbole_to_column_type(column.type)));
+		});
+		this->Tables.push_back(pTD);
+  });
+}
+
+//------------------------------------------------------------------------------
+void Base::loadFromRawFile( const char* pszDataBaseFile ) {
 	unsigned int nTableCount;
 	unsigned int nColumnCount;
 	unsigned int nTableRecordsNb;
@@ -1228,7 +1242,7 @@ void Base::loadFromBaseDesc( const char* pszDataBaseFile ) {
 			throw generic_error(generic_error::INVALID_BASE_FILE, "");
 
 		// Add Table
-		Table	pTD( string(szTableName), nTableId );
+		Table	pTD( std::string(szTableName), nTableId );
 		pTD.TotalCount = nTableRecordsNb;
 		for ( iColumn = 0; iColumn < nColumnCount; iColumn++ ) {
 			pszStr = SkipToNextLine_sFirstChar( pszStr );
@@ -1262,7 +1276,7 @@ void Base::loadFromBaseDesc( const char* pszDataBaseFile ) {
 			else // if ( strcmp( szColumnType, "VARCHAR2" ) == 0 )	// Same for CHAR
 				eColumnType = COL_TYPE_VARCHAR;
 
-			pTD.Columns.push_back( new Column( string(szColumnName), nColumnId, nColumnSize, eColumnType ) );
+			pTD.Columns.push_back( new Column( std::string(szColumnName), nColumnId, nColumnSize, eColumnType ) );
 		}
 
 		this->Tables.push_back( pTD );
@@ -1270,7 +1284,7 @@ void Base::loadFromBaseDesc( const char* pszDataBaseFile ) {
 }
 
 //------------------------------------------------------------------------------
-void Base::saveToBaseDesc( const char* pszDataBaseFile )
+void Base::saveToRawFile( const char* pszDataBaseFile )
 {
 	FILE *pFOut = fopen( pszDataBaseFile, "wt" );
 	FileCloser fileClose(pFOut);
@@ -1293,9 +1307,9 @@ void Base::saveToBaseDesc( const char* pszDataBaseFile )
 		{
 			Column& col = *table.Columns[idx2];
 			col.ID = idx2 + 1;
-			string colName = col.getOriginalName();
+			std::string colName = col.getOriginalName();
 			size_t pos = colName.find('.');
-			if( pos != string::npos )
+			if( pos != std::string::npos )
 				colName = colName.substr( pos + 1 );
 			fprintf( pFOut, "\"%s\" %u %u ", colName.c_str(), col.ID, col.Size );
 			char* szColumnType = NULL;
@@ -1317,15 +1331,25 @@ void Base::saveToBaseDesc( const char* pszDataBaseFile )
 }
 
 //------------------------------------------------------------------------------
-void Base::dump( std::ostream& os )
+void Base::dumpRaw( std::ostream& os )
 {
   os << this->Name << std::endl;
   os << this->Tables.size() << std::endl << std::endl;
-  std::for_each(this->Tables.begin(), this->Tables.end(), boost::bind(&Table::dump, _1, boost::ref(os)));
+  std::for_each(this->Tables.begin(), this->Tables.end(), boost::bind(&Table::dumpRaw, _1, boost::ref(os)));
  }
  
 //------------------------------------------------------------------------------
-void Table::dump( std::ostream& os )
+void Base::dumpXml( std::ostream& os )
+{
+  os << "<Database Name=\"" << this->Name << "\">" << std::endl;
+  os << "<Tables>" << std::endl;
+  std::for_each(this->Tables.begin(), this->Tables.end(), boost::bind(&Table::dumpXml, _1, boost::ref(os)));
+  os << "</Tables>" << std::endl;
+  os << "</Database>" << std::endl;
+ }
+ 
+//------------------------------------------------------------------------------
+void Table::dumpRaw( std::ostream& os )
 {
   if( this->Columns.size() == 0 )
     throw generic_error(generic_error::INVALID_TABLE, "");
@@ -1333,29 +1357,19 @@ void Table::dump( std::ostream& os )
   if( this->HasCount )
     --nrColumns;
   os << "\"" << this->getOriginalName() << "\" " << this->ID << " " << this->TotalCount << " " << nrColumns << std::endl;
-  std::for_each(Columns.begin(), Columns.end(), boost::bind(&Column::dump, _1, boost::ref(os)));
+  std::for_each(Columns.begin(), Columns.end(), boost::bind(&Column::dumpRaw, _1, boost::ref(os)));
   os << std::endl;
 }
 
 //------------------------------------------------------------------------------
-void Column::dump( std::ostream& os )
+void Table::dumpXml( std::ostream& os )
 {
-  std::string colName = this->getOriginalName();
-  size_t pos = colName.find('.');
-  if( pos != string::npos )
-    colName = colName.substr( pos + 1 );
-  os << colName << "\" " << this->ID << " " << this->Size << " ";
-  switch( this->Type )
-  {
-  case COL_TYPE_INT: os << "INT"; break;
-  case COL_TYPE_BIG_INT: os << "BIG_INT"; break;
-  case COL_TYPE_DOUBLE: os << "DOUBLE"; break;
-  case COL_TYPE_DATE1: os << "DATE1"; break;
-  case COL_TYPE_DATE2: os << "DATE2"; break;
-  case COL_TYPE_DATE3: os << "DATE3"; break;
-  case COL_TYPE_VARCHAR: os << "VARCHAR2"; break;
-  default:
-    throw generic_error(generic_error::NOT_IMPLEMENED, "");
-  }
-  os << std::endl;
+  if( this->Columns.size() == 0 )
+    throw generic_error(generic_error::INVALID_TABLE, "");
+  size_t nrColumns = this->Columns.size();
+  os << "<Table Name=\"" << this->getOriginalName() << "\" ID=\"" << this->ID << "\" NbRows=\"" << this->TotalCount << "\">" << std::endl;
+  os << "<Columns>" << std::endl;
+  std::for_each(Columns.begin(), Columns.end(), boost::bind(&Column::dumpXml, _1, boost::ref(os)));
+  os << "</Columns>" << std::endl;
+  os << "</Table>" << std::endl;
 }

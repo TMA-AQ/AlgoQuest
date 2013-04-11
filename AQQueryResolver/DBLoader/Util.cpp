@@ -265,16 +265,7 @@ void check_args (const char * iniFilename, size_t table, size_t column)
 
 			// printf("%s = %s\n", lside, rside);
 
-			if (strcmp(lside, "k_file_name_size_max") == 0)
-			{
-				sscanf(rside, "%d", k_file_name_size_max);
-			}
-			else if (strcmp(lside, "k_taille_paquet") == 0)
-			{
-				// sscanf(rside, "%d", k_taille_paquet);
-				// sscanf(rside, "%d", 1048576);
-			}
-			else if ( strcmp(lside, "loader") == 0 ) // loader batch
+			if ( strcmp(lside, "aq-loader") == 0 ) // loader batch
 			{
 				strcpy( k_batch_loader , rside);
 				size_t len = strlen( k_batch_loader );

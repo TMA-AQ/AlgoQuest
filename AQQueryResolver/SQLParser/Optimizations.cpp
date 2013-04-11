@@ -11,7 +11,7 @@ using namespace boost;
 ColumnItem::Ptr getMinMaxFromThesaurus(	size_t tableIdx, size_t colIdx, size_t partIdx, bool min, Base& BaseDesc, TProjectSettings& Settings )
 {
 	ColumnItem::Ptr minMax = NULL;
-	string fileName = getThesaurusFileName( Settings.szThesaurusPath, 
+	std::string fileName = getThesaurusFileName( Settings.szThesaurusPath, 
 		tableIdx + 1, colIdx + 1, partIdx );
 	FILE* pFIn = fopen( fileName.c_str(), "rb" );
 	if ( pFIn == NULL )

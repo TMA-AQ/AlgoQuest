@@ -11,6 +11,7 @@
 #include "Optimizations.h"
 #include "AQEngine_Intf.h"
 #include "ColumnMapper.h"
+#include "DumpVisitor.h"
 
 #include <aq/Exceptions.h>
 #include <aq/Logger.h>
@@ -396,32 +397,42 @@ Table::Ptr QueryResolver::SolveSelectRegular( int nSelectLevel )
 	++nQueryIdx;
 	if( nSelectLevel < 2 )
 		nQueryIdx = -1;
-	string str;
+	std::string str;
 	syntax_tree_to_prefix_form( this->sqlStatement, str );
 	
 	SaveFile( pSettings->szOutputFN, str.c_str() );
 	MakeBackupFile( pSettings->szOutputFN, nQueryIdx, 1 );
 #endif
+  
+#ifdef _DEBUG
+  std::ostringstream oss;
+  oss << *this->sqlStatement << std::endl;
+  std::cout << oss.str() << std::endl;
+  std::string stmp1 = oss.str();
+#endif
 
 	//
-	// Query Pre Processing
-
+	// Query Pre Processing (TODO : optimize tree by detecting identical subtrees)
 	timer.start();
-	
 	VerbNode::Ptr spTree = QueryResolver::BuildVerbsTree( this->sqlStatement, this->BaseDesc, this->pSettings );
-	// TODO: optimize tree by detecting identical subtrees
 	spTree->changeQuery();
 	QueryResolver::cleanQuery( this->sqlStatement );
 	aq::Logger::getInstance().log(AQ_INFO, "Query Preprocessing: Time elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
+  
+#ifdef _DEBUG
+  oss.str() = "";
+  oss << *this->sqlStatement << std::endl;
+  std::string stmp2 = oss.str();
+  DumpVisitor printer;
+  spTree->accept(&printer);
+  std::cout << oss.str() << std::endl << printer.getQuery() << std::endl;
+#endif
 
 	//
-	// Solve Optimal Min/Max
-
-	timer.start();
-
-	table = solveOptimalMinMax( spTree, BaseDesc, *pSettings );
-
-	aq::Logger::getInstance().log(AQ_INFO, "Solve Optimal Min/Max: Time elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
+	// Solve Optimal Min/Max : FIXME
+	// timer.start();
+	// table = solveOptimalMinMax( spTree, BaseDesc, *pSettings );
+	// aq::Logger::getInstance().log(AQ_INFO, "Solve Optimal Min/Max: Time elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
 	
 	if( table )
 		return table;
@@ -484,7 +495,7 @@ void QueryResolver::SolveSelectFromSelect(	tnode* pInteriorSelect,
 	++nQueryIdx;
 	if( nSelectLevel < 2 )
 		nQueryIdx = -1;
-	string str;
+	std::string str;
 	syntax_tree_to_prefix_form( pExteriorSelect, str );
 	SaveFile( pSettings->szOutputFN, str.c_str() );
 	MakeBackupFile( pSettings->szOutputFN, nQueryIdx, 3 );
@@ -858,7 +869,7 @@ void QueryResolver::SolveInsert(	tnode* pNode )
 	int nrColumns = (int) table.Columns.size();
 	//write new base struct
 	table.TotalCount += newRowsNr;
-	BaseDesc.saveToBaseDesc( pSettings->szDBDescFN );
+	BaseDesc.saveToRawFile( pSettings->szDBDescFN );
 
 	//write rows to table file
 	vector<size_t> reverseValuePos;
@@ -866,7 +877,7 @@ void QueryResolver::SolveInsert(	tnode* pNode )
 	for( size_t idx = 0; idx < valuePos.size(); ++idx )
 		reverseValuePos[valuePos[idx]] = idx;
 
-	string tablePath = pSettings->szRootPath;
+	std::string tablePath = pSettings->szRootPath;
 	tablePath += "data_orga\\tables\\" + table.getOriginalName() + ".txt";
 	FILE* file = fopen(tablePath.c_str(), "a");
 	if( !file )
@@ -879,7 +890,7 @@ void QueryResolver::SolveInsert(	tnode* pNode )
 			nrRepetitions = (int) valuesToInsert->Columns[nrColumns - 1]->Items[idx]->numval;
 		for( int countIdx = 0; countIdx < nrRepetitions; ++countIdx )
 		{
-			string row;
+			std::string row;
 			for( int idx2 = 0; idx2 < nrColumns; ++idx2 )
 			{
 				if( pSettings->csvFormat )
@@ -951,13 +962,13 @@ void QueryResolver::SolveUpdateDelete(	tnode* pNode )
 	vector<Column::Ptr>& columns = BaseDesc.Tables[tableIdx].Columns;
 	Table& table = BaseDesc.Tables[tableIdx];
 
-	string tablePath = pSettings->szRootPath;
+	std::string tablePath = pSettings->szRootPath;
 	tablePath += "data_orga\\tables\\" + table.getOriginalName() + ".txt";
 	FILE* fOldTable = fopenUTF8( tablePath.c_str(), "rt" );
 	if( fOldTable == NULL )
 		throw generic_error(generic_error::COULD_NOT_OPEN_FILE, "");
 
-	string newTablePath = tablePath + "a"; //form unique table name
+	std::string newTablePath = tablePath + "a"; //form unique table name
 	FILE* fNewTable = fopen( newTablePath.c_str(), "wt" );
 	if( fNewTable == NULL )
 		throw generic_error(generic_error::COULD_NOT_OPEN_FILE, "");
@@ -973,7 +984,7 @@ void QueryResolver::SolveUpdateDelete(	tnode* pNode )
 
 		for( size_t idx = 0; idx < updates.size(); ++idx )
 		{
-			string str(updates[idx]->left->data.val_str);
+			std::string str(updates[idx]->left->data.val_str);
 			strtoupr( str );
 			for( size_t idx2 = 0; idx2 < columns.size(); ++idx2 )
 				if( str == columns[idx2]->getName() )
@@ -1042,7 +1053,7 @@ void QueryResolver::SolveUpdateDelete(	tnode* pNode )
 		commaListToNodeArray( conditionsRoot, conditions );
 		for( size_t idx = 0; idx < conditions.size(); ++idx )
 		{
-			string str(conditions[idx]->left->data.val_str);
+			std::string str(conditions[idx]->left->data.val_str);
 			strtoupr( str );
 			bool found = false;
 			for( size_t idx2 = 0; idx2 < columns.size(); ++idx2 )
@@ -1093,7 +1104,7 @@ void QueryResolver::SolveUpdateDelete(	tnode* pNode )
 		{
 			Column::Ptr condCol = condTable->Columns[idx];
 			Column::Ptr column( new Column(*condCol) );
-			string columnPath = pSettings->szRootPath;
+			std::string columnPath = pSettings->szRootPath;
 			sprintf( szBuffer, "B001T%.4uC%.4uP%.12u", table.ID, 
 				column->ID, packNr );
 			columnPath += "data_orga\\columns\\";
@@ -1128,7 +1139,7 @@ void QueryResolver::SolveUpdateDelete(	tnode* pNode )
 			{
 				Column::Ptr tColumn = table.Columns[updateToTableMap[idx]];
 				Column::Ptr column( new Column(*tColumn) );
-				string columnPath = pSettings->szRootPath;
+				std::string columnPath = pSettings->szRootPath;
 				sprintf( szBuffer, "B001T%.4uC%.4uP%.12u", table.ID, 
 					tColumn->ID, packNr );
 				columnPath += "data_orga\\columns\\";
@@ -1170,7 +1181,7 @@ void QueryResolver::SolveUpdateDelete(	tnode* pNode )
 				fgets( myRecord, pSettings->maxRecordSize, fOldTable );
 				vector<char*> fields;
 				splitLine( myRecord, pSettings->fieldSeparator, fields, true );
-				string strval;
+				std::string strval;
 				for( size_t idx2 = 0; idx2 < fields.size(); ++idx2 )
 				{
 					if( pNode->tag == K_DELETE )
@@ -1179,7 +1190,7 @@ void QueryResolver::SolveUpdateDelete(	tnode* pNode )
 						fwrite( fields[idx2], sizeof(char), strlen(fields[idx2]), fNewTable );
 					else
 					{
-						string str = to_string(updates[tableToUpdateMap[idx2]]->right);
+						std::string str = to_string(updates[tableToUpdateMap[idx2]]->right);
 						fwrite( str.c_str(), sizeof(char), str.size(), fNewTable );
 					}
 					if( idx2 + 1 < fields.size() )
@@ -1320,10 +1331,10 @@ void QueryResolver::SolveTruncate(	tnode* pNode )
 	BaseDesc.Tables[tableIdx].TotalCount = 0;
 
 	//write to disk
-	BaseDesc.saveToBaseDesc( pSettings->szDBDescFN );
+	BaseDesc.saveToRawFile( pSettings->szDBDescFN );
 
 	//delete table related files?
-	string tablePath = pSettings->szRootPath;
+	std::string tablePath = pSettings->szRootPath;
 	tablePath += "data_orga\\tables\\" + table->getOriginalName() + ".txt";
 	//..
 }
@@ -1353,8 +1364,8 @@ void QueryResolver::SolveCreate(	tnode* pNode )
 	table->setName( pNode->left->data.val_str );
 	BaseDesc.Tables.push_back( *table );
 	//write to disk
-	BaseDesc.saveToBaseDesc( pSettings->szDBDescFN );
-	string tablePath = pSettings->szRootPath;
+	BaseDesc.saveToRawFile( pSettings->szDBDescFN );
+	std::string tablePath = pSettings->szRootPath;
 	tablePath += "data_orga\\tables\\" + table->getOriginalName() + ".txt";
 	table->saveToAnswer( tablePath.c_str(), pSettings->fieldSeparator, false );
 	//apply cut in col on the new columns
@@ -1363,9 +1374,9 @@ void QueryResolver::SolveCreate(	tnode* pNode )
 		--nrColumns;
 	for( size_t idx = 0; idx < nrColumns; ++idx )
 	{
-		sprintf( szBuffer, "cmd /s /c \"%s %s \"%u\" \"%u\"\"", pSettings->szCutInColPath, pSettings->iniFile.c_str(),
-			BaseDesc.Tables.size(), idx + 1 ); //debug13 - not portable
-		system( szBuffer );
+    // FIXME
+		//sprintf( szBuffer, "cmd /s /c \"%s %s \"%u\" \"%u\"\"", pSettings->szCutInColPath, pSettings->iniFile.c_str(), BaseDesc.Tables.size(), idx + 1 ); //debug13 - not portable
+		//system( szBuffer );
 	}
 }
 

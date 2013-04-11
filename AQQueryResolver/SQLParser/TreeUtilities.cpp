@@ -149,8 +149,8 @@ void solveSelectStar(	tnode* pNode,
 			colRef->right = new_node( K_COLUMN );
 			set_string_data( colRef->right, columns[idx2]->getName().c_str() );
 			colRefs.push_back( colRef );
-			columnNames.push_back( string(tableName) + "." + columns[idx2]->getName() );
-			columnDisplayNames.push_back( string(tableName) + "." + columns[idx2]->getOriginalName() );
+			columnNames.push_back( std::string(tableName) + "." + columns[idx2]->getName() );
+			columnDisplayNames.push_back( std::string(tableName) + "." + columns[idx2]->getOriginalName() );
 		}
 	}
 	delete_subtree( pNode->left );
@@ -293,7 +293,7 @@ void getAllColumnNodes( tnode*& pNode, vector<tnode**>& columnNodes )
 }
 
 //------------------------------------------------------------------------------
-tnode* findColumn(  string columnName, std::vector<tnode*>& interiorColumns,
+tnode* findColumn(  std::string columnName, std::vector<tnode*>& interiorColumns,
 					bool keepAlias)
 {
 	strtoupr( columnName );
@@ -301,7 +301,7 @@ tnode* findColumn(  string columnName, std::vector<tnode*>& interiorColumns,
 	{
 		if( !interiorColumns[idx] )
 			continue;
-		string column2(interiorColumns[idx]->right->data.val_str);
+		std::string column2(interiorColumns[idx]->right->data.val_str);
 		strtoupr( column2 );
 
 		switch( interiorColumns[idx]->tag )
@@ -332,7 +332,7 @@ tnode* findColumn(  string columnName, std::vector<tnode*>& interiorColumns,
 void changeTableNames(	tnode* pIntSelectAs, tnode* pInteriorSelect, 
 						tnode* pExteriorSelect )
 {
-	string tableName = pIntSelectAs->right->data.val_str;
+	std::string tableName = pIntSelectAs->right->data.val_str;
 
 	tnode* intFromNode = find_main_node( pInteriorSelect, K_FROM );
 	vector<tnode*> intTables;
@@ -380,7 +380,7 @@ void changeTableNames(	tnode* pIntSelectAs, tnode* pInteriorSelect,
 void changeColumnNames(	tnode* pIntSelectAs, tnode* pInteriorSelect, 
 						tnode* pExteriorSelect, bool keepAlias )
 {
-	string tableName = pIntSelectAs->right->data.val_str;
+	std::string tableName = pIntSelectAs->right->data.val_str;
 
 	std::vector<tnode**> exteriorColumns;
 	getAllColumnNodes( pExteriorSelect, exteriorColumns );
@@ -397,9 +397,9 @@ void changeColumnNames(	tnode* pIntSelectAs, tnode* pInteriorSelect,
 			{
 				assert( extCol->left && extCol->left->tag == K_IDENT && 
 					extCol->right->tag == K_COLUMN );
-				if( tableName != string(extCol->left->data.val_str) )
+				if( tableName != std::string(extCol->left->data.val_str) )
 					continue;
-				string columnName = extCol->right->data.val_str;
+				std::string columnName = extCol->right->data.val_str;
 				tnode* replCol = findColumn( columnName, interiorColumns, keepAlias );
 				if( replCol )
 				{
@@ -410,7 +410,7 @@ void changeColumnNames(	tnode* pIntSelectAs, tnode* pInteriorSelect,
 			break;
 		case K_COLUMN:
 			{
-				string columnName = extCol->data.val_str;
+				std::string columnName = extCol->data.val_str;
 				tnode* replCol = findColumn( columnName, interiorColumns, keepAlias );
 				if( replCol )
 				{
@@ -708,15 +708,15 @@ void SolveMinMaxGroupBy::modifyTmpFiles(	const char* tmpPath,
 void getColumnsIds(	const Table& table, vector<tnode*>& columns, 
 					vector<int>& valuePos )
 {
-	vector<string> columnsStr;
+	vector<std::string> columnsStr;
 	for( size_t idx = 0; idx < columns.size(); ++idx )
 	{
 		if( columns[idx]->tag == K_PERIOD )
-			columnsStr.push_back( string(columns[idx]->right->data.val_str) );
+			columnsStr.push_back( std::string(columns[idx]->right->data.val_str) );
 		else if( columns[idx]->tag == K_AS )
-			columnsStr.push_back( string(columns[idx]->left->right->data.val_str) );
+			columnsStr.push_back( std::string(columns[idx]->left->right->data.val_str) );
 		else if( columns[idx]->tag == K_COLUMN )
-			columnsStr.push_back( string(columns[idx]->data.val_str) );
+			columnsStr.push_back( std::string(columns[idx]->data.val_str) );
 		else
 			throw generic_error(generic_error::INVALID_QUERY, "");
 		strtoupr(columnsStr[idx]);

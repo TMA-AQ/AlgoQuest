@@ -58,7 +58,7 @@ char* realloc_string_buffer( char* pszStr, unsigned int *pncbBuf, unsigned int n
 //------------------------------------------------------------------------------
 // Retuned string must be freed with C-RTL's free() !
 // Returns NULL on error !
-void show_node( tnode *pNode, string& str, char* szTmpBuf, char* szBuffer )
+void show_node( tnode *pNode, std::string& str, char* szTmpBuf, char* szBuffer )
 {
 	char *pszToAdd;
 	
@@ -178,7 +178,7 @@ void getTableAlias(tnode *pNode, std::map<std::string, std::string>& tablesAlias
 }
 
 //------------------------------------------------------------------------------
-void syntax_tree_to_prefix_form( tnode *pNode, string& str )
+void syntax_tree_to_prefix_form( tnode *pNode, std::string& str )
 {
 	if ( pNode == NULL )
 		return;
