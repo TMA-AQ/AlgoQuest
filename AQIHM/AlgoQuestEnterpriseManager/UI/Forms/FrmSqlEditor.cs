@@ -233,7 +233,6 @@ namespace AlgoQuest.UI.Forms
             String dbPath = _appReader.GetValue("DataBasePath", typeof(System.String)).ToString();
             String cfgPath = _appReader.GetValue("ConfigPath", typeof(System.String)).ToString();
             Int32 nbRecordsToPrint = (Int32)_appReader.GetValue("NbRecordsToPrint", typeof(int));
-            // SelectRequest sr = new SelectRequest(cfgPath, _selectedBase, nbRecordsToPrint);
             try
             {
                 string request = rtbEditor.Text;
@@ -284,14 +283,17 @@ namespace AlgoQuest.UI.Forms
                 Stopwatch watch = new Stopwatch();
                 watch.Start();
                 ISelectRequest sr;
-                if ((_odbc_conn_str == null) || (_odbc_conn_str == ""))
+                if ((_odbc_conn_str != null) && (_odbc_conn_str != ""))
                 {
-                    sr = new SelectRequest(cfgPath, _selectedBase, nbRecordsToPrint);
-                    // sr = new SelectRequestRemote(_server, _port, _selectedBase, nbRecordsToPrint);
+                    sr = new OdbcRequest(_odbc_conn_str);
+                }
+                else if ((_server != "") && (_port != 0))
+                {
+                    sr = new SelectRequestRemote(_server, _port, _selectedBase, nbRecordsToPrint);
                 }
                 else
                 {
-                    sr = new OdbcRequest(_odbc_conn_str);
+                    sr = new SelectRequest(cfgPath, _selectedBase, nbRecordsToPrint);
                 }
                 System.Data.DataTable dt = sr.Execute(request);
                 watch.Stop();
