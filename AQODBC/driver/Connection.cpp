@@ -27,7 +27,7 @@ void Connection::connect(const char * host, boost::uint16_t port)
 	os << port;
 	boost::system::error_code ec;
 	boost::asio::ip::tcp::resolver resolver(io_service);
-	boost::asio::ip::tcp::resolver::query query(boost::asio::ip::tcp::v4(), host, "9999"/*os.str()*/);
+	boost::asio::ip::tcp::resolver::query query(boost::asio::ip::tcp::v4(), host, os.str());
 	boost::asio::ip::tcp::resolver::iterator iterator = resolver.resolve(query, ec);
 	if (ec)
 		aq::Logger::getInstance().log(AQ_ERROR, "cannot resolver %s:%u\n", host, port);
@@ -48,13 +48,20 @@ void Connection::write(const char * stmt)
 	boost::asio::write(socket, boost::asio::buffer(stmt, strlen(stmt)));
 }
 
-void Connection::read(buffer_t& buf)
+size_t Connection::read(buffer_t& buf)
 {
 	aq::Logger::getInstance().log(AQ_INFO, "read from %s:%u\n", _host.c_str(), _port);
 
 	boost::system::error_code error;
 	size_t len = socket.read_some(boost::asio::buffer(buf), error);
 
+  if (error)
+  {
+    throw int(-1);
+  }
+
 	//_eos = error == boost::asio::error::eof;
 	//_eos = error != 0;
+
+  return len;
 }

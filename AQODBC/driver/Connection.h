@@ -25,7 +25,7 @@ public:
 	void disconnect();
 
 	void write(const char * stmt);
-	void read(buffer_t& buf);
+	size_t read(buffer_t& buf);
   
   std::string query_resolver;
   std::string schema;
