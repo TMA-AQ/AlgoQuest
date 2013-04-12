@@ -258,6 +258,42 @@ void ResultSet::loadCatalg(const char * db)
   // dump_base(std::cout, baseDesc);
 }
 
+void ResultSet::loadCatalg(std::istream& data)
+{
+  try
+  {
+    build_base_from_xml(data, baseDesc);
+  }
+  catch (const std::exception& ex)
+  {
+  }
+}
+
+void ResultSet::clearBases()
+{
+	// clean
+  headers.clear();
+	results.clear();
+}
+
+void ResultSet::addBases(const char * db)
+{
+  // fill headers if needed
+  if (headers.empty())
+  {
+    headers.push_back(col_attr_t("TABLE_SCHEM", 32, SQL_C_CHAR));
+  }
+
+  // fill rows
+  std::vector<col_t> line;
+  col_t c1(db);
+  line.push_back(c1);
+  results.push_back(line);
+
+	// set cursor
+	resultIt = results.begin();
+}
+
 void ResultSet::fillBases(const char * path)
 {
 	// clean

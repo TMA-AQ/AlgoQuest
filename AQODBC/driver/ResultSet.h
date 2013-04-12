@@ -91,9 +91,12 @@ public:
 	bool bindCol(unsigned short c, void * ptr, void * len_ptr, SQLSMALLINT type);
 	bool fetch();
   bool moreResults() const;
-
+  
   void loadCatalg(const char * db);
-
+  void loadCatalg(std::istream& data);
+  
+  void clearBases();
+  void addBases(const char * db);
   void fillBases(const char * path);
   void fillTables();
   void fillColumns(const char *);
