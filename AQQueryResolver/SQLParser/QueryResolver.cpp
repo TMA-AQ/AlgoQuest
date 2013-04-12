@@ -430,9 +430,9 @@ Table::Ptr QueryResolver::SolveSelectRegular( int nSelectLevel )
 
 	//
 	// Solve Optimal Min/Max : FIXME
-	// timer.start();
-	// table = solveOptimalMinMax( spTree, BaseDesc, *pSettings );
-	// aq::Logger::getInstance().log(AQ_INFO, "Solve Optimal Min/Max: Time elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
+	timer.start();
+	table = solveOptimalMinMax( spTree, BaseDesc, *pSettings );
+	aq::Logger::getInstance().log(AQ_INFO, "Solve Optimal Min/Max: Time elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
 	
 	if( table )
 		return table;
