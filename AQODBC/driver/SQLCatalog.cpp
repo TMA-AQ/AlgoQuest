@@ -44,13 +44,14 @@ SQLRETURN  SQL_API SQLTables(SQLHSTMT StatementHandle,
 
       //
       // Read Show
+      size_t len = 0;
       std::stringstream showData;
       aq::Connection::buffer_t buf;
       while (true)
       {
         memset(buf.data(), 0, buf.size());
-        conn->read(buf);
-        std::string s(buf.data(), buf.size());
+        len = conn->read(buf);
+        std::string s(buf.data(), len);
         showData << s;
         if (showData.str().find("<Databases>") != std::string::npos)
         {
