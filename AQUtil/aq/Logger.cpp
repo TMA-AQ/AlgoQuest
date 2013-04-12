@@ -233,7 +233,7 @@ void Logger::printWithColor(const char * buf, int facility) const
 
 int Logger::openFile(const char * name)
 {
-  this->localFile = fopen(name, "w");
+  this->localFile = fopen(name, "a");
 	if (localFile == NULL)
 		return -1;
 	return 0;
