@@ -152,10 +152,12 @@ void Session::onShow(std::string& args)
 {
 	aq::Logger::getInstance().log(AQ_DEBUG, "[session:%u]\n", this->m_sessionId);
 	std::ostringstream oss;
+  oss << "<Databases>" << std::endl;
 	for (Configuration::map_cfg_t::const_iterator it = this->m_cfg->begin(); it != this->m_cfg->end(); ++it)
 	{
-		oss << it->first << std::endl;
+		oss << "<Database Name=\"" << it->first << "\"/>" << std::endl;
 	}
+  oss << "</Databases>" << std::endl;
 	this->deliver(oss.str());
 }
 
