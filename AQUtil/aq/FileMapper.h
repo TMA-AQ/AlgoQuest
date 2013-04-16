@@ -14,6 +14,7 @@ public:
 	~FileMapper();
 
 	int read(void * buffer, size_t offset, size_t len);
+  size_t size() { return this->cbFile; }
 
 private:
 	FileMapper(const FileMapper&);
