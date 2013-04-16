@@ -17,7 +17,7 @@ generic_error::generic_error( EType type, const char * format, ... )
   va_list ap;
   va_start(ap, format);
   vsnprintf(buf, sizeof(buf), format, ap);
-	this->Message = "[" + typeToString(type) + "]" + std::string(buf);
+	this->Message = "[" + typeToString(type) + "] " + std::string(buf);
 }
 
 //------------------------------------------------------------------------------
