@@ -409,4 +409,30 @@ aq::ColumnType symbole_to_column_type(symbole s)
   }
 }
 
+//-------------------------------------------------------------------------------
+void CleanSpaceAtEnd ( char *my_field )
+{
+	// discard all space at the end
+	size_t max_size = strlen( my_field);
+	// beware >0, must have at least one char
+	for ( size_t i = max_size -1; i > 0 ; i -- )
+	{
+		if ( my_field [ i ] == ' ' ) my_field [ i ] = '\0';
+		else return;
+	}
+	//at this point  my_field is empty 
+	//need this ;   strcpy ( my_field, "NULL" ); ?
+}
+//-------------------------------------------------------------------------------
+void ChangeCommaToDot (  char *string )
+{
+	// assume  : input is to be converted in double
+	// change  ',' in '.'
+	char *p;
+	// seach first  ',' in string
+	p = strchr(string, ',' );
+	// modify string ',' become '.'  
+	if (p != NULL )  *p = '.' ;
+}
+
 }

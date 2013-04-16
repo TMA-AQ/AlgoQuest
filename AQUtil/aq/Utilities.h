@@ -87,7 +87,14 @@ void doubleToString( char* strVal, double dVal );
 std::string getPrmFileName( const char* path, size_t tableIdx, size_t columnIdx, size_t partIdx );
 std::string getThesaurusFileName( const char* path, size_t tableIdx, size_t columnIdx, size_t partIdx );
 
+//------------------------------------------------------------------------------
 aq::ColumnType symbole_to_column_type(aq::symbole s);
+
+//-------------------------------------------------------------------------------
+void CleanSpaceAtEnd ( char *my_field );
+
+//-------------------------------------------------------------------------------
+void ChangeCommaToDot (  char *string );
 
 }
 
