@@ -54,3 +54,6 @@ void eliminateAliases( tnode* pSelect );
 void getAllColumnNodes( tnode*& pNode, std::vector<tnode**>& columnNodes );
 
 void getColumnsList( tnode* pNode, std::vector<tnode*>& columns );
+
+/// search a subtree for a node and return the last node that had a certain tag
+tnode* getLastTag( tnode*& pNode, tnode* pLastTag, tnode* pCheckNode, int tag );

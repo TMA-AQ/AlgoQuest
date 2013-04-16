@@ -771,3 +771,23 @@ void getColumnsList( tnode* pNode,std::vector<tnode*>& columns )
 		columns.push_back( pNode );
 	}
 }
+
+//------------------------------------------------------------------------------
+tnode* getLastTag( tnode*& pNode, tnode* pLastTag, tnode* pCheckNode, int tag )
+{
+	if( !pNode )
+		return NULL;
+	if( pNode == pCheckNode )
+		return pLastTag;
+	tnode* pNewLastTag = pLastTag;
+	if( pNode->tag == tag )
+		pNewLastTag = pNode;
+	tnode* res = getLastTag( pNode->left, pNewLastTag, pCheckNode, tag );
+	if( res )
+		return res;
+	res = getLastTag( pNode->right, pNewLastTag, pCheckNode, tag );
+	if( res )
+		return res;
+	res = getLastTag( pNode->next, pNewLastTag, pCheckNode, tag );
+	return res;
+}
