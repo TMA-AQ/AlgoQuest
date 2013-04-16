@@ -86,47 +86,6 @@ tnode* GetTree( Table& table )
 }
 
 //------------------------------------------------------------------------------
-//type - 0 - nothing, 1 - "Before", 2 - "After"
-int MakeBackupFile( char *pszPath, int nIdx, int type )
-{
-	char szBuffer[STR_BUF_SIZE];
-	memset(szBuffer, 0, STR_BUF_SIZE);
-	char		szDstPath[_MAX_PATH];
-	size_t	len = 0;
-	strcpy( szBuffer, pszPath );
-	len = strlen(szBuffer);
-	if( len < 3 )
-	{
-#ifdef CREATE_LOG
-		Log( "MakeBackupFile : Invalid filename %s !", szBuffer );
-#endif
-		return -1;
-	}
-	szBuffer[len - 4] = '\0';
-	char *typeChar = "";
-	switch( type )
-	{
-	case 1: typeChar = "_Before"; break;
-	case 2: typeChar = "_After"; break;
-	case 3: typeChar = "_Exterior_Before"; break;
-	case 4: typeChar = "_Exterior"; break;
-	default: ;
-	}
-	if( nIdx >= 0 )
-		sprintf( szDstPath, "%s_%.2d%s%s", szBuffer, nIdx, typeChar, &pszPath[len - 4] );
-	else
-		sprintf( szDstPath, "%s%s%s", szBuffer, typeChar, &pszPath[len - 4] );
-	if( FileRename( pszPath, szDstPath ) != 0 )
-	{
-#ifdef CREATE_LOG
-		Log( "MakeBackupFile : Error copying file %s to %s !", pszPath, szDstPath );
-#endif
-		return -1;
-	}
-	return 0;
-}
-
-//------------------------------------------------------------------------------
 //helper struct for BuildVerbsTree
 struct tnodeVerbNode
 {
@@ -141,25 +100,15 @@ struct tnodeVerbNode
 
 
 //------------------------------------------------------------------------------
-QueryResolver::QueryResolver(tnode * _sqlStatement, TProjectSettings * _pSettings, AQEngine_Intf * _aq_engine, Base& _baseDesc)
+QueryResolver::QueryResolver(tnode * _sqlStatement, TProjectSettings * _pSettings, AQEngine_Intf * _aq_engine, Base& _baseDesc, unsigned int _level, unsigned int _id)
 	:	sqlStatement(_sqlStatement),
 		pSettings(_pSettings), 
 		aq_engine(_aq_engine), 
 		BaseDesc(_baseDesc), 
-		nQueryIdx(0),
-		nested(false)
-{
-	memset(szBuffer, 0, STR_BUF_SIZE);
-}
-
-//------------------------------------------------------------------------------
-QueryResolver::QueryResolver(tnode * _sqlStatement, TProjectSettings * _pSettings, AQEngine_Intf * _aq_engine, Base& _baseDesc, bool _nested)
-	:	sqlStatement(_sqlStatement),
-		pSettings(_pSettings), 
-		aq_engine(_aq_engine), 
-		BaseDesc(_baseDesc), 
-		nQueryIdx(0),
-		nested(_nested)
+    id(_id),
+    nestedId(0),
+    level(_level),
+		nested(id != 1)
 {
 	memset(szBuffer, 0, STR_BUF_SIZE);
 }
@@ -388,20 +337,33 @@ void QueryResolver::addUnionMinusNode(	int tag, vector<tnode*>& queries, vector<
 }
 
 //-------------------------------------------------------------------------------
-Table::Ptr QueryResolver::SolveSelectRegular( int nSelectLevel )
+Table::Ptr QueryResolver::SolveSelect()
+{
+	assert( this->sqlStatement->tag == K_SELECT );
+	
+	this->hasGroupBy = find_main_node(this->sqlStatement, K_GROUP) != NULL;
+	this->hasOrderBy = find_main_node(this->sqlStatement, K_ORDER) != NULL;
+	this->hasPartitionBy = find_main_node(this->sqlStatement, K_OVER) != NULL;
+
+	SolveSelectRecursive( this->sqlStatement, this->level, NULL, false, false );
+	return SolveSelectRegular();
+}
+
+//-------------------------------------------------------------------------------
+Table::Ptr QueryResolver::SolveSelectRegular()
 {
 	aq::Timer timer;
 	Table::Ptr table;
 
 #ifdef OUTPUT_NESTED_QUERIES
-	++nQueryIdx;
-	if( nSelectLevel < 2 )
-		nQueryIdx = -1;
+	// nQueryIdx;
+	//if( level < 2 )
+	//	nQueryIdx = -1;
 	std::string str;
 	syntax_tree_to_prefix_form( this->sqlStatement, str );
 	
 	SaveFile( pSettings->szOutputFN, str.c_str() );
-	MakeBackupFile( pSettings->szOutputFN, nQueryIdx, 1 );
+	MakeBackupFile( pSettings->szOutputFN, backup_type_t::Before );
 #endif
   
 #ifdef _DEBUG
@@ -442,7 +404,7 @@ Table::Ptr QueryResolver::SolveSelectRegular( int nSelectLevel )
 	//for( int idx = (int) preorderVerbTree.size() - 1; idx >= 0; --idx )
 	//	preorderVerbTree[idx]->changeQuery();
 	
-	aq_engine->call( *this->pSettings, this->sqlStatement, 0, nSelectLevel );
+	aq_engine->call( *this->pSettings, this->sqlStatement, 0, this->id );
 
 	if (pSettings->computeAnswer)
 	{
@@ -463,27 +425,6 @@ Table::Ptr QueryResolver::SolveSelectRegular( int nSelectLevel )
 }
 
 //------------------------------------------------------------------------------
-//search a subtree for a node and return the last node that had a certain tag
-tnode* QueryResolver::getLastTag( tnode*& pNode, tnode* pLastTag, tnode* pCheckNode, int tag )
-{
-	if( !pNode )
-		return NULL;
-	if( pNode == pCheckNode )
-		return pLastTag;
-	tnode* pNewLastTag = pLastTag;
-	if( pNode->tag == tag )
-		pNewLastTag = pNode;
-	tnode* res = getLastTag( pNode->left, pNewLastTag, pCheckNode, tag );
-	if( res )
-		return res;
-	res = getLastTag( pNode->right, pNewLastTag, pCheckNode, tag );
-	if( res )
-		return res;
-	res = getLastTag( pNode->next, pNewLastTag, pCheckNode, tag );
-	return res;
-}
-
-//------------------------------------------------------------------------------
 void QueryResolver::SolveSelectFromSelect(	tnode* pInteriorSelect, 
 							tnode* pExteriorSelect,
 							int nSelectLevel)
@@ -492,13 +433,13 @@ void QueryResolver::SolveSelectFromSelect(	tnode* pInteriorSelect,
 		return;
 
 #ifdef OUTPUT_NESTED_QUERIES
-	++nQueryIdx;
-	if( nSelectLevel < 2 )
-		nQueryIdx = -1;
+	//nQueryIdx;
+	//if( nSelectLevel < 2 )
+	//	nQueryIdx = -1;
 	std::string str;
 	syntax_tree_to_prefix_form( pExteriorSelect, str );
 	SaveFile( pSettings->szOutputFN, str.c_str() );
-	MakeBackupFile( pSettings->szOutputFN, nQueryIdx, 3 );
+  MakeBackupFile( pSettings->szOutputFN, backup_type_t::Exterior_Before );
 #endif
 
 	solveSelectStar( pInteriorSelect, BaseDesc );
@@ -519,7 +460,7 @@ void QueryResolver::SolveSelectFromSelect(	tnode* pInteriorSelect,
 	{
 		syntax_tree_to_prefix_form( pInteriorSelect, str );
 		SaveFile( pSettings->szOutputFN, str.c_str() );
-		MakeBackupFile( pSettings->szOutputFN, nQueryIdx, 0 );
+		MakeBackupFile( pSettings->szOutputFN, backup_type_t::Empty );
 		mark_as_deleted( pIntSelectAs );
 		return;
 	}
@@ -536,7 +477,7 @@ void QueryResolver::SolveSelectFromSelect(	tnode* pInteriorSelect,
 #ifdef OUTPUT_NESTED_QUERIES
 	syntax_tree_to_prefix_form( pExteriorSelect, str );
 	SaveFile( pSettings->szOutputFN, str.c_str() );
-	MakeBackupFile( pSettings->szOutputFN, nQueryIdx, 4 );
+	MakeBackupFile( pSettings->szOutputFN, backup_type_t::Exterior );
 #endif
 
 	VerbNode::Ptr spTree = QueryResolver::BuildVerbsTree( pInteriorSelect, this->BaseDesc, this->pSettings );
@@ -551,7 +492,7 @@ void QueryResolver::SolveSelectFromSelect(	tnode* pInteriorSelect,
 										BaseDesc, *pSettings );
 
 #ifdef OUTPUT_NESTED_QUERIES
-	MakeBackupFile( pSettings->szOutputFN, nQueryIdx, 0 );
+	MakeBackupFile( pSettings->szOutputFN, backup_type_t::Empty );
 #endif
 	
 	mark_as_deleted( pIntSelectAs );
@@ -559,9 +500,7 @@ void QueryResolver::SolveSelectFromSelect(	tnode* pInteriorSelect,
 
 //------------------------------------------------------------------------------
 //solve all selects found in the main select
-void QueryResolver::SolveSelectRecursive(	tnode*& pNode, int nSelectLevel, 
-											tnode* pLastSelect, bool inFrom, 
-											bool inIn )
+void QueryResolver::SolveSelectRecursive(	tnode*& pNode, unsigned int nSelectLevel, tnode* pLastSelect, bool inFrom, bool inIn )
 {
 	if( pNode == NULL )
 		return;
@@ -573,7 +512,6 @@ void QueryResolver::SolveSelectRecursive(	tnode*& pNode, int nSelectLevel,
 	switch( pNode->tag )
 	{
 	case K_SELECT:
-		++nSelectLevel;
 		pNewLastSelect = pNode;
 		newInFrom = false;
 		newInIn = false;
@@ -587,102 +525,66 @@ void QueryResolver::SolveSelectRecursive(	tnode*& pNode, int nSelectLevel,
 	default:;
 	}
 
-	SolveSelectRecursive( pNode->left, nSelectLevel, 
-		pNewLastSelect, newInFrom, newInIn );
-	if( !pNode )
-		return;
-	SolveSelectRecursive( pNode->right, nSelectLevel, 
-		pNewLastSelect, newInFrom, newInIn );
-	if( !pNode )
-		return;
-	if( pNode->tag == K_FROM )
-		newInFrom = false;
-	SolveSelectRecursive( pNode->next, nSelectLevel, 
-		pNewLastSelect, newInFrom, newInIn );
-	if( !pNode )
-		return;
+  if ((pNode->tag == K_SELECT) && (nSelectLevel > this->level))
+  {
+    if( inFrom )
+    {
+      throw generic_error(generic_error::NOT_IMPLEMENED, "'SELECT FROM SELECT' are not implemented yet");
+      // There is two type of nested query in FROM that can be solve in two way:
+      //   - Fold Up => pNode will be modified.
+      //   - Temporary Table => create a table used to perform join on it, this is a complex task.
+      // SolveSelectFromSelect( pNode, pLastSelect, nSelectLevel );
+    }
+    else if ( inIn )
+    {
+      // Resolve SubQuery
+      QueryResolver queryResolver(pNode, this->pSettings, this->aq_engine, this->BaseDesc, nSelectLevel, ++this->nestedId);
+      queryResolver.SolveSQLStatement();
+      Table::Ptr table = queryResolver.getResult();
 
-	if( (pNode->tag == K_IN) && (pNode->right == NULL) )
-	{
-		/* If subquery evaluates to an empty set, IN evaluates to FALSE. */
-		delete_subtree( pNode );
-		pNode = new_node( K_FALSE );
-	}
+      //delete old subtree and add new subtree containing answer
+      delete_subtree( pNode );
+      if( inIn )
+      {
+        pNode = new_node( K_IN_VALUES );
+        pNode->left = GetTree( *table );
+      }
+      else
+        pNode = GetTree( *table );
+    }
+    else
+    {
+      throw aq::generic_error(aq::generic_error::INVALID_QUERY, "SELECT must be in FROM or WHERE clause");
+    }
+  }
+  else
+  {
+    if ( pNode->tag == K_SELECT)
+      ++nSelectLevel;
 
-	if( pNode->tag != K_SELECT )
-		return;
-	if( nSelectLevel < 2 )
-		return; //do not solve first SELECT, it will be solved outside
+    SolveSelectRecursive( pNode->left, nSelectLevel, pNewLastSelect, newInFrom, newInIn );
+    if( !pNode ) 
+      return; // FIXME: why it is needed ?
 
-	if( inFrom )
-	{
+    SolveSelectRecursive( pNode->right, nSelectLevel, pNewLastSelect, newInFrom, newInIn );
+    if( !pNode ) 
+      return; // FIXME: why it is needed ?
 
-		throw generic_error(generic_error::NOT_IMPLEMENED, "'select from select' are not implemented yet");
-		
-		// There is two type of nested query in FROM that can be solve in two way:
-		//   - Fold Up => pNode will be modified.
-		//   - Temporary Table => create a table used to perform join on it, this is a complex task.
-		
-		// SolveSelectFromSelect( pNode, pLastSelect, nSelectLevel );
+    if( pNode->tag == K_FROM )
+      newInFrom = false;
 
-	}
-	else
-	{
-		
-		// Resolve SubQuery
-		QueryResolver queryResolver(pNode, this->pSettings, this->aq_engine, this->BaseDesc, true);
-		queryResolver.SolveSQLStatement();
-		Table::Ptr table = queryResolver.getResult();
-		
-		//delete old subtree and add new subtree containing answer
-		delete_subtree( pNode );
-		if( inIn )
-		{
-			pNode = new_node( K_IN_VALUES );
-			pNode->left = GetTree( *table );
-		}
-		else
-			pNode = GetTree( *table );
-	}
-}
+    SolveSelectRecursive( pNode->next, nSelectLevel, pNewLastSelect, newInFrom, newInIn );
+    if( !pNode ) 
+      return; // FIXME: why it is needed ?
 
-//-------------------------------------------------------------------------------
-Table::Ptr QueryResolver::SolveSelect()
-{
-	assert( this->sqlStatement->tag == K_SELECT );
-	
-	this->hasGroupBy = find_main_node(this->sqlStatement, K_GROUP) != NULL;
-	this->hasOrderBy = find_main_node(this->sqlStatement, K_ORDER) != NULL;
-	this->hasPartitionBy = find_main_node(this->sqlStatement, K_OVER) != NULL;
+    if( (pNode->tag == K_IN) && (pNode->right == NULL) )
+    {
+      /* If subquery evaluates to an empty set, IN evaluates to FALSE. */
+      delete_subtree( pNode );
+      pNode = new_node( K_FALSE );
+    }
+  }
 
-	SolveSelectRecursive( this->sqlStatement, 0, NULL, false, false );
-	return SolveSelectRegular();
-}
-
-//-------------------------------------------------------------------------------
-void   QueryResolver::CleanSpaceAtEnd ( char *my_field )
-{
-	// discard all space at the end
-	size_t max_size = strlen( my_field);
-	// beware >0, must have at least one char
-	for ( size_t i = max_size -1; i > 0 ; i -- )
-	{
-		if ( my_field [ i ] == ' ' ) my_field [ i ] = '\0';
-		else return;
-	}
-	//at this point  my_field is empty 
-	//need this ;   strcpy ( my_field, "NULL" ); ?
-}
-//-------------------------------------------------------------------------------
-void QueryResolver::ChangeCommaToDot (  char *string )
-{
-	// assume  : input is to be converted in double
-	// change  ',' in '.'
-	char *p;
-	// seach first  ',' in string
-	p = strchr(string, ',' );
-	// modify string ',' become '.'  
-	if (p != NULL )  *p = '.' ;
 }
 
 //-------------------------------------------------------------------------------
@@ -1283,7 +1185,7 @@ void QueryResolver::SolveUnionMinus(	tnode* pNode )
 								//MINUS
 								deletedRows.push_back( idx4 );
 								for( size_t idx3 = 0; idx3 < nrColumns; ++idx3 )
-									totalTable->Columns[idx3]->Items[idx4] = NULL;
+                  totalTable->Columns[idx3]->Items[idx4] = NULL;
 							}
 						}
 					}
@@ -1464,8 +1366,8 @@ Table::Ptr QueryResolver::solveAQMatriceByRows(VerbNode::Ptr spTree)
 	Table::Ptr table = new Table();
 
 #ifdef OUTPUT_NESTED_QUERIES
-	MakeBackupFile( pSettings->szOutputFN, nQueryIdx, 0 );
-	MakeBackupFile( pSettings->szAnswerFN, nQueryIdx, 1 );
+	MakeBackupFile( pSettings->szOutputFN, backup_type_t::Empty );
+	MakeBackupFile( pSettings->szAnswerFN, backup_type_t::Before );
 #endif
 
 	if (this->hasGroupBy)
@@ -1506,8 +1408,8 @@ Table::Ptr QueryResolver::solveAQMatriceByColumns(VerbNode::Ptr spTree)
 	aq::Logger::getInstance().log(AQ_INFO, "Load From Answer: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
 
 #ifdef OUTPUT_NESTED_QUERIES
-	MakeBackupFile( pSettings->szOutputFN, nQueryIdx, 0 );
-	MakeBackupFile( pSettings->szAnswerFN, nQueryIdx, 1 );
+	MakeBackupFile( pSettings->szOutputFN, backup_type_t::Empty );
+	MakeBackupFile( pSettings->szAnswerFN, backup_type_t::Before );
 #endif
 
 	if( !table->NoAnswer )
@@ -1585,3 +1487,37 @@ Table::Ptr QueryResolver::solveAQMatriceByColumns(VerbNode::Ptr spTree)
 //
 //	return table;
 //}
+
+//------------------------------------------------------------------------------
+int QueryResolver::MakeBackupFile( char *pszPath, backup_type_t type ) const
+{
+	char szBuffer[STR_BUF_SIZE];
+	memset(szBuffer, 0, STR_BUF_SIZE);
+	char		szDstPath[_MAX_PATH];
+	size_t	len = 0;
+	strcpy( szBuffer, pszPath );
+	len = strlen(szBuffer);
+	if( len < 3 )
+	{
+		aq::Logger::getInstance().log(AQ_DEBUG, "MakeBackupFile : Invalid filename %s !", szBuffer );
+		return -1;
+	}
+	szBuffer[len - 4] = '\0';
+	char *typeChar = "";
+	switch( type )
+	{
+  case backup_type_t::Empty: break;
+  case backup_type_t::Before: typeChar = "Before"; break;
+	case backup_type_t::After: typeChar = "After"; break;
+	case backup_type_t::Exterior_Before: typeChar = "Exterior_Before"; break;
+	case backup_type_t::Exterior: typeChar = "Exterior"; break;
+	default: ;
+	}
+	sprintf( szDstPath, "%s_%.2d_%.2d_%s.%s", szBuffer, this->level, this->id, typeChar, &pszPath[len - 3] );
+	if( FileRename( pszPath, szDstPath ) != 0 )
+	{
+		aq::Logger::getInstance().log(AQ_DEBUG, "MakeBackupFile : Error renaming file %s to %s !", pszPath, szDstPath );
+		return -1;
+	}
+	return 0;
+}

@@ -15,8 +15,7 @@
 class QueryResolver
 {
 public:
-	QueryResolver(tnode * _sqlStatement, TProjectSettings * _pSettings, AQEngine_Intf * _aq_engine, Base& _baseDesc);
-	QueryResolver(tnode * _sqlStatement, TProjectSettings * _pSettings, AQEngine_Intf * _aq_engine, Base& _baseDesc, bool _nested);
+	QueryResolver(tnode * _sqlStatement, TProjectSettings * _pSettings, AQEngine_Intf * _aq_engine, Base& _baseDesc, unsigned int _level = 1, unsigned int _id = 0);
 	~QueryResolver();
 
 	int SolveSQLStatement();
@@ -30,26 +29,23 @@ public:
 	static void cleanQuery( tnode*& pNode );
 	
 private:
-	static VerbNode::Ptr BuildVerbsSubtree(	tnode* pSelect, tnode* pStart, 
-										tnode* pStartOriginal, int context, Base& BaseDesc, TProjectSettings *pSettings );
-	void addUnionMinusNode(	int tag, std::vector<tnode*>& queries, 
-							std::vector<int>& operation, tnode* pNode );
+	static VerbNode::Ptr BuildVerbsSubtree(	tnode* pSelect, tnode* pStart, tnode* pStartOriginal, int context, Base& BaseDesc, TProjectSettings *pSettings );
+	void addUnionMinusNode(	int tag, std::vector<tnode*>& queries, std::vector<int>& operation, tnode* pNode );
 						
 	/// Solve Select Statement	
 	Table::Ptr SolveSelect();
-	Table::Ptr SolveSelectRegular( int nSelectLevel = 1 );
+	Table::Ptr SolveSelectRegular();
 	
-	void SolveSelectFromSelect(	tnode* pInteriorSelect, tnode* pExteriorSelect, 
-								int nSelectLevel );
-	void SolveSelectRecursive(	tnode*& pNode, int nSelectLevel, 
-								tnode* pLastSelect, bool inFrom, bool inIn  );
+	void SolveSelectFromSelect(	tnode* pInteriorSelect, tnode* pExteriorSelect, int nSelectLevel );
+	void SolveSelectRecursive(	tnode*& pNode, unsigned int nSelectLevel, tnode* pLastSelect, bool inFrom, bool inIn  );
 
 	/// Solve Insert Statement
 	void SolveInsert(	tnode* pNode );
-	void SolveInsertAux(	Table& table, size_t tableIdx, size_t colIdx, size_t packNumber,
-							std::vector<size_t>& reverseValuePos,
-							Column& nullColumn, Table& valuesToInsert, size_t startIdx, 
-							size_t endIdx, bool append );
+	void SolveInsertAux(	
+    Table& table, size_t tableIdx, size_t colIdx, size_t packNumber,
+    std::vector<size_t>& reverseValuePos,
+    Column& nullColumn, Table& valuesToInsert, size_t startIdx, 
+    size_t endIdx, bool append );
 
 	/// Solve Update and Delete Statement
 	void SolveUpdateDelete(	tnode* pNode );
@@ -63,22 +59,39 @@ private:
 	/// Solve Create Statement
 	void SolveCreate(	tnode* pNode );
 	
-	// misc (shoulb be outside of this class)
-	void CleanSpaceAtEnd( char *my_field );
-	void ChangeCommaToDot( char *string );
-	tnode* getLastTag( tnode*& pNode, tnode* pLastTag, tnode* pCheckNode, int tag );
+  /// backup
+  enum backup_type_t
+  {
+    Empty = 0,
+    Before,
+    After,
+    Exterior_Before,
+    Exterior
+  };
+  int MakeBackupFile( char *pszPath, backup_type_t type ) const;
+
+	/// write a record
 	void FileWriteEnreg( aq::ColumnType col_type, const int col_size, char *my_field, FILE *fcol );
 
+  ////////////////////////////////////////////////////////////////////////////
 	// Variables Members
+
+  // Settings
 	TProjectSettings * pSettings;
 	Base& BaseDesc;
 	AQEngine_Intf * aq_engine;
-	int nQueryIdx;
+
+  // helper
 	aq::Timer timer;
 	char szBuffer[STR_BUF_SIZE];
+
+  // query
 	tnode *sqlStatement;
 	Table::Ptr result;
-	
+  std::map<size_t, tnode*> values;
+  unsigned int id;
+  unsigned int nestedId;
+  unsigned int level;
 	bool nested;
 	bool hasGroupBy;
 	bool hasOrderBy;
