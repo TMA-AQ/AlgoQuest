@@ -143,6 +143,8 @@ void AQMatrix::load(const char * filePath, const char fieldSeparator, std::vecto
 		throw generic_error(generic_error::COULD_NOT_OPEN_FILE, "");
 
 	this->matrix.clear();
+  this->count.clear();
+  this->groupByIndex.clear();
 
 	pszBigBuffer = new char[STR_BIG_BUF_SIZE];
 	boost::scoped_array<char> pszBigBufferDel( pszBigBuffer );
