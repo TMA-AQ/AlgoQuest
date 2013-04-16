@@ -436,7 +436,14 @@ tnode* find_deeper_node(tnode * pNode, int tag, bool with_next ) {
 
 void dump(const tnode * const pNode, std::ostream& os, std::string indent)
 {
-	os << indent << "'" << id_to_string(pNode->tag) << "' [" << pNode->tag << ", " << pNode->inf << "] : " << to_string(pNode) << " [address:" << pNode << "]" << std::endl;
+  if (indent.size() > 100) 
+  {
+      os << indent << "..."; 
+      return;
+  }
+
+
+	os << indent << "'" << id_to_sql_string(pNode->tag) << "' [" << pNode->tag << ", " << pNode->inf << "] : " << to_string(pNode) << " [address:" << pNode << "]" << std::endl;
 
 	if (pNode->left) dump(pNode->left, os, indent + "  ");
 	// else os << indent << "NULL [empty left]" << std::endl;
