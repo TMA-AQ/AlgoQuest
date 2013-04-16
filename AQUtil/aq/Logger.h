@@ -48,8 +48,9 @@ namespace aq
 
     char getMode() const { return this->mode; }
     const char * getIdent() const { return this->ident; }
-
-    void log(const char *file, const char *function, unsigned int line, int facility, const char * forma, ...) const;
+    
+    void log(int facility, const char * format, ...) const;
+    void log(const char *file, const char *function, unsigned int line, int facility, const char * format, ...) const;
 
   private:  
     Logger(const char * ident, int mode);
@@ -87,20 +88,31 @@ enum log_facilities {
   AQ_LOG_DEBUG,
 };
 
-#define AQ_CRITICAL __FILE__, __FUNCTION__, __LINE__, AQ_LOG_CRIT
-#define AQ_ERROR __FILE__, __FUNCTION__, __LINE__, AQ_LOG_ERR
-#define AQ_WARNING __FILE__, __FUNCTION__, __LINE__, AQ_LOG_WARNING
-#define AQ_NOTICE __FILE__, __FUNCTION__, __LINE__, AQ_LOG_NOTICE
-#define AQ_INFO __FILE__, __FUNCTION__, __LINE__, AQ_LOG_INFO
-#define AQ_DEBUG __FILE__, __FUNCTION__, __LINE__, AQ_LOG_DEBUG
-
 #ifdef _DEBUG
+
+# define AQ_CRITICAL __FILE__, __FUNCTION__, __LINE__, AQ_LOG_CRIT
+# define AQ_ERROR __FILE__, __FUNCTION__, __LINE__, AQ_LOG_ERR
+# define AQ_WARNING __FILE__, __FUNCTION__, __LINE__, AQ_LOG_WARNING
+# define AQ_NOTICE __FILE__, __FUNCTION__, __LINE__, AQ_LOG_NOTICE
+# define AQ_INFO __FILE__, __FUNCTION__, __LINE__, AQ_LOG_INFO
+# define AQ_DEBUG __FILE__, __FUNCTION__, __LINE__, AQ_LOG_DEBUG
+
 # define AQ_LOG_DEBUG(args) \
   do {                   \
     aq::Logger::getInstance().log(AQ_DEBUG, args);                \
   } while (false) ;
+
 #else
+
+# define AQ_CRITICAL AQ_LOG_CRIT
+# define AQ_ERROR AQ_LOG_ERR
+# define AQ_WARNING AQ_LOG_WARNING
+# define AQ_NOTICE AQ_LOG_NOTICE
+# define AQ_INFO AQ_LOG_INFO
+# define AQ_DEBUG AQ_LOG_DEBUG
+
 # define AQ_LOG_DEBUG(inst)
+
 #endif
 
 #endif

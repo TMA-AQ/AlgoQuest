@@ -113,6 +113,22 @@ void Logger::log(const char *file, const char *function, unsigned int line, int 
 {
   int pos = 0;
   va_list ap;
+  char buf1[LOGBUFFER];
+  ::memset(buf1, 0, LOGBUFFER);
+  if ((pos = ::snprintf(buf1, sizeof(buf1), "%s - %s:%d: ", file, function, line)) < 0)
+  {
+    std::cerr << "ERROR: cannot log" << std::endl;
+  }
+  va_start(ap, format);
+  vsnprintf(buf1 + pos, sizeof(buf1) - pos, format, ap);
+  va_end(ap);
+  this->log(facility, "%s", buf1);
+}
+
+void Logger::log(int facility, const char * format, ...) const
+{
+  int pos = 0;
+  va_list ap;
   time_t currentTime;
   struct tm * localTime = 0;
   char date[256];
@@ -147,12 +163,6 @@ void Logger::log(const char *file, const char *function, unsigned int line, int 
     {
       std::cerr << "ERROR: cannot log" << std::endl;
     }
-  }
-
-  pos += ::snprintf(buf1 + pos, sizeof(buf1) - pos, "%s - %s:%d: ", file, function, line);
-  if (pos < 0)
-  {
-    std::cerr << "ERROR: cannot log" << std::endl;
   }
 
   va_start(ap, format);
