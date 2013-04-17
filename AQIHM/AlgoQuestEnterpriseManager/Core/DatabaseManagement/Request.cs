@@ -10,13 +10,11 @@ namespace AlgoQuest.Core.DatabaseManagement
     public class Request
     {
         private string _dbName;
-        private string _dbPath;
         private string _requestPath;
-        public Request(string dbPath, string dbName)
+        public Request(string path, string dbName)
         {
             _dbName = dbName;
-            _dbPath = Path.Combine(Path.GetDirectoryName(dbPath), _dbName);
-            _requestPath = Path.Combine(_dbPath, "Requete.xml");
+            _requestPath = Path.Combine(Path.GetDirectoryName(path), _dbName + "-Requests.xml");
         }
 
         public string LoadRequest(string requestName)
