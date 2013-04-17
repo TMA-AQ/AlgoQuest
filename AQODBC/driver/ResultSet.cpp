@@ -340,6 +340,7 @@ void ResultSet::fillTables()
   headers.push_back(col_attr_t("REMARKS", 32, SQL_C_CHAR));
 
   // fill rows
+  unsigned int numCol = 0;
   for (aq::base_t::tables_t::const_iterator it = baseDesc.table.begin(); it != baseDesc.table.end(); ++it)
   {
     const base_t::table_t& table = *it;
@@ -350,7 +351,14 @@ void ResultSet::fillTables()
     row.push_back(col_t("TABLE"));
     row.push_back(col_t(""));
     results.push_back(row);
+
+    // bind
+    currentRow.push_back(col_attr_t("", 32, SQL_C_CHAR)); // FIXME
+    currentRow.rbegin()->valueBind = static_cast<void*>(::malloc(128)); // FIXME
+    currentRow.rbegin()->sizeBind = static_cast<void*>(::malloc(sizeof(size_t)));
+    this->bindCol(++numCol, currentRow.rbegin()->valueBind, currentRow.rbegin()->sizeBind, SQL_C_CHAR);
   }
+
 
 	// set cursor
 	resultIt = results.begin();
@@ -377,17 +385,17 @@ void ResultSet::fillColumns(const char * tableName)
 	headers.push_back(col_attr_t("REMARKS", 32, SQL_C_CHAR));
 	headers.push_back(col_attr_t("COLUMN_DEF", 32, SQL_C_CHAR));
 	headers.push_back(col_attr_t("SQL_DATA_TYPE", 32, SQL_C_CHAR));
-	headers.push_back(col_attr_t("SQL_DATETIME_SUB", 32, SQL_C_CHAR));
+	// headers.push_back(col_attr_t("SQL_DATETIME_SUB", 32, SQL_C_CHAR));
 	headers.push_back(col_attr_t("CHAR_OCTET_LENGTH", 32, SQL_C_CHAR));
 	headers.push_back(col_attr_t("ORDINAL_POSITION", 32, SQL_C_CHAR));
 	headers.push_back(col_attr_t("IS_NULLABLE", 32, SQL_C_CHAR));
-	headers.push_back(col_attr_t("REMARKS", 32, SQL_C_CHAR));
+	// headers.push_back(col_attr_t("REMARKS", 32, SQL_C_CHAR));
 	
   // fill rows
   for (aq::base_t::tables_t::const_iterator it_table = baseDesc.table.begin(); it_table != baseDesc.table.end(); ++it_table)
   {
     const base_t::table_t& table = *it_table;
-    if (table.nom == tableName)
+    if ((table.nom == tableName) || (tableName == "%"))
     {
       for (aq::base_t::table_t::cols_t::const_iterator it_col = table.colonne.begin(); it_col != table.colonne.end(); ++it_col)
       {
@@ -395,7 +403,7 @@ void ResultSet::fillColumns(const char * tableName)
         std::vector<col_t> row;
         row.push_back(col_t("NULL"));
         row.push_back(col_t(baseDesc.nom));
-        row.push_back(col_t(tableName));
+        row.push_back(col_t(table.nom));
         row.push_back(col_t(column.nom));
         switch(column.type)
         {
