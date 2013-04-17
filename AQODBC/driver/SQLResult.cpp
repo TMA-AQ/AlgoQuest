@@ -54,12 +54,12 @@ SQLRETURN  SQL_API SQLColAttribute (SQLHSTMT StatementHandle,
 	const aq::ResultSet::col_attr_t * const attr = ((AqHandleStmt*)StatementHandle)->result->getColAttr(ColumnNumber);
 	switch (FieldIdentifier)
 	{
-	case SQL_DESC_NAME:
-		if (CharacterAttribute == NULL)
-		{
-			*StringLength = attr->name.size();
-		}
-		else
+  case SQL_DESC_NAME:
+    if (StringLength != NULL)
+    {
+      *StringLength = attr->name.size();
+    }
+		if (CharacterAttribute != NULL)
 		{
 			memset(CharacterAttribute, 0, BufferLength);
 			memcpy(CharacterAttribute, attr->name.c_str(), attr->name.size());

@@ -145,7 +145,9 @@ SQLRETURN  SQL_API SQLColumns(SQLHSTMT StatementHandle,
 {
 	AQ_ODBC_LOG("%s called\n", __FUNCTION__);
 	aq::ResultSet * result = ((AqHandleStmt*)StatementHandle)->result;
-  std::string tn((const char *)TableName);
+  std::string tn = "%";
+  if (TableName != NULL)
+    tn = (const char *)TableName;
 	result->fillColumns(tn.c_str());
 	
   return SQL_SUCCESS;
