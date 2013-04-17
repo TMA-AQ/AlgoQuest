@@ -5,11 +5,32 @@ using System.Text;
 using System.Windows.Forms;
 using System.Net.Sockets;
 using System.Xml;
+using System.Data.Odbc;
 
 namespace AlgoQuest.Core.DatabaseManagement
 {
-    public class DataBaseParser
+    public class DataBaseParser : IDisposable
     {
+
+        public void fill(TreeNode node, string odbcConnStr)
+        {
+            using (OdbcConnection conn = new OdbcConnection(odbcConnStr))
+            {
+                conn.Open();
+                System.Data.DataTable tableschema = conn.GetSchema(OdbcMetaDataCollectionNames.Tables);
+                foreach (System.Data.DataRow row in tableschema.Rows)
+                {
+                    string tn = row["TABLE_NAME"].ToString();
+                    TreeNode trDt = node.Nodes.Add(tn, tn, 2, 2);
+                    foreach (System.Data.DataColumn col in tableschema.Columns)
+                    {
+                        tn = row[col].ToString();
+                        string cn = col.ColumnName;
+                    }
+                }
+                conn.Close();
+            }
+        }
 
         public void fill(TreeNode node, string server, UInt16 port, string database)
         {
@@ -78,6 +99,10 @@ namespace AlgoQuest.Core.DatabaseManagement
                         , 3);
                 }
             }
+        }
+
+        public void Dispose()
+        {
         }
 
     }
