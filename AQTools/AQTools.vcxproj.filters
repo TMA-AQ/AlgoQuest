@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Fichiers d%27en-tête">
+      <UniqueIdentifier>{59c18c55-0ff7-44b3-bb7c-84ae6b11e8f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers de ressources">
+      <UniqueIdentifier>{80b3dce4-342d-45fb-b709-b24fb05b0cdf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources">
+      <UniqueIdentifier>{238eacf0-cc69-45a3-a3b2-0cd6be3f7694}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\aq">
+      <UniqueIdentifier>{d538c0f1-8232-49cb-9cba-a932398d6ba5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\aq">
+      <UniqueIdentifier>{3764af82-6a5c-4a41-a121-ae44705abcd4}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="AQTools.rc">
+      <Filter>Fichiers de ressources</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="aq\AQEngineBasic.h">
+      <Filter>Fichiers d%27en-tête\aq</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\Link.h">
+      <Filter>Fichiers d%27en-tête\aq</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="aq\aq_tools.cpp">
+      <Filter>Fichiers sources\aq</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\AQEngineBasic.cpp">
+      <Filter>Fichiers sources\aq</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
