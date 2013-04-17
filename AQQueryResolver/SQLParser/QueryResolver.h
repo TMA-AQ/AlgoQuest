@@ -15,7 +15,7 @@
 class QueryResolver
 {
 public:
-	QueryResolver(tnode * _sqlStatement, TProjectSettings * _pSettings, AQEngine_Intf * _aq_engine, Base& _baseDesc, unsigned int _level = 1, unsigned int _id = 0);
+	QueryResolver(tnode * _sqlStatement, TProjectSettings * _pSettings, AQEngine_Intf * _aq_engine, Base& _baseDesc, unsigned int _level = 1, unsigned int _id = 1);
 	~QueryResolver();
 
 	int SolveSQLStatement();
