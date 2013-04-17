@@ -1,5 +1,7 @@
 #include "ID2Str.h"
-#include <stdio.h>
+#include <aq/Exceptions.h>
+#include <cstdio>
+#include <sstream>
 
 struct TID2String 
 {
@@ -158,7 +160,8 @@ TID2String g_id2str[] = {
 	{ K_MERGE,			"K_MERGE"		},
 	{ K_MATCHED,		"K_MATCHED"		},
 	{ K_USING,			"K_USING"		},
-	{ K_TARGET,			"K_TARGET"		}
+	{ K_TARGET,			"K_TARGET"		}//,
+  // { K_IN_VALUES,  "K_IN" }
 };
 
 #define SIZE_OF( tab ) ( sizeof( tab ) / sizeof( tab[ 0 ] ) )
@@ -171,7 +174,9 @@ char* id_to_string( unsigned int nID ) {
 			return g_id2str[ i ].pszStr;
 		}
 	}
-	return NULL;
+  //throw aq::generic_error(aq::generic_error::VERB_TYPE_MISMATCH, "cannot find type %u", nID);
+	//return "K_UNKNOW";
+  return NULL;
 }
 
 
@@ -188,7 +193,6 @@ char* id_to_sql_string( unsigned int nID )
 	case K_JSUP: nID = K_GT ; break;
 	case K_JSEQ: nID = K_GEQ ; break;
 	}
-	
 
 	unsigned int i;
 	for ( i = 0; i < SIZE_OF( g_id2str ); i++ ) {
@@ -196,5 +200,6 @@ char* id_to_sql_string( unsigned int nID )
 			return g_id2str[ i ].pszStr;
 		}
 	}
-	return NULL;
+
+	return "K_UNKNOW";
 }
