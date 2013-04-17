@@ -25,13 +25,13 @@ namespace AlgoQuest.Core.DatabaseManagement
         private string _baseStructPathRaw;
         private string _baseStructPathXml;
 
-        private enum BaseDesc_t
-        {
-            RAW,
-            XML
-        }
+        //private enum BaseDesc_t
+        //{
+        //    RAW,
+        //    XML
+        //}
 
-        private BaseDesc_t base_desc_type;
+        // private BaseDesc_t base_desc_type;
         private List<DataTable> _datatableList;
         private StreamReader _srProperties;
         private XmlDocument _xmlReader;
@@ -174,7 +174,7 @@ namespace AlgoQuest.Core.DatabaseManagement
         {
             try
             {
-                base_desc_type = DataBase.BaseDesc_t.XML;
+                // base_desc_type = DataBase.BaseDesc_t.XML;
                 _xmlReader = new XmlDocument();
                 _xmlReader.Load(@_baseStructPathXml);
                 this._name = _xmlReader.SelectSingleNode("Database/@Name").Value;
@@ -182,7 +182,7 @@ namespace AlgoQuest.Core.DatabaseManagement
             }
             catch (FileNotFoundException)
             {
-                base_desc_type = DataBase.BaseDesc_t.RAW;
+                // base_desc_type = DataBase.BaseDesc_t.RAW;
                 _srProperties = new StreamReader(_baseStructPathRaw);
                 if (!_srProperties.EndOfStream)
                     _name = _srProperties.ReadLine();
