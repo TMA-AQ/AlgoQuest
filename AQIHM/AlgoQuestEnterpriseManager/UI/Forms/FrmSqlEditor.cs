@@ -20,55 +20,44 @@ namespace AlgoQuest.UI.Forms
 {
     public partial class FrmSqlEditor : Form
     {
-        private string _server;
-        private UInt16 _port;
-        private string _selectedBase;
-        private List<RequestData> _requestList;
-        private string _pathFile;
-        private string _odbc_conn_str;
-        private string _multiThreadResult = string.Empty;
-
-        public FrmSqlEditor(string SelectedBase)
+        public class ConnectAttr
         {
-            InitializeComponent();
-            _selectedBase = SelectedBase;
-            string[] fields = SelectedBase.Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
-            if (fields.Length > 1)
+            public enum type
             {
-                _server = fields[0];
-                _port = UInt16.Parse(fields[1]);
-                _selectedBase = fields[2];
+                LOCAL,
+                REMOTE,
+                ODBC
             }
-            this.Text = String.Format("Analyseur de requêtes - {0}", SelectedBase);
-            populateRequestList();
-            scSql.Panel2.ClientSizeChanged += new EventHandler(Panel2_ClientSizeChanged);
-
-            // fill odbc connections
-            try
-            {
-                AppSettingsReader _appReader = new AppSettingsReader();
-                OdbcConnectionSection section = (OdbcConnectionSection)ConfigurationManager.GetSection("OdbcConnectionSection");
-                if (section != null)
-                {
-                    List<OdbcConnectionElement> _listMapElement = section.MapItems.AsQueryable().Cast<OdbcConnectionElement>().ToList<OdbcConnectionElement>();
-                    foreach (OdbcConnectionElement e in _listMapElement)
-                    {
-                        this.odbcCombo.Items.Add(e.value);
-                    }
-                }
-            }
-            catch (ConfigurationErrorsException)
-            {
-            }
+            public type _type;
+            public string _server;
+            public UInt16 _port;
+            public string _database;
+            public string _odbc_conn_str;
         }
 
-       
+        private ConnectAttr _attr;
+        private List<RequestData> _requestList;
+        private string _pathFile;
+        private string _multiThreadResult = string.Empty;
+        private Request _requests;
+
+        public FrmSqlEditor(ConnectAttr attr)
+        {
+            InitializeComponent();
+            _attr = attr;
+            this.Text = String.Format("Analyseur de requêtes - {0}", attr._database);
+            if (_attr._type == FrmSqlEditor.ConnectAttr.type.LOCAL)
+            {
+                populateRequestList();
+                scSql.Panel2.ClientSizeChanged += new EventHandler(Panel2_ClientSizeChanged);
+            }
+        }
 
         public FrmSqlEditor(string SelectedBase, string scriptFilePath)
         {
             InitializeComponent();
-            _selectedBase = SelectedBase;
-            this.Text = String.Format("Analyseur de requêtes - {0}", _selectedBase);
+            _attr._database = SelectedBase;
+            this.Text = String.Format("Analyseur de requêtes - {0}", _attr._database);
             populateRequestList();
             try
             {
@@ -85,36 +74,13 @@ namespace AlgoQuest.UI.Forms
             
         }
 
-        //private void rtbEditor_KeyPressed(object sender, KeyPressEventArgs e)
-        //{
-        //    int startIndex = 0;
-        //    int lastSpacePosition = 0;
-        //    lastSpacePosition = rtbEditor.Text.LastIndexOf(" ");
-        //    if (lastSpacePosition > 0)
-        //        startIndex = lastSpacePosition;
-
-        //    string currentWord = string.Empty;
-        //    if (rtbEditor.Text.Length > 0)
-        //    {
-        //        currentWord = rtbEditor.Text.Substring(startIndex).Trim();
-        //        if (currentWord != string.Empty)
-        //        {
-        //            rtbEditor.Select(startIndex, rtbEditor.TextLength - startIndex);
-        //            rtbEditor.SelectionColor = setWordColor(currentWord);
-        //            rtbEditor.SelectionLength = 0;
-        //            rtbEditor.SelectionStart = rtbEditor.TextLength;
-        //        }
-        //    }
-
-        //}
-
         private void populateRequestList()
         {
             tlcRequest.Items.Clear();
             AppSettingsReader _appReader = new AppSettingsReader();
-            String dbPath = _appReader.GetValue("DataBasePath", typeof(System.String)).ToString();
-            Request rq = new Request(dbPath, _selectedBase);
-            _requestList = rq.GetRequest();
+            String scriptPath = _appReader.GetValue("ScriptPath", typeof(System.String)).ToString();
+            _requests = new Request(scriptPath, _attr._database);
+            _requestList = _requests.GetRequest();
             foreach (RequestData rd in _requestList)
                 tlcRequest.Items.Add(rd);
         }
@@ -179,10 +145,7 @@ namespace AlgoQuest.UI.Forms
             DialogResult dr = frmSaveRequest.ShowDialog(this);
             if (dr == System.Windows.Forms.DialogResult.OK)
             {
-                AppSettingsReader _appReader = new AppSettingsReader();
-                String dbPath = _appReader.GetValue("DataBasePath", typeof(System.String)).ToString();
-                Request request = new Request(dbPath, _selectedBase);
-                request.SaveRequest(rd);
+                _requests.SaveRequest(rd);
                 populateRequestList();
             }
         }
@@ -283,18 +246,20 @@ namespace AlgoQuest.UI.Forms
                 Stopwatch watch = new Stopwatch();
                 watch.Start();
                 ISelectRequest sr;
-                if ((_odbc_conn_str != null) && (_odbc_conn_str != ""))
+
+                if ((_attr._odbc_conn_str != null) && (_attr._odbc_conn_str != ""))
                 {
-                    sr = new OdbcRequest(_odbc_conn_str);
+                    sr = new OdbcRequest(_attr._odbc_conn_str);
                 }
-                else if ((_server != "") && (_port != 0))
+                else if ((_attr._server != "") && (_attr._port != 0))
                 {
-                    sr = new SelectRequestRemote(_server, _port, _selectedBase, nbRecordsToPrint);
+                    sr = new SelectRequestRemote(_attr._server, _attr._port, _attr._database, nbRecordsToPrint);
                 }
                 else
                 {
-                    sr = new SelectRequest(cfgPath, _selectedBase, nbRecordsToPrint);
+                    sr = new SelectRequest(cfgPath, _attr._database, nbRecordsToPrint);
                 }
+
                 System.Data.DataTable dt = sr.Execute(request);
                 watch.Stop();
                 ssResult.Invoke(new Action(() => { ssResult.Visible = true; }));
@@ -335,7 +300,7 @@ namespace AlgoQuest.UI.Forms
                 AppSettingsReader _appReader = new AppSettingsReader();
                 String dbPath = _appReader.GetValue("DataBasePath", typeof(System.String)).ToString();
                 Int32 nbRecordsToPrint = (Int32)_appReader.GetValue("NbRecordsToPrint", typeof(int));
-                SelectRequest sr = new SelectRequest(dbPath, _selectedBase, nbRecordsToPrint);
+                SelectRequest sr = new SelectRequest(dbPath, _attr._database, nbRecordsToPrint);
                 string request = (string)state;
                 Stopwatch watch = new Stopwatch();
                 watch.Start();
@@ -369,9 +334,5 @@ namespace AlgoQuest.UI.Forms
             dgResult.MaximumSize = new Size(scSql.Panel2.ClientSize.Width, scSql.Panel2.ClientSize.Height - ssResult.Height);
         }
 
-        private void odbcCombo_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            _odbc_conn_str = this.odbcCombo.SelectedItem.ToString();
-        }
     }
 }

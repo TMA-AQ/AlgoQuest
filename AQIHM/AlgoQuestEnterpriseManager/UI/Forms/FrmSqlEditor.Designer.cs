@@ -36,7 +36,6 @@
             this.tsbSave = new System.Windows.Forms.ToolStripButton();
             this.tsbOpen = new System.Windows.Forms.ToolStripButton();
             this.tlcRequest = new System.Windows.Forms.ToolStripComboBox();
-            this.odbcCombo = new System.Windows.Forms.ToolStripComboBox();
             this.scSql = new System.Windows.Forms.SplitContainer();
             this.ssResult = new System.Windows.Forms.StatusStrip();
             this.tsslDuration = new System.Windows.Forms.ToolStripStatusLabel();
@@ -67,8 +66,7 @@
             this.tsbExecute,
             this.tsbSave,
             this.tsbOpen,
-            this.tlcRequest,
-            this.odbcCombo});
+            this.tlcRequest});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.MaximumSize = new System.Drawing.Size(0, 25);
             this.toolStrip1.Name = "toolStrip1";
@@ -125,13 +123,6 @@
             this.tlcRequest.Name = "tlcRequest";
             this.tlcRequest.Size = new System.Drawing.Size(121, 25);
             this.tlcRequest.SelectedIndexChanged += new System.EventHandler(this.tlcRequest_SelectedIndexChanged);
-            // 
-            // odbcCombo
-            // 
-            this.odbcCombo.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.odbcCombo.Name = "odbcCombo";
-            this.odbcCombo.Size = new System.Drawing.Size(480, 25);
-            this.odbcCombo.SelectedIndexChanged += new System.EventHandler(this.odbcCombo_SelectedIndexChanged);
             // 
             // scSql
             // 
@@ -232,6 +223,5 @@
         private System.Windows.Forms.ToolStripStatusLabel tsslDuration;
         private System.Windows.Forms.ToolStripStatusLabel tsslNumber;
         private System.Windows.Forms.ToolStripButton tsbOpen;
-        private System.Windows.Forms.ToolStripComboBox odbcCombo;
     }
 }

@@ -12,6 +12,7 @@ using Aq = AlgoQuest.Core.DatabaseManagement;
 using AlgoQuest.UI.Forms.Import;
 using AlgoQuest.Core.DatabaseManagement;
 using AlgoQuest.Configuration.Connection;
+using AlgoQuest.Configuration.Core;
 
 namespace AlgoQuest.UI.Forms
 {
@@ -19,6 +20,8 @@ namespace AlgoQuest.UI.Forms
     {
         private string _selectedBase;
         private List<Aq.DataBase> _lstDb;
+        private Dictionary<string, FrmSqlEditor.ConnectAttr> connsAttr;
+
         public string SelectedBase
         {
             get {return _selectedBase;}
@@ -41,6 +44,7 @@ namespace AlgoQuest.UI.Forms
         }
         public FrmMdi()
         {
+            connsAttr = new Dictionary<string, FrmSqlEditor.ConnectAttr>();
             InitializeComponent();
             if (connect())
             {
@@ -101,7 +105,8 @@ namespace AlgoQuest.UI.Forms
 
         private void tsbRequest_Click(object sender, EventArgs e)
         {
-            FrmSqlEditor frmSqlEditor = new FrmSqlEditor(_selectedBase);
+            FrmSqlEditor.ConnectAttr connAttr = this.connsAttr[_selectedBase];
+            FrmSqlEditor frmSqlEditor = new FrmSqlEditor(connAttr);
             frmSqlEditor.MdiParent = this;
             frmSqlEditor.Show();
             frmSqlEditor.WindowState = FormWindowState.Maximized;
@@ -159,6 +164,7 @@ namespace AlgoQuest.UI.Forms
                     trDb = tvObjects.Nodes[0].Nodes.Add(db.Name, db.Name, 1, 1);
                     trDb.ContextMenuStrip = cmsDataBase;
                     if (db.DataTableList != null)
+                    {
                         foreach (Aq.DataTable dt in db.DataTableList)
                         {
                             trDt = trDb.Nodes.Add(dt.DataTableName, dt.DataTableName, 2, 2);
@@ -170,6 +176,12 @@ namespace AlgoQuest.UI.Forms
                                     , 3);
                             }
                         }
+                    }
+
+                    FrmSqlEditor.ConnectAttr connAttr = new FrmSqlEditor.ConnectAttr();
+                    connAttr._type = FrmSqlEditor.ConnectAttr.type.LOCAL;
+                    connAttr._database = db.Name;
+                    connsAttr.Add(db.Name, connAttr);
                 }
 
                 //
@@ -177,22 +189,45 @@ namespace AlgoQuest.UI.Forms
                 TreeNode server = new TreeNode("Servers");
                 tvObjects.Nodes.Add(server);
 
-                RemoteDatabaseSection section = (RemoteDatabaseSection)ConfigurationManager.GetSection("RemoteDatabaseSection");
-                if (section != null)
+                RemoteDatabaseSection remoteSection = (RemoteDatabaseSection)ConfigurationManager.GetSection("RemoteDatabaseSection");
+                if (remoteSection != null)
                 {
-                    List<RemoteDatabaseElement> _listMapElement = section.MapItems.AsQueryable().Cast<RemoteDatabaseElement>().ToList<RemoteDatabaseElement>();
+                    List<RemoteDatabaseElement> _listMapElement = remoteSection.MapItems.AsQueryable().Cast<RemoteDatabaseElement>().ToList<RemoteDatabaseElement>();
                     foreach (RemoteDatabaseElement e in _listMapElement)
                     {
-                        trDb = server.Nodes.Add(e.host + ":" + e.port + ":" + e.dbname, e.host + ":" + e.port + ":" + e.dbname, 1, 1);
-                        trDb.ContextMenuStrip = cmsDataBase;
+                        trDb = server.Nodes.Add(e.key, e.key, 1, 1);
                         dbParser.fill(trDb, e.host, UInt16.Parse(e.port), e.dbname);
+                        trDb.ContextMenuStrip = cmsDataBase;
+                        FrmSqlEditor.ConnectAttr connAttr = new FrmSqlEditor.ConnectAttr();
+                        connAttr._type = FrmSqlEditor.ConnectAttr.type.REMOTE;
+                        connAttr._database = e.dbname;
+                        connAttr._server = e.host;
+                        connAttr._port = UInt16.Parse(e.port);
+                        connsAttr.Add(e.key, connAttr);
                     }
                 }
+
+                OdbcConnectionSection odbcSection = (OdbcConnectionSection)ConfigurationManager.GetSection("OdbcConnectionSection");
+                if (odbcSection != null)
+                {
+                    List<OdbcConnectionElement> _listMapElement = odbcSection.MapItems.AsQueryable().Cast<OdbcConnectionElement>().ToList<OdbcConnectionElement>();
+                    foreach (OdbcConnectionElement e in _listMapElement)
+                    {
+                        trDb = server.Nodes.Add(e.key, e.key, 1, 1);
+                        dbParser.fill(trDb, e.value);
+                        trDb.ContextMenuStrip = cmsDataBase;
+                        FrmSqlEditor.ConnectAttr connAttr = new FrmSqlEditor.ConnectAttr();
+                        connAttr._type = FrmSqlEditor.ConnectAttr.type.ODBC;
+                        connAttr._odbc_conn_str = e.value;
+                        connsAttr.Add(e.key, connAttr);
+                    }
+                }
+
             }
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    String.Format("Les bases de données sont inaccessibles. Vérifiez l'accès au répertoire 'DB' du système\n{0}\n{1}"
+                    String.Format("Certaines bases sont inaccessibles\n{0}\n{1}"
                     , Application.StartupPath, ex.Message)
                     , "Erreur"
                     , MessageBoxButtons.OK
