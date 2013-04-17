@@ -35,4 +35,5 @@ WHERE
 				AND table_1.champ_2 < 'y'
 		)
 Group By table_1.champ_2
+Order By table_1.champ_2
 ;

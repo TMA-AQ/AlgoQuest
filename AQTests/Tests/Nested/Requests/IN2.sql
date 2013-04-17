@@ -1,4 +1,4 @@
-MSALGOQUEST
+-- MSALGOQUEST
 SELECT table_1.champ_2, Count(table_1.champ_2)
 FROM table_1,table_6
 WHERE 
@@ -35,4 +35,5 @@ WHERE
 					)
 		)
 Group By table_1.champ_2
+Order By table_1.champ_2
 ;

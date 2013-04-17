@@ -12,6 +12,7 @@ WHERE
 				table_1.val_1=table_6.val_1
 				AND table_1.champ_2 > 'abcabcabc'
 				AND table_1.champ_2 < 'abcabcpqr'
+			group by table_1.champ_2
 		)
 group by table_1.champ_2
 ;

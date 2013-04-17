@@ -34,4 +34,6 @@ WHERE
 								)
 					)
 		)
+Group By table_1.val_3
+Order By table_1.val_3
 ;
