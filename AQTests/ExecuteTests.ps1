@@ -5,8 +5,7 @@ Param([Boolean]$help,
 	  [String]$databasesFolder,
 	  [String]$aq_query_resolver,
 	  [String]$aqengine,
-	  [String]$cutInCol,
-	  [String]$loader,
+	  [String]$aqloader,
 	  [String]$logFile,
 	  [String]$checkFile,
 	  [String]$skipFile,
@@ -116,7 +115,7 @@ Function CheckResult($logFile, $testName, $fileName, $folderResult, $execTime, [
 		{
 			++$success.Value
 			Write-Output $($testName + " SUCCESSFULLY CHECKED in " + $execTime + " sec")
-			Add-Content $logFile ($testName + ";OK")
+			Add-Content $logFile ($testName + ";OK;" + $execTime + " sec")
 		}
     }
     else
@@ -215,10 +214,11 @@ if ($help)
 	Write-Host "	-databasesFolder  			"
 	Write-Host "	-aq_query_resolver 			"
 	Write-Host "	-aqengine         			"
+	Write-Host "	-aqloader         			"
 	Write-Host "	-testsFolder      			"
 	Write-Host "	-logFile          			"
 	Write-Host "	-checkFile         			requests to check"
-	Write-Host "	-skipFile	      			requests to skip"
+	Write-Host "	-skipFile	      			  requests to skip"
 	Write-Host "	-outputToNotepad  			"
 	return
 }
@@ -245,12 +245,11 @@ if ($settings)
 		if (!$aq_query_resolver      			-and ($el1.CompareTo("aq_query_resolver")      				-eq 0) ) { $aq_query_resolver      			= $el2 ; continue }
 		if (!$aq_query_resolver_params      	-and ($el1.CompareTo("aq_query_resolver_params")	    -eq 0) ) { $aq_query_resolver_params    = $el2 ; continue }
 		if (!$aqengine        					-and ($el1.CompareTo("aqengine")        				-eq 0) ) { $aqengine        			= $el2 ; continue }
-		if (!$cutInCol        					-and ($el1.CompareTo("cutInCol")        				-eq 0) ) { $cutInCol        			= $el2 ; continue }
-		if (!$loader        					-and ($el1.CompareTo("loader")	        				-eq 0) ) { $loader	        			= $el2 ; continue }
+		if (!$aqloader        					-and ($el1.CompareTo("aqloader")        				-eq 0) ) { $aqloader        			= $el2 ; continue }
 		if (!$testsFolder     					-and ($el1.CompareTo("testsFolder")     				-eq 0) ) { $testsFolder     			= $el2 ; continue }
 		if (!$logFile         					-and ($el1.CompareTo("logFile")         				-eq 0) ) { $logFile         			= $el2 ; continue }
-		if (!$checkFile        					-and ($el1.CompareTo("check")	        				-eq 0) ) { $checkFile       			= $el2 ; continue }
-		if (!$skipFile	     					-and ($el1.CompareTo("skip")		     				-eq 0) ) { $skipFile     				= $el2 ; continue }
+		if (!$checkFile        					-and ($el1.CompareTo("checkFile")	        				-eq 0) ) { $checkFile       			= $el2 ; continue }
+		if (!$skipFile	     					-and ($el1.CompareTo("skipFile")		     				-eq 0) ) { $skipFile     				= $el2 ; continue }
 		if (!$outputToNotePad 					-and ($el1.CompareTo("outputToNotePad") 				-eq 0) ) 
 		{ 
 			if ($el2.CompareTo("1") -eq 0) { $outputToNotePad = $True }
@@ -265,8 +264,7 @@ if ($settings)
 if ((!$databasesFolder) -or
 	(!$aq_query_resolver) -or
 	(!$aqengine) -or
-	(!$cutInCol) -or
-	(!$loader) -or
+	(!$aqloader) -or
 	(!$testsFolder))
 {
 	Write-Host "Variables are not setted"
@@ -279,6 +277,7 @@ Write-Host "testsFolder:      		$testsFolder"
 Write-Host "databasesFolder:  		$databasesFolder"
 Write-Host "aq_query_resolver:		$aq_query_resolver"
 Write-Host "aqengine:         		$aqengine"
+Write-Host "aqloader:         		$aqloader"
 Write-Host "logFile:          		$logFile"
 Write-Host "onlyFile:         		$checkFile"
 Write-Host "excludeFile:      		$skipFile"
