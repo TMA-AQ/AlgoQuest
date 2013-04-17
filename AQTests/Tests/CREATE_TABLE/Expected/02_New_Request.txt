@@ -1,3 +1,0 @@
-SELECT , , , , , . TestTable1 City . TestTable1 Name . TestTable1 Population . People Name . People Age . People City
-FROM , People TestTable1
-WHERE K_JEQ . TestTable1 City . People City 

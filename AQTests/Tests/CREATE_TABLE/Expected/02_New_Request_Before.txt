@@ -1,3 +1,0 @@
-SELECT K_STAR
-FROM , People TestTable1
-WHERE K_JEQ . TestTable1 City . People City 

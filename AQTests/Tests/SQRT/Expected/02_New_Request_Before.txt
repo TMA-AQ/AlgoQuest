@@ -1,3 +1,0 @@
-SELECT . table_1 val_3
-FROM , table_1 table_2
-WHERE AND K_JEQ . table_2 val_1 . table_1 val_1 = . table_1 val_3 SQRT K_VALUE 99.99

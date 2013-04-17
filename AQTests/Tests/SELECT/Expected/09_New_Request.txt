@@ -1,3 +1,0 @@
-SELECT . People Name
-FROM People
-WHERE AND K_JNO . People NAME = . People City K_VALUE 'NewYork'

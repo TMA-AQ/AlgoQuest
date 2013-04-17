@@ -1,4 +1,0 @@
-SELECT , annee ROW_NUMBER
-ORDER BY annee PARTITION BY annee
-FROM td_hebdo_calendrier
-WHERE < annee K_VALUE 2005

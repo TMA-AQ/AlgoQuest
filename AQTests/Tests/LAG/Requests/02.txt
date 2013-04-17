@@ -1,5 +1,0 @@
-RootDir4
-select People.City, People.Age, People.Name, LAG (People.Name, 1) OVER (PARTITION BY People.City ORDER BY People.Name)
-from People, Cities
-where People.City=Cities.CityName
-ORDER BY People.City, People.Name;

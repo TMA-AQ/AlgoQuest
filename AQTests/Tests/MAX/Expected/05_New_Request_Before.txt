@@ -1,2 +1,0 @@
-SELECT MAX . table_4 val_3
-FROM table_4

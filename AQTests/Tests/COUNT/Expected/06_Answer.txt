@@ -1,7 +1,0 @@
-; table_1.champ_1; COUNT table_1.val_1; Count
-; abcabcabc; 7; 1
-; abcabcdef; 3; 1
-; abcabcghi; 8; 1
-; abcabcjkl; 12; 1
-; abcabcmno; 12; 1
-; abcabcpqr; 11; 1

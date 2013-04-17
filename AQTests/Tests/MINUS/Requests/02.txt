@@ -1,5 +1,0 @@
-﻿ACTION
-select count(*) - 1 AS DIFF
-from COTATION, action
-where 
-COTATION.isin = action.isin;

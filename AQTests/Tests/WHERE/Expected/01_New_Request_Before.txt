@@ -1,3 +1,0 @@
-SELECT K_STAR
-FROM , AS cotation_neg n AS cotation c
-WHERE AND K_JEQ . n dte . c dte K_JEQ . n isin . c isin 

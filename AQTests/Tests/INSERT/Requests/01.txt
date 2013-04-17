@@ -1,6 +1,0 @@
-﻿Date2
-INSERT INTO ACTION
-            (isin,
-             libelle)
-VALUES      ('FR0000134639',
-             'Altran Techn.');

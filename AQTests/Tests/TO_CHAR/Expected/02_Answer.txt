@@ -1,3 +1,0 @@
-; TO_CHAR COTATION.dte; Count
-; 201208; 1330
-; 201209; 1462

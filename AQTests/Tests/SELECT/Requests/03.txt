@@ -1,4 +1,0 @@
-﻿action
-select *
-from COTATION, ACTION
-where COTATION.isin=ACTION.isin;

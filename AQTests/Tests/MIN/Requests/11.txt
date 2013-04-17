@@ -1,9 +1,0 @@
-﻿MSALGOQUEST
-SELECT	table_1.champ_1, table_1.val_1,
-	MIN(table_1.val_1) OVER 
-		(PARTITION BY table_1.champ_1 
-		ORDER BY table_1.champ_1, table_1.val_1 
-		ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING)
-FROM   table_1
-WHERE  table_1.champ_1 < 'abcabcstu' AND table_1.val_1 > 0
-ORDER BY table_1.champ_1, table_1.val_1;

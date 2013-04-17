@@ -1,3 +1,0 @@
-118218
-SELECT Count(*)
-FROM   cid_T_VR3callinformation a;

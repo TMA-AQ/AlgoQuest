@@ -1,7 +1,0 @@
-MSALGOQUEST
-SELECT table_1.champ_2, Count (*)
-FROM   table_1,
-       table_2
-WHERE  table_2.val_1 = table_1.val_1
-group by table_1.champ_2
-having count(*) > 100000;

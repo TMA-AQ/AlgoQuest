@@ -1,4 +1,0 @@
-SELECT , , , . action libelle . COTATION isin . COTATION dte . COTATION clo
-FROM , COTATION action
-WHERE AND K_JEQ . action isin . COTATION isin = . COTATION isin K_VALUE 'FR0000130007'
-ORDER BY . COTATION dte

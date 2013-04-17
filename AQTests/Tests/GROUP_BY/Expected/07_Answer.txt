@@ -1,6 +1,0 @@
-; t1.champ_1; MIN t1.champ_2; Count
-; yzyzmno; abcjklabc; 1
-; yzyzpqr; ghiabcabc; 1
-; yzyzstu; defabcmno; 1
-; yzyzvwx; abcjklpqr; 1
-; yzyzyz; abcghighi; 1

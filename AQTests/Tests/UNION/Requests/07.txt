@@ -1,8 +1,0 @@
-﻿MSALGOQUEST
-select table_1.champ_1
-from table_1, table_6
-where table_1.champ_1=table_6.champ_1 AND table_1.champ_1 < 'm' AND table_1.champ_1 > 'b'
-UNION
-select table_1.champ_1
-from table_1, table_6
-where table_1.champ_1=table_6.champ_1 AND table_1.champ_1 < 'h' AND table_1.champ_1 > 'a';

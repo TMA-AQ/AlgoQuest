@@ -1,2 +1,0 @@
-; AVG table_1.val_1
-; 142

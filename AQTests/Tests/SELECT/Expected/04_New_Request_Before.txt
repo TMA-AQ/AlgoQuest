@@ -1,2 +1,0 @@
-SELECT K_STAR
-FROM People

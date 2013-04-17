@@ -1,5 +1,0 @@
-﻿RootDir5
-CREATE TABLE TestTable1 AS
-select People.City, People.Name, Cities.Population
-from People, Cities
-where People.City=Cities.CityName;

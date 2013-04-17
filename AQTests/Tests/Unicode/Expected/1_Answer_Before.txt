@@ -1,3 +1,0 @@
-
-My Error message  :  error 006
-Error : No such file or directory 

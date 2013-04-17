@@ -1,2 +1,0 @@
-﻿RootDir5
-TRUNCATE TABLE TestTable2;

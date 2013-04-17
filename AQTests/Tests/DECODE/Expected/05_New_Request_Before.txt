@@ -1,3 +1,0 @@
-SELECT DECODE . People Name , K_VALUE 'Debbie' K_VALUE 'Slagathor'
-FROM , People Cities
-WHERE K_JEQ . People City . Cities CityName

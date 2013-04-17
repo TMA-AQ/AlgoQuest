@@ -1,6 +1,0 @@
-ACTION
-select   action.libelle , COTATION.isin, COTATION.dte, COTATION.clo
-from     COTATION, action
-where    COTATION.isin = action.isin
-and COTATION.isin = 'FR0000130007'
-order by COTATION.dte;

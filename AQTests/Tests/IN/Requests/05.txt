@@ -1,5 +1,0 @@
-MSALGOQUEST
-SELECT *
-FROM   table_1
-WHERE  table_1.id IN (SELECT table_2.id
-                      FROM   table_2); 

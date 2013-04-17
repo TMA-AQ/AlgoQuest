@@ -1,5 +1,0 @@
-SELECT , . People Name ROW_NUMBER
-ORDER BY . People Name
-FROM , Cities People
-WHERE K_JEQ . People City
-ORDER . Cities CityName BY . People Name

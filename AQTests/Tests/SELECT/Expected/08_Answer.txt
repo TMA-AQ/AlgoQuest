@@ -1,2 +1,0 @@
-; People.City; Count
-; NewYork; 7

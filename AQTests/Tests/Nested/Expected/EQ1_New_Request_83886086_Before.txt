@@ -1,3 +1,0 @@
-SELECT COUNT . table_1 champ_2
-FROM , table_1 table_6
-WHERE AND AND K_JEQ . table_1 val_1 . table_6 val_1 > . table_1 champ_2 K_VALUE 'abcabcabc' < . table_1 champ_2 K_VALUE 'abcabcghi'

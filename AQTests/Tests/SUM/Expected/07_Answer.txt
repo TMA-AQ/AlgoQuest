@@ -1,3 +1,0 @@
-; People.City; SUM People.Age; Count
-; Madrid; 290; 1
-; NewYork; 155; 1

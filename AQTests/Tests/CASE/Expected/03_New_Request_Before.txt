@@ -1,3 +1,0 @@
-SELECT , . People Age CASE . People Age WHEN K_VALUE 20 . People Name WHEN K_VALUE 21 . People Name WHEN K_VALUE 32 . People Name ELSE . People City
-FROM , Cities People
-WHERE K_JEQ . People City . Cities CityName 

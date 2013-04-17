@@ -1,3 +1,0 @@
-SELECT COUNT K_STAR
-FROM , Albums Tracks
-WHERE AND K_JEQ . Tracks SerialNr . Albums Serialnr LIKE . TRACKS Song K_VALUE '%'

@@ -1,4 +1,0 @@
-; table_1.champ_2; MAX table_1.champ_2; table_1.val_1; MAX table_1.val_1; table_1.val_2; MAX table_1.val_2; table_1.val_3; MAX table_1.val_3; table_1.val_4; MAX table_1.val_4; Count
-; abcpqrpqr; yzpqrghi; 57; 91; 0.62; 1684.00; 8106.00; 80644.50; 77640; 77640; 295
-; yzmnodef; yzpqrghi; 91; 91; 1684.00; 1684.00; 0.00; 80644.50; 5; 77640; 264
-; yzpqrghi; yzpqrghi; 91; 91; 3.33; 1684.00; 80644.50; 80644.50; 54; 77640; 264

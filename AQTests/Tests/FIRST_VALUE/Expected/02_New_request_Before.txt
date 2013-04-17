@@ -1,4 +1,0 @@
-SELECT , , , . People City . People Age . People Name FIRST_VALUE . People Name
-ORDER BY , . People Age . People Name PARTITION BY , . People City . People Age
-FROM , People Cities
-WHERE K_JEQ . People City . Cities CityName 

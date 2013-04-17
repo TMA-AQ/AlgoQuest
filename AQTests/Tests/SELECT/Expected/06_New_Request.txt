@@ -1,3 +1,0 @@
-SELECT . People City
-FROM People
-WHERE K_JNO . People NAME

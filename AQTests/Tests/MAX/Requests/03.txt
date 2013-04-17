@@ -1,3 +1,0 @@
-MSALGOQUEST
-select MAX(table_4.id)
-from table_4;

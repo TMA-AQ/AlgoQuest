@@ -1,3 +1,0 @@
-118218
-SELECT Count(*)
-FROM   bil_t_vrus3calldetail b;

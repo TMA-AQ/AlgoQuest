@@ -1,2 +1,0 @@
-FROM , Albums Tracks
-WHERE AND K_JEQ . Tracks SerialNr . Albums Serialnr IN . TRACKS Song , K_VALUE 'مختلفة،سباقة،قرىقضاءالناص' K_VALUE 'مختلفة،سباققضاءالناص'

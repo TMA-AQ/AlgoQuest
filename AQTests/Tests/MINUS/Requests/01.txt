@@ -1,4 +1,0 @@
-﻿MSALGOQUEST
-select table_1.val_1, (table_1.val_1 - 11) as diff
-from table_1, table_2
-where table_2.val_1=table_1.val_1 AND table_1.id IN (1, 2, 3);

@@ -1,3 +1,0 @@
-; People.City; Count
-; Madrid; 10
-; NewYork; 7

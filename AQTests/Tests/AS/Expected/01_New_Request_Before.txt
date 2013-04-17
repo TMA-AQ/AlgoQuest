@@ -1,3 +1,0 @@
-SELECT , , , , AS . table_1 champ_2 field2 AS . table_1 val_1 value1 AS SUM . table_1 val_1 sum_value1 AS . table_1 val_2 V2 AS SUM . table_1 val_2 SUMV2
-FROM , table_1 table_2
-WHERE AND K_JEQ . table_2 val_1 . table_1 val_1 IN . table_1 id , K_VALUE 1 , K_VALUE 2 K_VALUE 3

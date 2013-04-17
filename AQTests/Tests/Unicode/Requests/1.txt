@@ -1,2 +1,0 @@
-﻿RootDir1
-SELECT COUNT(*) FROM Albums, Tracks WHERE Albums.Serialnr = Tracks.SerialNr AND Song LIKE '%لف%';

@@ -1,5 +1,0 @@
-; table_1.val_1; ; Count
-; 0; string value; 37559
-; 1; string value; 3792
-; 2; string value; 3855
-; 3; string value; 4148

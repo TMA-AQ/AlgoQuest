@@ -1,3 +1,0 @@
-MSALGOQUEST
-select MIN(table_4.val_3)
-from table_4;

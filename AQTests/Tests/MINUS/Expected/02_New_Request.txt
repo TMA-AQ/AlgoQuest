@@ -1,2 +1,0 @@
-FROM , COTATION action
-WHERE K_JEQ . action isin . COTATION isin 

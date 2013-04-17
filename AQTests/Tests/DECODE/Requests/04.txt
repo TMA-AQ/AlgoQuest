@@ -1,7 +1,0 @@
-﻿RootDir5
-SELECT decode(People.Name, 'Alice', 'Some Alice',
-                    'Steve', 'Some Steve',
-                    'Bran', 'Some Bran',
-                    'Other guy')
-from People, Cities
-where People.City=Cities.CityName;

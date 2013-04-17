@@ -1,4 +1,0 @@
-action
-select COTATION.dte
-from COTATION, ACTION
-where COTATION.isin=ACTION.isin;

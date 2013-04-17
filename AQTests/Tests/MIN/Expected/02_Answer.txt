@@ -1,2 +1,0 @@
-; MIN table_1.val_1
-; 57

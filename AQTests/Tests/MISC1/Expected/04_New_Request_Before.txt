@@ -1,4 +1,0 @@
-SELECT , . table_1 val_1 * . table_1 val_2 - K_VALUE 1 . table_1 val_1
-FROM , table_1 table_2
-WHERE AND AND K_JEQ . table_2 val_1 . table_1 val_1 IN . table_1 val_1 , K_VALUE 1 , K_VALUE 2 K_VALUE 3 IN . table_1 val_2 , K_VALUE 1 , K_VALUE 2 K_VALUE 3
-GROUP BY . table_1 val_1

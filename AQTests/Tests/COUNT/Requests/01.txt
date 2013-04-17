@@ -1,4 +1,0 @@
-action
-select count(COTATION.isin)
-from COTATION, ACTION
-where COTATION.isin=ACTION.isin;

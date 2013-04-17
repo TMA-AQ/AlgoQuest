@@ -1,3 +1,0 @@
-SELECT . table_1 champ_2
-FROM , table_1 table_2
-WHERE AND K_JEQ . table_2 val_1 . table_1 val_1 IN . table_1 champ_2 , K_VALUE 'abcyzstu' , K_VALUE 'defyzstu' , K_VALUE 'ghiyzstu' , K_VALUE 'jklyzstu' , K_VALUE 'mnoyzstu' , K_VALUE 'pqryzstu' , K_VALUE 'stuyzstu' , K_VALUE 'vwxyzstu' , K_VALUE 'yzabcstu' , K_VALUE 'yzdefstu' , K_VALUE 'yzghistu' , K_VALUE 'yzjklstu' , K_VALUE 'yzmnostu' , K_VALUE 'yzpqrstu' , K_VALUE 'yzstustu' K_VALUE 'yzvwxstu'

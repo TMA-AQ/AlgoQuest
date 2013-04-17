@@ -1,4 +1,0 @@
-MSALGOQUEST
-select table_1.champ_2, table_1.val_1, SUM(table_1.val_1), table_1.val_2, SUM(table_1.val_2), table_1.val_3, SUM(table_1.val_3), table_1.val_4, SUM(table_1.val_4)
-from table_1, table_2
-where table_2.val_1=table_1.val_1 AND table_1.id IN (1, 2, 3);

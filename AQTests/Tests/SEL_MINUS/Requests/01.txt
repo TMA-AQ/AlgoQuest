@@ -1,8 +1,0 @@
-﻿MSALGOQUEST
-select table_1.id, table_1.champ_1, table_1.champ_2, table_1.val_1, table_1.val_4
-from table_1, table_6
-where table_1.champ_1=table_6.champ_1 AND table_1.id IN (1, 2, 3)
-MINUS
-select table_1.id, table_1.champ_1, table_1.champ_2, table_1.val_1, table_1.val_4
-from table_1, table_6
-where table_1.champ_1=table_6.champ_1 AND table_1.id IN (4, 5, 6);

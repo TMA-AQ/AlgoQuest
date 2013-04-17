@@ -1,7 +1,0 @@
-; table_1.champ_1; SUM table_1.val_1 PARTITION BY table_1.champ_1; Count
-; abcabcabc; 929; 7
-; abcabcdef; 163; 3
-; abcabcghi; 2756; 8
-; abcabcjkl; 3390; 12
-; abcabcmno; 1944; 12
-; abcabcpqr; 1756; 11

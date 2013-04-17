@@ -1,3 +1,0 @@
-SELECT , . a champ_2 . b val_1
-FROM , AS table_1 a AS table_2 b
-WHERE AND K_JEQ . b val_1 . a val_1 IN . a id , K_VALUE 1 , K_VALUE 2 K_VALUE 3

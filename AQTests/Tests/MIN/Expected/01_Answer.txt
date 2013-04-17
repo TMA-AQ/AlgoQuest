@@ -1,4 +1,0 @@
-; table_1.champ_2; MIN table_1.champ_2; table_1.val_1; MIN table_1.val_1; table_1.val_2; MIN table_1.val_2; table_1.val_3; MIN table_1.val_3; table_1.val_4; MIN table_1.val_4; Count
-; abcpqrpqr; abcpqrpqr; 57; 57; 0.62; 0.62; 8106.00; 0.00; 77640; 5; 295
-; yzmnodef; abcpqrpqr; 91; 57; 1684.00; 0.62; 0.00; 0.00; 5; 5; 264
-; yzpqrghi; abcpqrpqr; 91; 57; 3.33; 0.62; 80644.50; 0.00; 54; 5; 264

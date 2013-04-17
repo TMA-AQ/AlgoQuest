@@ -1,3 +1,0 @@
-﻿RootDir4
-select *
-from People;

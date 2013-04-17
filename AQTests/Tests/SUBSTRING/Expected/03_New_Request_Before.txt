@@ -1,3 +1,0 @@
-SELECT SUBSTRING , . table_1 champ_1 , K_VALUE 2 K_VALUE 2
-FROM , table_1 table_2
-WHERE K_JEQ . table_2 val_1 . table_1 val_1 

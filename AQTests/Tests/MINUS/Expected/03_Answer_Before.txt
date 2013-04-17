@@ -1,5 +1,0 @@
-; Num_table : 2   ; Num_table : 1     ; Count
-823 
-2 
- ; 1   ; 1  ; 295
- ; 0   ; 0  ; 528

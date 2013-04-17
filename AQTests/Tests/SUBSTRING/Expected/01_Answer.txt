@@ -1,4 +1,0 @@
-; SUBSTRING , table_1.champ_2 ,; Count
-; abc; 295
-; yzm; 264
-; yzp; 264

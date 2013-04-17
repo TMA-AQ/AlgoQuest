@@ -1,7 +1,0 @@
-; table_1.champ_2; Count
-40917 
-4 
-; abcabcdef; 9147
-; abcabcghi; 7180
-; abcabcjkl; 14507
-; abcabcmno; 10083

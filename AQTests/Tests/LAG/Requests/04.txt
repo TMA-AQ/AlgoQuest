@@ -1,7 +1,0 @@
-ACTION
-select   action.libelle, COTATION.isin, COTATION.dte, COTATION.clo,
-         lag(COTATION.clo, 1) over(partition by COTATION.isin order by COTATION.dte),
-		 lag(COTATION.clo, 2) over(partition by COTATION.isin order by COTATION.dte)
-from     COTATION, action
-where    COTATION.isin = action.isin
-and COTATION.isin = 'FR0000130007';

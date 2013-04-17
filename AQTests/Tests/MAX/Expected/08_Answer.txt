@@ -1,7 +1,0 @@
-; table_1.champ_1; MAX table_1.val_1 PARTITION BY table_1.champ_1; Count
-; abcabcabc; 445; 7
-; abcabcdef; 94; 3
-; abcabcghi; 825; 8
-; abcabcjkl; 951; 12
-; abcabcmno; 616; 12
-; abcabcpqr; 765; 11
