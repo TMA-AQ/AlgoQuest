@@ -21,7 +21,7 @@ namespace AlgoQuest.Configuration.Connection
             }
         }
 
-        [ConfigurationProperty("host", DefaultValue = "", IsKey = false, IsRequired = true)]
+        [ConfigurationProperty("host", DefaultValue = "", IsKey = false, IsRequired = false)]
         public string host
         {
             get
@@ -34,7 +34,7 @@ namespace AlgoQuest.Configuration.Connection
             }
         }
 
-        [ConfigurationProperty("port", DefaultValue = "", IsKey = false, IsRequired = true)]
+        [ConfigurationProperty("port", DefaultValue = "", IsKey = false, IsRequired = false)]
         public string port
         {
             get
