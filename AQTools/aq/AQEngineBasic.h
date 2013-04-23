@@ -1,7 +1,7 @@
 #ifndef __AQEngineBasic_H__
 #define __AQEngineBasic_H__
 
-#include <SQLParser\AQEngine_Intf.h>
+#include <aq\AQEngine_Intf.h>
 
 namespace aq
 {

@@ -1,18 +1,18 @@
-#include <SQLParser/AQEngine.h>
-#include <SQLParser/SQLParser.h>
-#include <SQLParser/SQLPrefix.h>
-#include <SQLParser/Column2Table.h>
-#include <SQLParser/QueryResolver.h>
-#include <SQLParser/JeqParser.h>
+#include <aq/AQEngine.h>
+#include <aq/SQLParser.h>
+#include <aq/SQLPrefix.h>
+#include <aq/Column2Table.h>
+#include <aq/QueryResolver.h>
+#include <aq/JeqParser.h>
 #include <aq/Exceptions.h>
 #include <aq/BaseDesc.h>
-#include <DBLoader/DatabaseLoader.h>
+#include <aq/db_loader/DatabaseLoader.h>
+#include <aq/Logger.h>
 #include <iostream>
 #include <list>
 #include <fstream>
 #include <string>
 #include <codecvt>
-#include <aq/Logger.h>
 #include <boost/thread.hpp>
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
@@ -45,12 +45,12 @@ boost::mutex parserMutex;
 class AQEngineSimulate : public AQEngine_Intf
 {
 public:
-	void call(TProjectSettings& settings, tnode * pNode, int mode, int selectLevel) {
+	void call(tnode * pNode, int mode, int selectLevel) {
 
 		//
 		// Get prefix form of query.
 		std::string str;
-		syntax_tree_to_prefix_form(pNode, str);
+		aq::syntax_tree_to_prefix_form(pNode, str);
 
 		aq::Logger::getInstance().log(AQ_INFO, "---\n");
 		aq::Logger::getInstance().log(AQ_INFO, "Get prefix form of query\n");
@@ -112,7 +112,7 @@ int processAQMatrix(const std::string& query, const std::string& aqMatrixFileNam
 
 	}
 	
-	VerbNode::Ptr spTree = QueryResolver::BuildVerbsTree(pNode, baseDesc, &settings );
+	VerbNode::Ptr spTree = VerbNode::BuildVerbsTree(pNode, baseDesc, &settings );
 	spTree->changeQuery();
 	QueryResolver::cleanQuery( pNode );
 
@@ -177,14 +177,14 @@ int transformQuery(const std::string& query, TProjectSettings& settings, Base& b
 
 	std::cout << *pNode << std::endl;
 
-	VerbNode::Ptr spTree = QueryResolver::BuildVerbsTree(pNode, baseDesc, &settings );
+	VerbNode::Ptr spTree = VerbNode::BuildVerbsTree(pNode, baseDesc, &settings );
 	spTree->changeQuery();
 	QueryResolver::cleanQuery( pNode );
 	std::cout << std::endl;
 	std::cout << *pNode << std::endl << std::endl;
 	
 	std::string str;
-	syntax_tree_to_prefix_form(pNode, str);
+	aq::syntax_tree_to_prefix_form(pNode, str);
 	ParseJeq( str );
 
 	std::cout << str << std::endl << std::endl;
@@ -347,7 +347,7 @@ int processQuery(const std::string& query, TProjectSettings& settings, Base& bas
 
 // -------------------------------------------------------------------------------------------------
 int processSQLQueries(std::list<std::string>::const_iterator itBegin, std::list<std::string>::const_iterator itEnd, 
-                      const TProjectSettings& settingsBase, Base& baseDesc, AQEngine_Intf * aq_engine,
+                      const TProjectSettings& settingsBase, Base& baseDesc, bool simulateAQEngine,
                       bool display, bool clean, const std::string queryIdent, bool force)
 {
 
@@ -359,10 +359,28 @@ int processSQLQueries(std::list<std::string>::const_iterator itBegin, std::list<
 		aq::Logger::getInstance().log(AQ_NOTICE, "'%s'\n", (*it).c_str());
 		boost::posix_time::ptime begin(boost::posix_time::microsec_clock::local_time());
 
+    //
+    // Settings
+		TProjectSettings settings(settingsBase);
+
+		//
+		// Load AQ engine
+		AQEngine_Intf * aq_engine;
+		if (simulateAQEngine)
+		{
+			aq::Logger::getInstance().log(AQ_INFO, "Do not use aq engine\n");
+			aq_engine = new AQEngineSimulate();
+		}
+		else
+		{
+			aq::Logger::getInstance().log(AQ_INFO, "Use aq engine: '%s'\n", settings.szEnginePath.c_str());
+			aq_engine = new AQEngineSystem(baseDesc, settings);
+		}
+    
 		//
 		// prepare and process query
 		std::string answer;
-		TProjectSettings settings(settingsBase);
+
 		if (!((prepareQuery(*it, settingsBase, baseDesc, settings, answer, queryIdent, force) == EXIT_SUCCESS) &&
 				  (processQuery(*it, settings, baseDesc, aq_engine, answer, display, clean) == EXIT_SUCCESS)))
 		{
@@ -549,20 +567,6 @@ int main(int argc, char**argv)
 		}
 
 		//
-		// Load AQ engine
-		AQEngine_Intf * aq_engine;
-		if (simulateAQEngine)
-		{
-			aq::Logger::getInstance().log(AQ_INFO, "Do not use aq engine\n");
-			aq_engine = new AQEngineSimulate();
-		}
-		else
-		{
-			aq::Logger::getInstance().log(AQ_INFO, "Use aq engine: '%s'\n", settings.szEnginePath.c_str());
-			aq_engine = new AQEngine(baseDesc, settings);
-		}
-
-		//
 		// keep backward compatibility
 		if (oldArgs.size() == 2)
 		{
@@ -603,6 +607,7 @@ int main(int argc, char**argv)
 			//
 			// process
 			std::string answer;
+      AQEngine_Intf * aq_engine = new AQEngineSystem(baseDesc, settings);
 			processQuery(query, settings, baseDesc, aq_engine, answer, false, false);
 
 		}
@@ -670,7 +675,7 @@ int main(int argc, char**argv)
 			{
 				// std::advance(itEnd, queries.size() / worker); // fixme: doesn't work under visual !!!
 				for (unsigned int i = 0; (i < queries.size() / worker) && (itEnd != queries.end()); i++) ++itEnd;
-				grp.create_thread(boost::bind(processSQLQueries, itBegin, itEnd, settings, baseDesc, aq_engine, display, clean, queryIdent, force));
+				grp.create_thread(boost::bind(processSQLQueries, itBegin, itEnd, settings, baseDesc, simulateAQEngine, display, clean, queryIdent, force));
 				itBegin = itEnd;
 			}
 			grp.join_all();

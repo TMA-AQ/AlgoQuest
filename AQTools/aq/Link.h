@@ -3,20 +3,19 @@
 
 // i need this to force static link: all verb are registered statically at init
 // todo: find a best way to do this
-#include "SQLParser\ArithmeticVerbs.h"
-#include "SQLParser/AggregateVerbs.h"
-#include "SQLParser/ArithmeticVerbs.h"
-#include "SQLParser/AuxiliaryVerbs.h"
-#include "SQLParser/CaseVerb.h"
-#include "SQLParser/ComparisonVerbs.h"
-#include "SQLParser/ConversionVerbs.h"
-#include "SQLParser/DateVerbs.h"
-#include "SQLParser/JoinVerbs.h"
-#include "SQLParser/MainVerbs.h"
-#include "SQLParser/OverVerbs.h"
-#include "SQLParser/ScalarVerbs.h"
-#include "SQLParser/TableVerbs.h"
-#include "SQLParser/Verb.h"
+#include "aq/verbs/ArithmeticVerbs.h"
+#include "aq/verbs/AggregateVerbs.h"
+#include "aq/verbs/ArithmeticVerbs.h"
+#include "aq/verbs/AuxiliaryVerbs.h"
+#include "aq/verbs/CaseVerb.h"
+#include "aq/verbs/ComparisonVerbs.h"
+#include "aq/verbs/ConversionVerbs.h"
+#include "aq/verbs/DateVerbs.h"
+#include "aq/verbs/JoinVerbs.h"
+#include "aq/verbs/MainVerbs.h"
+#include "aq/verbs/OverVerbs.h"
+#include "aq/verbs/ScalarVerbs.h"
+#include "aq/verbs/Verb.h"
 
 void verb_register()
 {
