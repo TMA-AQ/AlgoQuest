@@ -254,7 +254,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>..\AQUtil;$(ProjectDir);C:\Boost\install\include\boost-1_50;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\AQUtil;$(ProjectDir);$(ProjectDir)\aq;C:\Boost\install\include\boost-1_50;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -284,105 +284,10 @@
       </Command>
     </CustomBuildStep>
     <PreBuildEvent>
-      <Command>.\Generate_Parser.bat SQLParser\sql92_grm_tab.c SQLParser\SQL92_Grm.y SQLParser\lex.yy.c SQLParser\SQL92_Tok.l</Command>
+      <Command>.\Generate_Parser.bat    aq\sql92_grm_tab.cpp    aq\SQL92_Grm.y    aq\lex.yy.cpp    aq\SQL92_Tok.l</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="DBLoader\DatabaseLoader.cpp" />
-    <ClCompile Include="DBLoader\Util.cpp" />
-    <ClCompile Include="SQLParser\AggregateVerbs.cpp" />
-    <ClCompile Include="SQLParser\AQEngine.cpp" />
-    <ClCompile Include="SQLParser\AQMatrix.cpp" />
-    <ClCompile Include="SQLParser\ArithmeticVerbs.cpp" />
-    <ClCompile Include="SQLParser\AuxiliaryVerbs.cpp" />
-    <ClCompile Include="SQLParser\CaseVerb.cpp" />
-    <ClCompile Include="SQLParser\Column.cpp" />
-    <ClCompile Include="SQLParser\Column2Table.cpp" />
-    <ClCompile Include="SQLParser\ColumnItem.cpp" />
-    <ClCompile Include="SQLParser\ColumnMapper.cpp" />
-    <ClCompile Include="SQLParser\ComparisonVerbs.cpp" />
-    <ClCompile Include="SQLParser\ConversionVerbs.cpp" />
-    <ClCompile Include="SQLParser\DateVerbs.cpp" />
-    <ClCompile Include="SQLParser\DumpVisitor.cpp" />
-    <ClCompile Include="SQLParser\ExprTransform.cpp" />
-    <ClCompile Include="SQLParser\ID2Str.cpp" />
-    <ClCompile Include="SQLParser\JeqParser.cpp" />
-    <ClCompile Include="SQLParser\JoinVerbs.cpp" />
-    <ClCompile Include="SQLParser\lex.yy.c">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsC</CompileAs>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsC</CompileAs>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="SQLParser\LIKE_PatternMatching.cpp" />
-    <ClCompile Include="SQLParser\MainVerbs.cpp" />
-    <ClCompile Include="SQLParser\Optimizations.cpp" />
-    <ClCompile Include="SQLParser\OverVerbs.cpp" />
-    <ClCompile Include="SQLParser\QueryResolver.cpp" />
-    <ClCompile Include="SQLParser\RowProcessing.cpp" />
-    <ClCompile Include="SQLParser\RowVerbProcess.cpp" />
-    <ClCompile Include="SQLParser\ScalarVerbs.cpp" />
-    <ClCompile Include="SQLParser\Settings.cpp" />
-    <ClCompile Include="SQLParser\sql92_grm_tab.c">
-      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsCpp</CompileAs>
-      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsCpp</CompileAs>
-      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsCpp</CompileAs>
-      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsCpp</CompileAs>
-    </ClCompile>
-    <ClCompile Include="SQLParser\SQLParser.cpp" />
-    <ClCompile Include="SQLParser\SQLPrefix.cpp" />
-    <ClCompile Include="SQLParser\Table.cpp" />
-    <ClCompile Include="SQLParser\TreeUtilities.cpp" />
-    <ClCompile Include="SQLParser\Verb.cpp" />
-    <ClCompile Include="SQLParser\VerbResult.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <CustomBuild Include="SQLParser\SQL92_Grm.y">
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Calling BISON on %(FullPath)</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\BisonFlex\bison.bat -o ../SQLParser/sql92_grm_tab.c ../SQLParser/SQL92_Grm.y
-</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">SQLParser/sql92_grm_tab.c;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Calling BISON on %(FullPath)</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\BisonFlex\bison.bat -o ../SQLParser/sql92_grm_tab.c ../SQLParser/SQL92_Grm.y
-</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">SQLParser/sql92_grm_tab.c;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Calling BISON on %(FullPath)</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\BisonFlex\bison.bat -o ../SQLParser/sql92_grm_tab.c ../SQLParser/SQL92_Grm.y
-</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">SQLParser/sql92_grm_tab.c;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Calling BISON on %(FullPath)</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\BisonFlex\bison.bat -o ../SQLParser/sql92_grm_tab.c ../SQLParser/SQL92_Grm.y
-</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">SQLParser/sql92_grm_tab.c;%(Outputs)</Outputs>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </CustomBuild>
-    <CustomBuild Include="SQLParser\SQL92_Tok.l">
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Calling FLEX on %(FullPath)</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\BisonFlex\flex.exe -oSQLParser/lex.yy.c SQLParser/SQL92_Tok.l
-</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">SQLParser/lex.yy.c;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Calling FLEX on %(FullPath)</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\BisonFlex\flex.exe -oSQLParser/lex.yy.c SQLParser/SQL92_Tok.l
-</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">SQLParser/lex.yy.c;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Calling FLEX on %(FullPath)</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\BisonFlex\flex.exe -oSQLParser/lex.yy.c SQLParser/SQL92_Tok.l
-</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">SQLParser/lex.yy.c;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Calling FLEX on %(FullPath)</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\BisonFlex\flex.exe -oSQLParser/lex.yy.c SQLParser/SQL92_Tok.l
-</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">SQLParser/lex.yy.c;%(Outputs)</Outputs>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </CustomBuild>
     <CustomBuild Include="SQLParser\sql92_grm.output">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -391,51 +296,12 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DBLoader\DatabaseLoader.h" />
-    <ClInclude Include="DBLoader\Util.h" />
-    <ClInclude Include="SQLParser\AggregateVerbs.h" />
-    <ClInclude Include="SQLParser\AQEngine.h" />
-    <ClInclude Include="SQLParser\AQEngine_Intf.h" />
-    <ClInclude Include="SQLParser\AQMatrix.h" />
-    <ClInclude Include="SQLParser\ArithmeticVerbs.h" />
-    <ClInclude Include="SQLParser\AuxiliaryVerbs.h" />
-    <ClInclude Include="SQLParser\CaseVerb.h" />
-    <ClInclude Include="SQLParser\Column.h" />
-    <ClInclude Include="SQLParser\Column2Table.h" />
-    <ClInclude Include="SQLParser\ColumnItem.h" />
-    <ClInclude Include="SQLParser\ColumnMapper.h" />
-    <ClInclude Include="SQLParser\ComparisonVerbs.h" />
-    <ClInclude Include="SQLParser\ConversionVerbs.h" />
-    <ClInclude Include="SQLParser\DateVerbs.h" />
-    <ClInclude Include="SQLParser\DumpVisitor.h" />
-    <ClInclude Include="SQLParser\ExprTransform.h" />
-    <ClInclude Include="SQLParser\ID2Str.h" />
-    <ClInclude Include="SQLParser\JeqParser.h" />
-    <ClInclude Include="SQLParser\JoinVerbs.h" />
-    <ClInclude Include="SQLParser\LIKE_PatternMatching.h" />
-    <ClInclude Include="SQLParser\MainVerbs.h" />
-    <ClInclude Include="SQLParser\Object.h" />
-    <ClInclude Include="SQLParser\Optimizations.h" />
-    <ClInclude Include="SQLParser\OverVerbs.h" />
-    <ClInclude Include="SQLParser\QueryAnalyzer.h" />
-    <ClInclude Include="SQLParser\QueryResolver.h" />
-    <ClInclude Include="SQLParser\RowAggregator.h" />
-    <ClInclude Include="SQLParser\RowProcesses.h" />
-    <ClInclude Include="SQLParser\RowProcessing.h" />
-    <ClInclude Include="SQLParser\RowProcess_Intf.h" />
-    <ClInclude Include="SQLParser\RowVerbProcess.h" />
-    <ClInclude Include="SQLParser\ScalarVerbs.h" />
-    <ClInclude Include="SQLParser\Settings.h" />
-    <ClInclude Include="SQLParser\sql92_grm_tab.h" />
-    <ClInclude Include="SQLParser\SQLParser.h" />
-    <ClInclude Include="SQLParser\SQLPrefix.h" />
-    <ClInclude Include="SQLParser\Table.h" />
-    <ClInclude Include="SQLParser\TreeUtilities.h" />
-    <ClInclude Include="SQLParser\Verb.h" />
-    <ClInclude Include="SQLParser\VerbResult.h" />
-    <ClInclude Include="SQLParser\VerbVisitor.h" />
-  </ItemGroup>
-  <ItemGroup>
+    <None Include="aq\SQL92_Grm.y">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="aq\SQL92_Tok.l">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </None>
     <None Include="Generate_Parser.bat" />
   </ItemGroup>
   <ItemGroup>
@@ -445,6 +311,92 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="AQQueryResolver.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="aq\AQEngine.h" />
+    <ClInclude Include="aq\AQEngine_Intf.h" />
+    <ClInclude Include="aq\AQMatrix.h" />
+    <ClInclude Include="aq\Column.h" />
+    <ClInclude Include="aq\Column2Table.h" />
+    <ClInclude Include="aq\ColumnItem.h" />
+    <ClInclude Include="aq\ColumnMapper.h" />
+    <ClInclude Include="aq\db_loader\DatabaseLoader.h" />
+    <ClInclude Include="aq\db_loader\Util.h" />
+    <ClInclude Include="aq\DumpVisitor.h" />
+    <ClInclude Include="aq\ExprTransform.h" />
+    <ClInclude Include="aq\ID2Str.h" />
+    <ClInclude Include="aq\JeqParser.h" />
+    <ClInclude Include="aq\LIKE_PatternMatching.h" />
+    <ClInclude Include="aq\Object.h" />
+    <ClInclude Include="aq\Optimizations.h" />
+    <ClInclude Include="aq\QueryAnalyzer.h" />
+    <ClInclude Include="aq\QueryResolver.h" />
+    <ClInclude Include="aq\RowAggregator.h" />
+    <ClInclude Include="aq\RowProcesses.h" />
+    <ClInclude Include="aq\RowProcessing.h" />
+    <ClInclude Include="aq\RowProcess_Intf.h" />
+    <ClInclude Include="aq\RowVerbProcess.h" />
+    <ClInclude Include="aq\Settings.h" />
+    <ClInclude Include="aq\sql92_grm_tab.h" />
+    <ClInclude Include="aq\SQLParser.h" />
+    <ClInclude Include="aq\SQLPrefix.h" />
+    <ClInclude Include="aq\Table.h" />
+    <ClInclude Include="aq\TreeUtilities.h" />
+    <ClInclude Include="aq\Verb.h" />
+    <ClInclude Include="aq\VerbResult.h" />
+    <ClInclude Include="aq\verbs\AggregateVerbs.h" />
+    <ClInclude Include="aq\verbs\ArithmeticVerbs.h" />
+    <ClInclude Include="aq\verbs\AuxiliaryVerbs.h" />
+    <ClInclude Include="aq\verbs\CaseVerb.h" />
+    <ClInclude Include="aq\verbs\ComparisonVerbs.h" />
+    <ClInclude Include="aq\verbs\ConversionVerbs.h" />
+    <ClInclude Include="aq\verbs\DateVerbs.h" />
+    <ClInclude Include="aq\verbs\JoinVerbs.h" />
+    <ClInclude Include="aq\verbs\MainVerbs.h" />
+    <ClInclude Include="aq\verbs\OverVerbs.h" />
+    <ClInclude Include="aq\verbs\ScalarVerbs.h" />
+    <ClInclude Include="aq\VerbVisitor.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="aq\AQEngine.cpp" />
+    <ClCompile Include="aq\AQMatrix.cpp" />
+    <ClCompile Include="aq\Column.cpp" />
+    <ClCompile Include="aq\Column2Table.cpp" />
+    <ClCompile Include="aq\ColumnItem.cpp" />
+    <ClCompile Include="aq\ColumnMapper.cpp" />
+    <ClCompile Include="aq\db_loader\DatabaseLoader.cpp" />
+    <ClCompile Include="aq\db_loader\Util.cpp" />
+    <ClCompile Include="aq\DumpVisitor.cpp" />
+    <ClCompile Include="aq\ExprTransform.cpp" />
+    <ClCompile Include="aq\ID2Str.cpp" />
+    <ClCompile Include="aq\JeqParser.cpp" />
+    <ClCompile Include="aq\lex.yy.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="aq\LIKE_PatternMatching.cpp" />
+    <ClCompile Include="aq\Optimizations.cpp" />
+    <ClCompile Include="aq\QueryResolver.cpp" />
+    <ClCompile Include="aq\RowProcessing.cpp" />
+    <ClCompile Include="aq\RowVerbProcess.cpp" />
+    <ClCompile Include="aq\Settings.cpp" />
+    <ClCompile Include="aq\sql92_grm_tab.cpp" />
+    <ClCompile Include="aq\SQLParser.cpp" />
+    <ClCompile Include="aq\SQLPrefix.cpp" />
+    <ClCompile Include="aq\Table.cpp" />
+    <ClCompile Include="aq\TreeUtilities.cpp" />
+    <ClCompile Include="aq\Verb.cpp" />
+    <ClCompile Include="aq\VerbResult.cpp" />
+    <ClCompile Include="aq\verbs\AggregateVerbs.cpp" />
+    <ClCompile Include="aq\verbs\ArithmeticVerbs.cpp" />
+    <ClCompile Include="aq\verbs\AuxiliaryVerbs.cpp" />
+    <ClCompile Include="aq\verbs\CaseVerb.cpp" />
+    <ClCompile Include="aq\verbs\ComparisonVerbs.cpp" />
+    <ClCompile Include="aq\verbs\ConversionVerbs.cpp" />
+    <ClCompile Include="aq\verbs\DateVerbs.cpp" />
+    <ClCompile Include="aq\verbs\JoinVerbs.cpp" />
+    <ClCompile Include="aq\verbs\MainVerbs.cpp" />
+    <ClCompile Include="aq\verbs\OverVerbs.cpp" />
+    <ClCompile Include="aq\verbs\ScalarVerbs.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
