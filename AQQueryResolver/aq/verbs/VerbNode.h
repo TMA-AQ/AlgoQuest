@@ -14,12 +14,20 @@
 class VerbVisitor;
 
 //--------------------------------------------------------------------------
-class VerbNode: public Object
+class VerbNode: public Verb
 {
 	OBJECT_DECLARE( VerbNode );
 public:
 	VerbNode();
-	bool build( tnode* pStart, tnode* pNode, tnode* pStartOriginal, int context, Base& BaseDesc, TProjectSettings& settings );
+	
+  /// Verb interface default implementation
+  virtual bool preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal ) { return false; }
+  virtual bool changeQuery( tnode* pStart, tnode* pNode, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext ) { return false; }
+  virtual void changeResult( Table::Ptr table, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext ) {}
+  virtual void addResult ( aq::RowProcess_Intf::row_t& row, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext ) {}
+
+  virtual VerbNode* clone() const = 0;
+
 	void setLeftChild( VerbNode::Ptr child );
 	void setRightChild( VerbNode::Ptr child );
 	void setBrother( VerbNode::Ptr brother );
@@ -29,14 +37,18 @@ public:
 	void changeResult( Table::Ptr table );
   void addResult(aq::RowProcess_Intf::row_t& row);
 	
-	void accept(VerbVisitor*);
-  void acceptLeftToRight(VerbVisitor* visitor);
+	void acceptTopLeftRight(VerbVisitor*);
+  void acceptLeftTopRight(VerbVisitor* visitor);
 
-	Verb::Ptr getVerbObject();
+	// Verb::Ptr getVerbObject();
 	VerbNode::Ptr getLeftChild();
 	VerbNode::Ptr getRightChild();
 	VerbNode::Ptr getBrother();
   
+  bool isToSolved() const { return this->toSolve; }
+
+	static VerbNode::Ptr build( tnode* pStart, tnode* pNode, tnode* pStartOriginal, int context, Base& BaseDesc, TProjectSettings& settings );
+
 	/// build a subtree for each major category
 	/// order is given by \a categories_order (the last one will be executed first)
 	/// engine actually executes GROUP BY before select and after where, but
@@ -52,12 +64,14 @@ public:
   static void dump(std::ostream& os, VerbNode::Ptr tree, std::string ident = "");
 
 private:
-	Verb::Ptr VerbObject;
+	// Verb::Ptr VerbObject;
 	tnode* pStart; //top node in the query tree
 	tnode* pNode; //tnode to which this VerbNode corresponds
 	std::vector<VerbNode*> Parents;
 	VerbNode::Ptr Left, Right, Brother;
+  bool toSolve;
 };
 
+#include "VerbFactory.h"
 
 #endif

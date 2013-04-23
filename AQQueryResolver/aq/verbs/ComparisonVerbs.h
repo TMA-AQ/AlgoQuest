@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Verb.h"
+#include "VerbNode.h"
 #include <aq/DBTypes.h>
 
 //------------------------------------------------------------------------------
-class ComparisonVerb: public Verb
+class ComparisonVerb: public VerbNode
 {
 	VERB_DECLARE( ComparisonVerb );
 public:
@@ -202,7 +202,7 @@ public:
 };
 
 //------------------------------------------------------------------------------
-class IsVerb: public Verb
+class IsVerb: public VerbNode
 {
 	VERB_DECLARE( IsVerb );
 public:

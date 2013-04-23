@@ -290,9 +290,11 @@
   <ItemGroup>
     <None Include="aq\parser\SQL92_Grm.y">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
     <None Include="aq\parser\SQL92_Tok.l">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
     <None Include="Generate_Parser.bat" />
   </ItemGroup>
@@ -367,6 +369,7 @@
     <ClCompile Include="aq\parser\JeqParser.cpp" />
     <ClCompile Include="aq\parser\lex.yy.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="aq\parser\sql92_grm_tab.cpp" />
     <ClCompile Include="aq\parser\SQLParser.cpp" />

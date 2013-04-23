@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Verb.h"
+#include "VerbNode.h"
 #include <aq/DBTypes.h>
 
 //------------------------------------------------------------------------------
-class ScalarVerb: public Verb
+class ScalarVerb: public VerbNode
 {
 	VERB_DECLARE( ScalarVerb );
 public:

@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Verb.h"
+#include "VerbNode.h"
 #include <aq/RowProcess_Intf.h>
 #include <list>
 
 //------------------------------------------------------------------------------
-class SelectVerb: public Verb
+class SelectVerb: public VerbNode
 {
 	VERB_DECLARE( SelectVerb );
 public:
@@ -30,7 +30,7 @@ private:
 };
 
 //------------------------------------------------------------------------------
-class WhereVerb: public Verb
+class WhereVerb: public VerbNode
 {
 	VERB_DECLARE( WhereVerb );
 public:
@@ -44,7 +44,7 @@ public:
 };
 
 //------------------------------------------------------------------------------
-class OrderVerb: public Verb
+class OrderVerb: public VerbNode
 {
 	VERB_DECLARE( OrderVerb );
 public:
@@ -57,7 +57,7 @@ public:
 };
 
 //------------------------------------------------------------------------------
-class ByVerb: public Verb
+class ByVerb: public VerbNode
 {
 	VERB_DECLARE( ByVerb );
 public:
@@ -70,7 +70,7 @@ public:
 };
 
 //------------------------------------------------------------------------------
-class FromVerb: public Verb
+class FromVerb: public VerbNode
 {
 	VERB_DECLARE( FromVerb );
 public:
@@ -90,7 +90,7 @@ private:
 };
 
 //------------------------------------------------------------------------------
-class GroupVerb: public Verb
+class GroupVerb: public VerbNode
 {
 	VERB_DECLARE( GroupVerb );
 public:
@@ -108,7 +108,7 @@ private:
 };
 
 //------------------------------------------------------------------------------
-class HavingVerb: public Verb
+class HavingVerb: public VerbNode
 {
 	VERB_DECLARE( HavingVerb );
 public:

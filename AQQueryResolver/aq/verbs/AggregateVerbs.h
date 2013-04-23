@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Verb.h"
+#include "VerbNode.h"
 
 //------------------------------------------------------------------------------
-class AggregateVerb: public Verb
+class AggregateVerb: public VerbNode
 {
 	VERB_DECLARE( AggregateVerb );
 public:
@@ -109,7 +109,7 @@ protected:
 };
 
 //------------------------------------------------------------------------------
-class FirstValueVerb: public Verb
+class FirstValueVerb: public VerbNode
 {
 	VERB_DECLARE( FirstValueVerb );
 public:
@@ -126,7 +126,7 @@ public:
 //change
 //Obs: enforcing this assumption in the future would allow for some optimizations
 //and useful code refactoring
-class LagVerb: public Verb
+class LagVerb: public VerbNode
 {
 	VERB_DECLARE( LagVerb );
 public:
@@ -142,7 +142,7 @@ public:
 };
 
 //------------------------------------------------------------------------------
-class RowNumberVerb: public Verb
+class RowNumberVerb: public VerbNode
 {
 	VERB_DECLARE( RowNumberVerb );
 public:

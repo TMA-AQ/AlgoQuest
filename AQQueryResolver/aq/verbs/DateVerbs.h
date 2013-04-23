@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Verb.h"
+#include "VerbNode.h"
 
 //------------------------------------------------------------------------------
-class CurrentDateVerb: public Verb
+class CurrentDateVerb: public VerbNode
 {
 	VERB_DECLARE( CurrentDateVerb );
 public:

@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Verb.h"
+#include "VerbNode.h"
 #include <aq/DBTypes.h>
 
 //------------------------------------------------------------------------------
-class BinaryVerb: public Verb
+class BinaryVerb: public VerbNode
 {
 	VERB_DECLARE( BinaryVerb );
 public:

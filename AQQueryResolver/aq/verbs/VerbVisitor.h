@@ -19,6 +19,7 @@ public:
 
 	// Default Verbs
 	virtual void visit(Verb*) = 0;
+	virtual void visit(VerbNode*) = 0;
 
 	// Aggregate Verbs
 	virtual void visit(AggregateVerb*) = 0;

@@ -8,6 +8,7 @@ class DumpVisitor : public VerbVisitor
 public:
 	// Default Verbs
 	virtual void visit(Verb*);
+	virtual void visit(VerbNode*);
 
 	// Aggregate Verbs
 	virtual void visit(AggregateVerb*);

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Verb.h"
+#include "VerbNode.h"
 
 //------------------------------------------------------------------------------
-class CaseVerb: public Verb
+class CaseVerb: public VerbNode
 {
 	VERB_DECLARE( CaseVerb );
 public:
@@ -13,7 +13,7 @@ public:
 };
 
 //------------------------------------------------------------------------------
-class WhenVerb: public Verb
+class WhenVerb: public VerbNode
 {
 	VERB_DECLARE( WhenVerb );
 public:
@@ -23,7 +23,7 @@ public:
 };
 
 //------------------------------------------------------------------------------
-class ElseVerb: public Verb
+class ElseVerb: public VerbNode
 {
 	VERB_DECLARE( ElseVerb );
 public:

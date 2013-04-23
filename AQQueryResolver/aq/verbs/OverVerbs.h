@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Verb.h"
+#include "VerbNode.h"
 /*
 //------------------------------------------------------------------------------
 class OverVerb: public Verb
@@ -14,7 +14,7 @@ public:
 */
 
 //------------------------------------------------------------------------------
-class PartitionVerb: public Verb
+class PartitionVerb: public VerbNode
 {
 	VERB_DECLARE( PartitionVerb );
 public:
@@ -24,7 +24,7 @@ public:
 };
 
 //------------------------------------------------------------------------------
-class FrameVerb: public Verb
+class FrameVerb: public VerbNode
 {
 	VERB_DECLARE( FrameVerb );
 public:

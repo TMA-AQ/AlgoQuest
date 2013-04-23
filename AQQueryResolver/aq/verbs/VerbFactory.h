@@ -1,14 +1,14 @@
 #ifndef __VERB_FACTORY_H__
 #define __VERB_FACTORY_H__
 
-#include "Verb.h"
+#include "VerbNode.h"
 
 //--------------------------------------------------------------------------
 class VerbFactory
 {
 public:
-	void addVerb( Verb::Ptr verb );
-	Verb::Ptr getVerb( int verbType ) const;
+	void addVerb( VerbNode::Ptr verb );
+	VerbNode::Ptr getVerb( int verbType ) const;
 	static VerbFactory& GetInstance();
 private:
 	//disable creation
@@ -16,7 +16,7 @@ private:
 	VerbFactory(const VerbFactory& source){};
 	VerbFactory& operator=( const VerbFactory& source ){ return *this; }
 
-	std::vector<Verb::Ptr> Verbs;
+	std::vector<VerbNode::Ptr> Verbs;
 };
 
 //------------------------------------------------------------------------------
@@ -35,7 +35,7 @@ private:
 	static FactoryRegister##class_name FactoryRegisterObj##class_name;\
 	public:\
 	class_name();\
-	virtual Verb* clone() const { return new class_name(*this); }
+	virtual VerbNode* clone() const { return new class_name(*this); }
 
 //------------------------------------------------------------------------------
 #define VERB_IMPLEMENT( class_name )\

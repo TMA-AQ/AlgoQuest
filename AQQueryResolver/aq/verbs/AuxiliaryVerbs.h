@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Verb.h"
+#include "VerbNode.h"
 
 //------------------------------------------------------------------------------
-class ColumnVerb: public Verb
+class ColumnVerb: public VerbNode
 {
 	VERB_DECLARE( ColumnVerb );
 public:
@@ -38,7 +38,7 @@ private:
 };
 
 //------------------------------------------------------------------------------
-class CommaVerb: public Verb
+class CommaVerb: public VerbNode
 {
 	VERB_DECLARE( CommaVerb );
 public:
@@ -51,7 +51,7 @@ public:
 };
 
 //------------------------------------------------------------------------------
-class AndVerb: public Verb
+class AndVerb: public VerbNode
 {
 	VERB_DECLARE( AndVerb );
 public:
@@ -64,7 +64,7 @@ public:
 };
 
 //------------------------------------------------------------------------------
-class InVerb: public Verb
+class InVerb: public VerbNode
 {
 	VERB_DECLARE( InVerb );
 public:
@@ -78,7 +78,7 @@ public:
 };
 
 //------------------------------------------------------------------------------
-class IntValueVerb: public Verb
+class IntValueVerb: public VerbNode
 {
 	VERB_DECLARE( IntValueVerb );
 public:
@@ -87,7 +87,7 @@ public:
 };
 
 //------------------------------------------------------------------------------
-class DoubleValueVerb: public Verb
+class DoubleValueVerb: public VerbNode
 {
 	VERB_DECLARE( DoubleValueVerb );
 public:
@@ -96,7 +96,7 @@ public:
 };
 
 //------------------------------------------------------------------------------
-class StringValueVerb: public Verb
+class StringValueVerb: public VerbNode
 {
 	VERB_DECLARE( StringValueVerb );
 public:
@@ -105,7 +105,7 @@ public:
 };
 
 //------------------------------------------------------------------------------
-class AsVerb: public Verb
+class AsVerb: public VerbNode
 {
 	VERB_DECLARE( AsVerb );
 public:
@@ -122,7 +122,7 @@ private:
 };
 
 //------------------------------------------------------------------------------
-class AsteriskVerb: public Verb
+class AsteriskVerb: public VerbNode
 {
 	VERB_DECLARE( AsteriskVerb );
 public:
@@ -131,7 +131,7 @@ public:
 };
 
 //------------------------------------------------------------------------------
-class AscVerb: public Verb
+class AscVerb: public VerbNode
 {
 	VERB_DECLARE( AscVerb );
 public:

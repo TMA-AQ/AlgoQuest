@@ -35,7 +35,10 @@ public:
 	/// pNode - node to which this verb corresponds
 	/// Be carefull ! This method is called in top-down order, in the verb tree,
 	/// as the verb tree is being built
-	virtual bool preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal ){ return false; }
+	virtual bool preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal ) = 0;
+  //{ 
+  //  return false; 
+  //}
 
 	/// make changes to the query before it is executed
 	/// results that should be passed on to parent verbs should be placed in Result
@@ -45,20 +48,25 @@ public:
 	/// pStart/pNode - same as preprocessQuery
 	/// parameters - array of results from children verbs
 	/// Be carefull ! This method is called in bottom-up order, in the verb tree
-	virtual bool changeQuery( tnode* pStart, tnode* pNode,
-		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext ){ return false; }
+	virtual bool changeQuery( tnode* pStart, tnode* pNode, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext ) = 0;
+  //{ 
+  //  return false; 
+  //}
 
 	/// make changes to the table resulted from executing the query
 	/// results that should be passed on to parent verbs should be placed in Result
 	/// table - should be read by leaf nodes and written by top level nodes
 	/// parameters - same as changeQuery
 	/// Be carefull ! This method is called in bottom-up order, in the verb tree
-	virtual void changeResult( Table::Ptr table, 
-		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext ){}
+	virtual void changeResult( Table::Ptr table, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext ) = 0;
+  //{
+  //}
 
   /// Apply the verb on the row
   /// This method is called in bottom-up order in the verb tree
-  virtual void addResult ( aq::RowProcess_Intf::row_t& row, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext ){}
+  virtual void addResult ( aq::RowProcess_Intf::row_t& row, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext ) = 0;
+  //{
+  //}
 
   /// Set the Base Description
   virtual void setBaseDesc(Base * BaseDesc) 
@@ -91,12 +99,9 @@ public:
 	bool Disabled; //if true, do not use this Verb or its children anymore
 
 	//irrelevant when implementing derived class
-private:
+protected:
 	OBJECT_DECLARE( Verb );
 public:
 	Verb();
 	virtual ~Verb(){};
-	virtual Verb* clone() const = 0;
 };
-
-#include "VerbFactory.h"

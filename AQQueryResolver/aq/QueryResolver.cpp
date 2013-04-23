@@ -300,7 +300,7 @@ Table::Ptr QueryResolver::SolveSelectRegular()
   {
     VerbNode::dump(std::cout, spTree);
     DumpVisitor printer;
-    spTree->acceptLeftToRight(&printer);
+    spTree->acceptLeftTopRight(&printer);
     std::cout << std::endl << printer.getQuery() << std::endl;
   }
 #endif
@@ -313,7 +313,7 @@ Table::Ptr QueryResolver::SolveSelectRegular()
   oss << *this->sqlStatement << std::endl;
   std::string stmp2 = oss.str();
   DumpVisitor printer;
-  spTree->acceptLeftToRight(&printer);
+  spTree->acceptLeftTopRight(&printer);
   std::cout << oss.str() << std::endl << printer.getQuery() << std::endl;
 #endif
 

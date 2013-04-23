@@ -8,6 +8,11 @@ void DumpVisitor::visit(Verb* v)
 	aq::Logger::getInstance().log(AQ_WARNING, "verb %s not implemented for DumpVisitor\n", id_to_string(v->getVerbType()));
 }
 
+void DumpVisitor::visit(VerbNode* v)
+{
+	aq::Logger::getInstance().log(AQ_WARNING, "verb %s not implemented for DumpVisitor\n", id_to_string(v->getVerbType()));
+}
+
 // Aggregate Verbs
 void DumpVisitor::visit(AggregateVerb*)
 {
@@ -105,7 +110,7 @@ void DumpVisitor::visit(AsVerb* as)
 
 void DumpVisitor::visit(ColumnVerb* c)
 {
-	this->query +=  c->getTableName() + "." + c->getColumnOnlyName();
+	this->query += c->getTableName() + "." + c->getColumnOnlyName();
 }
 
 void DumpVisitor::visit(CommaVerb* cv)

@@ -95,12 +95,12 @@ Table::Ptr solveOptimalMinMax(	VerbNode::Ptr spTree, Base& BaseDesc,
 {
 	if( !spTree->getLeftChild() )
 		throw generic_error(generic_error::INVALID_QUERY, "");
-	Verb::Ptr verb1 = spTree->getLeftChild()->getVerbObject();
+	Verb::Ptr verb1 = spTree->getLeftChild();
 	if( !verb1 || 
 		verb1->getVerbType() != K_MIN && 
 		verb1->getVerbType() != K_MAX )
 		return NULL;
-	Verb::Ptr verb2 = spTree->getLeftChild()->getLeftChild()->getVerbObject();
+	Verb::Ptr verb2 = spTree->getLeftChild()->getLeftChild();
 	if( verb2->getVerbType() != K_PERIOD )
 		return NULL;
 	if( spTree->getBrother() == NULL )
@@ -108,7 +108,7 @@ Table::Ptr solveOptimalMinMax(	VerbNode::Ptr spTree, Base& BaseDesc,
 	VerbNode::Ptr spNode = spTree;
 	do
 	{
-		if( spNode->getVerbObject()->getVerbType() == K_WHERE )
+		if( spNode->getVerbType() == K_WHERE )
 			return NULL;
 		spNode = spNode->getBrother();
 	}while( spNode->getBrother() );

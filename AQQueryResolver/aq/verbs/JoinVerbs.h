@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Verb.h"
+#include "VerbNode.h"
 
 //------------------------------------------------------------------------------
-class JoinVerb: public Verb
+class JoinVerb: public VerbNode
 {
 	VERB_DECLARE( JoinVerb );
 public:

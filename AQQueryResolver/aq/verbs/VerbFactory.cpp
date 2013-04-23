@@ -8,14 +8,14 @@ VerbFactory& VerbFactory::GetInstance()
 }
 
 //------------------------------------------------------------------------------
-void VerbFactory::addVerb( Verb::Ptr verb )
+void VerbFactory::addVerb( VerbNode::Ptr verb )
 {
 	if( verb )
 		this->Verbs.push_back( verb );
 }
 
 //------------------------------------------------------------------------------
-Verb::Ptr VerbFactory::getVerb( int verbType ) const
+VerbNode::Ptr VerbFactory::getVerb( int verbType ) const
 {
 	for( size_t idx = 0; idx < this->Verbs.size(); ++idx )
 		if( this->Verbs[idx]->getVerbType() == verbType )

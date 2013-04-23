@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Verb.h"
+#include "VerbNode.h"
 #include <aq/DBTypes.h>
 
 //------------------------------------------------------------------------------
-class CastVerb: public Verb
+class CastVerb: public VerbNode
 {
 	VERB_DECLARE( CastVerb );
 public:
@@ -21,7 +21,7 @@ private:
 };
 
 //------------------------------------------------------------------------------
-class NvlVerb: public Verb
+class NvlVerb: public VerbNode
 {
 	VERB_DECLARE( NvlVerb );
 public:
@@ -32,7 +32,7 @@ public:
 };
 
 //------------------------------------------------------------------------------
-class DecodeVerb: public Verb
+class DecodeVerb: public VerbNode
 {
 	VERB_DECLARE( DecodeVerb );
 public:
