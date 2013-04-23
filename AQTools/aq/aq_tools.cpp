@@ -112,7 +112,26 @@ int processAQMatrix(const std::string& query, const std::string& aqMatrixFileNam
 
 	}
 	
-	VerbNode::Ptr spTree = VerbNode::BuildVerbsTree(pNode, baseDesc, &settings );
+  std::vector<unsigned int> categories_order;
+  if (settings.useRowResolver)
+  {
+    categories_order.push_back( K_FROM );
+    categories_order.push_back( K_WHERE );
+    categories_order.push_back( K_SELECT );
+    categories_order.push_back( K_GROUP );
+    categories_order.push_back( K_HAVING );
+    categories_order.push_back( K_ORDER );
+  }
+  else
+  {
+    categories_order.push_back( K_FROM );
+    categories_order.push_back( K_WHERE );
+    categories_order.push_back( K_GROUP );
+    categories_order.push_back( K_HAVING );
+    categories_order.push_back( K_SELECT );
+    categories_order.push_back( K_ORDER );
+  }
+	VerbNode::Ptr spTree = VerbNode::BuildVerbsTree(pNode, categories_order, baseDesc, &settings );
 	spTree->changeQuery();
 	QueryResolver::cleanQuery( pNode );
 
@@ -176,8 +195,27 @@ int transformQuery(const std::string& query, TProjectSettings& settings, Base& b
 	}
 
 	std::cout << *pNode << std::endl;
-
-	VerbNode::Ptr spTree = VerbNode::BuildVerbsTree(pNode, baseDesc, &settings );
+  
+  std::vector<unsigned int> categories_order;
+  if (settings.useRowResolver)
+  {
+    categories_order.push_back( K_FROM );
+    categories_order.push_back( K_WHERE );
+    categories_order.push_back( K_SELECT );
+    categories_order.push_back( K_GROUP );
+    categories_order.push_back( K_HAVING );
+    categories_order.push_back( K_ORDER );
+  }
+  else
+  {
+    categories_order.push_back( K_FROM );
+    categories_order.push_back( K_WHERE );
+    categories_order.push_back( K_GROUP );
+    categories_order.push_back( K_HAVING );
+    categories_order.push_back( K_SELECT );
+    categories_order.push_back( K_ORDER );
+  }
+	VerbNode::Ptr spTree = VerbNode::BuildVerbsTree(pNode, categories_order, baseDesc, &settings );
 	spTree->changeQuery();
 	QueryResolver::cleanQuery( pNode );
 	std::cout << std::endl;
