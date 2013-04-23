@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Table.h"
-#include "Verb.h"
+#include "verbs/Verb.h"
 
 //------------------------------------------------------------------------------
 Table::Ptr solveOptimalMinMax(	VerbNode::Ptr spTree, Base& BaseDesc, 

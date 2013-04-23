@@ -1,7 +1,7 @@
 #ifndef __AQ_COLUMN_H__
 #define __AQ_COLUMN_H__
 
-#include "VerbResult.h"
+#include "verbs/VerbResult.h"
 #include "Object.h"
 #include "Settings.h"
 

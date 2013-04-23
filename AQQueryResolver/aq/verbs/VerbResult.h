@@ -1,8 +1,8 @@
 #ifndef __AQ_VERB_RESULT_H__
 #define __AQ_VERB_RESULT_H__
 
-#include "Object.h"
-#include "ColumnItem.h"
+#include <aq/Object.h>
+#include <aq/ColumnItem.h>
 #include <aq/DBTypes.h>
 
 #include <vector>

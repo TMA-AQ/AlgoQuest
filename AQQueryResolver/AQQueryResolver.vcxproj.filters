@@ -138,15 +138,6 @@
     <ClInclude Include="aq\TreeUtilities.h">
       <Filter>Header Files\aq</Filter>
     </ClInclude>
-    <ClInclude Include="aq\Verb.h">
-      <Filter>Header Files\aq</Filter>
-    </ClInclude>
-    <ClInclude Include="aq\VerbResult.h">
-      <Filter>Header Files\aq</Filter>
-    </ClInclude>
-    <ClInclude Include="aq\VerbVisitor.h">
-      <Filter>Header Files\aq</Filter>
-    </ClInclude>
     <ClInclude Include="aq\db_loader\DatabaseLoader.h">
       <Filter>Header Files\aq\db_loader</Filter>
     </ClInclude>
@@ -184,6 +175,15 @@
       <Filter>Header Files\aq\verbs</Filter>
     </ClInclude>
     <ClInclude Include="aq\verbs\ScalarVerbs.h">
+      <Filter>Header Files\aq\verbs</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\verbs\Verb.h">
+      <Filter>Header Files\aq\verbs</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\verbs\VerbResult.h">
+      <Filter>Header Files\aq\verbs</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\verbs\VerbVisitor.h">
       <Filter>Header Files\aq\verbs</Filter>
     </ClInclude>
   </ItemGroup>
@@ -290,14 +290,14 @@
     <ClCompile Include="aq\TreeUtilities.cpp">
       <Filter>Source Files\aq</Filter>
     </ClCompile>
-    <ClCompile Include="aq\Verb.cpp">
-      <Filter>Source Files\aq</Filter>
-    </ClCompile>
-    <ClCompile Include="aq\VerbResult.cpp">
-      <Filter>Source Files\aq</Filter>
-    </ClCompile>
     <ClCompile Include="aq\sql92_grm_tab.cpp">
       <Filter>Source Files\aq</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\verbs\Verb.cpp">
+      <Filter>Source Files\aq\verbs</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\verbs\VerbResult.cpp">
+      <Filter>Source Files\aq\verbs</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

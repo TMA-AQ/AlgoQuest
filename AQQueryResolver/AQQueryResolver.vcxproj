@@ -342,8 +342,6 @@
     <ClInclude Include="aq\SQLPrefix.h" />
     <ClInclude Include="aq\Table.h" />
     <ClInclude Include="aq\TreeUtilities.h" />
-    <ClInclude Include="aq\Verb.h" />
-    <ClInclude Include="aq\VerbResult.h" />
     <ClInclude Include="aq\verbs\AggregateVerbs.h" />
     <ClInclude Include="aq\verbs\ArithmeticVerbs.h" />
     <ClInclude Include="aq\verbs\AuxiliaryVerbs.h" />
@@ -355,7 +353,9 @@
     <ClInclude Include="aq\verbs\MainVerbs.h" />
     <ClInclude Include="aq\verbs\OverVerbs.h" />
     <ClInclude Include="aq\verbs\ScalarVerbs.h" />
-    <ClInclude Include="aq\VerbVisitor.h" />
+    <ClInclude Include="aq\verbs\Verb.h" />
+    <ClInclude Include="aq\verbs\VerbResult.h" />
+    <ClInclude Include="aq\verbs\VerbVisitor.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="aq\AQEngine.cpp" />
@@ -384,8 +384,6 @@
     <ClCompile Include="aq\SQLPrefix.cpp" />
     <ClCompile Include="aq\Table.cpp" />
     <ClCompile Include="aq\TreeUtilities.cpp" />
-    <ClCompile Include="aq\Verb.cpp" />
-    <ClCompile Include="aq\VerbResult.cpp" />
     <ClCompile Include="aq\verbs\AggregateVerbs.cpp" />
     <ClCompile Include="aq\verbs\ArithmeticVerbs.cpp" />
     <ClCompile Include="aq\verbs\AuxiliaryVerbs.cpp" />
@@ -397,6 +395,8 @@
     <ClCompile Include="aq\verbs\MainVerbs.cpp" />
     <ClCompile Include="aq\verbs\OverVerbs.cpp" />
     <ClCompile Include="aq\verbs\ScalarVerbs.cpp" />
+    <ClCompile Include="aq\verbs\Verb.cpp" />
+    <ClCompile Include="aq\verbs\VerbResult.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

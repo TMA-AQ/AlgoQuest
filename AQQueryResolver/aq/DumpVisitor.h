@@ -1,7 +1,7 @@
 #ifndef __DUMP_VISITOR_H__
 #define __DUMP_VISITOR_H__
 
-#include "VerbVisitor.h"
+#include "verbs/VerbVisitor.h"
 
 class DumpVisitor : public VerbVisitor
 {

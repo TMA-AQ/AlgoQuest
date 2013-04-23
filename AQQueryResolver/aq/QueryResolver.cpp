@@ -7,7 +7,7 @@
 #include "RowProcessing.h"
 #include "RowVerbProcess.h"
 
-#include "Verb.h"
+#include "verbs/Verb.h"
 #include "JeqParser.h"
 #include "Column2Table.h"
 #include "ExprTransform.h"
