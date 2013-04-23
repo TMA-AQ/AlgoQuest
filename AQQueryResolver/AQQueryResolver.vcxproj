@@ -322,6 +322,7 @@
     <ClCompile Include="SQLParser\OverVerbs.cpp" />
     <ClCompile Include="SQLParser\QueryResolver.cpp" />
     <ClCompile Include="SQLParser\RowProcessing.cpp" />
+    <ClCompile Include="SQLParser\RowVerbProcess.cpp" />
     <ClCompile Include="SQLParser\ScalarVerbs.cpp" />
     <ClCompile Include="SQLParser\Settings.cpp" />
     <ClCompile Include="SQLParser\sql92_grm_tab.c">
@@ -416,8 +417,13 @@
     <ClInclude Include="SQLParser\Object.h" />
     <ClInclude Include="SQLParser\Optimizations.h" />
     <ClInclude Include="SQLParser\OverVerbs.h" />
+    <ClInclude Include="SQLParser\QueryAnalyzer.h" />
     <ClInclude Include="SQLParser\QueryResolver.h" />
+    <ClInclude Include="SQLParser\RowAggregator.h" />
+    <ClInclude Include="SQLParser\RowProcesses.h" />
     <ClInclude Include="SQLParser\RowProcessing.h" />
+    <ClInclude Include="SQLParser\RowProcess_Intf.h" />
+    <ClInclude Include="SQLParser\RowVerbProcess.h" />
     <ClInclude Include="SQLParser\ScalarVerbs.h" />
     <ClInclude Include="SQLParser\Settings.h" />
     <ClInclude Include="SQLParser\sql92_grm_tab.h" />

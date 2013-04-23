@@ -28,30 +28,21 @@
     <Filter Include="Source Files\DBLoader">
       <UniqueIdentifier>{782fde03-72ea-44ab-ab92-a29001e0ca06}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\RowProcess">
+      <UniqueIdentifier>{89c2e4dc-1654-48bf-a84d-afdbaf3c8c1a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\RowProcess">
+      <UniqueIdentifier>{2543550d-a48b-4617-ab82-bf7d557f0ea7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Verbs">
+      <UniqueIdentifier>{3a5bbc57-243c-4036-ab20-b53e2851413b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Verbs">
+      <UniqueIdentifier>{2e8b9f78-1630-4c22-b160-e3085ce68460}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="SQLParser\AggregateVerbs.cpp">
-      <Filter>Source Files\SQLParser</Filter>
-    </ClCompile>
-    <ClCompile Include="SQLParser\ArithmeticVerbs.cpp">
-      <Filter>Source Files\SQLParser</Filter>
-    </ClCompile>
-    <ClCompile Include="SQLParser\AuxiliaryVerbs.cpp">
-      <Filter>Source Files\SQLParser</Filter>
-    </ClCompile>
-    <ClCompile Include="SQLParser\CaseVerb.cpp">
-      <Filter>Source Files\SQLParser</Filter>
-    </ClCompile>
     <ClCompile Include="SQLParser\Column2Table.cpp">
-      <Filter>Source Files\SQLParser</Filter>
-    </ClCompile>
-    <ClCompile Include="SQLParser\ComparisonVerbs.cpp">
-      <Filter>Source Files\SQLParser</Filter>
-    </ClCompile>
-    <ClCompile Include="SQLParser\ConversionVerbs.cpp">
-      <Filter>Source Files\SQLParser</Filter>
-    </ClCompile>
-    <ClCompile Include="SQLParser\DateVerbs.cpp">
       <Filter>Source Files\SQLParser</Filter>
     </ClCompile>
     <ClCompile Include="SQLParser\ExprTransform.cpp">
@@ -72,16 +63,7 @@
     <ClCompile Include="SQLParser\LIKE_PatternMatching.cpp">
       <Filter>Source Files\SQLParser</Filter>
     </ClCompile>
-    <ClCompile Include="SQLParser\MainVerbs.cpp">
-      <Filter>Source Files\SQLParser</Filter>
-    </ClCompile>
     <ClCompile Include="SQLParser\Optimizations.cpp">
-      <Filter>Source Files\SQLParser</Filter>
-    </ClCompile>
-    <ClCompile Include="SQLParser\OverVerbs.cpp">
-      <Filter>Source Files\SQLParser</Filter>
-    </ClCompile>
-    <ClCompile Include="SQLParser\ScalarVerbs.cpp">
       <Filter>Source Files\SQLParser</Filter>
     </ClCompile>
     <ClCompile Include="SQLParser\sql92_grm_tab.c">
@@ -99,16 +81,10 @@
     <ClCompile Include="SQLParser\TreeUtilities.cpp">
       <Filter>Source Files\SQLParser</Filter>
     </ClCompile>
-    <ClCompile Include="SQLParser\Verb.cpp">
-      <Filter>Source Files\SQLParser</Filter>
-    </ClCompile>
     <ClCompile Include="SQLParser\AQEngine.cpp">
       <Filter>Source Files\SQLParser</Filter>
     </ClCompile>
     <ClCompile Include="SQLParser\DumpVisitor.cpp">
-      <Filter>Source Files\SQLParser</Filter>
-    </ClCompile>
-    <ClCompile Include="SQLParser\RowProcessing.cpp">
       <Filter>Source Files\SQLParser</Filter>
     </ClCompile>
     <ClCompile Include="SQLParser\AQMatrix.cpp">
@@ -135,39 +111,60 @@
     <ClCompile Include="SQLParser\Column.cpp">
       <Filter>Source Files\SQLParser</Filter>
     </ClCompile>
+    <ClCompile Include="SQLParser\RowProcessing.cpp">
+      <Filter>Source Files\RowProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="SQLParser\AggregateVerbs.cpp">
+      <Filter>Source Files\Verbs</Filter>
+    </ClCompile>
+    <ClCompile Include="SQLParser\ArithmeticVerbs.cpp">
+      <Filter>Source Files\Verbs</Filter>
+    </ClCompile>
+    <ClCompile Include="SQLParser\AuxiliaryVerbs.cpp">
+      <Filter>Source Files\Verbs</Filter>
+    </ClCompile>
+    <ClCompile Include="SQLParser\CaseVerb.cpp">
+      <Filter>Source Files\Verbs</Filter>
+    </ClCompile>
+    <ClCompile Include="SQLParser\ComparisonVerbs.cpp">
+      <Filter>Source Files\Verbs</Filter>
+    </ClCompile>
+    <ClCompile Include="SQLParser\ConversionVerbs.cpp">
+      <Filter>Source Files\Verbs</Filter>
+    </ClCompile>
+    <ClCompile Include="SQLParser\DateVerbs.cpp">
+      <Filter>Source Files\Verbs</Filter>
+    </ClCompile>
+    <ClCompile Include="SQLParser\MainVerbs.cpp">
+      <Filter>Source Files\Verbs</Filter>
+    </ClCompile>
+    <ClCompile Include="SQLParser\OverVerbs.cpp">
+      <Filter>Source Files\Verbs</Filter>
+    </ClCompile>
+    <ClCompile Include="SQLParser\ScalarVerbs.cpp">
+      <Filter>Source Files\Verbs</Filter>
+    </ClCompile>
+    <ClCompile Include="SQLParser\Verb.cpp">
+      <Filter>Source Files\Verbs</Filter>
+    </ClCompile>
     <ClCompile Include="SQLParser\VerbResult.cpp">
-      <Filter>Source Files\SQLParser</Filter>
+      <Filter>Source Files\Verbs</Filter>
+    </ClCompile>
+    <ClCompile Include="SQLParser\RowVerbProcess.cpp">
+      <Filter>Source Files\RowProcess</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="SQLParser\AggregateVerbs.h">
-      <Filter>Header Files\SQLParser</Filter>
-    </ClInclude>
     <ClInclude Include="SQLParser\AQEngine.h">
       <Filter>Header Files\SQLParser</Filter>
     </ClInclude>
     <ClInclude Include="SQLParser\AQEngine_Intf.h">
       <Filter>Header Files\SQLParser</Filter>
     </ClInclude>
-    <ClInclude Include="SQLParser\ArithmeticVerbs.h">
-      <Filter>Header Files\SQLParser</Filter>
-    </ClInclude>
-    <ClInclude Include="SQLParser\AuxiliaryVerbs.h">
-      <Filter>Header Files\SQLParser</Filter>
-    </ClInclude>
     <ClInclude Include="SQLParser\CaseVerb.h">
       <Filter>Header Files\SQLParser</Filter>
     </ClInclude>
     <ClInclude Include="SQLParser\Column2Table.h">
-      <Filter>Header Files\SQLParser</Filter>
-    </ClInclude>
-    <ClInclude Include="SQLParser\ComparisonVerbs.h">
-      <Filter>Header Files\SQLParser</Filter>
-    </ClInclude>
-    <ClInclude Include="SQLParser\ConversionVerbs.h">
-      <Filter>Header Files\SQLParser</Filter>
-    </ClInclude>
-    <ClInclude Include="SQLParser\DateVerbs.h">
       <Filter>Header Files\SQLParser</Filter>
     </ClInclude>
     <ClInclude Include="SQLParser\ExprTransform.h">
@@ -179,25 +176,13 @@
     <ClInclude Include="SQLParser\JeqParser.h">
       <Filter>Header Files\SQLParser</Filter>
     </ClInclude>
-    <ClInclude Include="SQLParser\JoinVerbs.h">
-      <Filter>Header Files\SQLParser</Filter>
-    </ClInclude>
     <ClInclude Include="SQLParser\LIKE_PatternMatching.h">
-      <Filter>Header Files\SQLParser</Filter>
-    </ClInclude>
-    <ClInclude Include="SQLParser\MainVerbs.h">
       <Filter>Header Files\SQLParser</Filter>
     </ClInclude>
     <ClInclude Include="SQLParser\Object.h">
       <Filter>Header Files\SQLParser</Filter>
     </ClInclude>
     <ClInclude Include="SQLParser\Optimizations.h">
-      <Filter>Header Files\SQLParser</Filter>
-    </ClInclude>
-    <ClInclude Include="SQLParser\OverVerbs.h">
-      <Filter>Header Files\SQLParser</Filter>
-    </ClInclude>
-    <ClInclude Include="SQLParser\ScalarVerbs.h">
       <Filter>Header Files\SQLParser</Filter>
     </ClInclude>
     <ClInclude Include="SQLParser\sql92_grm_tab.h">
@@ -215,16 +200,7 @@
     <ClInclude Include="SQLParser\TreeUtilities.h">
       <Filter>Header Files\SQLParser</Filter>
     </ClInclude>
-    <ClInclude Include="SQLParser\Verb.h">
-      <Filter>Header Files\SQLParser</Filter>
-    </ClInclude>
-    <ClInclude Include="SQLParser\VerbVisitor.h">
-      <Filter>Header Files\SQLParser</Filter>
-    </ClInclude>
     <ClInclude Include="SQLParser\DumpVisitor.h">
-      <Filter>Header Files\SQLParser</Filter>
-    </ClInclude>
-    <ClInclude Include="SQLParser\RowProcessing.h">
       <Filter>Header Files\SQLParser</Filter>
     </ClInclude>
     <ClInclude Include="SQLParser\AQMatrix.h">
@@ -251,8 +227,62 @@
     <ClInclude Include="SQLParser\Column.h">
       <Filter>Header Files\SQLParser</Filter>
     </ClInclude>
-    <ClInclude Include="SQLParser\VerbResult.h">
+    <ClInclude Include="SQLParser\QueryAnalyzer.h">
       <Filter>Header Files\SQLParser</Filter>
+    </ClInclude>
+    <ClInclude Include="SQLParser\RowAggregator.h">
+      <Filter>Header Files\RowProcess</Filter>
+    </ClInclude>
+    <ClInclude Include="SQLParser\RowProcess_Intf.h">
+      <Filter>Header Files\RowProcess</Filter>
+    </ClInclude>
+    <ClInclude Include="SQLParser\RowProcessing.h">
+      <Filter>Header Files\RowProcess</Filter>
+    </ClInclude>
+    <ClInclude Include="SQLParser\RowProcesses.h">
+      <Filter>Header Files\RowProcess</Filter>
+    </ClInclude>
+    <ClInclude Include="SQLParser\Verb.h">
+      <Filter>Header Files\Verbs</Filter>
+    </ClInclude>
+    <ClInclude Include="SQLParser\VerbResult.h">
+      <Filter>Header Files\Verbs</Filter>
+    </ClInclude>
+    <ClInclude Include="SQLParser\VerbVisitor.h">
+      <Filter>Header Files\Verbs</Filter>
+    </ClInclude>
+    <ClInclude Include="SQLParser\AggregateVerbs.h">
+      <Filter>Header Files\Verbs</Filter>
+    </ClInclude>
+    <ClInclude Include="SQLParser\ArithmeticVerbs.h">
+      <Filter>Header Files\Verbs</Filter>
+    </ClInclude>
+    <ClInclude Include="SQLParser\AuxiliaryVerbs.h">
+      <Filter>Header Files\Verbs</Filter>
+    </ClInclude>
+    <ClInclude Include="SQLParser\ComparisonVerbs.h">
+      <Filter>Header Files\Verbs</Filter>
+    </ClInclude>
+    <ClInclude Include="SQLParser\ConversionVerbs.h">
+      <Filter>Header Files\Verbs</Filter>
+    </ClInclude>
+    <ClInclude Include="SQLParser\DateVerbs.h">
+      <Filter>Header Files\Verbs</Filter>
+    </ClInclude>
+    <ClInclude Include="SQLParser\JoinVerbs.h">
+      <Filter>Header Files\Verbs</Filter>
+    </ClInclude>
+    <ClInclude Include="SQLParser\MainVerbs.h">
+      <Filter>Header Files\Verbs</Filter>
+    </ClInclude>
+    <ClInclude Include="SQLParser\OverVerbs.h">
+      <Filter>Header Files\Verbs</Filter>
+    </ClInclude>
+    <ClInclude Include="SQLParser\ScalarVerbs.h">
+      <Filter>Header Files\Verbs</Filter>
+    </ClInclude>
+    <ClInclude Include="SQLParser\RowVerbProcess.h">
+      <Filter>Header Files\RowProcess</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
