@@ -1,4 +1,5 @@
 #include "AggregateVerbs.h"
+#include "VerbVisitor.h"
 #include <aq/Exceptions.h>
 
 using namespace aq;
@@ -197,6 +198,20 @@ Scalar::Ptr SumVerb::computeResultRegular(	Column::Ptr column,
 		count = table->Columns[table->Columns.size() - 1];
 	double sum = computeSum(column, count, start, end);
 	return new Scalar(column->Type, ColumnItem(sum));
+}
+
+//------------------------------------------------------------------------------
+void SumVerb::addResult(aq::RowProcess_Intf::row_t& row, 
+                        VerbResult::Ptr resLeft,
+                        VerbResult::Ptr resRight, 
+                        VerbResult::Ptr resNext )
+{
+}
+
+//------------------------------------------------------------------------------
+void SumVerb::accept(VerbVisitor* visitor)
+{
+	visitor->visit(this);
 }
 
 //------------------------------------------------------------------------------

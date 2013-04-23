@@ -100,17 +100,17 @@ void DumpVisitor::visit(AsteriskVerb*)
 
 void DumpVisitor::visit(AsVerb* as)
 {
-	this->query += " as " + as->getIdent() + " ";
+	this->query += " as " + as->getIdent();
 }
 
 void DumpVisitor::visit(ColumnVerb* c)
 {
-	this->query += " " + c->getTableName() + "." + c->getColumnName() + " ";
+	this->query +=  c->getTableName() + "." + c->getColumnOnlyName();
 }
 
-void DumpVisitor::visit(CommaVerb*)
+void DumpVisitor::visit(CommaVerb* cv)
 {
-	this->query += " , ";
+	this->query += ", ";
 }
 
 void DumpVisitor::visit(DoubleValueVerb*)
@@ -278,14 +278,25 @@ void DumpVisitor::visit(ByVerb*)
 {
 }
 
-void DumpVisitor::visit(FromVerb*)
+void DumpVisitor::visit(FromVerb* from)
 {
-  this->fromStr = " FROM " + this->query + "\n";
+  const std::list<std::string>& tables = from->getTables();
+  for (std::list<std::string>::const_iterator it = tables.begin(); it != tables.end();)
+  {
+    this->query += *it;
+    ++it;
+    if (it != tables.end())
+      this->query += ", ";
+  }
+
+  this->fromStr = "FROM " + this->query + "\n";
   this->query = "";
 }
 
 void DumpVisitor::visit(GroupVerb*)
 {
+  this->groupStr = "GROUP BY " + this->query + "\n";
+  this->query = "";
 }
 
 void DumpVisitor::visit(OrderVerb*)
@@ -294,13 +305,13 @@ void DumpVisitor::visit(OrderVerb*)
 
 void DumpVisitor::visit(SelectVerb*)
 {
-  this->selectStr = " SELECT " + this->query + "\n";
+  this->selectStr = "SELECT " + this->query + "\n";
   this->query = "";
 }
 
 void DumpVisitor::visit(WhereVerb*)
 {
-  this->whereStr = " WHERE " + this->query + "\n";
+  this->whereStr = "WHERE " + this->query + "\n";
   this->query = "";
 }
 

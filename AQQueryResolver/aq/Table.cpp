@@ -1,5 +1,5 @@
 #include "Table.h"
-#include "RowProcessing.h"
+#include "RowProcess_Intf.h"
 
 #include <aq/Utilities.h>
 #include <aq/Exceptions.h>

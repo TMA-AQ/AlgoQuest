@@ -650,6 +650,12 @@ void ByVerb::changeResult(	Table::Ptr table,
 }
 
 //------------------------------------------------------------------------------
+void ByVerb::accept(VerbVisitor* visitor)
+{
+	visitor->visit(this);
+}
+
+//------------------------------------------------------------------------------
 VERB_IMPLEMENT( FromVerb );
 
 //------------------------------------------------------------------------------
@@ -719,6 +725,7 @@ bool FromVerb::changeQuery( tnode* pStart, tnode* pNode,
 	return false;
 }
 
+//------------------------------------------------------------------------------
 void FromVerb::accept(VerbVisitor* visitor)
 {
 	visitor->visit(this);
@@ -801,6 +808,35 @@ void GroupVerb::changeResult(	Table::Ptr table,
 			if( table->Columns[idx]->Items.size() < foundColumn->Items.size() )
 				table->Columns[idx]->increase( foundColumn->Items.size() );
 	*/
+}
+
+//------------------------------------------------------------------------------
+void GroupVerb::addResult(aq::RowProcess_Intf::row_t& row, 
+                          VerbResult::Ptr resLeft, 
+                          VerbResult::Ptr resRight, 
+                          VerbResult::Ptr resNext )
+{
+  assert((this->row_acc.size() == 0) || (row.size() == this->row_acc.size()));
+  if (this->row_acc.size() == 0)
+  {
+    std::copy(row.begin(), row.end(), std::back_inserter<aq::RowProcess_Intf::row_t>(this->row_acc));
+    // std::for_each(row.begin(), row.end(), [&] (aq::RowProcess_Intf::row_item_t& item) { this->row_acc.push_back(item); });
+  }
+  else
+  {
+    for (size_t i = 0; i < row.size(); ++i)
+    {
+      // TODO : apply aggregate function on items whose need it
+      row_acc[i].item->numval += row[i].item->numval;
+      row[i].item->numval = row_acc[i].item->numval;
+    }    
+  }
+}
+
+//------------------------------------------------------------------------------
+void GroupVerb::accept(VerbVisitor* visitor)
+{
+	visitor->visit(this);
 }
 
 //------------------------------------------------------------------------------

@@ -5,9 +5,6 @@
       <UniqueIdentifier>{d378e7e7-fbbf-4708-9290-7b5a47ec1caf}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
     </Filter>
-    <Filter Include="TempFiles">
-      <UniqueIdentifier>{f432c355-3857-4c08-bf6a-1f501ce2bb18}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files">
       <UniqueIdentifier>{9c5329b9-765e-45be-ad6d-b2f1227906e2}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl</Extensions>
@@ -40,11 +37,6 @@
     <Filter Include="Source Files\aq\parser">
       <UniqueIdentifier>{216ac17a-0f88-4cdc-8907-67084daa11d3}</UniqueIdentifier>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <CustomBuild Include="SQLParser\sql92_grm.output">
-      <Filter>TempFiles</Filter>
-    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <None Include="Generate_Parser.bat">
@@ -109,9 +101,6 @@
       <Filter>Header Files\aq</Filter>
     </ClInclude>
     <ClInclude Include="aq\RowProcesses.h">
-      <Filter>Header Files\aq</Filter>
-    </ClInclude>
-    <ClInclude Include="aq\RowProcessing.h">
       <Filter>Header Files\aq</Filter>
     </ClInclude>
     <ClInclude Include="aq\RowVerbProcess.h">
@@ -189,6 +178,9 @@
     <ClInclude Include="aq\parser\ID2Str.h">
       <Filter>Header Files\aq\parser</Filter>
     </ClInclude>
+    <ClInclude Include="aq\RowWritter.h">
+      <Filter>Header Files\aq</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="aq\verbs\AggregateVerbs.cpp">
@@ -263,9 +255,6 @@
     <ClCompile Include="aq\QueryResolver.cpp">
       <Filter>Source Files\aq</Filter>
     </ClCompile>
-    <ClCompile Include="aq\RowProcessing.cpp">
-      <Filter>Source Files\aq</Filter>
-    </ClCompile>
     <ClCompile Include="aq\RowVerbProcess.cpp">
       <Filter>Source Files\aq</Filter>
     </ClCompile>
@@ -301,6 +290,9 @@
     </ClCompile>
     <ClCompile Include="aq\parser\ID2Str.cpp">
       <Filter>Source Files\aq\parser</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\RowWritter.cpp">
+      <Filter>Source Files\aq</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -38,6 +38,9 @@ protected:
 	virtual VerbResult::Ptr computeResultPartition(	Column::Ptr column, 
 													Table::Ptr table,
 													TablePartition::Ptr partition );
+  void addResult(aq::RowProcess_Intf::row_t& row, 
+    VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
+  void accept(VerbVisitor* visitor);
 };
 
 //------------------------------------------------------------------------------

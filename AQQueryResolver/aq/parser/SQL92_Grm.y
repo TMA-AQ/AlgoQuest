@@ -646,7 +646,7 @@ general_set_function	: set_function_type
 															$1->left	= $3;
 															$1->right	= $4;
 														} else {
-															$1->left	= $4;
+															$1->right	= $4;
 														}
 														$$ = $1;
 													}

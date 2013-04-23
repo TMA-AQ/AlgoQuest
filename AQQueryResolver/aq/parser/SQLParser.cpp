@@ -444,11 +444,14 @@ void dump(const tnode * const pNode, std::ostream& os, std::string indent)
 
 	os << indent << "'" << id_to_sql_string(pNode->tag) << "' [" << pNode->tag << ", " << pNode->inf << "] : " << to_string(pNode) << " [address:" << pNode << "]" << std::endl;
 
-	if (pNode->left) dump(pNode->left, os, indent + "  ");
-	// else os << indent << "NULL [empty left]" << std::endl;
+  if ((pNode->left != NULL) || (pNode->right != NULL))
+  {
+    if (pNode->left) dump(pNode->left, os, indent + "  ");
+    else os << indent << "  NULL [empty left]" << std::endl;
 
-	if (pNode->right) dump(pNode->right, os, indent + "  ");
-	// else os << indent << "NULL [empty right]" << std::endl;
+    if (pNode->right) dump(pNode->right, os, indent + "  ");
+    else os << indent << "  NULL [empty right]" << std::endl;
+  }
 	
 	if (pNode->next) 
 	{

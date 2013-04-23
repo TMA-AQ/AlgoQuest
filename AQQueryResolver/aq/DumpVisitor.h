@@ -90,7 +90,7 @@ public:
 	virtual void visit(PartitionVerb*);
 
 	const std::string& getQuery() { 
-    this->query = this->selectStr + this->fromStr + this->whereStr ; 
+    this->query = this->selectStr + this->fromStr + this->whereStr + this->groupStr + this->havingStr + this->orderStr; 
     return this->query;
   }
 
@@ -99,9 +99,11 @@ private:
   std::string fromStr;
   std::string whereStr;
   std::string groupStr;
+  std::string havingStr;
   std::string orderStr;
+	std::string leftQuery;
+	std::string rightQuery;
 	std::string query;
-
 };
 
 #endif

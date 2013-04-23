@@ -4,7 +4,7 @@
 #include "Table.h"
 
 #include "RowProcesses.h"
-#include "RowProcessing.h"
+#include "RowWritter.h"
 #include "RowVerbProcess.h"
 
 #include "verbs/Verb.h"
@@ -268,17 +268,40 @@ Table::Ptr QueryResolver::SolveSelectRegular()
   std::string stmp1 = oss.str();
 #endif
 
+  //
+  // processing order of main verb of the request depends of the resolution mode ('by row' or 'by column')
+  std::vector<unsigned int> categories_order;
+  if (pSettings->useRowResolver)
+  {
+    categories_order.push_back( K_FROM );
+    categories_order.push_back( K_WHERE );
+    categories_order.push_back( K_SELECT );
+    categories_order.push_back( K_GROUP );
+    categories_order.push_back( K_HAVING );
+    categories_order.push_back( K_ORDER );
+  }
+  else
+  {
+    categories_order.push_back( K_FROM );
+    categories_order.push_back( K_WHERE );
+    categories_order.push_back( K_GROUP );
+    categories_order.push_back( K_HAVING );
+    categories_order.push_back( K_SELECT );
+    categories_order.push_back( K_ORDER );
+  }
+
 	//
 	// Query Pre Processing (TODO : optimize tree by detecting identical subtrees)
 	timer.start();
-	VerbNode::Ptr spTree = VerbNode::BuildVerbsTree( this->sqlStatement, this->BaseDesc, this->pSettings );
+	VerbNode::Ptr spTree = VerbNode::BuildVerbsTree( this->sqlStatement, categories_order, this->BaseDesc, this->pSettings );
 	spTree->changeQuery();
 
 #ifdef _DEBUG
   {
+    VerbNode::dump(std::cout, spTree);
     DumpVisitor printer;
     spTree->acceptLeftToRight(&printer);
-    std::cout << printer.getQuery() << std::endl;
+    std::cout << std::endl << printer.getQuery() << std::endl;
   }
 #endif
 
@@ -401,7 +424,26 @@ boost::shared_ptr<QueryResolver> QueryResolver::SolveSelectFromSelect(	tnode* pI
   std::cout << syntax_tree_to_prefix_form(pExteriorSelect, queryExterior) << std::endl;
 #endif
 
-	VerbNode::Ptr spTree = VerbNode::BuildVerbsTree( pInteriorSelect, this->BaseDesc, this->pSettings );
+  std::vector<unsigned int> categories_order;
+  if (pSettings->useRowResolver)
+  {
+    categories_order.push_back( K_FROM );
+    categories_order.push_back( K_WHERE );
+    categories_order.push_back( K_SELECT );
+    categories_order.push_back( K_GROUP );
+    categories_order.push_back( K_HAVING );
+    categories_order.push_back( K_ORDER );
+  }
+  else
+  {
+    categories_order.push_back( K_FROM );
+    categories_order.push_back( K_WHERE );
+    categories_order.push_back( K_GROUP );
+    categories_order.push_back( K_HAVING );
+    categories_order.push_back( K_SELECT );
+    categories_order.push_back( K_ORDER );
+  }
+	VerbNode::Ptr spTree = VerbNode::BuildVerbsTree( pInteriorSelect, categories_order, this->BaseDesc, this->pSettings );
 	spTree->changeQuery();
 	QueryResolver::cleanQuery( pInteriorSelect );
 

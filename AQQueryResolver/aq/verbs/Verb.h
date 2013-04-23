@@ -123,12 +123,19 @@ public:
 	VerbNode::Ptr getRightChild();
 	VerbNode::Ptr getBrother();
   
-  static VerbNode::Ptr BuildVerbsTree( tnode* pStart, Base& baseDesc, TProjectSettings * settings );
+	/// build a subtree for each major category
+	/// order is given by \a categories_order (the last one will be executed first)
+	/// engine actually executes GROUP BY before select and after where, but
+	/// I need to delete it after select gets the grouping columns
+  static VerbNode::Ptr BuildVerbsTree( tnode* pStart, const std::vector<unsigned int>& categories_order, Base& baseDesc, TProjectSettings * settings );
    
   /// build a VerbNode subtree corresponding to the ppStart subtree
   /// a branch will end when a VerbNode for that tnode cannot be found
   /// top level node in the subtree will not have a brother
   static VerbNode::Ptr BuildVerbsSubtree( tnode* pSelect, tnode* pStart, tnode* pStartOriginal, int context, Base& BaseDesc, TProjectSettings *pSettings );
+
+  /// Debug purpose
+  static void dump(std::ostream& os, VerbNode::Ptr tree, std::string ident = "");
 
 private:
 	Verb::Ptr VerbObject;

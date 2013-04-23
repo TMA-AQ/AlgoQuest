@@ -1,8 +1,8 @@
 #include "AuxiliaryVerbs.h"
+#include "VerbVisitor.h"
 #include <aq/Utilities.h>
 #include <aq/ExprTransform.h>
 #include <aq/Exceptions.h>
-#include "VerbVisitor.h"
 #include <memory>
 #include <algorithm>
 #include <boost/algorithm/string.hpp>

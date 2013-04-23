@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Verb.h"
+#include <aq/RowProcess_Intf.h>
 #include <list>
 
 //------------------------------------------------------------------------------
@@ -65,6 +66,7 @@ public:
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
+  void accept(VerbVisitor* visitor);
 };
 
 //------------------------------------------------------------------------------
@@ -81,6 +83,7 @@ public:
     m_baseDesc = baseDesc;
   }
 	virtual void accept(VerbVisitor* visitor);
+  const std::list<std::string>& getTables() const { return this->tables; };
 private:
   Base * m_baseDesc;
   std::list<std::string> tables;
@@ -96,6 +99,12 @@ public:
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
+	virtual void addResult( aq::RowProcess_Intf::row_t& row, 
+		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
+  void accept(VerbVisitor* visitor);
+private:
+  aq::RowProcess_Intf::row_t row_acc;
+  // std::list<RowProcess_Intf::row_t> rows;
 };
 
 //------------------------------------------------------------------------------

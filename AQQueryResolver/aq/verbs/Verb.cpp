@@ -217,6 +217,7 @@ void VerbNode::addResult(aq::RowProcess_Intf::row_t& row)
 {
 	if( this->Brother )
 		this->Brother->addResult( row );
+
 	if( !this->VerbObject )
 		return;
 	if( this->VerbObject->Disabled )
@@ -234,6 +235,7 @@ void VerbNode::addResult(aq::RowProcess_Intf::row_t& row)
 	VerbResult::Ptr param3 = this->Brother && this->Brother->VerbObject ? this->Brother->VerbObject->getResult() : NULL;
 
 	this->VerbObject->addResult( row, param1, param2, param3 );
+  
 }
 
 //------------------------------------------------------------------------------
@@ -271,35 +273,23 @@ struct tnodeVerbNode
 };
 
 //------------------------------------------------------------------------------
-VerbNode::Ptr VerbNode::BuildVerbsTree( tnode* pStart, Base& baseDesc, TProjectSettings * settings )
+VerbNode::Ptr VerbNode::BuildVerbsTree( tnode* pStart, const std::vector<unsigned int>& categories_order, Base& baseDesc, TProjectSettings * settings )
 {
 	if( pStart->tag != K_SELECT )
 		throw 0; // TODO
 
-	//build a subtree for each major category
-	//order is important (the last one will be executed first)
-	//engine actually executes GROUP BY before select and after where, but
-	//I need to delete it after select gets the grouping columns
-	std::vector<int> categories;
-	categories.push_back( K_FROM );
-	categories.push_back( K_WHERE );
-	categories.push_back( K_GROUP );
-	categories.push_back( K_HAVING );
-	categories.push_back( K_SELECT );
-	categories.push_back( K_ORDER );
-
 	tnode* pStartOriginal = clone_subtree( pStart );
 	
 	VerbNode::Ptr spLast = NULL;
-	for( size_t idx = 0; idx < categories.size(); ++idx )
+	for( size_t idx = 0; idx < categories_order.size(); ++idx )
 	{
 		tnode* pNode = pStart;
-		while( pNode && pNode->tag != categories[idx] ) 
+		while( pNode && pNode->tag != categories_order[idx] ) 
 			pNode = pNode->next;
 		if( !pNode )
 			continue;
 		
-		VerbNode::Ptr spNode = VerbNode::BuildVerbsSubtree( pStart, pNode, pStartOriginal, categories[idx], baseDesc, settings );
+		VerbNode::Ptr spNode = VerbNode::BuildVerbsSubtree( pStart, pNode, pStartOriginal, categories_order[idx], baseDesc, settings );
 		spNode->setBrother( spLast );
 		spLast = spNode;
 	}
@@ -361,6 +351,26 @@ VerbNode::Ptr VerbNode::BuildVerbsSubtree(	tnode* pSelect, tnode* pStart, tnode*
 
 	return spStart;
 }
+
+//------------------------------------------------------------------------------
+void VerbNode::dump(std::ostream& os, VerbNode::Ptr tree, std::string ident)
+{
+  if (tree != NULL)
+  {
+    os << id_to_string(tree->getVerbObject()->getVerbType()) << std::endl;
+    os << ident << "  left -> ";
+    dump(os, tree->getLeftChild(), ident + "  ");
+    os << ident << "  right -> ";
+    dump(os, tree->getRightChild(), ident + "  ");
+    os << ident ;
+    dump(os, tree->getBrother(), ident);
+  }
+  else 
+  {
+    os << "NULL" << std::endl;
+  }
+}
+
 
 //------------------------------------------------------------------------------
 VerbFactory& VerbFactory::GetInstance()
