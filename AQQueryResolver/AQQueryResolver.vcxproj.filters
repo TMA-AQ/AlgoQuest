@@ -181,6 +181,12 @@
     <ClInclude Include="aq\RowWritter.h">
       <Filter>Header Files\aq</Filter>
     </ClInclude>
+    <ClInclude Include="aq\verbs\VerbNode.h">
+      <Filter>Header Files\aq\verbs</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\verbs\VerbFactory.h">
+      <Filter>Header Files\aq\verbs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="aq\verbs\AggregateVerbs.cpp">
@@ -293,6 +299,12 @@
     </ClCompile>
     <ClCompile Include="aq\RowWritter.cpp">
       <Filter>Source Files\aq</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\verbs\VerbNode.cpp">
+      <Filter>Source Files\aq\verbs</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\verbs\VerbFactory.cpp">
+      <Filter>Source Files\aq\verbs</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

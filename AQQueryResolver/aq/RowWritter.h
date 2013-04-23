@@ -2,7 +2,7 @@
 #define __ROW_WRITTE_H__
 
 #include "Table.h"
-#include "verbs/Verb.h"
+#include "verbs/VerbNode.h"
 #include "RowProcess_Intf.h"
 #include <vector>
 

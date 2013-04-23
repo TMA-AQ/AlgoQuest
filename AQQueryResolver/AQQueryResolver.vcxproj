@@ -345,6 +345,8 @@
     <ClInclude Include="aq\verbs\OverVerbs.h" />
     <ClInclude Include="aq\verbs\ScalarVerbs.h" />
     <ClInclude Include="aq\verbs\Verb.h" />
+    <ClInclude Include="aq\verbs\VerbFactory.h" />
+    <ClInclude Include="aq\verbs\VerbNode.h" />
     <ClInclude Include="aq\verbs\VerbResult.h" />
     <ClInclude Include="aq\verbs\VerbVisitor.h" />
   </ItemGroup>
@@ -387,6 +389,8 @@
     <ClCompile Include="aq\verbs\OverVerbs.cpp" />
     <ClCompile Include="aq\verbs\ScalarVerbs.cpp" />
     <ClCompile Include="aq\verbs\Verb.cpp" />
+    <ClCompile Include="aq\verbs\VerbFactory.cpp" />
+    <ClCompile Include="aq\verbs\VerbNode.cpp" />
     <ClCompile Include="aq\verbs\VerbResult.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -2,7 +2,7 @@
 #define __ROW_VERB_PROCESS_H__
 
 #include "RowProcess_Intf.h"
-#include "verbs/Verb.h"
+#include "verbs/VerbNode.h"
 
 namespace aq
 {

@@ -5,7 +5,7 @@
 #include <aq/Utilities.h>
 #include "AQEngine_Intf.h"
 #include "Table.h"
-#include "verbs/Verb.h"
+#include "verbs/VerbNode.h"
 #include <aq/Timer.h>
 #include <vector>
 #include <boost/date_time/posix_time/posix_time.hpp>
