@@ -325,7 +325,6 @@
     <ClInclude Include="aq\DumpVisitor.h" />
     <ClInclude Include="aq\ExprTransform.h" />
     <ClInclude Include="aq\LIKE_PatternMatching.h" />
-    <ClInclude Include="aq\Object.h" />
     <ClInclude Include="aq\Optimizations.h" />
     <ClInclude Include="aq\parser\ID2Str.h" />
     <ClInclude Include="aq\parser\JeqParser.h" />

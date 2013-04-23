@@ -1,7 +1,7 @@
 #ifndef __AQ_COLUMN_ITEM_H__
 #define __AQ_COLUMN_ITEM_H__
 
-#include "Object.h"
+#include <aq/Object.h>
 #include <aq/DBTypes.h>
 #include <string>
 

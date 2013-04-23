@@ -2,9 +2,9 @@
 #define __AQ_COLUMN_H__
 
 #include "verbs/VerbResult.h"
-#include "Object.h"
 #include "Settings.h"
 
+#include <aq/Object.h>
 #include <aq/DBTypes.h>
 #include <aq/FileMapper.h>
 

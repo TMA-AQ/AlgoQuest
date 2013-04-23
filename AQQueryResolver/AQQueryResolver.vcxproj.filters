@@ -93,9 +93,6 @@
     <ClInclude Include="aq\LIKE_PatternMatching.h">
       <Filter>Header Files\aq</Filter>
     </ClInclude>
-    <ClInclude Include="aq\Object.h">
-      <Filter>Header Files\aq</Filter>
-    </ClInclude>
     <ClInclude Include="aq\Optimizations.h">
       <Filter>Header Files\aq</Filter>
     </ClInclude>
