@@ -1,6 +1,6 @@
 #include "AQEngine.h"
 #include <aq/Exceptions.h>
-#include "JeqParser.h"
+#include "parser/JeqParser.h"
 #include "SQLPrefix.h"
 #include "TreeUtilities.h"
 #include <string>

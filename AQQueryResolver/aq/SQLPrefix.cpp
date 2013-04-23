@@ -1,5 +1,5 @@
 #include "SQLPrefix.h"
-#include "ID2Str.h"
+#include "parser/ID2Str.h"
 #include <cstdio>
 #include <cassert>
 #include <cstdlib>

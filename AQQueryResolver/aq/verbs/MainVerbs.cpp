@@ -1,10 +1,10 @@
 #include "MainVerbs.h"
-#include <algorithm>
-#include "ID2Str.h"
-#include <aq/Exceptions.h>
-#include "TreeUtilities.h"
-#include "Column2Table.h"
 #include "VerbVisitor.h"
+#include <algorithm>
+#include <aq/parser/ID2Str.h>
+#include <aq/Exceptions.h>
+#include <aq/TreeUtilities.h>
+#include <aq/Column2Table.h>
 #include <aq/Logger.h>
 
 using namespace aq;

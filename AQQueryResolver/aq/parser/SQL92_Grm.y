@@ -17,8 +17,6 @@
 #include <stdlib.h>
 #include <malloc.h>
 #include <string.h>
-#include "SQLPrefix.h"
-#include "Column2Table.h"
 
 // Forward Definitions
 int yyerror( const char *pszMsg );
@@ -1667,7 +1665,7 @@ column_column_pair	: column_reference K_EQ column_reference	{
 %%
 
 //------------------------------------------------------------------------------
-#include "lex.yy.c"
+#include "lex.yy.cpp"
 
 //------------------------------------------------------------------------------
 /* Returns 0 on success, 1 on error */

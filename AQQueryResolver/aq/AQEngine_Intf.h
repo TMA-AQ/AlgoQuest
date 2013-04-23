@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SQLParser.h"
+#include "parser/SQLParser.h"
 #include "AQMatrix.h"
 #include "Settings.h"
 

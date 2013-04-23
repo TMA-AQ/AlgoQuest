@@ -1,17 +1,17 @@
 #ifndef __VERB_VISITOR_H__
 #define __VERB_VISITOR_H__
 
-#include "verbs/AggregateVerbs.h"
-#include "verbs/ArithmeticVerbs.h"
-#include "verbs/AuxiliaryVerbs.h"
-#include "verbs/CaseVerb.h"
-#include "verbs/ComparisonVerbs.h"
-#include "verbs/ConversionVerbs.h"
-#include "verbs/DateVerbs.h"
-#include "verbs/JoinVerbs.h"
-#include "verbs/MainVerbs.h"
-#include "verbs/OverVerbs.h"
-#include "verbs/ScalarVerbs.h"
+#include "AggregateVerbs.h"
+#include "ArithmeticVerbs.h"
+#include "AuxiliaryVerbs.h"
+#include "CaseVerb.h"
+#include "ComparisonVerbs.h"
+#include "ConversionVerbs.h"
+#include "DateVerbs.h"
+#include "JoinVerbs.h"
+#include "MainVerbs.h"
+#include "OverVerbs.h"
+#include "ScalarVerbs.h"
 
 class VerbVisitor
 {

@@ -1,5 +1,5 @@
 #include "Column2Table.h"
-#include "sql92_grm_tab.h"
+#include "parser/sql92_grm_tab.hpp"
 #include <stdio.h>
 #include <malloc.h>
 #include <string.h>

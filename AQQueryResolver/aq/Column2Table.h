@@ -1,7 +1,7 @@
 #ifndef __FIAN_COLUMN2TABLE_H__
 #define __FIAN_COLUMN2TABLE_H__
 
-#include "SQLParser.h"
+#include "parser/SQLParser.h"
 #include "Table.h"
 
 #define EXIT_ON_MEM_ERROR	1

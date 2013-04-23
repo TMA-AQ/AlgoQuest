@@ -1,6 +1,6 @@
 #include "TreeUtilities.h"
 #include <assert.h>
-#include "sql92_grm_tab.h"
+#include "parser/sql92_grm_tab.hpp"
 #include "Table.h"
 #include <aq/Exceptions.h>
 #include <algorithm>

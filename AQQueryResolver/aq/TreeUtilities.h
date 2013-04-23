@@ -1,7 +1,7 @@
 #pragma once
 
-#include "SQLParser.h"
-#include "sql92_grm_tab.h"
+#include "parser/SQLParser.h"
+#include "parser/sql92_grm_tab.hpp"
 #include "Table.h"
 #include <vector>
 #include <list>

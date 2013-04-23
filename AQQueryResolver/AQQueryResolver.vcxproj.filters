@@ -34,6 +34,12 @@
     <Filter Include="Source Files\aq\verbs">
       <UniqueIdentifier>{b4c5082d-51d5-48d8-b9fa-93fbf352a5ba}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\aq\parser">
+      <UniqueIdentifier>{bfecb335-152c-40b2-95f9-511a1e3578a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\aq\parser">
+      <UniqueIdentifier>{216ac17a-0f88-4cdc-8907-67084daa11d3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="SQLParser\sql92_grm.output">
@@ -44,11 +50,11 @@
     <None Include="Generate_Parser.bat">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="aq\SQL92_Tok.l">
-      <Filter>Source Files\aq</Filter>
+    <None Include="aq\parser\SQL92_Grm.y">
+      <Filter>Source Files\aq\parser</Filter>
     </None>
-    <None Include="aq\SQL92_Grm.y">
-      <Filter>Source Files\aq</Filter>
+    <None Include="aq\parser\SQL92_Tok.l">
+      <Filter>Source Files\aq\parser</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -84,12 +90,6 @@
     <ClInclude Include="aq\ExprTransform.h">
       <Filter>Header Files\aq</Filter>
     </ClInclude>
-    <ClInclude Include="aq\ID2Str.h">
-      <Filter>Header Files\aq</Filter>
-    </ClInclude>
-    <ClInclude Include="aq\JeqParser.h">
-      <Filter>Header Files\aq</Filter>
-    </ClInclude>
     <ClInclude Include="aq\LIKE_PatternMatching.h">
       <Filter>Header Files\aq</Filter>
     </ClInclude>
@@ -121,12 +121,6 @@
       <Filter>Header Files\aq</Filter>
     </ClInclude>
     <ClInclude Include="aq\Settings.h">
-      <Filter>Header Files\aq</Filter>
-    </ClInclude>
-    <ClInclude Include="aq\sql92_grm_tab.h">
-      <Filter>Header Files\aq</Filter>
-    </ClInclude>
-    <ClInclude Include="aq\SQLParser.h">
       <Filter>Header Files\aq</Filter>
     </ClInclude>
     <ClInclude Include="aq\SQLPrefix.h">
@@ -186,6 +180,18 @@
     <ClInclude Include="aq\verbs\VerbVisitor.h">
       <Filter>Header Files\aq\verbs</Filter>
     </ClInclude>
+    <ClInclude Include="aq\parser\JeqParser.h">
+      <Filter>Header Files\aq\parser</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\parser\SQLParser.h">
+      <Filter>Header Files\aq\parser</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\parser\sql92_grm_tab.hpp">
+      <Filter>Header Files\aq\parser</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\parser\ID2Str.h">
+      <Filter>Header Files\aq\parser</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="aq\verbs\AggregateVerbs.cpp">
@@ -227,9 +233,6 @@
     <ClCompile Include="aq\db_loader\Util.cpp">
       <Filter>Source Files\aq\db_loader</Filter>
     </ClCompile>
-    <ClCompile Include="aq\lex.yy.c">
-      <Filter>Source Files\aq</Filter>
-    </ClCompile>
     <ClCompile Include="aq\AQEngine.cpp">
       <Filter>Source Files\aq</Filter>
     </ClCompile>
@@ -254,12 +257,6 @@
     <ClCompile Include="aq\ExprTransform.cpp">
       <Filter>Source Files\aq</Filter>
     </ClCompile>
-    <ClCompile Include="aq\ID2Str.cpp">
-      <Filter>Source Files\aq</Filter>
-    </ClCompile>
-    <ClCompile Include="aq\JeqParser.cpp">
-      <Filter>Source Files\aq</Filter>
-    </ClCompile>
     <ClCompile Include="aq\LIKE_PatternMatching.cpp">
       <Filter>Source Files\aq</Filter>
     </ClCompile>
@@ -278,9 +275,6 @@
     <ClCompile Include="aq\Settings.cpp">
       <Filter>Source Files\aq</Filter>
     </ClCompile>
-    <ClCompile Include="aq\SQLParser.cpp">
-      <Filter>Source Files\aq</Filter>
-    </ClCompile>
     <ClCompile Include="aq\SQLPrefix.cpp">
       <Filter>Source Files\aq</Filter>
     </ClCompile>
@@ -290,14 +284,26 @@
     <ClCompile Include="aq\TreeUtilities.cpp">
       <Filter>Source Files\aq</Filter>
     </ClCompile>
-    <ClCompile Include="aq\sql92_grm_tab.cpp">
-      <Filter>Source Files\aq</Filter>
-    </ClCompile>
     <ClCompile Include="aq\verbs\Verb.cpp">
       <Filter>Source Files\aq\verbs</Filter>
     </ClCompile>
     <ClCompile Include="aq\verbs\VerbResult.cpp">
       <Filter>Source Files\aq\verbs</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\parser\JeqParser.cpp">
+      <Filter>Source Files\aq\parser</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\parser\SQLParser.cpp">
+      <Filter>Source Files\aq\parser</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\parser\lex.yy.cpp">
+      <Filter>Source Files\aq\parser</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\parser\sql92_grm_tab.cpp">
+      <Filter>Source Files\aq\parser</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\parser\ID2Str.cpp">
+      <Filter>Source Files\aq\parser</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

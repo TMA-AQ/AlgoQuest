@@ -5,8 +5,8 @@
 #include <aq/Object.h>
 #include <aq/RowProcess_Intf.h>
 #include <aq/Table.h>
-#include <aq/SQLParser.h>
-#include <aq/sql92_grm_tab.h>
+#include <aq/parser/SQLParser.h>
+#include <aq/parser/sql92_grm_tab.hpp>
 #include <aq/Exceptions.h>
 
 // forward declaration

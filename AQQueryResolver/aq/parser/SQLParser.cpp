@@ -1,7 +1,6 @@
 #include "SQLParser.h"
-// #include "Table.h"
 #include <aq/DBTypes.h>
-#include "sql92_grm_tab.h"
+#include "sql92_grm_tab.hpp"
 #include "ID2Str.h"
 
 #include <cstdio>

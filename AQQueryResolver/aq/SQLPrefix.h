@@ -1,7 +1,7 @@
 #ifndef __FIAN_SQLPREFIX_H__
 #define __FIAN_SQLPREFIX_H__
 
-#include "SQLParser.h"
+#include "parser/SQLParser.h"
 
 namespace aq
 {

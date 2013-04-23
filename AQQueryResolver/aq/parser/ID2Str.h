@@ -1,7 +1,7 @@
 #ifndef __AQ_ID2STR_H__
 #define __AQ_ID2STR_H__
 
-#include "sql92_grm_tab.h"
+#include "sql92_grm_tab.hpp"
 
 //------------------------------------------------------------------------------
 char* id_to_string( unsigned int nID );
