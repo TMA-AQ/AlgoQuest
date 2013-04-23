@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef __FIAN_Object_H__
-#define __FIAN_Object_H__
+#ifndef __AQ_OBJECT_H__
+#define __AQ_OBJECT_H__
 
 #include <boost/intrusive_ptr.hpp>
 

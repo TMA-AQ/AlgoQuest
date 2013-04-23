@@ -160,6 +160,7 @@
     <ClInclude Include="aq\Exceptions.h" />
     <ClInclude Include="aq\FileMapper.h" />
     <ClInclude Include="aq\Logger.h" />
+    <ClInclude Include="aq\Object.h" />
     <ClInclude Include="aq\ParallelProcess.h" />
     <ClInclude Include="aq\Symbole.h" />
     <ClInclude Include="aq\Timer.h" />
