@@ -1,6 +1,6 @@
 #include "Verb.h"
 #include "VerbVisitor.h"
-#include "ID2Str.h"
+#include <aq/ID2Str.h>
 #include <aq/Logger.h>
 
 using namespace boost;

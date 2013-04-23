@@ -1,5 +1,5 @@
 #include "Optimizations.h"
-#include "AuxiliaryVerbs.h"
+#include "verbs/AuxiliaryVerbs.h"
 #include <aq/Exceptions.h>
 #include <boost/scoped_array.hpp>
 

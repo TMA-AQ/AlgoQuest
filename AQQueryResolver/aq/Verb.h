@@ -1,11 +1,12 @@
 #pragma once
 
-#include "Object.h"
 #include "VerbResult.h"
-#include "RowProcess_Intf.h"
-#include "Table.h"
-#include "SQLParser.h"
-#include "sql92_grm_tab.h"
+
+#include <aq/Object.h>
+#include <aq/RowProcess_Intf.h>
+#include <aq/Table.h>
+#include <aq/SQLParser.h>
+#include <aq/sql92_grm_tab.h>
 #include <aq/Exceptions.h>
 
 // forward declaration
