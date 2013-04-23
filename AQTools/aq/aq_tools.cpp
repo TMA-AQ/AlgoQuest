@@ -1,9 +1,9 @@
 #include <aq/AQEngine.h>
-#include <aq/SQLParser.h>
 #include <aq/SQLPrefix.h>
 #include <aq/Column2Table.h>
 #include <aq/QueryResolver.h>
-#include <aq/JeqParser.h>
+#include <aq/parser/SQLParser.h>
+#include <aq/parser/JeqParser.h>
 #include <aq/Exceptions.h>
 #include <aq/BaseDesc.h>
 #include <aq/db_loader/DatabaseLoader.h>
