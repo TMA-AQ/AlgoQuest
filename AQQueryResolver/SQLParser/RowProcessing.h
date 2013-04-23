@@ -1,24 +1,25 @@
-#ifndef __ROW_PROCESSING_H__
-#define __ROW_PROCESSING_H__
+#ifndef __ROW_WRITTER_H__
+#define __ROW_WRITTE_H__
 
 #include "Table.h"
+#include "Verb.h"
+#include "RowProcess_Intf.h"
 #include <vector>
 
 namespace aq
 {
 
-class RowProcessing
+class RowWritter : public aq::RowProcess_Intf
 {
 public:
-	typedef std::vector<std::pair<ColumnItem::Ptr, ColumnType> > row_t;
-
-	RowProcessing(const std::string& filePath);
-	~RowProcessing();
+	RowWritter(const std::string& filePath);
+	~RowWritter();
 
 	void setColumn(std::vector<Column::Ptr> _columns) { this->columns = _columns; }
-	virtual int process(row_t row);
+	virtual int process(row_t& row);
 
 private:
+  VerbNode::Ptr spTree;
 	std::vector<Column::Ptr> columns;
 	char * value;
 	FILE * pFOut;

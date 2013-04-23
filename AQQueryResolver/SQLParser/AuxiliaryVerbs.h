@@ -12,6 +12,8 @@ public:
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
+  virtual void addResult(	aq::RowProcess_Intf::row_t& row, 
+    VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
 
 	std::string getTableName() const;
 	std::string getColumnName() const;
@@ -111,6 +113,12 @@ public:
 	virtual bool preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal );
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
+  void addResult(aq::RowProcess_Intf::row_t& row, 
+    VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
+	virtual void accept(VerbVisitor* visitor);
+  const std::string& getIdent() const { return ident; }
+private:
+  std::string ident;
 };
 
 //------------------------------------------------------------------------------

@@ -2,6 +2,7 @@
 
 #include "Object.h"
 #include "VerbResult.h"
+#include "RowProcess_Intf.h"
 #include "Table.h"
 #include "SQLParser.h"
 #include "sql92_grm_tab.h"
@@ -25,34 +26,38 @@ public:
 	//return verb identifier (K_XXX from sql92_grm_tab.h)
 	virtual int getVerbType() const = 0;
 
-	//preprocess query to gather information about it before it is changed
-	//or change the tnode subtree before the verb tree is built based on it
-	//1. If the subtree can be solved by the engine, return true.
-	//2. If the subtree will be solved by the verb return false.
-	//pStart - top of the query (SELECT node)
-	//pNode - node to which this verb corresponds
-	//attention! the method is called in top-down order, in the verb tree,
-	//as the verb tree is being built
+	/// preprocess query to gather information about it before it is changed
+	/// or change the tnode subtree before the verb tree is built based on it
+	/// 1. If the subtree can be solved by the engine, return true.
+	/// 2. If the subtree will be solved by the verb return false.
+	/// pStart - top of the query (SELECT node)
+	/// pNode - node to which this verb corresponds
+	/// Be carefull ! This method is called in top-down order, in the verb tree,
+	/// as the verb tree is being built
 	virtual bool preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal ){ return false; }
 
-	//make changes to the query before it is executed
-	//results that should be passed on to parent verbs should be placed in Result
-	//1. If verb can be solved and changeResult is not necessary, pNode should
-	//be assigned the appropriate subtree and changeQuery should return true.
-	//2. If verb cannot be solved completely changeQuery should return false.
-	//pStart/pNode - same as preprocessQuery
-	//parameters - array of results from children verbs
-	//attention! the method is called in bottom-up order, in the verb tree
+	/// make changes to the query before it is executed
+	/// results that should be passed on to parent verbs should be placed in Result
+	/// 1. If verb can be solved and changeResult is not necessary, pNode should
+	/// be assigned the appropriate subtree and changeQuery should return true.
+	/// 2. If verb cannot be solved completely changeQuery should return false.
+	/// pStart/pNode - same as preprocessQuery
+	/// parameters - array of results from children verbs
+	/// Be carefull ! This method is called in bottom-up order, in the verb tree
 	virtual bool changeQuery( tnode* pStart, tnode* pNode,
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext ){ return false; }
 
-	//make changes to the table resulted from executing the query
-	//results that should be passed on to parent verbs should be placed in Result
-	//table - should be read by leaf nodes and written by top level nodes
-	//parameters - same as changeQuery
-	//attention! the method is called in bottom-up order, in the verb tree
+	/// make changes to the table resulted from executing the query
+	/// results that should be passed on to parent verbs should be placed in Result
+	/// table - should be read by leaf nodes and written by top level nodes
+	/// parameters - same as changeQuery
+	/// Be carefull ! This method is called in bottom-up order, in the verb tree
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext ){}
+
+  /// Apply the verb on the row
+  /// This method is called in bottom-up order in the verb tree
+  virtual void addResult ( aq::RowProcess_Intf::row_t& row, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext ){}
 
   /// Set the Base Description
   virtual void setBaseDesc(Base * BaseDesc) 
@@ -107,13 +112,23 @@ public:
 	//true - executed and done (the node should be deleted)
 	void changeQuery();
 	void changeResult( Table::Ptr table );
+  void addResult(aq::RowProcess_Intf::row_t& row);
 	
 	void accept(VerbVisitor*);
+  void acceptLeftToRight(VerbVisitor* visitor);
 
 	Verb::Ptr getVerbObject();
 	VerbNode::Ptr getLeftChild();
 	VerbNode::Ptr getRightChild();
 	VerbNode::Ptr getBrother();
+  
+  static VerbNode::Ptr BuildVerbsTree( tnode* pStart, Base& baseDesc, TProjectSettings * settings );
+   
+  /// build a VerbNode subtree corresponding to the ppStart subtree
+  /// a branch will end when a VerbNode for that tnode cannot be found
+  /// top level node in the subtree will not have a brother
+  static VerbNode::Ptr BuildVerbsSubtree( tnode* pSelect, tnode* pStart, tnode* pStartOriginal, int context, Base& BaseDesc, TProjectSettings *pSettings );
+
 private:
 	Verb::Ptr VerbObject;
 	tnode* pStart; //top node in the query tree

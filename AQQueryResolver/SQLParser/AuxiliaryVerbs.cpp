@@ -3,7 +3,9 @@
 #include "ExprTransform.h"
 #include <aq/Exceptions.h>
 #include "VerbVisitor.h"
+#include <memory>
 #include <algorithm>
+#include <boost/algorithm/string.hpp>
 
 using namespace aq;
 using namespace std;
@@ -40,6 +42,9 @@ bool ColumnVerb::changeQuery(	tnode* pStart, tnode* pNode,
 		this->ColumnName = auxcol.getName();
 	//}
 	//update: it IS possible
+
+  boost::to_upper(this->TableName);
+  boost::to_upper(this->ColumnName);
 
 	if( this->Context != K_WHERE )
 		return false; //must perform the query before we know the values
@@ -90,6 +95,26 @@ void ColumnVerb::changeResult(	Table::Ptr table,
 		}
 	assert( (table->Columns.size() == 0) ||
 			(table->Columns.size() == 1) && table->HasCount );
+}
+
+//------------------------------------------------------------------------------
+void ColumnVerb::addResult(aq::RowProcess_Intf::row_t& row, 
+                           VerbResult::Ptr resLeft,
+                           VerbResult::Ptr resRight, 
+                           VerbResult::Ptr resNext )
+{
+	if( this->Result )
+		return;
+  
+  for (aq::RowProcess_Intf::row_t::iterator it = row.begin(); it != row.end(); ++it)
+  {
+    if ((*it).match(this->TableName, this->ColumnName))
+    {
+      this->Result.reset(new Scalar((*it).type, *(*it).item.get()));
+      break;
+    }
+  }
+
 }
 
 //------------------------------------------------------------------------------
@@ -320,6 +345,8 @@ bool AsVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal
 		*pNode = *pNode->left; //no memory leaks
 		return true;
 	case K_SELECT:
+    assert(pNode->right);
+    this->ident = pNode->right->data.val_str;
 		return false;
 	default:
 		throw verb_error(generic_error::INVALID_QUERY, this->getVerbType());
@@ -334,6 +361,26 @@ void AsVerb::changeResult(	Table::Ptr table,
 							VerbResult::Ptr resRight, VerbResult::Ptr resNext )
 {
 	this->Result = resLeft;
+}
+
+//------------------------------------------------------------------------------
+void AsVerb::addResult(aq::RowProcess_Intf::row_t& row, 
+                       VerbResult::Ptr resLeft,
+                       VerbResult::Ptr resRight, 
+                       VerbResult::Ptr resNext )
+{
+  Scalar * scalar = dynamic_cast<Scalar*>(resLeft.get());
+  if (scalar != 0)
+  {
+    ColumnItem::Ptr item(new ColumnItem(scalar->Item));
+    row.push_back(aq::RowProcess_Intf::row_item_t(item, scalar->Type, "", this->ident));
+  }
+}
+
+//------------------------------------------------------------------------------
+void AsVerb::accept(VerbVisitor* visitor)
+{
+	visitor->visit(this);
 }
 
 //------------------------------------------------------------------------------

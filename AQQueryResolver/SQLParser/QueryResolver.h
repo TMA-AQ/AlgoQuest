@@ -24,19 +24,19 @@ public:
 	// Table::Ptr solveAQMatriceV2(VerbNode::Ptr spTree, tnode * pNode);
 	Table::Ptr getResult() { return this->result; }
 
-	static VerbNode::Ptr BuildVerbsTree( tnode* pStart, Base& baseDesc, TProjectSettings * settings );
+  const ColumnItem& getValue(size_t row, size_t column) const;
+
 	static void getColumnTypes( tnode* pNode, std::vector<Column::Ptr>& columnTypes, Base& baseDesc );
 	static void cleanQuery( tnode*& pNode );
 	
 private:
-	static VerbNode::Ptr BuildVerbsSubtree(	tnode* pSelect, tnode* pStart, tnode* pStartOriginal, int context, Base& BaseDesc, TProjectSettings *pSettings );
 	void addUnionMinusNode(	int tag, std::vector<tnode*>& queries, std::vector<int>& operation, tnode* pNode );
 						
 	/// Solve Select Statement	
 	Table::Ptr SolveSelect();
 	Table::Ptr SolveSelectRegular();
 	
-	void SolveSelectFromSelect(	tnode* pInteriorSelect, tnode* pExteriorSelect, int nSelectLevel );
+	boost::shared_ptr<QueryResolver> SolveSelectFromSelect(	tnode* pInteriorSelect, tnode* pExteriorSelect, int nSelectLevel );
 	void SolveSelectRecursive(	tnode*& pNode, unsigned int nSelectLevel, tnode* pLastSelect, bool inFrom, bool inIn  );
 
 	/// Solve Insert Statement
@@ -89,6 +89,7 @@ private:
 	tnode *sqlStatement;
 	Table::Ptr result;
   std::map<size_t, tnode*> values;
+  std::map<std::string, boost::shared_ptr<QueryResolver> > nestedTables;
   unsigned int id;
   unsigned int nestedId;
   unsigned int level;

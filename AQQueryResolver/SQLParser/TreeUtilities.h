@@ -2,14 +2,19 @@
 
 #include "SQLParser.h"
 #include "sql92_grm_tab.h"
-#include <vector>
 #include "Table.h"
+#include <vector>
+#include <list>
 
-void addConditionsToWhere( tnode* pCond, tnode* pStart );
-void addInnerOuterNodes( tnode* pNode, int leftTag, int rightTag );
 extern const int nrJoinTypes;
 extern const int joinTypes[];
 extern const int inverseTypes[];
+
+namespace aq
+{
+  
+void addConditionsToWhere( tnode* pCond, tnode* pStart );
+void addInnerOuterNodes( tnode* pNode, int leftTag, int rightTag );
 void mark_as_deleted( tnode* pNode );
 void solveSelectStar(	tnode* pNode, 
             Base& BaseDesc,
@@ -18,10 +23,9 @@ void solveSelectStar(	tnode* pNode,
 void solveSelectStarExterior( tnode* pInterior, tnode* pExterior );
 void solveOneTableInFrom( tnode* pStart, Base& BaseDesc );
 void moveFromJoinToWhere( tnode* pStart, Base& BaseDesc );
-void changeTableNames(	tnode* pIntSelectAs, tnode* pInteriorSelect, 
-						tnode* pExteriorSelect );
-void changeColumnNames(	tnode* pIntSelectAs, tnode* pInteriorSelect, 
-						tnode* pExteriorSelect, bool keepAlias );
+void changeTableNames(	tnode* pIntSelectAs, tnode* pInteriorSelect, tnode* pExteriorSelect );
+void changeColumnNames(	tnode* pIntSelectAs, tnode* pInteriorSelect, tnode* pExteriorSelect, bool keepAlias );
+tnode * getJoin(tnode* pNode);
 bool isMonoTable(tnode* query, std::string& tableName);
 
 class SolveMinMaxGroupBy
@@ -43,11 +47,9 @@ private:
 };
 
 void readTmpFile( const char* filePath, std::vector<llong>& vals );
-void writeTmpFile(	const char* filePath, const std::vector<llong>& vals,
-					size_t startIdx, size_t endIdx );
+void writeTmpFile(	const char* filePath, const std::vector<llong>& vals, size_t startIdx, size_t endIdx );
 
-void getColumnsIds(	const Table& table, std::vector<tnode*>& columns, 
-					std::vector<int>& valuePos );
+void getColumnsIds(	const Table& table, std::vector<tnode*>& columns, std::vector<int>& valuePos );
 
 void eliminateAliases( tnode* pSelect );
 
@@ -55,5 +57,11 @@ void getAllColumnNodes( tnode*& pNode, std::vector<tnode**>& columnNodes );
 
 void getColumnsList( tnode* pNode, std::vector<tnode*>& columns );
 
+void getTablesList( tnode* pNode, std::list<std::string>& tables );
+
 /// search a subtree for a node and return the last node that had a certain tag
 tnode* getLastTag( tnode*& pNode, tnode* pLastTag, tnode* pCheckNode, int tag );
+
+void generate_parent(tnode* pNode, tnode* parent);
+
+}

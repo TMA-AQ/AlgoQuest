@@ -7,13 +7,13 @@
 #include <boost/scoped_array.hpp>
 #include <direct.h>
 
-using namespace aq;
-using namespace std;
-
 //------------------------------------------------------------------------------
 const int nrJoinTypes = 7;
 const int joinTypes[] = { K_JEQ, K_JAUTO, K_JNEQ, K_JINF, K_JIEQ, K_JSUP, K_JSEQ };
 const int inverseTypes[] = { K_JEQ, K_JAUTO, K_JNEQ, K_JSUP, K_JSEQ, K_JINF, K_JIEQ };
+
+namespace aq
+{
 
 //------------------------------------------------------------------------------
 void addConditionsToWhere( tnode* pCond, tnode* pStart )
@@ -21,9 +21,9 @@ void addConditionsToWhere( tnode* pCond, tnode* pStart )
 	assert( pCond && pStart );
 	//eliminate K_JNO from conditions
 	tnode* pCondClone = clone_subtree( pCond );
-	vector<tnode*> nodes;
+	std::vector<tnode*> nodes;
 	andListToNodeArray( pCondClone, nodes );
-	vector<tnode*> newNodes;
+	std::vector<tnode*> newNodes;
 	for( size_t idx = 0; idx < nodes.size(); ++idx )
 		if( nodes[idx] && (nodes[idx]->tag != K_JNO) )
 			newNodes.push_back( nodes[idx] );
@@ -132,9 +132,9 @@ void solveSelectStar(	tnode* pNode,
 	//get all columns from all tables and return
 	//the other verbs will have the columns they need
 	tnode* fromNode = find_main_node( pNode, K_FROM );
-	vector<tnode*> tables;
+	std::vector<tnode*> tables;
 	commaListToNodeArray( fromNode->left, tables );
-	vector<tnode*> colRefs;
+	std::vector<tnode*> colRefs;
 	for( size_t idx = 0; idx < tables.size(); ++idx )
 	{
 		assert( tables[idx] && tables[idx]->tag == K_IDENT );
@@ -173,7 +173,7 @@ void solveOneTableInFrom( tnode* pStart, Base& BaseDesc )
 {
 	assert( pStart && pStart->tag == K_SELECT );
 	tnode* pNode = find_main_node( pStart, K_FROM );
-	/*vector<tnode*> tables;
+	/*std::vector<tnode*> tables;
 	commaListToNodeArray( pNode->left, tables );
 	for( size_t idx = 0; idx < tables.size(); ++idx )
 		if( tables[idx] && tables[idx]->tag == K_AS )
@@ -181,10 +181,10 @@ void solveOneTableInFrom( tnode* pStart, Base& BaseDesc )
 			replaceTableIdent( pStart, tables[idx]->right->data.val_str, tables[idx]->left->data.val_str );
 			*tables[idx] = *tables[idx]->left; //no memory leaks
 		}*/
-	vector<tnode*> tables;
+	std::vector<tnode*> tables;
 	commaListToNodeArray( pNode->left, tables );
 	/*tnode* oldTables = pNode->left;
-	vector<tnode*> newTables;
+	std::vector<tnode*> newTables;
 	for( size_t idx = 0; idx < tables.size(); ++idx )
 		if( tables[idx] && tables[idx]->tag == K_IDENT )
 			newTables.push_back( new_node(tables[idx]) );
@@ -278,7 +278,7 @@ void moveFromJoinToWhere( tnode* pStart, Base& BaseDesc )
 }
 
 //------------------------------------------------------------------------------
-void getAllColumnNodes( tnode*& pNode, vector<tnode**>& columnNodes )
+void getAllColumnNodes( tnode*& pNode, std::vector<tnode**>& columnNodes )
 {
 	if( !pNode )
 		return;
@@ -329,20 +329,19 @@ tnode* findColumn(  std::string columnName, std::vector<tnode*>& interiorColumns
 }
 
 //------------------------------------------------------------------------------
-void changeTableNames(	tnode* pIntSelectAs, tnode* pInteriorSelect, 
-						tnode* pExteriorSelect )
+void changeTableNames(	tnode* pIntSelectAs, tnode* pInteriorSelect, tnode* pExteriorSelect )
 {
 	std::string tableName = pIntSelectAs->right->data.val_str;
 
 	tnode* intFromNode = find_main_node( pInteriorSelect, K_FROM );
-	vector<tnode*> intTables;
+	std::vector<tnode*> intTables;
 	commaListToNodeArray( intFromNode->left, intTables );
 
 	tnode* extFromNode = find_main_node( pExteriorSelect, K_FROM );
-	vector<tnode*> extTables;
+	std::vector<tnode*> extTables;
 	commaListToNodeArray( extFromNode->left, extTables );
 	
-	vector<tnode*> newExtTables;
+	std::vector<tnode*> newExtTables;
 	for( size_t idx = 0; idx < extTables.size(); ++idx )
 		if( extTables[idx] != pIntSelectAs )
 			newExtTables.push_back( extTables[idx] );
@@ -377,8 +376,7 @@ void changeTableNames(	tnode* pIntSelectAs, tnode* pInteriorSelect,
 }
 
 //------------------------------------------------------------------------------
-void changeColumnNames(	tnode* pIntSelectAs, tnode* pInteriorSelect, 
-						tnode* pExteriorSelect, bool keepAlias )
+void changeColumnNames(	tnode* pIntSelectAs, tnode* pInteriorSelect, tnode* pExteriorSelect, bool keepAlias )
 {
 	std::string tableName = pIntSelectAs->right->data.val_str;
 
@@ -426,6 +424,46 @@ void changeColumnNames(	tnode* pIntSelectAs, tnode* pInteriorSelect,
 }
 
 //------------------------------------------------------------------------------
+tnode * getJoin(tnode* pNode)
+{
+
+  //if (!((pNode->left != NULL) && (pNode->left->left->tag == K_PERIOD) && (pNode->left->right->tag == K_PERIOD)))
+  //{
+  //  delete_subtree(pNode->left);
+  //}
+
+  if (pNode->tag == K_AND)
+  {
+
+    tnode * left = getJoin(pNode->left);
+    tnode * right = getJoin(pNode->right);
+
+    if ((left == NULL) && (right == NULL))
+    {
+      delete pNode;
+      pNode = NULL;
+    }
+    else if (left != NULL)
+    {
+      delete pNode;
+      pNode = left;
+    }
+    else if (right != NULL)
+    {
+      delete pNode;
+      pNode = right;
+    }
+  }
+  else if (!((pNode->tag == K_JEQ) || (pNode->tag == K_JAUTO)))
+  {
+    delete pNode;
+    pNode = NULL;
+  }
+
+  return pNode;
+}
+
+//------------------------------------------------------------------------------
 bool isMonoTable(tnode * query, std::string& tableName)
 {
 	//
@@ -464,7 +502,7 @@ SolveMinMaxGroupBy::~SolveMinMaxGroupBy()
 //------------------------------------------------------------------------------
 bool SolveMinMaxGroupBy::checkAndClear( tnode* pSelect )
 {
-	vector<tnode*> auxColumns;
+	std::vector<tnode*> auxColumns;
 	commaListToNodeArray( pSelect->left, auxColumns );
 	int nrMinMaxCols = 0;
 	for( size_t idx = 0; idx < auxColumns.size(); ++idx )
@@ -496,7 +534,7 @@ bool SolveMinMaxGroupBy::checkAndClear( tnode* pSelect )
 	tnode* pFrom = find_main_node( pSelect, K_FROM );
 	if( !pFrom )
 		return false;
-	vector<tnode*> tables;
+	std::vector<tnode*> tables;
 	commaListToNodeArray( pFrom->left, tables );
 	
 	if( tables.size() != 1 )
@@ -520,7 +558,7 @@ bool SolveMinMaxGroupBy::checkAndClear( tnode* pSelect )
 }
 
 //------------------------------------------------------------------------------
-void readTmpFile( const char* filePath, vector<llong>& vals )
+void readTmpFile( const char* filePath, std::vector<llong>& vals )
 {
 	FILE *pFIn = fopenUTF8( filePath, "rb" );
 	FileCloser fileCloser( pFIn );
@@ -538,7 +576,7 @@ void readTmpFile( const char* filePath, vector<llong>& vals )
 }
 
 //------------------------------------------------------------------------------
-void writeTmpFile(	const char* filePath, const vector<llong>& vals,
+void writeTmpFile(	const char* filePath, const std::vector<llong>& vals,
 					size_t startIdx, size_t endIdx )
 {
 	FILE *pFOut = fopen( filePath, "wb" );
@@ -558,7 +596,7 @@ void writeTmpFile(	const char* filePath, const vector<llong>& vals,
 }
 
 //------------------------------------------------------------------------------
-void readPosFile( const char* filePath, vector<llong>& vals )
+void readPosFile( const char* filePath, std::vector<llong>& vals )
 {
 	FILE *pFIn = fopen( filePath, "rb" );
 	FileCloser fileCloser( pFIn );
@@ -579,12 +617,12 @@ void SolveMinMaxGroupBy::modifyTmpFiles(	const char* tmpPath,
 	if( !this->pGroupBy )
 		return;
 
-	/*vector<string> files;
+	/*std::vector<string> files;
 	if( GetFiles( tmpPath, files ) != 0 )
 		throw generic_error(generic_error::INVALID_FILE, "");*/
 
 	size_t tIdx1 = BaseDesc.getTableIdx( this->tableName );
-	/*vector<llong> rows;
+	/*std::vector<llong> rows;
 	/* read tmp file
 	for( size_t idx = 0; idx < files.size(); ++idx )
 	{
@@ -608,11 +646,11 @@ void SolveMinMaxGroupBy::modifyTmpFiles(	const char* tmpPath,
 	sort( rows.begin(), rows.end() );*/
 
 	Table& templateTable = BaseDesc.Tables[tIdx1];
-	vector<int> colIds;
+	std::vector<int> colIds;
 	getColumnsIds( templateTable, this->columns, colIds );
 
 	Table table;
-	vector<Column::Ptr> columnTypes;
+	std::vector<Column::Ptr> columnTypes;
 	for( size_t idx = 0; idx < colIds.size(); ++idx )
 	{
 		columnTypes.push_back( new Column(*templateTable.Columns[colIds[idx]]) );
@@ -637,7 +675,7 @@ void SolveMinMaxGroupBy::modifyTmpFiles(	const char* tmpPath,
 			continue;
 		++idxRows;
 
-		vector<char*> fields;
+		std::vector<char*> fields;
 		splitLine( myRecord, Settings.fieldSeparator, fields, false );
 		for( size_t idx2 = 0; idx2 < colIds.size(); ++idx2 )
 			table.Columns[idx2]->Items.push_back( 
@@ -647,7 +685,7 @@ void SolveMinMaxGroupBy::modifyTmpFiles(	const char* tmpPath,
   answerFiles.push_back(Settings.szAnswerFN);
 
 	aq::AQMatrix aqMatrix(Settings);
-	vector<llong> tableIDs;
+	std::vector<llong> tableIDs;
 	for (std::vector<std::string>::const_iterator it = answerFiles.begin(); it != answerFiles.end(); ++it)
 	{
 		aqMatrix.load((*it).c_str(), Settings.fieldSeparator, tableIDs);
@@ -656,14 +694,14 @@ void SolveMinMaxGroupBy::modifyTmpFiles(	const char* tmpPath,
 	table.loadFromTableAnswerByColumn( aqMatrix, tableIDs, columnTypes, Settings, BaseDesc );
 
 	TablePartition::Ptr partition = new TablePartition();
-	vector<size_t> index;
-	vector<Column::Ptr> orderColumns;
+	std::vector<size_t> index;
+	std::vector<Column::Ptr> orderColumns;
 	for( size_t idx = 0; idx < table.Columns.size(); ++idx )
 		if( idx != minMaxCol )
 			orderColumns.push_back( table.Columns[idx] );
 	table.orderBy(orderColumns, partition, index);
 	assert( partition->Rows.size() > 0 );
-	vector<llong> finalRows;
+	std::vector<llong> finalRows;
 	for( size_t idx = 0; idx < partition->Rows.size() - 1; ++idx )
 	{
 		size_t selIdx = partition->Rows[idx];
@@ -705,10 +743,9 @@ void SolveMinMaxGroupBy::modifyTmpFiles(	const char* tmpPath,
 }
 
 //------------------------------------------------------------------------------
-void getColumnsIds(	const Table& table, vector<tnode*>& columns, 
-					vector<int>& valuePos )
+void getColumnsIds(	const Table& table, std::vector<tnode*>& columns, std::vector<int>& valuePos )
 {
-	vector<std::string> columnsStr;
+	std::vector<std::string> columnsStr;
 	for( size_t idx = 0; idx < columns.size(); ++idx )
 	{
 		if( columns[idx]->tag == K_PERIOD )
@@ -739,9 +776,9 @@ void getColumnsIds(	const Table& table, vector<tnode*>& columns,
 void eliminateAliases( tnode* pSelect )
 {
 	assert( pSelect );
-	vector<tnode*> columns;
+	std::vector<tnode*> columns;
 	commaListToNodeArray( pSelect->left, columns );
-	vector<tnode*> newColumns;
+	std::vector<tnode*> newColumns;
 	for( int idx = 0; idx < columns.size(); ++idx )
 		if( columns[idx]->tag == K_PERIOD )
 			newColumns.push_back( clone_subtree(columns[idx]) );
@@ -773,6 +810,23 @@ void getColumnsList( tnode* pNode,std::vector<tnode*>& columns )
 }
 
 //------------------------------------------------------------------------------
+void getTablesList( tnode* pNode, std::list<std::string>& tables )
+{
+  if (pNode != NULL)
+  {
+    if (pNode->tag == K_IDENT)
+    {
+      tables.push_back( pNode->data.val_str );
+    } 
+    else // if (pNode->tag == K_COMMA)
+    {
+      getTablesList( pNode->left, tables );
+      getTablesList( pNode->right, tables );
+    }
+  }
+}
+
+//------------------------------------------------------------------------------
 tnode* getLastTag( tnode*& pNode, tnode* pLastTag, tnode* pCheckNode, int tag )
 {
 	if( !pNode )
@@ -790,4 +844,14 @@ tnode* getLastTag( tnode*& pNode, tnode* pLastTag, tnode* pCheckNode, int tag )
 		return res;
 	res = getLastTag( pNode->next, pNewLastTag, pCheckNode, tag );
 	return res;
+}
+
+void generate_parent(tnode* pNode, tnode* parent)
+{
+  pNode->parent = parent;
+  if (pNode->right) generate_parent(pNode->right, pNode);
+  if (pNode->left) generate_parent(pNode->left, pNode);
+  if (pNode->next) generate_parent(pNode->next, NULL);
+}
+
 }

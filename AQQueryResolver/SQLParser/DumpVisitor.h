@@ -89,9 +89,17 @@ public:
 	virtual void visit(FrameVerb*);
 	virtual void visit(PartitionVerb*);
 
-	const std::string& getQuery() const { return this->query ; }
+	const std::string& getQuery() { 
+    this->query = this->selectStr + this->fromStr + this->whereStr ; 
+    return this->query;
+  }
 
 private:
+  std::string selectStr;
+  std::string fromStr;
+  std::string whereStr;
+  std::string groupStr;
+  std::string orderStr;
 	std::string query;
 
 };

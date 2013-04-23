@@ -98,14 +98,14 @@ void DumpVisitor::visit(AsteriskVerb*)
 	this->query += " * ";
 }
 
-void DumpVisitor::visit(AsVerb*)
+void DumpVisitor::visit(AsVerb* as)
 {
-	this->query += " as ";
+	this->query += " as " + as->getIdent() + " ";
 }
 
-void DumpVisitor::visit(ColumnVerb*)
+void DumpVisitor::visit(ColumnVerb* c)
 {
-	this->query += " . ";
+	this->query += " " + c->getTableName() + "." + c->getColumnName() + " ";
 }
 
 void DumpVisitor::visit(CommaVerb*)
@@ -176,22 +176,22 @@ void DumpVisitor::visit(GtVerb*)
 
 void DumpVisitor::visit(JeqVerb*)
 {
-	this->query += " Jeq ";
+	this->query += " = ";
 }
 
 void DumpVisitor::visit(JieqVerb*)
 {
-	this->query += " Jieq ";
+	this->query += " JIeq ";
 }
 
 void DumpVisitor::visit(JinfVerb*)
 {
-	this->query += " Jinf ";
+	this->query += " < ";
 }
 
 void DumpVisitor::visit(JneqVerb*)
 {
-	this->query += " Jneq ";
+	this->query += " != ";
 }
 
 void DumpVisitor::visit(JseqVerb*)
@@ -201,7 +201,7 @@ void DumpVisitor::visit(JseqVerb*)
 
 void DumpVisitor::visit(JsupVerb*)
 {
-	this->query += " JSup ";
+	this->query += " > ";
 }
 
 void DumpVisitor::visit(LeqVerb*)
@@ -280,7 +280,8 @@ void DumpVisitor::visit(ByVerb*)
 
 void DumpVisitor::visit(FromVerb*)
 {
-	this->query += " FROM ";
+  this->fromStr = " FROM " + this->query + "\n";
+  this->query = "";
 }
 
 void DumpVisitor::visit(GroupVerb*)
@@ -293,12 +294,14 @@ void DumpVisitor::visit(OrderVerb*)
 
 void DumpVisitor::visit(SelectVerb*)
 {
-	this->query += " SELECT ";
+  this->selectStr = " SELECT " + this->query + "\n";
+  this->query = "";
 }
 
 void DumpVisitor::visit(WhereVerb*)
 {
-	this->query += " WHERE ";
+  this->whereStr = " WHERE " + this->query + "\n";
+  this->query = "";
 }
 
 

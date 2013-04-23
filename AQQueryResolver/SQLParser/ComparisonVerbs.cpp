@@ -1,5 +1,6 @@
 #include "ComparisonVerbs.h"
 #include "ExprTransform.h"
+#include "VerbVisitor.h"
 #include <aq/Exceptions.h>
 #include <aq/Logger.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -149,11 +150,23 @@ bool EqVerb::compare(	ColumnItem* item1,
 }
 
 //------------------------------------------------------------------------------
+void EqVerb::accept(VerbVisitor* visitor)
+{
+  visitor->visit(this);
+}
+
+//------------------------------------------------------------------------------
 VERB_IMPLEMENT( JeqVerb );
 
 //------------------------------------------------------------------------------
 JeqVerb::JeqVerb()
 {}
+
+//------------------------------------------------------------------------------
+void JeqVerb::accept(VerbVisitor* visitor)
+{
+  visitor->visit(this);
+}
 
 //------------------------------------------------------------------------------
 VERB_IMPLEMENT( JautoVerb );

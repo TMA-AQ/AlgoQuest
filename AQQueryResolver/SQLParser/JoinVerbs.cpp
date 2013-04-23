@@ -19,9 +19,9 @@ bool JoinVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOrigin
 	assert( pJoin->tag == K_JOIN );
 	if( pJoin->next && pJoin->next->tag == K_ON )
 	{
-		addInnerOuterNodes( pJoin->next->left,
+		aq::addInnerOuterNodes( pJoin->next->left,
 			this->leftTag(), this->rightTag() );
-		addConditionsToWhere( pJoin->next->left, pStart );
+		aq::addConditionsToWhere( pJoin->next->left, pStart );
 	}
 	assert( pJoin->left && (pJoin->left->tag == K_IDENT 
 		|| pJoin->left->tag == K_AS && pJoin->left->left

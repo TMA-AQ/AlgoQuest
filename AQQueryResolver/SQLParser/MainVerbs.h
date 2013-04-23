@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Verb.h"
+#include <list>
 
 //------------------------------------------------------------------------------
 class SelectVerb: public Verb
@@ -82,6 +83,7 @@ public:
 	virtual void accept(VerbVisitor* visitor);
 private:
   Base * m_baseDesc;
+  std::list<std::string> tables;
 };
 
 //------------------------------------------------------------------------------

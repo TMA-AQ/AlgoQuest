@@ -3,7 +3,7 @@
 
 using namespace aq;
 
-RowProcessing::RowProcessing(const std::string& filePath)
+RowWritter::RowWritter(const std::string& filePath)
 	: firstRow(true)
 {
 	value = static_cast<char*>(malloc(128 * sizeof(char)));
@@ -13,31 +13,39 @@ RowProcessing::RowProcessing(const std::string& filePath)
 		pFOut = fopen( filePath.c_str(), "wt" );
 }
 
-RowProcessing::~RowProcessing()
+RowWritter::~RowWritter()
 {
 	free(value);
 	fclose(pFOut);
 }
 
-int RowProcessing::process(row_t row)
+int RowWritter::process(row_t& row)
 {
 	if (this->firstRow)
 	{
 		//write column names
 		for(size_t idx = 0; idx < row.size(); ++idx)
-		{
-			if (idx < this->columns.size())
-			{
-				if(this->columns[idx]->Invisible)
-					continue;
-				fputs(" ; ", pFOut);
-				assert(this->columns[idx]);
-				fputs(this->columns[idx]->getDisplayName().c_str(), pFOut);
-			}
-			else
-			{
-				fputs(" ; Count", pFOut);
-			}
+    {
+      fputs(" ; ", pFOut);
+      if (row[idx].tableName != "")
+      {
+        fputs(row[idx].tableName.c_str(), pFOut);
+        fputs(".", pFOut);
+      }
+      fputs(row[idx].columnName.c_str(), pFOut);
+
+			//if (idx < this->columns.size())
+			//{
+			//	if(this->columns[idx]->Invisible)
+			//		continue;
+			//	fputs(" ; ", pFOut);
+			//	assert(this->columns[idx]);
+			//	fputs(this->columns[idx]->getDisplayName().c_str(), pFOut);
+			//}
+			//else
+			//{
+			//	fputs(" ; Count", pFOut);
+			//}
 		}
 		fputc('\n', pFOut);
 		this->firstRow = false;
@@ -45,7 +53,7 @@ int RowProcessing::process(row_t row)
 
 	for (row_t::const_iterator it = row.begin(); it != row.end(); ++it)
 	{
-		it->first->toString(value, it->second);
+		(*it).item->toString(value, (*it).type);
 		fputs(" ; ", pFOut);
 		fputs(value, pFOut);
 	}

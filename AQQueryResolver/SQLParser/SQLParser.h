@@ -16,21 +16,20 @@ typedef enum {
 } TNodeDataType;
 
 //------------------------------------------------------------------------------
-/* La structure node à renseigner est :
-// tnode - noeud d'arbre binaire
-*/
-typedef struct tnode {
-	short			tag;			// étiquette
-//	short			arity;			// arité du noeud : 0 (feuille), 1 ou 2	
-	struct tnode	*left;			// fils gauche
-	struct tnode	*right;			// fils droit
-
+struct tnode 
+{
+	short tag;
 	TNodeDataType	eNodeDataType;
-	size_t	nStrBufCb;		// String Buffer (data.val_str) allocated bytes
 	aq::data_holder_t data;		 // - feuille - le contenu du noeud
-	struct tnode	*next;			// arbre suivant : le frère
-	int				inf;			// used by Verbs to exchange information
-} tnode;
+	size_t nStrBufCb;		// String Buffer (data.val_str) allocated bytes
+	int inf; // used by Verbs to exchange information
+
+	struct tnode * left;
+	struct tnode * right;
+	struct tnode * next;
+  struct tnode * parent;
+
+} ;
 
 //------------------------------------------------------------------------------
 void report_error( char* pszMsg, int bExit );

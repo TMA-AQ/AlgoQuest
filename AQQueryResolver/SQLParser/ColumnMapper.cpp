@@ -67,7 +67,8 @@ ColumnItem::Ptr ColumnMapper::loadValue(size_t index)
 	case aq::COL_TYPE_VARCHAR:
 		{ 
 			char val[128];
-			this->thesaurusMapper->read(val, offset * sizeof(val), sizeof(val)); // fixme
+      throw aq::generic_error(aq::generic_error::NOT_IMPLEMENED, "cannot read varchar item in row resolver mode now");
+			this->thesaurusMapper->read(val, offset * sizeof(val), sizeof(val)); // FIXME : I NEED TO KNOW THE SIZE OF THE COLUMN ITEM HERE !!!!
 			value->strval = val;
 		}
 		break;

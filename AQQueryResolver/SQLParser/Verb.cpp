@@ -213,6 +213,30 @@ void VerbNode::changeResult( Table::Ptr table )
 }
 
 //------------------------------------------------------------------------------
+void VerbNode::addResult(aq::RowProcess_Intf::row_t& row)
+{
+	if( this->Brother )
+		this->Brother->addResult( row );
+	if( !this->VerbObject )
+		return;
+	if( this->VerbObject->Disabled )
+		return;
+
+	//right first because partition by modifies the column pointers in table
+	//and it should be executed before order by collects his list of column pointers
+	if( this->Right )
+		this->Right->addResult( row );
+	if( this->Left )
+		this->Left->addResult( row );
+
+	VerbResult::Ptr param1 = this->Left && this->Left->VerbObject ? this->Left->VerbObject->getResult() : NULL;
+	VerbResult::Ptr param2 = this->Right && this->Right->VerbObject ? this->Right->VerbObject->getResult() : NULL;
+	VerbResult::Ptr param3 = this->Brother && this->Brother->VerbObject ? this->Brother->VerbObject->getResult() : NULL;
+
+	this->VerbObject->addResult( row, param1, param2, param3 );
+}
+
+//------------------------------------------------------------------------------
 void VerbNode::accept(VerbVisitor* visitor)
 {
 	this->VerbObject->accept(visitor);
@@ -222,10 +246,121 @@ void VerbNode::accept(VerbVisitor* visitor)
 }
 
 //------------------------------------------------------------------------------
+void VerbNode::acceptLeftToRight(VerbVisitor* visitor)
+{
+	if (this->Left) this->Left->acceptLeftToRight(visitor);
+	this->VerbObject->accept(visitor);
+	if (this->Right) this->Right->acceptLeftToRight(visitor);
+	if (this->Brother) this->Brother->acceptLeftToRight(visitor);
+}
+
+//------------------------------------------------------------------------------
 Verb::Ptr VerbNode::getVerbObject(){ return this->VerbObject; }
 VerbNode::Ptr VerbNode::getLeftChild(){ return this->Left; }
 VerbNode::Ptr VerbNode::getRightChild(){ return this->Right; }
 VerbNode::Ptr VerbNode::getBrother(){ return this->Brother; }
+
+//------------------------------------------------------------------------------
+//helper struct for BuildVerbsTree
+struct tnodeVerbNode
+{
+	tnodeVerbNode( tnode* pNode, VerbNode::Ptr spNode ): 
+		pNode(pNode), spNode(spNode){}
+	tnode* pNode;
+	VerbNode::Ptr spNode;
+};
+
+//------------------------------------------------------------------------------
+VerbNode::Ptr VerbNode::BuildVerbsTree( tnode* pStart, Base& baseDesc, TProjectSettings * settings )
+{
+	if( pStart->tag != K_SELECT )
+		throw 0; // TODO
+
+	//build a subtree for each major category
+	//order is important (the last one will be executed first)
+	//engine actually executes GROUP BY before select and after where, but
+	//I need to delete it after select gets the grouping columns
+	std::vector<int> categories;
+	categories.push_back( K_FROM );
+	categories.push_back( K_WHERE );
+	categories.push_back( K_GROUP );
+	categories.push_back( K_HAVING );
+	categories.push_back( K_SELECT );
+	categories.push_back( K_ORDER );
+
+	tnode* pStartOriginal = clone_subtree( pStart );
+	
+	VerbNode::Ptr spLast = NULL;
+	for( size_t idx = 0; idx < categories.size(); ++idx )
+	{
+		tnode* pNode = pStart;
+		while( pNode && pNode->tag != categories[idx] ) 
+			pNode = pNode->next;
+		if( !pNode )
+			continue;
+		
+		VerbNode::Ptr spNode = VerbNode::BuildVerbsSubtree( pStart, pNode, pStartOriginal, categories[idx], baseDesc, settings );
+		spNode->setBrother( spLast );
+		spLast = spNode;
+	}
+	delete_subtree( pStartOriginal );
+	return spLast;
+}
+
+//------------------------------------------------------------------------------
+VerbNode::Ptr VerbNode::BuildVerbsSubtree(	tnode* pSelect, tnode* pStart, tnode* pStartOriginal, int context, Base& BaseDesc, TProjectSettings *pSettings  )
+{
+	VerbNode::Ptr spStart = new VerbNode();
+	if( !spStart->build( pSelect, pStart, pStartOriginal, context, BaseDesc, *pSettings ) )
+		return spStart;
+	std::deque<tnodeVerbNode> deq;
+	deq.push_back( tnodeVerbNode(pStart, spStart) );
+
+	while( deq.size() > 0 )
+	{
+		tnodeVerbNode& currentNode = deq[0];
+		//next
+		if( currentNode.pNode != pStart )
+		{
+			tnode* pNext = currentNode.pNode->next;
+			if( pNext )
+			{
+				VerbNode::Ptr spNewVerbNode = new VerbNode();
+				if( spNewVerbNode->build( pSelect, pNext, pStartOriginal, context, BaseDesc, *pSettings ) )
+				{
+					currentNode.spNode->setBrother( spNewVerbNode );
+					deq.push_back( tnodeVerbNode( pNext, spNewVerbNode ) );
+				}
+			}
+		}
+		//left
+		tnode* pLeft = currentNode.pNode->left;
+		if( pLeft )
+		{
+			VerbNode::Ptr spNewVerbNode = new VerbNode();
+			if( spNewVerbNode->build( pSelect, pLeft, pStartOriginal, context, BaseDesc, *pSettings ) )
+			{
+				currentNode.spNode->setLeftChild( spNewVerbNode );
+				deq.push_back( tnodeVerbNode( pLeft, spNewVerbNode ) );
+			}
+		}
+		//right
+		tnode* pRight = currentNode.pNode->right;
+		if( pRight )
+		{
+			VerbNode::Ptr spNewVerbNode = new VerbNode();
+			if( spNewVerbNode->build( pSelect, pRight, pStartOriginal, context, BaseDesc, *pSettings ) )
+			{
+				currentNode.spNode->setRightChild( spNewVerbNode );
+				deq.push_back( tnodeVerbNode( pRight, spNewVerbNode ) );
+			}
+		}
+
+		deq.pop_front();
+	}
+
+	return spStart;
+}
 
 //------------------------------------------------------------------------------
 VerbFactory& VerbFactory::GetInstance()

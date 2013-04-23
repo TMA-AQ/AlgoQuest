@@ -17,7 +17,9 @@ public:
 								VerbResult::Ptr resLeft, 
 								VerbResult::Ptr resRight, 
 								VerbResult::Ptr resNext );
-    
+  
+  const std::string& getValue() const { return value; }
+
 	virtual void setBaseDesc(Base * baseDesc) 
 	{ 
 		m_baseDesc = baseDesc;
@@ -34,6 +36,7 @@ private:
 	virtual bool compare(	ColumnItem* item1, 
 							ColumnItem* item2, 
 							aq::ColumnType type );
+  std::string value;
 };
 
 //------------------------------------------------------------------------------
@@ -46,6 +49,7 @@ private:
 	bool compare(	ColumnItem* item1, 
 					ColumnItem* item2, 
 					aq::ColumnType type );
+  virtual void accept(VerbVisitor* visitor);
 };
 
 //------------------------------------------------------------------------------
@@ -54,6 +58,7 @@ class JeqVerb: public ComparisonVerb
 	VERB_DECLARE( JeqVerb );
 public:
 	virtual int getVerbType() const { return K_JEQ; };
+  virtual void accept(VerbVisitor* visitor);
 };
 
 //------------------------------------------------------------------------------

@@ -706,6 +706,7 @@ void PreProcessSelect( tnode *pNode, Base& BaseDesc )
 bool FromVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal )
 {
 	PreProcessSelect( pStart, *this->m_baseDesc );
+  getTablesList(pNode, this->tables);
 	return false;
 }
 

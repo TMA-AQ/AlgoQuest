@@ -11,8 +11,10 @@
 #define STR_BUF_SIZE_ROUND_UP	4096
 #define EXIT_ON_MEM_ERROR		1
 
-using namespace aq;
 using namespace std;
+
+namespace aq
+{
 
 //------------------------------------------------------------------------------
 /* Particular cases : 
@@ -178,10 +180,10 @@ void getTableAlias(tnode *pNode, std::map<std::string, std::string>& tablesAlias
 }
 
 //------------------------------------------------------------------------------
-void syntax_tree_to_prefix_form( tnode *pNode, std::string& str )
+std::string& syntax_tree_to_prefix_form( tnode *pNode, std::string& str )
 {
 	if ( pNode == NULL )
-		return;
+		return str;
 
 	std::map<std::string, std::string> tablesAlias;
 
@@ -227,17 +229,19 @@ void syntax_tree_to_prefix_form( tnode *pNode, std::string& str )
 		if( pTop->left )
 			nodes.push( pTop->left );
 	}
+
+  return str;
 }
 
 //------------------------------------------------------------------------------
-void syntax_tree_to_sql_form(tnode * pNode, std::string& query, unsigned int level)
+std::string& syntax_tree_to_sql_form(tnode * pNode, std::string& query, unsigned int level)
 {
-	if (pNode == NULL) return;
+	if (pNode == NULL) return query;
 
 	if (level > 100) 
 	{
 		query += " ... ";
-		return;
+		return query;
 	}
 	
 	if (	pNode->tag == K_SELECT || pNode->tag == K_FROM 
@@ -245,12 +249,12 @@ void syntax_tree_to_sql_form(tnode * pNode, std::string& query, unsigned int lev
 		 || pNode->tag == K_HAVING || pNode->tag == K_ORDER )
 	{
 		query += " " + std::string(id_to_string(pNode->tag)) + " ";
-		syntax_tree_to_sql_form(pNode->left, query, ++level);
-		syntax_tree_to_sql_form(pNode->right, query, ++level);
+		aq::syntax_tree_to_sql_form(pNode->left, query, ++level);
+		aq::syntax_tree_to_sql_form(pNode->right, query, ++level);
 	}
 	else
 	{
-		syntax_tree_to_sql_form(pNode->left, query, ++level);
+		aq::syntax_tree_to_sql_form(pNode->left, query, ++level);
 
 		std::ostringstream stmp;
 		switch ( pNode->tag ) {
@@ -278,7 +282,10 @@ void syntax_tree_to_sql_form(tnode * pNode, std::string& query, unsigned int lev
 		}
 
 		query += " " + stmp.str() + " ";
-		syntax_tree_to_sql_form(pNode->right, query, ++level);
+		aq::syntax_tree_to_sql_form(pNode->right, query, ++level);
 	}
-	syntax_tree_to_sql_form(pNode->next, query, ++level);
+	aq::syntax_tree_to_sql_form(pNode->next, query, ++level);
+  return query;
+}
+
 }

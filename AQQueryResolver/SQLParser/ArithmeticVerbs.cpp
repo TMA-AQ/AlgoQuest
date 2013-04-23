@@ -1,4 +1,5 @@
 #include "ArithmeticVerbs.h"
+#include "VerbVisitor.h"
 #include <aq/Exceptions.h>
 
 using namespace aq;
@@ -132,6 +133,16 @@ void BinaryVerb::changeResult(	Table::Ptr table,
 }
 
 //------------------------------------------------------------------------------
+void BinaryVerb::addResult(	aq::RowProcess_Intf::row_t& row, 
+								VerbResult::Ptr resLeft, 
+								VerbResult::Ptr resRight, 
+								VerbResult::Ptr resNext )
+{
+	assert( resLeft && resRight );
+	this->computeResult( resLeft, resRight );
+}
+
+//------------------------------------------------------------------------------
 VERB_IMPLEMENT( MinusVerb );
 
 //------------------------------------------------------------------------------
@@ -160,6 +171,12 @@ ColumnType MinusVerb::outputType( ColumnType inputType1, ColumnType inputType2 )
 }
 
 //------------------------------------------------------------------------------
+void MinusVerb::accept(VerbVisitor* visitor)
+{
+  visitor->visit(this);
+}
+
+//------------------------------------------------------------------------------
 VERB_IMPLEMENT( PlusVerb );
 
 //------------------------------------------------------------------------------
@@ -179,17 +196,19 @@ void PlusVerb::transformItem(	const ColumnItem& item1, const ColumnItem& item2,
 //------------------------------------------------------------------------------
 ColumnType PlusVerb::outputType( ColumnType inputType1, ColumnType inputType2 )
 {
-	if( inputType1 >= COL_TYPE_DATE1 && inputType1 <= COL_TYPE_DATE4 &&
-		inputType2 >= COL_TYPE_DATE1 && inputType2 <= COL_TYPE_DATE4
-		)
-		return inputType1;
-	if( (inputType1 == COL_TYPE_DOUBLE || inputType1 == COL_TYPE_INT) &&
-		(inputType2 == COL_TYPE_DOUBLE || inputType2 == COL_TYPE_INT)
-		)
-		return inputType1;
+	if (inputType1 >= COL_TYPE_DATE1 && inputType1 <= COL_TYPE_DATE4 && inputType2 >= COL_TYPE_DATE1 && inputType2 <= COL_TYPE_DATE4)
+		return min(inputType1, inputType2);
+	if ((inputType1 == COL_TYPE_DOUBLE || inputType1 == COL_TYPE_INT) && (inputType2 == COL_TYPE_DOUBLE || inputType2 == COL_TYPE_INT))
+		return max(inputType1, inputType2);
 	if( inputType1 == COL_TYPE_VARCHAR && inputType2 == COL_TYPE_VARCHAR )
 		return inputType1;
 	throw verb_error(generic_error::VERB_TYPE_MISMATCH, this->getVerbType() );
+}
+
+//------------------------------------------------------------------------------
+void PlusVerb::accept(VerbVisitor* visitor)
+{
+  visitor->visit(this);
 }
 
 //------------------------------------------------------------------------------
@@ -217,6 +236,12 @@ ColumnType MultiplyVerb::outputType( ColumnType inputType1, ColumnType inputType
 }
 
 //------------------------------------------------------------------------------
+void MultiplyVerb::accept(VerbVisitor* visitor)
+{
+  visitor->visit(this);
+}
+
+//------------------------------------------------------------------------------
 VERB_IMPLEMENT( DivideVerb );
 
 //------------------------------------------------------------------------------
@@ -238,4 +263,10 @@ ColumnType DivideVerb::outputType( ColumnType inputType1, ColumnType inputType2 
 		)
 		return inputType1;
 	throw verb_error(generic_error::VERB_TYPE_MISMATCH, this->getVerbType() );
+}
+
+//------------------------------------------------------------------------------
+void DivideVerb::accept(VerbVisitor* visitor)
+{
+  visitor->visit(this);
 }

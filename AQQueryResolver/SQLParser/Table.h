@@ -30,7 +30,7 @@ class Base;
 //------------------------------------------------------------------------------
 namespace aq
 {
-	class RowProcessing;
+	class RowProcess_Intf;
 }
 
 //------------------------------------------------------------------------------
@@ -60,7 +60,7 @@ public:
 	void loadFromTableAnswerByRow(aq::AQMatrix& aqMatrix, const std::vector<llong>& tableIDs, 
 																std::vector<aq::ColumnMapper::Ptr>& columnsMapper,
 																const std::vector<Column::Ptr>& columnTypes, const TProjectSettings& pSettings, const Base& BaseDesc, 
-																boost::shared_ptr<aq::RowProcessing> rowProcessing);
+																boost::shared_ptr<aq::RowProcess_Intf> rowProcess);
 
 	void loadFromTableAnswerByColumn(aq::AQMatrix& aqMatrix, const std::vector<llong>& tableIDs, const std::vector<Column::Ptr>& columnTypes, const TProjectSettings& pSettings, const Base& BaseDesc);
   void loadColumn(Column::Ptr col, const std::vector<size_t>& uniqueIndex, const std::vector<size_t>& mapToUniqueIndex, const Column::Ptr columnType, const TProjectSettings& pSettings, const Base& BaseDesc);

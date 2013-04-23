@@ -2,7 +2,11 @@
 #include "SQLPrefix.h"
 #include "sql92_grm_tab.h"
 #include "Table.h"
+
+#include "RowProcesses.h"
 #include "RowProcessing.h"
+#include "RowVerbProcess.h"
+
 #include "Verb.h"
 #include "JeqParser.h"
 #include "Column2Table.h"
@@ -86,18 +90,7 @@ tnode* GetTree( Table& table )
 }
 
 //------------------------------------------------------------------------------
-//helper struct for BuildVerbsTree
-struct tnodeVerbNode
-{
-	tnodeVerbNode( tnode* pNode, VerbNode::Ptr spNode ): 
-		pNode(pNode), spNode(spNode){}
-	tnode* pNode;
-	VerbNode::Ptr spNode;
-};
-
 //------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-
 
 //------------------------------------------------------------------------------
 QueryResolver::QueryResolver(tnode * _sqlStatement, TProjectSettings * _pSettings, AQEngine_Intf * _aq_engine, Base& _baseDesc, unsigned int _level, unsigned int _id)
@@ -117,101 +110,6 @@ QueryResolver::QueryResolver(tnode * _sqlStatement, TProjectSettings * _pSetting
 QueryResolver::~QueryResolver()
 {
 	aq::Logger::getInstance().log(AQ_INFO, "Query Resolver: Time elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
-}
-
-//------------------------------------------------------------------------------
-//build a VerbNode subtree corresponding to the ppStart subtree
-//a branch will end when a VerbNode for that tnode cannot be found
-//top level node in the subtree will not have a brother
-VerbNode::Ptr QueryResolver::BuildVerbsSubtree(	tnode* pSelect, tnode* pStart, tnode* pStartOriginal, int context, Base& BaseDesc, TProjectSettings *pSettings  )
-{
-	VerbNode::Ptr spStart = new VerbNode();
-	if( !spStart->build( pSelect, pStart, pStartOriginal, context, BaseDesc, *pSettings ) )
-		return spStart;
-	deque<tnodeVerbNode> deq;
-	deq.push_back( tnodeVerbNode(pStart, spStart) );
-
-	while( deq.size() > 0 )
-	{
-		tnodeVerbNode& currentNode = deq[0];
-		//next
-		if( currentNode.pNode != pStart )
-		{
-			tnode* pNext = currentNode.pNode->next;
-			if( pNext )
-			{
-				VerbNode::Ptr spNewVerbNode = new VerbNode();
-				if( spNewVerbNode->build( pSelect, pNext, pStartOriginal, context, BaseDesc, *pSettings ) )
-				{
-					currentNode.spNode->setBrother( spNewVerbNode );
-					deq.push_back( tnodeVerbNode( pNext, spNewVerbNode ) );
-				}
-			}
-		}
-		//left
-		tnode* pLeft = currentNode.pNode->left;
-		if( pLeft )
-		{
-			VerbNode::Ptr spNewVerbNode = new VerbNode();
-			if( spNewVerbNode->build( pSelect, pLeft, pStartOriginal, context, BaseDesc, *pSettings ) )
-			{
-				currentNode.spNode->setLeftChild( spNewVerbNode );
-				deq.push_back( tnodeVerbNode( pLeft, spNewVerbNode ) );
-			}
-		}
-		//right
-		tnode* pRight = currentNode.pNode->right;
-		if( pRight )
-		{
-			VerbNode::Ptr spNewVerbNode = new VerbNode();
-			if( spNewVerbNode->build( pSelect, pRight, pStartOriginal, context, BaseDesc, *pSettings ) )
-			{
-				currentNode.spNode->setRightChild( spNewVerbNode );
-				deq.push_back( tnodeVerbNode( pRight, spNewVerbNode ) );
-			}
-		}
-
-		deq.pop_front();
-	}
-
-	return spStart;
-}
-
-//------------------------------------------------------------------------------
-VerbNode::Ptr QueryResolver::BuildVerbsTree( tnode* pStart, Base& baseDesc, TProjectSettings * settings )
-{
-	if( pStart->tag != K_SELECT )
-		throw 0; // TODO
-
-	//build a subtree for each major category
-	//order is important (the last one will be executed first)
-	//engine actually executes GROUP BY before select and after where, but
-	//I need to delete it after select gets the grouping columns
-	vector<int> categories;
-	categories.push_back( K_FROM );
-	categories.push_back( K_WHERE );
-	categories.push_back( K_GROUP );
-	categories.push_back( K_HAVING );
-	categories.push_back( K_SELECT );
-	categories.push_back( K_ORDER );
-
-	tnode* pStartOriginal = clone_subtree( pStart );
-	
-	VerbNode::Ptr spLast = NULL;
-	for( size_t idx = 0; idx < categories.size(); ++idx )
-	{
-		tnode* pNode = pStart;
-		while( pNode && pNode->tag != categories[idx] ) 
-			pNode = pNode->next;
-		if( !pNode )
-			continue;
-		
-		VerbNode::Ptr spNode = QueryResolver::BuildVerbsSubtree( pStart, pNode, pStartOriginal, categories[idx], baseDesc, settings );
-		spNode->setBrother( spLast );
-		spLast = spNode;
-	}
-	delete_subtree( pStartOriginal );
-	return spLast;
 }
 
 /*
@@ -356,9 +254,6 @@ Table::Ptr QueryResolver::SolveSelectRegular()
 	Table::Ptr table;
 
 #ifdef OUTPUT_NESTED_QUERIES
-	// nQueryIdx;
-	//if( level < 2 )
-	//	nQueryIdx = -1;
 	std::string str;
 	syntax_tree_to_prefix_form( this->sqlStatement, str );
 	
@@ -376,8 +271,17 @@ Table::Ptr QueryResolver::SolveSelectRegular()
 	//
 	// Query Pre Processing (TODO : optimize tree by detecting identical subtrees)
 	timer.start();
-	VerbNode::Ptr spTree = QueryResolver::BuildVerbsTree( this->sqlStatement, this->BaseDesc, this->pSettings );
+	VerbNode::Ptr spTree = VerbNode::BuildVerbsTree( this->sqlStatement, this->BaseDesc, this->pSettings );
 	spTree->changeQuery();
+
+#ifdef _DEBUG
+  {
+    DumpVisitor printer;
+    spTree->acceptLeftToRight(&printer);
+    std::cout << printer.getQuery() << std::endl;
+  }
+#endif
+
 	QueryResolver::cleanQuery( this->sqlStatement );
 	aq::Logger::getInstance().log(AQ_INFO, "Query Preprocessing: Time elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
   
@@ -386,7 +290,7 @@ Table::Ptr QueryResolver::SolveSelectRegular()
   oss << *this->sqlStatement << std::endl;
   std::string stmp2 = oss.str();
   DumpVisitor printer;
-  spTree->accept(&printer);
+  spTree->acceptLeftToRight(&printer);
   std::cout << oss.str() << std::endl << printer.getQuery() << std::endl;
 #endif
 
@@ -404,7 +308,7 @@ Table::Ptr QueryResolver::SolveSelectRegular()
 	//for( int idx = (int) preorderVerbTree.size() - 1; idx >= 0; --idx )
 	//	preorderVerbTree[idx]->changeQuery();
 	
-	aq_engine->call( *this->pSettings, this->sqlStatement, 0, this->id );
+	aq_engine->call( this->sqlStatement, 0, this->id );
 
 	if (pSettings->computeAnswer)
 	{
@@ -425,17 +329,20 @@ Table::Ptr QueryResolver::SolveSelectRegular()
 }
 
 //------------------------------------------------------------------------------
-void QueryResolver::SolveSelectFromSelect(	tnode* pInteriorSelect, 
-							tnode* pExteriorSelect,
-							int nSelectLevel)
+boost::shared_ptr<QueryResolver> QueryResolver::SolveSelectFromSelect(	tnode* pInteriorSelect, tnode* pExteriorSelect, int nSelectLevel )
 {
 	if( !pInteriorSelect || !pExteriorSelect )
-		return;
+  {
+    throw aq::generic_error(aq::generic_error::INVALID_QUERY, "");
+  }
+  
+  boost::shared_ptr<QueryResolver> query(new QueryResolver(pInteriorSelect, this->pSettings, this->aq_engine, this->BaseDesc));
+
+#if _DEBUG
+  std::cout << *pInteriorSelect << std::endl;
+#endif
 
 #ifdef OUTPUT_NESTED_QUERIES
-	//nQueryIdx;
-	//if( nSelectLevel < 2 )
-	//	nQueryIdx = -1;
 	std::string str;
 	syntax_tree_to_prefix_form( pExteriorSelect, str );
 	SaveFile( pSettings->szOutputFN, str.c_str() );
@@ -456,21 +363,26 @@ void QueryResolver::SolveSelectFromSelect(	tnode* pInteriorSelect,
 	changeColumnNames( pIntSelectAs, pInteriorSelect, pExteriorSelect->left, true );
 	changeColumnNames( pIntSelectAs, pInteriorSelect, pExteriorSelect->next, false );
 	solveSelectStarExterior( pInteriorSelect, pExteriorSelect );
-	if( trivialSelectFromSelect(pInteriorSelect) )
+
+  if( trivialSelectFromSelect(pInteriorSelect) )
 	{
 		syntax_tree_to_prefix_form( pInteriorSelect, str );
 		SaveFile( pSettings->szOutputFN, str.c_str() );
 		MakeBackupFile( pSettings->szOutputFN, backup_type_t::Empty );
 		mark_as_deleted( pIntSelectAs );
-		return;
+		return query;
 	}
+
 	eliminateAliases( pInteriorSelect );
 
-	//copy conditions from inner select WHERE into outer select WHERE
+	// copy conditions from inner select WHERE into outer select WHERE
 	tnode* intWhereNode = find_main_node( pInteriorSelect, K_WHERE );
 	if( intWhereNode )
 	{
-		addConditionsToWhere( intWhereNode->left, pExteriorSelect );
+    // keep only join
+    tnode * joinNode = clone_subtree(intWhereNode->left);
+    joinNode = getJoin(joinNode);
+		addConditionsToWhere( joinNode, pExteriorSelect );
 	}
 	addInnerOuterNodes( intWhereNode->left, K_INNER, K_INNER );
 
@@ -479,24 +391,104 @@ void QueryResolver::SolveSelectFromSelect(	tnode* pInteriorSelect,
 	SaveFile( pSettings->szOutputFN, str.c_str() );
 	MakeBackupFile( pSettings->szOutputFN, backup_type_t::Exterior );
 #endif
+  
+#if _DEBUG
+  std::string queryInterior;
+  std::string queryExterior;
+  std::cout << "--- Interior select ---" << std::endl;
+  std::cout << syntax_tree_to_prefix_form(pInteriorSelect, queryInterior) << std::endl;
+  std::cout << "--- Exterior select ---" << std::endl;
+  std::cout << syntax_tree_to_prefix_form(pExteriorSelect, queryExterior) << std::endl;
+#endif
 
-	VerbNode::Ptr spTree = QueryResolver::BuildVerbsTree( pInteriorSelect, this->BaseDesc, this->pSettings );
+	VerbNode::Ptr spTree = VerbNode::BuildVerbsTree( pInteriorSelect, this->BaseDesc, this->pSettings );
 	spTree->changeQuery();
 	QueryResolver::cleanQuery( pInteriorSelect );
 
-	aq_engine->call(	*this->pSettings, pInteriorSelect, 
-						minMaxGroupBy ? 0 : 1,
-						nSelectLevel );
+	aq_engine->call(	pInteriorSelect, minMaxGroupBy ? 0 : 1, nSelectLevel );
 
-	solveMinMaxGroupBy.modifyTmpFiles(	pSettings->szTempPath2, nSelectLevel, 
-										BaseDesc, *pSettings );
+	solveMinMaxGroupBy.modifyTmpFiles( pSettings->szTempPath2, nSelectLevel, BaseDesc, *pSettings );
 
 #ifdef OUTPUT_NESTED_QUERIES
 	MakeBackupFile( pSettings->szOutputFN, backup_type_t::Empty );
 #endif
 	
 	mark_as_deleted( pIntSelectAs );
+  
+  return query;
 }
+
+//------------------------------------------------------------------------------
+//void QueryResolver::SolveSelectFromSelect(	tnode* pInteriorSelect, 
+//							tnode* pExteriorSelect,
+//							int nSelectLevel)
+//{
+//	if( !pInteriorSelect || !pExteriorSelect )
+//		return;
+//
+//#ifdef OUTPUT_NESTED_QUERIES
+//	//nQueryIdx;
+//	//if( nSelectLevel < 2 )
+//	//	nQueryIdx = -1;
+//	std::string str;
+//	syntax_tree_to_prefix_form( pExteriorSelect, str );
+//	SaveFile( pSettings->szOutputFN, str.c_str() );
+//  MakeBackupFile( pSettings->szOutputFN, backup_type_t::Exterior_Before );
+//#endif
+//
+//	solveSelectStar( pInteriorSelect, BaseDesc );
+//	solveOneTableInFrom( pInteriorSelect, BaseDesc );
+//
+//	tnode* pIntSelectAs = getLastTag( pExteriorSelect, NULL, pInteriorSelect, K_AS );
+//	if( !pIntSelectAs || !pIntSelectAs->right || (pIntSelectAs->right->tag != K_IDENT) )
+//		throw generic_error(generic_error::INVALID_QUERY, "");
+//
+//	SolveMinMaxGroupBy solveMinMaxGroupBy;
+//	bool minMaxGroupBy = solveMinMaxGroupBy.checkAndClear( pInteriorSelect );
+//
+//	changeTableNames( pIntSelectAs, pInteriorSelect, pExteriorSelect );
+//	changeColumnNames( pIntSelectAs, pInteriorSelect, pExteriorSelect->left, true );
+//	changeColumnNames( pIntSelectAs, pInteriorSelect, pExteriorSelect->next, false );
+//	solveSelectStarExterior( pInteriorSelect, pExteriorSelect );
+//	if( trivialSelectFromSelect(pInteriorSelect) )
+//	{
+//		syntax_tree_to_prefix_form( pInteriorSelect, str );
+//		SaveFile( pSettings->szOutputFN, str.c_str() );
+//		MakeBackupFile( pSettings->szOutputFN, backup_type_t::Empty );
+//		mark_as_deleted( pIntSelectAs );
+//		return;
+//	}
+//	eliminateAliases( pInteriorSelect );
+//
+//	//copy conditions from inner select WHERE into outer select WHERE
+//	tnode* intWhereNode = find_main_node( pInteriorSelect, K_WHERE );
+//	if( intWhereNode )
+//	{
+//		addConditionsToWhere( intWhereNode->left, pExteriorSelect );
+//	}
+//	addInnerOuterNodes( intWhereNode->left, K_INNER, K_INNER );
+//
+//#ifdef OUTPUT_NESTED_QUERIES
+//	syntax_tree_to_prefix_form( pExteriorSelect, str );
+//	SaveFile( pSettings->szOutputFN, str.c_str() );
+//	MakeBackupFile( pSettings->szOutputFN, backup_type_t::Exterior );
+//#endif
+//
+//	VerbNode::Ptr spTree = QueryResolver::BuildVerbsTree( pInteriorSelect, this->BaseDesc, this->pSettings );
+//	spTree->changeQuery();
+//	QueryResolver::cleanQuery( pInteriorSelect );
+//
+//	aq_engine->call(	pInteriorSelect, minMaxGroupBy ? 0 : 1, nSelectLevel );
+//
+//	solveMinMaxGroupBy.modifyTmpFiles(	pSettings->szTempPath2, nSelectLevel, 
+//										BaseDesc, *pSettings );
+//
+//#ifdef OUTPUT_NESTED_QUERIES
+//	MakeBackupFile( pSettings->szOutputFN, backup_type_t::Empty );
+//#endif
+//	
+//	mark_as_deleted( pIntSelectAs );
+//}
 
 //------------------------------------------------------------------------------
 //solve all selects found in the main select
@@ -529,11 +521,16 @@ void QueryResolver::SolveSelectRecursive(	tnode*& pNode, unsigned int nSelectLev
   {
     if( inFrom )
     {
-      throw generic_error(generic_error::NOT_IMPLEMENED, "'SELECT FROM SELECT' are not implemented yet");
+      // throw generic_error(generic_error::NOT_IMPLEMENED, "'SELECT FROM SELECT' are not implemented yet");
       // There is two type of nested query in FROM that can be solve in two way:
       //   - Fold Up => pNode will be modified.
       //   - Temporary Table => create a table used to perform join on it, this is a complex task.
-      // SolveSelectFromSelect( pNode, pLastSelect, nSelectLevel );
+      std::string alias;
+      if ((pNode->parent != NULL) && (pNode->parent->tag == K_AS) && (pNode->parent->right != NULL) && (pNode->parent->right->eNodeDataType == NODE_DATA_STRING))
+      {
+        alias = pNode->parent->right->data.val_str;
+      }
+      this->nestedTables.insert(std::make_pair(alias, this->SolveSelectFromSelect(pNode, pLastSelect, nSelectLevel)));
     }
     else if ( inIn )
     {
@@ -1285,6 +1282,7 @@ void QueryResolver::SolveCreate(	tnode* pNode )
 //------------------------------------------------------------------------------
 int QueryResolver::SolveSQLStatement()
 {
+  aq::generate_parent(this->sqlStatement, NULL);
 	tnode *pNode = this->sqlStatement;
 	if( !pNode )
 		throw generic_error(generic_error::INVALID_QUERY, "");
@@ -1341,7 +1339,7 @@ Table::Ptr QueryResolver::solveAQMatriceByRows(VerbNode::Ptr spTree)
 	aq::Timer timer;
 
 	// Prepare Columns
-	vector<Column::Ptr> columnTypes;
+	std::vector<Column::Ptr> columnTypes;
 	this->getColumnTypes( this->sqlStatement, columnTypes, this->BaseDesc );
 	
 	std::map<size_t, std::vector<std::pair<size_t, aq::ColumnType> > > columnsByTableId;
@@ -1362,30 +1360,33 @@ Table::Ptr QueryResolver::solveAQMatriceByRows(VerbNode::Ptr spTree)
 		}
 	}
 
-	// result
-	Table::Ptr table = new Table();
-
 #ifdef OUTPUT_NESTED_QUERIES
 	MakeBackupFile( pSettings->szOutputFN, backup_type_t::Empty );
 	MakeBackupFile( pSettings->szAnswerFN, backup_type_t::Before );
 #endif
 
+  boost::shared_ptr<aq::RowProcesses> processes(new aq::RowProcesses);
+
 	if (this->hasGroupBy)
 	{
-		timer.start();
 		std::vector<Column::Ptr> columnGroupBy;
 		tnode * nodeGroup = find_main_node(this->sqlStatement, K_GROUP);
 		std::vector<tnode**> columnNodes;
 		getAllColumnNodes(nodeGroup, columnNodes);
 
-		aq_engine->getAQMatrix()->groupBy(columnsMapper); // FIXME : the group by must be ordered according to the group by clause
-		aq::Logger::getInstance().log(AQ_INFO, "AQMatrix Group By: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
+		// aq_engine->getAQMatrix()->groupBy(columnsMapper); // FIXME : the group by must be ordered according to the group by clause
 	}
 
-	boost::shared_ptr<aq::RowProcessing> rowProcessing(new aq::RowProcessing(pSettings->output == "stdout" ? pSettings->output : pSettings->szAnswerFN));
-	rowProcessing->setColumn(columnTypes);
+  boost::shared_ptr<aq::RowVerbProcess> rowVerbProcess(new aq::RowVerbProcess(spTree));
+	processes->addProcess(rowVerbProcess);
+
+	boost::shared_ptr<aq::RowWritter> rowWritter(new aq::RowWritter(pSettings->output == "stdout" ? pSettings->output : pSettings->szAnswerFN));
+	rowWritter->setColumn(columnTypes); // fixme
+  processes->addProcess(rowWritter);
+
 	timer.start();
-	table->loadFromTableAnswerByRow(*(aq_engine->getAQMatrix()), aq_engine->getTablesIDs(), columnsMapper, columnTypes, *pSettings, BaseDesc, rowProcessing );
+	Table::Ptr table = new Table();
+	table->loadFromTableAnswerByRow(*(aq_engine->getAQMatrix()), aq_engine->getTablesIDs(), columnsMapper, columnTypes, *pSettings, BaseDesc, processes );
 	aq::Logger::getInstance().log(AQ_INFO, "Load From Answer: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
 	return Table::Ptr(); // empty
 }
@@ -1507,13 +1508,13 @@ int QueryResolver::MakeBackupFile( char *pszPath, backup_type_t type ) const
 	switch( type )
 	{
   case backup_type_t::Empty: break;
-  case backup_type_t::Before: typeChar = "Before"; break;
-	case backup_type_t::After: typeChar = "After"; break;
-	case backup_type_t::Exterior_Before: typeChar = "Exterior_Before"; break;
-	case backup_type_t::Exterior: typeChar = "Exterior"; break;
+  case backup_type_t::Before: typeChar = "_Before"; break;
+	case backup_type_t::After: typeChar = "_After"; break;
+	case backup_type_t::Exterior_Before: typeChar = "_Exterior_Before"; break;
+	case backup_type_t::Exterior: typeChar = "_Exterior"; break;
 	default: ;
 	}
-	sprintf( szDstPath, "%s_%.2d_%.2d_%s.%s", szBuffer, this->level, this->id, typeChar, &pszPath[len - 3] );
+	sprintf( szDstPath, "%s_%.2d_%.2d%s.%s", szBuffer, this->level, this->id, typeChar, &pszPath[len - 3] );
 	if( FileRename( pszPath, szDstPath ) != 0 )
 	{
 		aq::Logger::getInstance().log(AQ_DEBUG, "MakeBackupFile : Error renaming file %s to %s !", pszPath, szDstPath );
