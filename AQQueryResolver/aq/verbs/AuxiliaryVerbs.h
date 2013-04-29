@@ -12,7 +12,7 @@ public:
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
-  virtual void addResult(	aq::RowProcess_Intf::row_t& row, 
+  virtual void addResult(	aq::RowProcess_Intf::Row& row, 
     VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
 
 	std::string getTableName() const;
@@ -75,6 +75,7 @@ public:
 								VerbResult::Ptr resLeft, 
 								VerbResult::Ptr resRight, 
 								VerbResult::Ptr resNext );
+	virtual void accept(VerbVisitor*);
 };
 
 //------------------------------------------------------------------------------
@@ -84,6 +85,7 @@ class IntValueVerb: public VerbNode
 public:
 	virtual int getVerbType() const { return K_INTEGER; };
 	virtual bool preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal );
+	virtual void accept(VerbVisitor*);
 };
 
 //------------------------------------------------------------------------------
@@ -93,6 +95,7 @@ class DoubleValueVerb: public VerbNode
 public:
 	virtual int getVerbType() const { return K_REAL; };
 	virtual bool preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal );
+	virtual void accept(VerbVisitor*);
 };
 
 //------------------------------------------------------------------------------
@@ -102,6 +105,7 @@ class StringValueVerb: public VerbNode
 public:
 	virtual int getVerbType() const { return K_STRING; };
 	virtual bool preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal );
+	virtual void accept(VerbVisitor*);
 };
 
 //------------------------------------------------------------------------------
@@ -113,7 +117,7 @@ public:
 	virtual bool preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal );
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
-  void addResult(aq::RowProcess_Intf::row_t& row, 
+  void addResult(aq::RowProcess_Intf::Row& row, 
     VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
 	virtual void accept(VerbVisitor* visitor);
   const std::string& getIdent() const { return ident; }
@@ -128,6 +132,7 @@ class AsteriskVerb: public VerbNode
 public:
 	virtual int getVerbType() const { return K_STAR; };
 	virtual bool preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal );
+	virtual void accept(VerbVisitor*);
 };
 
 //------------------------------------------------------------------------------
@@ -138,4 +143,5 @@ public:
 	virtual int getVerbType() const { return K_ASC; };
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
+	virtual void accept(VerbVisitor*);
 };

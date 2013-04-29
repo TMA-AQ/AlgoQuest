@@ -165,6 +165,11 @@ void PartitionVerb::changeResult(	Table::Ptr table,
 }
 
 //------------------------------------------------------------------------------
+void PartitionVerb::accept(VerbVisitor* visitor)
+{
+}
+
+//------------------------------------------------------------------------------
 VERB_IMPLEMENT( FrameVerb );
 
 //------------------------------------------------------------------------------
@@ -260,4 +265,9 @@ bool FrameVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOrigi
 	}
 	this->Result = partition;
 	return false;
+}
+
+//------------------------------------------------------------------------------
+void FrameVerb::accept(VerbVisitor* visitor)
+{
 }

@@ -24,7 +24,9 @@ void AQEngine::call(tnode *pNode, int mode, int selectLevel)
 {
 	std::string query;
 	aq::syntax_tree_to_prefix_form( pNode, query );
-	ParseJeq( query );
+
+  // FIXME
+  // ParseJeq( query );
 	
 	if (query.size() < 2048) // fixme
 		aq::Logger::getInstance().log(AQ_DEBUG, "\n%s\n", query.c_str());

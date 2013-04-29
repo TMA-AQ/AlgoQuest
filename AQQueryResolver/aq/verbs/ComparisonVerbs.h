@@ -17,6 +17,7 @@ public:
 								VerbResult::Ptr resLeft, 
 								VerbResult::Ptr resRight, 
 								VerbResult::Ptr resNext );
+  virtual void accept(VerbVisitor* visitor);
   
   const std::string& getValue() const { return value; }
 
@@ -213,6 +214,7 @@ public:
 								VerbResult::Ptr resLeft, 
 								VerbResult::Ptr resRight, 
 								VerbResult::Ptr resNext );
+  virtual void accept(VerbVisitor* visitor);
 private:
 	bool IsNot;
 };

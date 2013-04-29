@@ -54,6 +54,7 @@ public:
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
+  virtual void accept(VerbVisitor* visitor);
 };
 
 //------------------------------------------------------------------------------
@@ -95,15 +96,22 @@ class GroupVerb: public VerbNode
 	VERB_DECLARE( GroupVerb );
 public:
 	virtual int getVerbType() const { return K_GROUP; };
+  virtual bool preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal );
 	virtual bool changeQuery( tnode* pStart, tnode* pNode,
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
-	virtual void addResult( aq::RowProcess_Intf::row_t& row, 
+	virtual void addResult( aq::RowProcess_Intf::Row& row, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
   void accept(VerbVisitor* visitor);
+  virtual void setSettings(TProjectSettings* settings)
+  {
+    this->useRowResolver = settings->useRowResolver;
+  }
 private:
-  aq::RowProcess_Intf::row_t row_acc;
+  aq::RowProcess_Intf::Row row_prv;
+  aq::RowProcess_Intf::Row row_acc;
+  bool useRowResolver;
   // std::list<RowProcess_Intf::row_t> rows;
 };
 
@@ -119,4 +127,5 @@ public:
 								VerbResult::Ptr resLeft, 
 								VerbResult::Ptr resRight, 
 								VerbResult::Ptr resNext );
+  virtual void accept(VerbVisitor* visitor);
 };

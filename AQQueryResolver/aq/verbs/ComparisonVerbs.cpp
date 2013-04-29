@@ -126,6 +126,12 @@ void ComparisonVerb::changeResult(	Table::Ptr table,
 }
 
 //------------------------------------------------------------------------------
+void ComparisonVerb::accept(VerbVisitor* visitor)
+{
+  visitor->visit(this);
+}
+
+//------------------------------------------------------------------------------
 bool ComparisonVerb::compare(	ColumnItem* item1, 
 								ColumnItem* item2, 
 								ColumnType type )
@@ -146,7 +152,7 @@ bool EqVerb::compare(	ColumnItem* item1,
 						ColumnItem* item2, 
 						ColumnType type )
 {
-	return equal( item1, item2, type );
+	return ColumnItem::equal( item1, item2, type );
 }
 
 //------------------------------------------------------------------------------
@@ -187,7 +193,7 @@ bool LtVerb::compare(	ColumnItem* item1,
 						ColumnItem* item2, 
 						ColumnType type )
 {
-	return lessThan( item1, item2, type );
+	return ColumnItem::lessThan( item1, item2, type );
 }
 
 //------------------------------------------------------------------------------
@@ -202,7 +208,7 @@ bool LeqVerb::compare(	ColumnItem* item1,
 						ColumnItem* item2, 
 						ColumnType type )
 {
-	return equal(item1, item2, type) || lessThan( item1, item2, type );
+	return ColumnItem::equal(item1, item2, type) || ColumnItem::lessThan( item1, item2, type );
 }
 
 //------------------------------------------------------------------------------
@@ -217,7 +223,7 @@ bool GtVerb::compare(	ColumnItem* item1,
 						ColumnItem* item2, 
 						ColumnType type )
 {
-	return !equal(item1, item2, type) && !lessThan( item1, item2, type );
+	return !ColumnItem::equal(item1, item2, type) && !ColumnItem::lessThan( item1, item2, type );
 }
 
 
@@ -233,7 +239,7 @@ bool GeqVerb::compare(	ColumnItem* item1,
 						ColumnItem* item2, 
 						ColumnType type )
 {
-	return !lessThan( item1, item2, type );
+	return !ColumnItem::lessThan( item1, item2, type );
 }
 
 //------------------------------------------------------------------------------
@@ -304,7 +310,7 @@ bool NeqVerb::compare(	ColumnItem* item1,
 						ColumnItem* item2, 
 						ColumnType type )
 {
-	return !equal( item1, item2, type );
+	return !ColumnItem::equal( item1, item2, type );
 }
 
 //------------------------------------------------------------------------------
@@ -354,4 +360,10 @@ void IsVerb::changeResult(	Table::Ptr table,
 	for( size_t idx = 0; idx < column->Items.size(); ++idx )
 		validRows[idx] = (column->Items[idx] == NULL) == !this->IsNot;
 	this->Result = rowValidation;
+}
+
+//------------------------------------------------------------------------------
+void IsVerb::accept(VerbVisitor* visitor)
+{
+  visitor->visit(this);
 }

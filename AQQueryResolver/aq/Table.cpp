@@ -100,161 +100,6 @@ void Table::computeUniqueRow(Table& aqMatrix, std::vector<std::vector<size_t> >&
 }
 
 //------------------------------------------------------------------------------
-void Table::loadFromTableAnswerByRow(aq::AQMatrix& aqMatrix, const std::vector<llong>& tableIDs, 
-																		 std::vector<aq::ColumnMapper::Ptr>& columnsMapper_unused,
-			                               const std::vector<Column::Ptr>& columnTypes, const TProjectSettings& settings, const Base& BaseDesc, 
-																		 boost::shared_ptr<aq::RowProcess_Intf> rowProcess)
-{
-	aq::Timer timer;
-
-	//
-  // is the answer empty ?
-	this->NoAnswer = aqMatrix.getTotalCount() == 0;
-	if( this->NoAnswer )
-		return;
-	if( aqMatrix.getNbColumn() == 0 )
-		this->NoAnswer = true;
-		
-	std::vector<std::vector<size_t> > mapToUniqueIndex;
-	std::vector<std::vector<size_t> > uniqueIndex;
-
-	timer.start();
-	aqMatrix.computeUniqueRow(mapToUniqueIndex, uniqueIndex);
-	aq::Logger::getInstance().log(AQ_INFO, "Sorted and Unique Index: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
-
-	//
-	// Compute table size and check column size
-	size_t size = 0;
-	for (size_t i = 0; i < mapToUniqueIndex.size(); ++i)
-	{
-		if (size == 0)
-			size = mapToUniqueIndex[i].size();
-		else if (size != mapToUniqueIndex[i].size())
-		{
-			throw generic_error(generic_error::INVALID_TABLE, "columns answer are not equals");
-		}
-	}
-
-	//
-	//
-	this->TotalCount = aqMatrix.getTotalCount();
-	
-	//
-	// Prepare Columns and Column Mapper
-	std::vector<aq::ColumnMapper::Ptr> columnsMapper; // order must be the same that columnsType
-	for (size_t i = 0; i < columnTypes.size(); ++i)
-	{
-		Column::Ptr c(new Column(*columnTypes[i]));
-
-		size_t tableIdx = BaseDesc.getTableIdx(c->getTableName());
-		c->TableID = BaseDesc.Tables[tableIdx].ID;
-		this->Columns.push_back(c);
-    
-		columnTypes[i]->TableID = BaseDesc.getTableIdx(columnTypes[i]->getTableName());
-		columnTypes[i]->TableID = BaseDesc.Tables[columnTypes[i]->TableID].ID;
-    ColumnMapper::Ptr cm(new ColumnMapper(aq::ColumnMapper(settings.szThesaurusPath, columnTypes[i]->TableID, columnTypes[i]->ID, columnTypes[i]->Type, settings.packSize)));
-    columnsMapper.push_back(cm);
-	}
-
-	//
-	// Get the last column
-	const std::vector<size_t>& count = aqMatrix.getCount();
-
-	//
-	// Special case for Count only
-	if (this->Columns.size() == 0)
-	{
-		ColumnItem::Ptr item(new ColumnItem((double)aqMatrix.getTotalCount()));
-		aq::RowProcess_Intf::row_t row(1, aq::RowProcess_Intf::row_item_t(item, COL_TYPE_INT, "", "Count"));
-		rowProcess->process(row);
-		return;
-	}
-	
-	////
-	//// Get group by index
-	//const AQMatrix::group_by_t& groupByIndex = aqMatrix.getGroupBy();
-
-	//// For each group by id
-	//for (AQMatrix::group_by_t::const_iterator itGrp = groupByIndex.begin(); itGrp != groupByIndex.end(); ++itGrp)
-	//{
-	//	aq::RowProcessing::row_t row(aqMatrix.hasCountColumn() ? this->Columns.size() + 1 : this->Columns.size(), std::make_pair(ColumnItem::Ptr(), COL_TYPE_BIG_INT));
-
-	//	// For each Row
-	//	for (std::vector<size_t>::const_iterator itRow = itGrp->second.begin(); itRow != itGrp->second.end(); ++itRow)
-	//	{
-	//		for (size_t j = 0; j < mapToUniqueIndex.size(); ++j) 
-	//		{
-	//			assert(*itRow < mapToUniqueIndex[j].size());
-	//			for (size_t c = 0; c < this->Columns.size(); ++c)
-	//			{
-	//				if (this->Columns[c]->TableID == tableIDs[j])
-	//				{
-	//					if (uniqueIndex[j][mapToUniqueIndex[j][*itRow]] != *itRow) exit(-1); // FIXME
-	//					row[c] = std::make_pair(columnsMapper[c]->loadValue(uniqueIndex[j][mapToUniqueIndex[j][*itRow]]), columnsMapper[c]->getType());
-	//					// this->Columns[c]->addItem(uniqueIndex[j][mapToUniqueIndex[j][*itRow]], pSettings, BaseDesc);
-	//					// row[c] = std::make_pair(*this->Columns[c]->Items.rbegin(), columnTypes[c]->Type);
-	//					// this->Columns[c]->Items.erase(--(this->Columns[c]->Items.end()));
-	//				}
-	//			}
-	//		}
-	//		if (aqMatrix.hasCountColumn())
-	//		{
-	//			if (row[this->Columns.size()].first != NULL)
-	//			{
-	//				row[this->Columns.size()].first->numval += static_cast<double>(count[*itRow]);
-	//			}
-	//			else
-	//			{
-	//				ColumnItem::Ptr item(new ColumnItem(static_cast<double>(count[*itRow])));
-	//				row[this->Columns.size()] = std::make_pair(item, COL_TYPE_BIG_INT);
-	//			}
-	//		}
-	//		// perform a group by processing
-	//		
-	//		rowProcessing->process(row); // FIXME
-	//	}
-
-	//	// process only last row
-	//	// rowProcessing->process(row);
-
-	//	continue;
-		
-  size_t row_size = aqMatrix.hasCountColumn() ? this->Columns.size() + 1 : this->Columns.size();
-	// aq::RowProcess_Intf::row_t row(row_size, RowProcess_Intf::row_item_t(ColumnItem::Ptr(), COL_TYPE_BIG_INT, "", ""));
-
-  // For each Row
-  for (size_t i = 0; i < size; ++i)
-  {
-    
-    aq::RowProcess_Intf::row_t row(row_size, RowProcess_Intf::row_item_t(ColumnItem::Ptr(), COL_TYPE_BIG_INT, "", ""));
-    for (size_t j = 0; j < mapToUniqueIndex.size(); ++j) 
-    {
-      for (size_t c = 0; c < this->Columns.size(); ++c)
-      {
-        assert(mapToUniqueIndex[j][i] < uniqueIndex[j].size());
-        if (this->Columns[c]->TableID == tableIDs[j])
-        {
-          row[c] = RowProcess_Intf::row_item_t(
-            columnsMapper[c]->loadValue(uniqueIndex[j][mapToUniqueIndex[j][i]]), 
-            columnTypes[c]->Type,
-            this->Columns[c]->getTableName(),
-            this->Columns[c]->getName());
-        }
-      }
-    }
-
-    if (aqMatrix.hasCountColumn())
-    {
-      ColumnItem::Ptr item(new ColumnItem((double)count[i]));
-      row[this->Columns.size()] = RowProcess_Intf::row_item_t(item, COL_TYPE_BIG_INT, "", "Count");
-    }
-
-    rowProcess->process(row);
-
-	}
-}
-
-//------------------------------------------------------------------------------
 void Table::loadFromTableAnswerByColumn(aq::AQMatrix& table, const std::vector<llong>& tableIDs, const std::vector<Column::Ptr>& columnTypes, const TProjectSettings& pSettings, const Base& BaseDesc)
 {
 	aq::Timer timer;
@@ -980,7 +825,7 @@ void Table::groupBy()
 	{
 		bool duplicate = true;
 		for( size_t idx2 = 0; idx2 < nrColumns; ++idx2 )
-			if( !equal(	this->Columns[idx2]->Items[idx].get(), 
+			if( !ColumnItem::equal(	this->Columns[idx2]->Items[idx].get(), 
 						this->Columns[idx2]->Items[idx - 1].get(),
 						this->Columns[idx2]->Type ) )
 			{
@@ -1076,7 +921,7 @@ void Table::orderBy(	std::vector<Column::Ptr> columns,
 			//detect new partitions within this old partition
 			partitions.push_back( pos1 );
 			for( size_t idx3 = pos1 + 1; idx3 < pos2; ++idx3 )
-				if( !equal(	columns[idx]->Items[index[idx3 - 1]].get(),
+				if( !ColumnItem::equal(	columns[idx]->Items[index[idx3 - 1]].get(),
 							columns[idx]->Items[index[idx3]].get(),
 							columns[idx]->Type ) )
 					partitions.push_back( idx3 );

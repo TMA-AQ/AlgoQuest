@@ -12,7 +12,7 @@ namespace aq
   public:
     RowProcesses() {}
     void addProcess(boost::shared_ptr<aq::RowProcess_Intf> _process) { this->processes.push_back(_process); }
-    int process(row_t& row) 
+    int process(Row& row) 
     {
       std::for_each(processes.begin(), processes.end(), [&] (boost::shared_ptr<aq::RowProcess_Intf> process) {
         process->process(row);

@@ -53,8 +53,8 @@ namespace
 			// and compare
 			for (pos = 0; pos < row1.size(); ++pos)
 			{
-				if (lessThan(*row1[pos], *row2[pos])) return true;
-				else if (lessThan(*row2[pos], *row1[pos])) return false;
+				if (ColumnItem::lessThan(*row1[pos], *row2[pos])) return true;
+				else if (ColumnItem::lessThan(*row2[pos], *row1[pos])) return false;
 			}
 			return false;
 		}
@@ -258,6 +258,17 @@ void AQMatrix::load(const char * filePath, const char fieldSeparator, std::vecto
 			}
 		}
 	}
+
+  this->size = 0;
+	for (size_t i = 0; i < this->matrix.size(); ++i)
+	{
+		if (this->size == 0)
+			this->size = this->matrix[i].indexes.size();
+		else if (this->size != this->matrix[i].indexes.size())
+		{
+			throw generic_error(generic_error::INVALID_TABLE, "columns answer are not equals");
+		}
+	}
 }
 
 void AQMatrix::computeUniqueRow(std::vector<std::vector<size_t> >& mapToUniqueIndex, std::vector<std::vector<size_t> >& uniqueIndex) const
@@ -343,4 +354,25 @@ void AQMatrix::groupBy(std::vector<aq::ColumnMapper::Ptr>& columnsMapper)
 		this->groupByIndex[gk].push_back((*it).index);
 		
 	aq::Logger::getInstance().log(AQ_DEBUG, "%u group\n", groupByIndex.size());
+}
+
+
+void AQMatrix::dump(std::ostream& os) const
+{
+  size_t size = (*this->matrix.begin()).indexes.size();
+  
+  for (size_t c = 0; c < this->matrix.size(); ++c)
+  {
+    std::cout << this->matrix[c].table_id << " ";
+  }
+  std::cout << std::endl;
+
+  for (size_t i = 0; i < size; ++i)
+  {
+    for (size_t c = 0; c < this->matrix.size(); ++c)
+    {
+      std::cout << this->matrix[c].indexes[i] << " ";
+    }
+    std::cout << std::endl;
+  }
 }

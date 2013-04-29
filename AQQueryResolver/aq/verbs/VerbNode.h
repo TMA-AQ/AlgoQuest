@@ -24,7 +24,7 @@ public:
   virtual bool preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal ) { return false; }
   virtual bool changeQuery( tnode* pStart, tnode* pNode, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext ) { return false; }
   virtual void changeResult( Table::Ptr table, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext ) {}
-  virtual void addResult ( aq::RowProcess_Intf::row_t& row, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext ) {}
+  virtual void addResult ( aq::RowProcess_Intf::Row& row, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext ) {}
 
   virtual VerbNode* clone() const = 0;
 
@@ -35,10 +35,11 @@ public:
 	//true - executed and done (the node should be deleted)
 	void changeQuery();
 	void changeResult( Table::Ptr table );
-  void addResult(aq::RowProcess_Intf::row_t& row);
+  void addResult(aq::RowProcess_Intf::Row& row);
 	
-	void acceptTopLeftRight(VerbVisitor*);
-  void acceptLeftTopRight(VerbVisitor* visitor);
+  virtual void accept(VerbVisitor*);
+	//void acceptTopLeftRight(VerbVisitor*);
+ // void acceptLeftTopRight(VerbVisitor* visitor);
 
 	// Verb::Ptr getVerbObject();
 	VerbNode::Ptr getLeftChild();

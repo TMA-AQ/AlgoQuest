@@ -103,7 +103,7 @@ void ColumnItem::toString( char* buffer, const ColumnType& type ) const
 }
 
 //------------------------------------------------------------------------------
-bool lessThan( ColumnItem * first, ColumnItem * second, ColumnType type )
+bool ColumnItem::lessThan( ColumnItem * first, ColumnItem * second, ColumnType type )
 {
 	if( !first || !second )
 		return false;
@@ -126,13 +126,13 @@ bool lessThan( ColumnItem * first, ColumnItem * second, ColumnType type )
 }
 
 //------------------------------------------------------------------------------
-bool lessThan( const ColumnItem& first, const ColumnItem& second )
+bool ColumnItem::lessThan( const ColumnItem& first, const ColumnItem& second )
 {
 	return (first.numval < second.numval) ||  (first.strval < second.strval);
 }
 
 //------------------------------------------------------------------------------
-bool equal( ColumnItem * first, ColumnItem * second, ColumnType type )
+bool ColumnItem::equal( ColumnItem * first, ColumnItem * second, ColumnType type )
 {
 	if( !first || !second )
 		return false;
@@ -155,7 +155,7 @@ bool equal( ColumnItem * first, ColumnItem * second, ColumnType type )
 }
 
 //------------------------------------------------------------------------------
-bool equal( const ColumnItem& first, const ColumnItem& second )
+bool ColumnItem::equal( const ColumnItem& first, const ColumnItem& second )
 {	
 	return (first.numval == second.numval) && (first.strval == second.strval);
 }

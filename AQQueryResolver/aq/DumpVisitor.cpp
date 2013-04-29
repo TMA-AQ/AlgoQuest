@@ -11,6 +11,10 @@ void DumpVisitor::visit(Verb* v)
 void DumpVisitor::visit(VerbNode* v)
 {
 	aq::Logger::getInstance().log(AQ_WARNING, "verb %s not implemented for DumpVisitor\n", id_to_string(v->getVerbType()));
+  
+	if (v->getLeftChild()) v->getLeftChild()->accept(this);
+	if (v->getRightChild()) v->getRightChild()->accept(this);
+	if (v->getBrother()) v->getBrother()->accept(this);
 }
 
 // Aggregate Verbs
@@ -115,7 +119,12 @@ void DumpVisitor::visit(ColumnVerb* c)
 
 void DumpVisitor::visit(CommaVerb* cv)
 {
-	this->query += ", ";
+  cv->getLeftChild()->accept(this);
+  if (cv->getRightChild() != NULL)
+  {
+    this->query += ", ";
+    cv->getRightChild()->accept(this);
+  }
 }
 
 void DumpVisitor::visit(DoubleValueVerb*)
@@ -296,6 +305,8 @@ void DumpVisitor::visit(FromVerb* from)
 
   this->fromStr = "FROM " + this->query + "\n";
   this->query = "";
+  if (from->getBrother() != NULL)
+    from->getBrother()->accept(this);
 }
 
 void DumpVisitor::visit(GroupVerb*)
@@ -308,10 +319,14 @@ void DumpVisitor::visit(OrderVerb*)
 {
 }
 
-void DumpVisitor::visit(SelectVerb*)
+void DumpVisitor::visit(SelectVerb* sv)
 {
-  this->selectStr = "SELECT " + this->query + "\n";
+  this->query = "SELECT ";
+  sv->getLeftChild()->accept(this);
+  assert(sv->getRightChild() == NULL);
+  this->selectStr = this->query + "\n";
   this->query = "";
+  sv->getBrother()->accept(this);
 }
 
 void DumpVisitor::visit(WhereVerb*)
@@ -328,4 +343,22 @@ void DumpVisitor::visit(FrameVerb*)
 
 void DumpVisitor::visit(PartitionVerb*)
 {
+}
+
+// Scalar Verbs
+void DumpVisitor::visit(ScalarVerb*)
+{
+}
+
+void DumpVisitor::visit(SubstringVerb* ssv)
+{
+
+  // FIXME
+  ssv->setLeftChild(ssv->getLeftChild()->getLeftChild());
+
+  std::stringstream ss;
+  this->query += "SUBSTRING(";
+  ssv->getLeftChild()->accept(this);
+  ss << ", " << ssv->getStartPos() << ", " << ssv->getSize() << ")";
+  this->query += ss.str();
 }

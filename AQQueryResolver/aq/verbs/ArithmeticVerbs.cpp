@@ -133,13 +133,19 @@ void BinaryVerb::changeResult(	Table::Ptr table,
 }
 
 //------------------------------------------------------------------------------
-void BinaryVerb::addResult(	aq::RowProcess_Intf::row_t& row, 
+void BinaryVerb::addResult(	aq::RowProcess_Intf::Row& row, 
 								VerbResult::Ptr resLeft, 
 								VerbResult::Ptr resRight, 
 								VerbResult::Ptr resNext )
 {
 	assert( resLeft && resRight );
 	this->computeResult( resLeft, resRight );
+}
+
+//------------------------------------------------------------------------------
+void BinaryVerb::accept(VerbVisitor* visitor)
+{
+  visitor->visit(this);
 }
 
 //------------------------------------------------------------------------------

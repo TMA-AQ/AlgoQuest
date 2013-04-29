@@ -37,6 +37,18 @@
     <Filter Include="Source Files\aq\parser">
       <UniqueIdentifier>{216ac17a-0f88-4cdc-8907-67084daa11d3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\aq\row_resolver">
+      <UniqueIdentifier>{fca227bb-f943-4b1c-9979-91825e4166a4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\aq\row_resolver">
+      <UniqueIdentifier>{bb257299-78d1-4605-a8ae-8c541fe3c702}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\aq\column_resolver">
+      <UniqueIdentifier>{bb9258fb-e301-4482-a126-13b813031dfe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\aq\column_resolver">
+      <UniqueIdentifier>{eea2bae9-b1f4-48e5-83e1-38899cd3483e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Generate_Parser.bat">
@@ -64,12 +76,6 @@
     <ClInclude Include="aq\AQMatrix.h">
       <Filter>Header Files\aq</Filter>
     </ClInclude>
-    <ClInclude Include="aq\Column.h">
-      <Filter>Header Files\aq</Filter>
-    </ClInclude>
-    <ClInclude Include="aq\Column2Table.h">
-      <Filter>Header Files\aq</Filter>
-    </ClInclude>
     <ClInclude Include="aq\ColumnItem.h">
       <Filter>Header Files\aq</Filter>
     </ClInclude>
@@ -94,25 +100,10 @@
     <ClInclude Include="aq\QueryResolver.h">
       <Filter>Header Files\aq</Filter>
     </ClInclude>
-    <ClInclude Include="aq\RowAggregator.h">
-      <Filter>Header Files\aq</Filter>
-    </ClInclude>
-    <ClInclude Include="aq\RowProcess_Intf.h">
-      <Filter>Header Files\aq</Filter>
-    </ClInclude>
-    <ClInclude Include="aq\RowProcesses.h">
-      <Filter>Header Files\aq</Filter>
-    </ClInclude>
-    <ClInclude Include="aq\RowVerbProcess.h">
-      <Filter>Header Files\aq</Filter>
-    </ClInclude>
     <ClInclude Include="aq\Settings.h">
       <Filter>Header Files\aq</Filter>
     </ClInclude>
     <ClInclude Include="aq\SQLPrefix.h">
-      <Filter>Header Files\aq</Filter>
-    </ClInclude>
-    <ClInclude Include="aq\Table.h">
       <Filter>Header Files\aq</Filter>
     </ClInclude>
     <ClInclude Include="aq\TreeUtilities.h">
@@ -178,14 +169,38 @@
     <ClInclude Include="aq\parser\ID2Str.h">
       <Filter>Header Files\aq\parser</Filter>
     </ClInclude>
-    <ClInclude Include="aq\RowWritter.h">
-      <Filter>Header Files\aq</Filter>
-    </ClInclude>
     <ClInclude Include="aq\verbs\VerbNode.h">
       <Filter>Header Files\aq\verbs</Filter>
     </ClInclude>
     <ClInclude Include="aq\verbs\VerbFactory.h">
       <Filter>Header Files\aq\verbs</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\RowAggregator.h">
+      <Filter>Header Files\aq\row_resolver</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\RowProcess_Intf.h">
+      <Filter>Header Files\aq\row_resolver</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\RowProcesses.h">
+      <Filter>Header Files\aq\row_resolver</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\RowVerbProcess.h">
+      <Filter>Header Files\aq\row_resolver</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\RowWritter.h">
+      <Filter>Header Files\aq\row_resolver</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\Column.h">
+      <Filter>Header Files\aq\column_resolver</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\Table.h">
+      <Filter>Header Files\aq\column_resolver</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\RowSolver.h">
+      <Filter>Header Files\aq\row_resolver</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\Column2Table.h">
+      <Filter>Header Files\aq\column_resolver</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -234,12 +249,6 @@
     <ClCompile Include="aq\AQMatrix.cpp">
       <Filter>Source Files\aq</Filter>
     </ClCompile>
-    <ClCompile Include="aq\Column.cpp">
-      <Filter>Source Files\aq</Filter>
-    </ClCompile>
-    <ClCompile Include="aq\Column2Table.cpp">
-      <Filter>Source Files\aq</Filter>
-    </ClCompile>
     <ClCompile Include="aq\ColumnItem.cpp">
       <Filter>Source Files\aq</Filter>
     </ClCompile>
@@ -261,16 +270,10 @@
     <ClCompile Include="aq\QueryResolver.cpp">
       <Filter>Source Files\aq</Filter>
     </ClCompile>
-    <ClCompile Include="aq\RowVerbProcess.cpp">
-      <Filter>Source Files\aq</Filter>
-    </ClCompile>
     <ClCompile Include="aq\Settings.cpp">
       <Filter>Source Files\aq</Filter>
     </ClCompile>
     <ClCompile Include="aq\SQLPrefix.cpp">
-      <Filter>Source Files\aq</Filter>
-    </ClCompile>
-    <ClCompile Include="aq\Table.cpp">
       <Filter>Source Files\aq</Filter>
     </ClCompile>
     <ClCompile Include="aq\TreeUtilities.cpp">
@@ -297,14 +300,29 @@
     <ClCompile Include="aq\parser\ID2Str.cpp">
       <Filter>Source Files\aq\parser</Filter>
     </ClCompile>
-    <ClCompile Include="aq\RowWritter.cpp">
-      <Filter>Source Files\aq</Filter>
-    </ClCompile>
     <ClCompile Include="aq\verbs\VerbNode.cpp">
       <Filter>Source Files\aq\verbs</Filter>
     </ClCompile>
     <ClCompile Include="aq\verbs\VerbFactory.cpp">
       <Filter>Source Files\aq\verbs</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\RowVerbProcess.cpp">
+      <Filter>Source Files\aq\row_resolver</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\RowWritter.cpp">
+      <Filter>Source Files\aq\row_resolver</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\Column.cpp">
+      <Filter>Source Files\aq\column_resolver</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\Table.cpp">
+      <Filter>Source Files\aq\column_resolver</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\RowSolver.cpp">
+      <Filter>Source Files\aq\row_resolver</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\Column2Table.cpp">
+      <Filter>Source Files\aq\column_resolver</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

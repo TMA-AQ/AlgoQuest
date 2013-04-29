@@ -1,4 +1,5 @@
 #include "ScalarVerbs.h"
+#include "VerbVisitor.h"
 #include <cmath>
 #include <aq/Exceptions.h>
 #include <aq/DateConversion.h>
@@ -97,6 +98,29 @@ void ScalarVerb::changeResult(	Table::Ptr table,
 		return;
 	assert( resLeft );
 	this->computeResult( resLeft );
+}
+
+//------------------------------------------------------------------------------
+void ScalarVerb::addResult(	aq::RowProcess_Intf::Row& row, 
+								VerbResult::Ptr resLeft, 
+								VerbResult::Ptr resRight, 
+								VerbResult::Ptr resNext )
+{
+	assert( resLeft );
+  this->computeResult( resLeft );
+  
+  Scalar * scalar = dynamic_cast<Scalar*>(this->Result.get());
+  if (scalar != 0)
+  {
+    ColumnItem::Ptr item(new ColumnItem(scalar->Item));
+    row.row.push_back(aq::RowProcess_Intf::row_item_t(item, scalar->Type, "", ""));
+  }
+}
+
+//------------------------------------------------------------------------------
+void ScalarVerb::accept(VerbVisitor* visitor)
+{
+  visitor->visit(this);
 }
 
 //------------------------------------------------------------------------------
@@ -202,6 +226,11 @@ bool SubstringVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartO
 	if( this->StartPos > 0 )
 		--this->StartPos; //SQL SUBSTRING indexing is 1-based, C++ substr is 0-based
 	return false;
+}
+
+void SubstringVerb::accept(VerbVisitor* visitor)
+{
+  visitor->visit(this);
 }
 
 //------------------------------------------------------------------------------

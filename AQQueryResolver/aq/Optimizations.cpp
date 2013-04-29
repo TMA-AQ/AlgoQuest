@@ -128,7 +128,7 @@ Table::Ptr solveOptimalMinMax(	VerbNode::Ptr spTree, Base& BaseDesc,
 		if( !minMax )
 			minMax = item;
 		else
-			if( min == lessThan(item.get(), minMax.get(), column->Type) )
+			if( min == ColumnItem::lessThan(item.get(), minMax.get(), column->Type) )
 				minMax = item;
 	}
 	

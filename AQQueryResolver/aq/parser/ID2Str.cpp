@@ -18,7 +18,7 @@ TID2String g_id2str[] = {
 	{ K_ASC,			"ASC"			},
 	{ K_AVG,			"AVG"			},
 	{ K_BETWEEN,		"BETWEEN"		},
-	{ K_BY,				"BY"			},
+  { K_BY,				"" }, // "BY"			},
 	{ K_CASE,			"CASE"			},
 	{ K_COMMIT,			"COMMIT"		},
 	{ K_COUNT,			"COUNT"			},

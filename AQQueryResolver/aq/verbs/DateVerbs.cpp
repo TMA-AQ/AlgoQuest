@@ -1,4 +1,5 @@
 #include "DateVerbs.h"
+#include "VerbVisitor.h"
 #include <aq/Exceptions.h>
 #include <aq/DateConversion.h>
 
@@ -25,4 +26,10 @@ bool CurrentDateVerb::changeQuery(	tnode* pStart, tnode* pNode,
 	set_data( *pNode, scalar->getValue(), scalar->Type );
 	this->Result = scalar;
 	return true;
+}
+
+//------------------------------------------------------------------------------
+void CurrentDateVerb::accept(VerbVisitor* visitor)
+{
+  visitor->visit(this);
 }

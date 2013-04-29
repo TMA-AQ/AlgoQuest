@@ -90,6 +90,10 @@ public:
 	virtual void visit(FrameVerb*);
 	virtual void visit(PartitionVerb*);
 
+  // Scalar Vervs
+  virtual void visit(ScalarVerb*);
+  virtual void visit(SubstringVerb*);
+
 	const std::string& getQuery() { 
     this->query = this->selectStr + this->fromStr + this->whereStr + this->groupStr + this->havingStr + this->orderStr; 
     return this->query;

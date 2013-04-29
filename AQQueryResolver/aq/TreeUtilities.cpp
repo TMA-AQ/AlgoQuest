@@ -708,14 +708,14 @@ void SolveMinMaxGroupBy::modifyTmpFiles(	const char* tmpPath,
 		for( size_t idx2 = partition->Rows[idx] + 1; idx2 < partition->Rows[idx+1]; ++idx2 )
 			if( this->_min )
 			{
-				if( lessThan(	table.Columns[minMaxCol]->Items[idx2].get(),
+				if( ColumnItem::lessThan(	table.Columns[minMaxCol]->Items[idx2].get(),
 								table.Columns[minMaxCol]->Items[selIdx].get(),
 								table.Columns[minMaxCol]->Type ) )
 					selIdx = idx2;
 			}
 			else
 			{
-				if( lessThan(	table.Columns[minMaxCol]->Items[selIdx].get(),
+				if( ColumnItem::lessThan(	table.Columns[minMaxCol]->Items[selIdx].get(),
 								table.Columns[minMaxCol]->Items[idx2].get(),
 								table.Columns[minMaxCol]->Type ) )
 					selIdx = idx2;

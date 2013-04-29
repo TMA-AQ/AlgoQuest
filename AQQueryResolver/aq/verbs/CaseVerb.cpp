@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CaseVerb.h"
+#include "VerbVisitor.h"
 #include <aq/Exceptions.h>
 #include <algorithm>
 
@@ -65,7 +66,7 @@ void CaseVerb::changeResult(	Table::Ptr table,
 			if( condType != testColumn->Type )
 				throw verb_error(generic_error::VERB_TYPE_MISMATCH, this->getVerbType());
 
-			if( equal(	testColumn->Items[idx].get(), condItem, condType) )
+			if( ColumnItem::equal(	testColumn->Items[idx].get(), condItem, condType) )
 			{
 				ColumnItem::Ptr resItem = NULL;
 				ColumnType resType;
@@ -100,6 +101,12 @@ void CaseVerb::changeResult(	Table::Ptr table,
 				resultColumn->Items.push_back( NULL ); //no element was found
 	}
 	this->Result = resultColumn;
+}
+
+//------------------------------------------------------------------------------
+void CaseVerb::accept(VerbVisitor* visitor)
+{
+  visitor->visit(this);
 }
 
 //------------------------------------------------------------------------------
@@ -138,6 +145,12 @@ void WhenVerb::changeResult(	Table::Ptr table,
 }
 
 //------------------------------------------------------------------------------
+void WhenVerb::accept(VerbVisitor* visitor)
+{
+  visitor->visit(this);
+}
+
+//------------------------------------------------------------------------------
 VERB_IMPLEMENT(ElseVerb);
 
 //------------------------------------------------------------------------------
@@ -161,4 +174,10 @@ void ElseVerb::changeResult(	Table::Ptr table,
 	conditions->Results.push_back( NULL );
 	results->Results.push_back( resLeft );
 	this->Result = resArray;
+}
+
+//------------------------------------------------------------------------------
+void ElseVerb::accept(VerbVisitor* visitor)
+{
+  visitor->visit(this);
 }

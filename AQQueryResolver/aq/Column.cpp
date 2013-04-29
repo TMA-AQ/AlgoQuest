@@ -13,7 +13,7 @@ Column::inner_column_cmp_t::inner_column_cmp_t(Column& lessThanColumn)
 }
 bool Column::inner_column_cmp_t::operator()(size_t idx1, size_t idx2)
 {
-	return lessThan(m_lessThanColumn.Items[idx1].get(), m_lessThanColumn.Items[idx2].get(), m_lessThanColumn.Type);
+	return ColumnItem::lessThan(m_lessThanColumn.Items[idx1].get(), m_lessThanColumn.Items[idx2].get(), m_lessThanColumn.Type);
 }
 
 Column::inner_column_cmp_2_t::inner_column_cmp_2_t(Column& lessThanColumn)
@@ -22,7 +22,7 @@ Column::inner_column_cmp_2_t::inner_column_cmp_2_t(Column& lessThanColumn)
 }
 bool Column::inner_column_cmp_2_t::operator()(ColumnItem::Ptr item1, ColumnItem::Ptr item2)
 {
-	return lessThan(item1.get(), item2.get(), m_lessThanColumn.Type );
+	return ColumnItem::lessThan(item1.get(), item2.get(), m_lessThanColumn.Type );
 }
 
 

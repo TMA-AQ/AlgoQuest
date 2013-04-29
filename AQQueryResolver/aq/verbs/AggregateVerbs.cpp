@@ -87,6 +87,11 @@ void AggregateVerb::changeResult(	Table::Ptr table,
 	table->GroupByApplied = oldGroupByApplied;
 }
 
+void AggregateVerb::accept(VerbVisitor* visitor)
+{
+  visitor->visit(this);
+}
+
 //------------------------------------------------------------------------------
 VERB_IMPLEMENT(SumVerb);
 
@@ -201,11 +206,12 @@ Scalar::Ptr SumVerb::computeResultRegular(	Column::Ptr column,
 }
 
 //------------------------------------------------------------------------------
-void SumVerb::addResult(aq::RowProcess_Intf::row_t& row, 
+void SumVerb::addResult(aq::RowProcess_Intf::Row& row, 
                         VerbResult::Ptr resLeft,
                         VerbResult::Ptr resRight, 
                         VerbResult::Ptr resNext )
 {
+  this->Result = resLeft;
 }
 
 //------------------------------------------------------------------------------
@@ -380,7 +386,7 @@ Scalar::Ptr MinVerb::computeResultRegular(	Column::Ptr column,
 	Scalar::Ptr scalar = new Scalar( column->Type );
 	size_t minMaxIdx = start;
 	for( llong idx = start + 1; idx < end; ++idx )
-		if( lessThan(	column->Items[idx].get(), 
+		if( ColumnItem::lessThan(	column->Items[idx].get(), 
 						column->Items[minMaxIdx].get(), 
 						column->Type)  )
 			minMaxIdx = idx;
@@ -406,7 +412,7 @@ Column::Ptr computeMinMaxPartition(	Column::Ptr column,
 			ColumnItem::Ptr minMaxVal = column->Items[partitionStart];
 			llong end = partitionStart + partition->FrameEnd + 1;
 			for( llong idx2 = partitionStart + 1; idx2 < end; ++idx2 )
-				if( lessThan( column->Items[idx2].get(), 
+				if( ColumnItem::lessThan( column->Items[idx2].get(), 
 					minMaxVal.get(), column->Type ) == isMin )
 					minMaxVal = column->Items[idx2];
 
@@ -418,7 +424,7 @@ Column::Ptr computeMinMaxPartition(	Column::Ptr column,
 				else
 				{
 					if( end <= partitionEnd &&
-						lessThan( column->Items[end-1].get(), 
+						ColumnItem::lessThan( column->Items[end-1].get(), 
 						minMaxVal.get(), column->Type ) == isMin )
 						minMaxVal = column->Items[end-1];
 					minMaxCol->Items.push_back( new ColumnItem(*minMaxVal) );
@@ -437,7 +443,7 @@ Column::Ptr computeMinMaxPartition(	Column::Ptr column,
 			ColumnItem::Ptr minMaxVal = column->Items[partitionEnd-1];
 			llong start = partitionEnd - 1 + partition->FrameStart;
 			for( llong idx2 = partitionEnd - 2; idx2 >= start; --idx2 )
-				if( lessThan( column->Items[idx2].get(), 
+				if( ColumnItem::lessThan( column->Items[idx2].get(), 
 					minMaxVal.get(), column->Type ) == isMin )
 					minMaxVal = column->Items[idx2];
 
@@ -450,7 +456,7 @@ Column::Ptr computeMinMaxPartition(	Column::Ptr column,
 				else
 				{
 					if( start >= partitionStart &&
-						lessThan( column->Items[start].get(), 
+						ColumnItem::lessThan( column->Items[start].get(), 
 						minMaxVal.get(), column->Type ) == isMin )
 						minMaxVal = column->Items[start];
 					tempCol.push_back( new ColumnItem(*minMaxVal) );
@@ -485,7 +491,7 @@ Column::Ptr computeMinMaxPartition(	Column::Ptr column,
 				{
 					ColumnItem::Ptr minMaxVal = column->Items[start];
 					for( llong idx3 = start + 1; idx3 < end; ++idx3 )
-						if( lessThan(column->Items[idx3].get(), 
+						if( ColumnItem::lessThan(column->Items[idx3].get(), 
 							minMaxVal.get(), column->Type) == isMin )
 							minMaxVal = column->Items[idx3];
 					minMaxCol->Items.push_back( new ColumnItem(*minMaxVal) );
@@ -525,7 +531,7 @@ Scalar::Ptr MaxVerb::computeResultRegular(	Column::Ptr column,
 	Scalar::Ptr scalar = new Scalar( column->Type );
 	size_t minMaxIdx = start;
 	for( llong idx = start + 1; idx < end; ++idx )
-		if( lessThan(	column->Items[minMaxIdx].get(),
+		if( ColumnItem::lessThan(	column->Items[minMaxIdx].get(),
 						column->Items[idx].get(),
 						column->Type)  )
 						minMaxIdx = idx;
@@ -617,7 +623,7 @@ Column::Ptr OffsetColumn(	Column::Ptr column, TablePartition::Ptr partition,
 			llong solveItems = min(unsolvedItems, itemIndexCount);
 			llong newColumnSize = (llong) newColumn->Items.size();
 			if( columnCount && solvedItemsInIdx &&
-				equal(	lagItem.get(), 
+				ColumnItem::equal(	lagItem.get(), 
 						newColumn->Items[newColumnSize - 1].get(), 
 						column->Type) )
 			{
@@ -696,11 +702,23 @@ void FirstValueVerb::changeResult(	Table::Ptr table,
 }
 
 //------------------------------------------------------------------------------
+void FirstValueVerb::accept(VerbVisitor* visitor)
+{
+  visitor->visit(this);
+}
+
+//------------------------------------------------------------------------------
 VERB_IMPLEMENT( LagVerb );
 
 //------------------------------------------------------------------------------
 LagVerb::LagVerb(): Offset(0), Default(NULL)
 {}
+
+//------------------------------------------------------------------------------
+LagVerb::~LagVerb()
+{
+	delete_node( this->Default );
+}
 
 //------------------------------------------------------------------------------
 bool LagVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal )
@@ -766,11 +784,9 @@ void LagVerb::changeResult(	Table::Ptr table,
 }
 
 //------------------------------------------------------------------------------
-LagVerb::~LagVerb()
+void LagVerb::accept(VerbVisitor* visitor)
 {
-	delete_node( this->Default );
 }
-
 //------------------------------------------------------------------------------
 VERB_IMPLEMENT( RowNumberVerb );
 
@@ -802,4 +818,10 @@ void RowNumberVerb::changeResult(	Table::Ptr table,
 
 	this->Result = newColumn;
 	table->unravel( partition );
+}
+
+//------------------------------------------------------------------------------
+void RowNumberVerb::accept(VerbVisitor* visitor)
+{
+  visitor->visit(this);
 }

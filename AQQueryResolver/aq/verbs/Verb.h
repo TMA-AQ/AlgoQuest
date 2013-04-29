@@ -64,7 +64,7 @@ public:
 
   /// Apply the verb on the row
   /// This method is called in bottom-up order in the verb tree
-  virtual void addResult ( aq::RowProcess_Intf::row_t& row, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext ) = 0;
+  virtual void addResult ( aq::RowProcess_Intf::Row& row, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext ) = 0;
   //{
   //}
 
@@ -85,7 +85,7 @@ public:
 	VerbResult::Ptr getResult() const;
 
 	// Visitor accept
-	virtual void accept(VerbVisitor*);
+	virtual void accept(VerbVisitor*) = 0;
 
 //debug13 ugly hack used so that FirstValue verb can use LagVerb protected:
 	//the result is automatically passed as a parameter to parent verbs

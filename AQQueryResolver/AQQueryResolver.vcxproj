@@ -329,6 +329,7 @@
     <ClInclude Include="aq\RowAggregator.h" />
     <ClInclude Include="aq\RowProcesses.h" />
     <ClInclude Include="aq\RowProcess_Intf.h" />
+    <ClInclude Include="aq\RowSolver.h" />
     <ClInclude Include="aq\RowVerbProcess.h" />
     <ClInclude Include="aq\RowWritter.h" />
     <ClInclude Include="aq\Settings.h" />
@@ -374,6 +375,7 @@
     <ClCompile Include="aq\parser\sql92_grm_tab.cpp" />
     <ClCompile Include="aq\parser\SQLParser.cpp" />
     <ClCompile Include="aq\QueryResolver.cpp" />
+    <ClCompile Include="aq\RowSolver.cpp" />
     <ClCompile Include="aq\RowVerbProcess.cpp" />
     <ClCompile Include="aq\RowWritter.cpp" />
     <ClCompile Include="aq\Settings.cpp" />

@@ -19,44 +19,35 @@ RowWritter::~RowWritter()
 	fclose(pFOut);
 }
 
-int RowWritter::process(row_t& row)
+int RowWritter::process(Row& row)
 {
 	if (this->firstRow)
 	{
 		//write column names
-		for(size_t idx = 0; idx < row.size(); ++idx)
+		for(size_t idx = 0; idx < row.row.size(); ++idx)
     {
       fputs(" ; ", pFOut);
-      if (row[idx].tableName != "")
+      if (row.row[idx].tableName != "")
       {
-        fputs(row[idx].tableName.c_str(), pFOut);
+        fputs(row.row[idx].tableName.c_str(), pFOut);
         fputs(".", pFOut);
       }
-      fputs(row[idx].columnName.c_str(), pFOut);
-
-			//if (idx < this->columns.size())
-			//{
-			//	if(this->columns[idx]->Invisible)
-			//		continue;
-			//	fputs(" ; ", pFOut);
-			//	assert(this->columns[idx]);
-			//	fputs(this->columns[idx]->getDisplayName().c_str(), pFOut);
-			//}
-			//else
-			//{
-			//	fputs(" ; Count", pFOut);
-			//}
+      fputs(row.row[idx].columnName.c_str(), pFOut);
 		}
 		fputc('\n', pFOut);
 		this->firstRow = false;
 	}
 
-	for (row_t::const_iterator it = row.begin(); it != row.end(); ++it)
-	{
-		(*it).item->toString(value, (*it).type);
-		fputs(" ; ", pFOut);
-		fputs(value, pFOut);
-	}
-	fputc('\n', pFOut);
+  if (row.completed)
+  {
+    for (row_t::const_iterator it = row.row.begin(); it != row.row.end(); ++it)
+    {
+      assert((*it).item != NULL);
+      (*it).item->toString(value, (*it).type);
+      fputs(" ; ", pFOut);
+      fputs(value, pFOut);
+    }
+    fputc('\n', pFOut);
+  }
 	return 0;
 }

@@ -12,6 +12,7 @@ public:
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
+  virtual void accept(VerbVisitor* visitor);
 protected:
 	virtual Scalar::Ptr computeResultRegular(	Column::Ptr column, 
 												Table::Ptr table,
@@ -38,7 +39,7 @@ protected:
 	virtual VerbResult::Ptr computeResultPartition(	Column::Ptr column, 
 													Table::Ptr table,
 													TablePartition::Ptr partition );
-  void addResult(aq::RowProcess_Intf::row_t& row, 
+  void addResult(aq::RowProcess_Intf::Row& row, 
     VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
   void accept(VerbVisitor* visitor);
 };
@@ -116,6 +117,7 @@ public:
 	virtual int getVerbType() const { return K_FIRST_VALUE; };
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
+  virtual void accept(VerbVisitor* visitor);
 };
 
 //------------------------------------------------------------------------------
@@ -136,6 +138,7 @@ public:
 	virtual bool preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal );
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
+  virtual void accept(VerbVisitor* visitor);
 //debug13 ugly hack to let FirstValueVerb use LagVerb private:
 	llong Offset;
 	tnode* Default;
@@ -149,4 +152,5 @@ public:
 	virtual int getVerbType() const { return K_ROW_NUMBER; };
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
+  virtual void accept(VerbVisitor* visitor);
 };

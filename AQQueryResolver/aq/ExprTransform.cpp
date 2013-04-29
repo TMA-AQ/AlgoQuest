@@ -795,7 +795,7 @@ tnode* transform_cmp_op( tnode* pNode, Base* baseDesc, char* pszPath, int *pErr 
 
 			if ( bAddValue == 1 ) {
 				std::vector<ColumnItem::Ptr>::const_iterator it = std::find_if(thesaurusRes.Items.begin(), thesaurusRes.Items.end(), 
-					boost::bind(equal, boost::bind(&ColumnItem::Ptr::get, _1), thesaurus.Items[ i ].get(), thesaurus.Type));
+					boost::bind(ColumnItem::equal, boost::bind(&ColumnItem::Ptr::get, _1), thesaurus.Items[ i ].get(), thesaurus.Type));
 				if (it == thesaurusRes.Items.end())
 				{
 					thesaurusRes.Items.push_back( thesaurus.Items[ i ] );

@@ -5,11 +5,12 @@
 
 using namespace aq;
 
-ColumnMapper::ColumnMapper(const char * _path, size_t _tableId, size_t _columnId, aq::ColumnType _type, size_t _packetSize)
+ColumnMapper::ColumnMapper(const char * _path, size_t _tableId, size_t _columnId, aq::ColumnType _type, size_t _size, size_t _packetSize)
 	: nbRemap(0),
 		tableId(_tableId),
 		columnId(_columnId),
 		type(_type),
+    size(_size),
 		currentPart(0),
 		packetSize(_packetSize),
 		path(_path)
@@ -67,8 +68,7 @@ ColumnItem::Ptr ColumnMapper::loadValue(size_t index)
 	case aq::COL_TYPE_VARCHAR:
 		{ 
 			char val[128];
-      throw aq::generic_error(aq::generic_error::NOT_IMPLEMENED, "cannot read varchar item in row resolver mode now");
-			this->thesaurusMapper->read(val, offset * sizeof(val), sizeof(val)); // FIXME : I NEED TO KNOW THE SIZE OF THE COLUMN ITEM HERE !!!!
+			this->thesaurusMapper->read(val, offset * size, size);
 			value->strval = val;
 		}
 		break;

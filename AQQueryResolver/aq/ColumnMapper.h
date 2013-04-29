@@ -17,7 +17,7 @@ class ColumnMapper
 public:
 	typedef boost::shared_ptr<ColumnMapper> Ptr;
 
-	ColumnMapper(const char * path, size_t tableId, size_t columnId, aq::ColumnType type, size_t _packetSize);
+	ColumnMapper(const char * path, size_t tableId, size_t columnId, aq::ColumnType type, size_t _size, size_t _packetSize);
 	~ColumnMapper();
 	ColumnItem::Ptr loadValue(size_t index);
 	const std::vector<size_t>& getSimilarIndex(size_t index) const;
@@ -27,6 +27,7 @@ private:
 	size_t tableId;
 	size_t columnId;
 	aq::ColumnType type;
+  size_t size;
 	size_t currentPart;
 	size_t packetSize;
 	const std::string path;

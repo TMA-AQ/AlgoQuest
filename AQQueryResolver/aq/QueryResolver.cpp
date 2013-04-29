@@ -6,6 +6,7 @@
 #include "RowProcesses.h"
 #include "RowWritter.h"
 #include "RowVerbProcess.h"
+#include "RowSolver.h"
 
 #include "verbs/Verb.h"
 #include "parser/JeqParser.h"
@@ -298,9 +299,10 @@ Table::Ptr QueryResolver::SolveSelectRegular()
 
 #ifdef _DEBUG
   {
+    std::cout << *this->sqlStatement << std::endl;
     VerbNode::dump(std::cout, spTree);
     DumpVisitor printer;
-    spTree->acceptLeftTopRight(&printer);
+    spTree->accept(&printer);
     std::cout << std::endl << printer.getQuery() << std::endl;
   }
 #endif
@@ -308,23 +310,16 @@ Table::Ptr QueryResolver::SolveSelectRegular()
 	QueryResolver::cleanQuery( this->sqlStatement );
 	aq::Logger::getInstance().log(AQ_INFO, "Query Preprocessing: Time elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
   
-#ifdef _DEBUG
-  oss.str() = "";
-  oss << *this->sqlStatement << std::endl;
-  std::string stmp2 = oss.str();
-  DumpVisitor printer;
-  spTree->acceptLeftTopRight(&printer);
-  std::cout << oss.str() << std::endl << printer.getQuery() << std::endl;
-#endif
+  std::cout << *this->sqlStatement << std::endl;
 
 	//
 	// Solve Optimal Min/Max : FIXME
-	timer.start();
-	table = solveOptimalMinMax( spTree, BaseDesc, *pSettings );
-	aq::Logger::getInstance().log(AQ_INFO, "Solve Optimal Min/Max: Time elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
-	
-	if( table )
-		return table;
+	//timer.start();
+	//table = solveOptimalMinMax( spTree, BaseDesc, *pSettings );
+	//aq::Logger::getInstance().log(AQ_INFO, "Solve Optimal Min/Max: Time elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
+	//
+	//if( table )
+	//	return table;
 
 	//vector<VerbNode::Ptr> preorderVerbTree;
 	//PreorderTraversal( spStart, preorderVerbTree );
@@ -1055,7 +1050,7 @@ void QueryResolver::SolveUpdateDelete(	tnode* pNode )
 			{
 				bool found = false;
 				for( size_t idx3 = 0; idx3 < condCol->Items.size(); ++idx3 )
-					if( equal(	column->Items[idx2].get(), 
+					if( ColumnItem::equal(	column->Items[idx2].get(), 
 								condCol->Items[idx3].get(), 
 								column->Type) )
 					{
@@ -1205,7 +1200,7 @@ void QueryResolver::SolveUnionMinus(	tnode* pNode )
 					{
 						bool allEqual = true;
 						for( size_t idx3 = 0; idx3 < nrColumns; ++idx3 )
-							if( !equal(	table->Columns[idx3]->Items[idx2].get(),
+							if( !ColumnItem::equal(	table->Columns[idx3]->Items[idx2].get(),
 										totalTable->Columns[idx3]->Items[idx4].get(), 
 										table->Columns[idx3]->Type ) )
 							{
@@ -1392,15 +1387,15 @@ Table::Ptr QueryResolver::solveAQMatriceByRows(VerbNode::Ptr spTree)
 		columnsByTableId[(*it)->TableID].push_back(std::make_pair((*it)->ID, (*it)->Type));
 	}
 
-	std::vector<aq::ColumnMapper::Ptr> columnsMapper;
-	for (std::map<size_t, std::vector<std::pair<size_t, aq::ColumnType> > >::const_iterator it_t = columnsByTableId.begin(); it_t != columnsByTableId.end(); ++it_t)
-	{
-		for (std::vector<std::pair<size_t, aq::ColumnType> >::const_iterator it_c = it_t->second.begin(); it_c != it_t->second.end(); ++it_c)
-		{
-			ColumnMapper::Ptr cm(new ColumnMapper(aq::ColumnMapper(pSettings->szThesaurusPath, it_t->first, it_c->first, it_c->second, pSettings->packSize)));
-			columnsMapper.push_back(cm);
-		}
-	}
+	//std::vector<aq::ColumnMapper::Ptr> columnsMapper;
+	//for (std::map<size_t, std::vector<std::pair<size_t, aq::ColumnType> > >::const_iterator it_t = columnsByTableId.begin(); it_t != columnsByTableId.end(); ++it_t)
+	//{
+	//	for (std::vector<std::pair<size_t, aq::ColumnType> >::const_iterator it_c = it_t->second.begin(); it_c != it_t->second.end(); ++it_c)
+	//	{
+	//		ColumnMapper::Ptr cm(new ColumnMapper(aq::ColumnMapper(pSettings->szThesaurusPath, it_t->first, it_c->first, it_c->second, pSettings->packSize)));
+	//		columnsMapper.push_back(cm);
+	//	}
+	//}
 
 #ifdef OUTPUT_NESTED_QUERIES
 	MakeBackupFile( pSettings->szOutputFN, backup_type_t::Empty );
@@ -1428,7 +1423,7 @@ Table::Ptr QueryResolver::solveAQMatriceByRows(VerbNode::Ptr spTree)
 
 	timer.start();
 	Table::Ptr table = new Table();
-	table->loadFromTableAnswerByRow(*(aq_engine->getAQMatrix()), aq_engine->getTablesIDs(), columnsMapper, columnTypes, *pSettings, BaseDesc, processes );
+	aq::solveAQMatrix(*(aq_engine->getAQMatrix()), aq_engine->getTablesIDs(), columnTypes, *pSettings, BaseDesc, processes );
 	aq::Logger::getInstance().log(AQ_INFO, "Load From Answer: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
 	return Table::Ptr(); // empty
 }
@@ -1462,10 +1457,10 @@ Table::Ptr QueryResolver::solveAQMatriceByColumns(VerbNode::Ptr spTree)
 		aq::Logger::getInstance().log(AQ_INFO, "Change Result: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
 	}
 	
-	timer.start();
-	table->cleanRedundantColumns();
-	table->groupBy();
-	aq::Logger::getInstance().log(AQ_INFO, "Group By: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
+	//timer.start();
+	//table->cleanRedundantColumns();
+	//table->groupBy();
+	//aq::Logger::getInstance().log(AQ_INFO, "Group By: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
 
 	if( table->GroupByApplied && table->HasCount )
 	{

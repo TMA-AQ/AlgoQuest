@@ -10,4 +10,5 @@ public:
 	virtual int getVerbType() const { return K_CURRENT_DATE; };
 	virtual bool changeQuery( tnode* pStart, tnode* pNode,
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
+  virtual void accept(VerbVisitor* visitor);
 };

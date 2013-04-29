@@ -16,7 +16,7 @@ public:
 	~RowWritter();
 
 	void setColumn(std::vector<Column::Ptr> _columns) { this->columns = _columns; }
-	virtual int process(row_t& row);
+	virtual int process(Row& row);
 
 private:
   VerbNode::Ptr spTree;

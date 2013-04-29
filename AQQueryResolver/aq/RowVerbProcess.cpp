@@ -8,7 +8,7 @@ namespace aq
     {
     }
 
-    int RowVerbProcess::process(row_t& row)
+    int RowVerbProcess::process(Row& row)
     {
       this->spTree->addResult(row);
       return 0;

@@ -9,6 +9,7 @@ class JoinVerb: public VerbNode
 public:
 	virtual int getVerbType() const { return -1; };
 	virtual bool preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal );
+  virtual void accept(VerbVisitor* visitor);
 protected:
 	virtual int leftTag();
 	virtual int rightTag();

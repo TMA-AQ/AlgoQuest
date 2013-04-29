@@ -58,7 +58,11 @@ public:
 	size_t getNbColumn() const { return this->matrix.size(); }
 	uint64_t getTotalCount() const { return this->totalCount; }
 	uint64_t getNbRows() const { return this->nbRows; }
+  size_t getSize() const { return this->size; }
 	bool hasCountColumn() const { return this->hasCount; }
+
+  /// Debug purpose
+  void dump(std::ostream& os) const;
 
 private:
 
@@ -78,6 +82,7 @@ private:
 	group_by_t groupByIndex;
 	uint64_t totalCount;
 	uint64_t nbRows;
+  size_t size;
 	bool hasCount;
 };
 

@@ -1,4 +1,5 @@
 #include "JoinVerbs.h"
+#include "VerbVisitor.h"
 #include <aq/TreeUtilities.h>
 
 //------------------------------------------------------------------------------
@@ -45,6 +46,12 @@ bool JoinVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOrigin
 //------------------------------------------------------------------------------
 int JoinVerb::leftTag(){ return K_INNER; };
 int JoinVerb::rightTag(){ return K_INNER; };
+
+//------------------------------------------------------------------------------
+void JoinVerb::accept(VerbVisitor* visitor)
+{
+  visitor->visit(this);
+}
 
 //------------------------------------------------------------------------------
 VERB_IMPLEMENT(LeftJoinVerb);

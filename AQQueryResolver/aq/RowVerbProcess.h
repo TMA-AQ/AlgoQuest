@@ -11,7 +11,7 @@ namespace aq
   {
   public:
     RowVerbProcess(VerbNode::Ptr _spTree);
-    int process(row_t& row);
+    int process(Row& row);
   private:
     VerbNode::Ptr spTree;
   };

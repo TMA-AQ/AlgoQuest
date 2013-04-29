@@ -98,15 +98,12 @@ void ColumnVerb::changeResult(	Table::Ptr table,
 }
 
 //------------------------------------------------------------------------------
-void ColumnVerb::addResult(aq::RowProcess_Intf::row_t& row, 
+void ColumnVerb::addResult(aq::RowProcess_Intf::Row& row, 
                            VerbResult::Ptr resLeft,
                            VerbResult::Ptr resRight, 
                            VerbResult::Ptr resNext )
 {
-	if( this->Result )
-		return;
-  
-  for (aq::RowProcess_Intf::row_t::iterator it = row.begin(); it != row.end(); ++it)
+  for (aq::RowProcess_Intf::row_t::iterator it = row.row.begin(); it != row.row.end(); ++it)
   {
     if ((*it).match(this->TableName, this->ColumnName))
     {
@@ -114,7 +111,6 @@ void ColumnVerb::addResult(aq::RowProcess_Intf::row_t& row,
       break;
     }
   }
-
 }
 
 //------------------------------------------------------------------------------
@@ -122,6 +118,7 @@ std::string ColumnVerb::getTableName() const{ return this->TableName; }
 std::string ColumnVerb::getColumnName() const{ return this->ColumnName; };
 std::string ColumnVerb::getColumnOnlyName() const{ return this->ColumnOnlyName; };
 
+//------------------------------------------------------------------------------
 void ColumnVerb::accept(VerbVisitor* visitor)
 {
 	visitor->visit(this);
@@ -269,6 +266,12 @@ bool InVerb::changeQuery(	tnode* pStart, tnode* pNode,
 }
 
 //------------------------------------------------------------------------------
+void InVerb::accept(VerbVisitor* visitor)
+{
+	visitor->visit(this);
+}
+
+//------------------------------------------------------------------------------
 VERB_IMPLEMENT( IntValueVerb );
 
 //------------------------------------------------------------------------------
@@ -281,6 +284,12 @@ bool IntValueVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOr
 	assert( pNode->eNodeDataType == NODE_DATA_INT );
 	this->Result = new Scalar(COL_TYPE_INT, ColumnItem((double)pNode->data.val_int));
 	return false;
+}
+
+//------------------------------------------------------------------------------
+void IntValueVerb::accept(VerbVisitor* visitor)
+{
+	visitor->visit(this);
 }
 
 //------------------------------------------------------------------------------
@@ -299,6 +308,12 @@ bool DoubleValueVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStar
 }
 
 //------------------------------------------------------------------------------
+void DoubleValueVerb::accept(VerbVisitor* visitor)
+{
+	visitor->visit(this);
+}
+
+//------------------------------------------------------------------------------
 VERB_IMPLEMENT( StringValueVerb );
 
 //------------------------------------------------------------------------------
@@ -311,6 +326,12 @@ bool StringValueVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStar
 	assert( pNode->eNodeDataType == NODE_DATA_STRING );
 	this->Result = new Scalar(COL_TYPE_VARCHAR, ColumnItem(pNode->data.val_str));
 	return false;
+}
+
+//------------------------------------------------------------------------------
+void StringValueVerb::accept(VerbVisitor* visitor)
+{
+	visitor->visit(this);
 }
 
 //------------------------------------------------------------------------------
@@ -364,7 +385,7 @@ void AsVerb::changeResult(	Table::Ptr table,
 }
 
 //------------------------------------------------------------------------------
-void AsVerb::addResult(aq::RowProcess_Intf::row_t& row, 
+void AsVerb::addResult(aq::RowProcess_Intf::Row& row, 
                        VerbResult::Ptr resLeft,
                        VerbResult::Ptr resRight, 
                        VerbResult::Ptr resNext )
@@ -373,7 +394,7 @@ void AsVerb::addResult(aq::RowProcess_Intf::row_t& row,
   if (scalar != 0)
   {
     ColumnItem::Ptr item(new ColumnItem(scalar->Item));
-    row.push_back(aq::RowProcess_Intf::row_item_t(item, scalar->Type, "", this->ident));
+    row.row.push_back(aq::RowProcess_Intf::row_item_t(item, scalar->Type, "", this->ident, true));
   }
 }
 
@@ -398,6 +419,12 @@ bool AsteriskVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOr
 }
 
 //------------------------------------------------------------------------------
+void AsteriskVerb::accept(VerbVisitor* visitor)
+{
+	visitor->visit(this);
+}
+
+//------------------------------------------------------------------------------
 VERB_IMPLEMENT( AscVerb );
 
 //------------------------------------------------------------------------------
@@ -413,4 +440,10 @@ void AscVerb::changeResult(	Table::Ptr table,
 	//simply move the parameters up to the parent
 	assert( resLeft && !resRight );
 	this->Result = resLeft;
+}
+
+//------------------------------------------------------------------------------
+void AscVerb::accept(VerbVisitor* visitor)
+{
+	visitor->visit(this);
 }

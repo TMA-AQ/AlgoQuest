@@ -1,5 +1,6 @@
 #include "VerbNode.h"
 #include "VerbFactory.h"
+#include "VerbVisitor.h"
 #include <aq/parser/ID2Str.h>
 
 //------------------------------------------------------------------------------
@@ -115,7 +116,7 @@ void VerbNode::changeResult( Table::Ptr table )
 }
 
 //------------------------------------------------------------------------------
-void VerbNode::addResult(aq::RowProcess_Intf::row_t& row)
+void VerbNode::addResult(aq::RowProcess_Intf::Row& row)
 {
 	if( this->Brother )
 		this->Brother->addResult( row );
@@ -137,22 +138,9 @@ void VerbNode::addResult(aq::RowProcess_Intf::row_t& row)
   
 }
 
-//------------------------------------------------------------------------------
-void VerbNode::acceptTopLeftRight(VerbVisitor* visitor)
+void VerbNode::accept(VerbVisitor* visitor)
 {
-	this->accept(visitor);
-	if (this->Left) this->Left->acceptTopLeftRight(visitor);
-	if (this->Right) this->Right->acceptTopLeftRight(visitor);
-	if (this->Brother) this->Brother->acceptTopLeftRight(visitor);
-}
-
-//------------------------------------------------------------------------------
-void VerbNode::acceptLeftTopRight(VerbVisitor* visitor)
-{
-	if (this->Left) this->Left->acceptLeftTopRight(visitor);
-	this->accept(visitor);
-	if (this->Right) this->Right->acceptLeftTopRight(visitor);
-	if (this->Brother) this->Brother->acceptLeftTopRight(visitor);
+  visitor->visit(this);
 }
 
 //------------------------------------------------------------------------------

@@ -100,6 +100,10 @@ public:
 	// Over Verbs
 	virtual void visit(FrameVerb*) = 0;
 	virtual void visit(PartitionVerb*) = 0;
+
+  // Scalar Vervs
+  virtual void visit(ScalarVerb*) = 0;
+  virtual void visit(SubstringVerb*) = 0;
 };
 
 #endif

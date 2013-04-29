@@ -1,4 +1,5 @@
 #include "ConversionVerbs.h"
+#include "VerbVisitor.h"
 #include <algorithm>
 #include <aq/Exceptions.h>
 #include <aq/DateConversion.h>
@@ -174,6 +175,12 @@ void CastVerb::changeResult(	Table::Ptr table,
 }
 
 //------------------------------------------------------------------------------
+void CastVerb::accept(VerbVisitor* visitor)
+{
+  visitor->visit(this);
+}
+
+//------------------------------------------------------------------------------
 VERB_IMPLEMENT(NvlVerb);
 
 //------------------------------------------------------------------------------
@@ -243,6 +250,12 @@ void NvlVerb::changeResult( Table::Ptr table,
 	default:
 		assert( 0 );
 	}
+}
+
+//------------------------------------------------------------------------------
+void NvlVerb::accept(VerbVisitor* visitor)
+{
+  visitor->visit(this);
 }
 
 //------------------------------------------------------------------------------
@@ -335,7 +348,7 @@ void DecodeVerb::changeResult( Table::Ptr table,
 	{
 		bool found = false;
 		for( size_t idx2 = 0; idx2 < search.size(); ++idx2 )
-			if( equal(	sourceCol->Items[idx].get(), 
+			if( ColumnItem::equal(	sourceCol->Items[idx].get(), 
 						&search[idx2]->Item, 
 						sourceCol->Type ) )
 			{
@@ -351,4 +364,10 @@ void DecodeVerb::changeResult( Table::Ptr table,
 	}
 
 	this->Result = destCol;
+}
+
+//------------------------------------------------------------------------------
+void DecodeVerb::accept(VerbVisitor* visitor)
+{
+  visitor->visit(this);
 }
