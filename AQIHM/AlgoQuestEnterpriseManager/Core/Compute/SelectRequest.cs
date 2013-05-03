@@ -13,7 +13,7 @@ namespace AlgoQuest.Core.Compute
 
     public class SelectRequest : ISelectRequest
     {
-        [DllImport("AQLib.dll", CharSet = CharSet.Auto)]
+        [DllImport("AQManager.dll", CharSet = CharSet.Auto)]
         public static extern int solve_query(
             [MarshalAs(UnmanagedType.LPStr)]string query,
             [MarshalAs(UnmanagedType.LPStr)]string iniFilename,
