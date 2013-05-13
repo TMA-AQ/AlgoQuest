@@ -14,5 +14,7 @@ AQLIB_API int solve_query(const char * query, const char * iniFilename, const ch
                           const char * logIdent, const char * logMode, unsigned int logLevel,
                           bool clean, bool force);
 
+AQLIB_API int load_db(const char * propertiesFile, unsigned int tableId);
+
 AQLIB_API int test_aq_lib(const char * query);
 }

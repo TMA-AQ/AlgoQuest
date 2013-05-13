@@ -3,13 +3,13 @@
 #include <aq/Exceptions.h>
 #include <aq/BaseDesc.h>
 #include <aq/Logger.h>
-#include <SQLParser/AQEngine.h>
-#include <SQLParser/SQLParser.h>
-#include <SQLParser/SQLPrefix.h>
-#include <SQLParser/Column2Table.h>
-#include <SQLParser/QueryResolver.h>
-#include <SQLParser/JeqParser.h>
-#include <DBLoader/DatabaseLoader.h>
+#include <aq/AQEngine.h>
+#include <aq/SQLPrefix.h>
+#include <aq/Column2Table.h>
+#include <aq/QueryResolver.h>
+#include <aq/parser/SQLParser.h>
+#include <aq/parser/JeqParser.h>
+#include <aq/db_loader/DatabaseLoader.h>
 #include <iostream>
 #include <list>
 #include <fstream>
@@ -187,7 +187,7 @@ int processQuery(const std::string& query, TProjectSettings& settings, Base& bas
 
 // -------------------------------------------------------------------------------------------------
 int processSQLQueries(const std::string query, 
-                      const TProjectSettings& settingsBase, Base& baseDesc, AQEngine_Intf * aq_engine,
+                      const TProjectSettings& settingsBase, Base& baseDesc,
                       const std::string queryIdent, bool clean, bool force)
 {
 
@@ -198,6 +198,11 @@ int processSQLQueries(const std::string query,
   // prepare and process query
   std::string answer;
   TProjectSettings settings(settingsBase);
+
+  //
+  // Load AQ engine
+  AQEngine_Intf * aq_engine = new AQEngineSystem(baseDesc, settings);
+    
   if (!((prepareQuery(query, settingsBase, baseDesc, settings, answer, queryIdent, force) == EXIT_SUCCESS) &&
     (processQuery(query, settings, baseDesc, aq_engine, answer, clean) == EXIT_SUCCESS)))
   {
@@ -287,9 +292,8 @@ int solve_query(const char * _query, const char * _iniFilename, const char * _wo
 		
 		//
 		// Load AQ engine
-		AQEngine_Intf * aq_engine = new AQEngine(baseDesc, settings);
 		aq::Logger::getInstance().log(AQ_INFO, "Use aq engine: '%s'\n", settings.szEnginePath.c_str());
-		processSQLQueries(query, settings, baseDesc, aq_engine, workingDirectory, clean, force);
+		processSQLQueries(query, settings, baseDesc,  workingDirectory, clean, force);
 	}
 	catch (const aq::generic_error& error)
 	{
@@ -311,7 +315,53 @@ int solve_query(const char * _query, const char * _iniFilename, const char * _wo
 	return EXIT_SUCCESS;
 }
 
-AQLIB_API int test_aq_lib(const char * query)
+int load_db(const char * propertiesFile, unsigned int tableId)
+{					
+  
+  //
+  // read ini file
+  TProjectSettings settings;
+  if (propertiesFile != "")
+  {
+    aq::Logger::getInstance().log(AQ_INFO, "read %s\n", propertiesFile);
+    settings.load(propertiesFile);
+  }
+
+  //
+  // Load DB Schema
+  Base baseDesc;
+  std::string baseDescr_filename = settings.szDBDescFN;
+  aq::Logger::getInstance().log(AQ_INFO, "load base %s\n", baseDescr_filename.c_str());
+  std::fstream bdFile(baseDescr_filename.c_str());
+  aq::base_t baseDescHolder;
+  if (baseDescr_filename.substr(baseDescr_filename.size() - 4) == ".xml")
+  {
+    aq::build_base_from_xml(bdFile, baseDescHolder);
+    baseDesc.loadFromBaseDesc(baseDescHolder);
+  }
+  else
+  {
+    baseDesc.loadFromRawFile(baseDescr_filename.c_str());
+  }
+
+  //
+  // load base
+  for (size_t t = 0; t < baseDesc.Tables.size(); ++t)
+  {
+    if ((tableId != 0) && (tableId != baseDesc.Tables[t].ID))
+    {
+      continue;
+    }
+    for (size_t c = 0; c < baseDesc.Tables[t].Columns.size(); ++c)
+    {
+      aq::Logger::getInstance().log(AQ_INFO, "loading column %d of table %d\n", c + 1, t + 1);
+      cut_in_col(propertiesFile, t + 1, c + 1);
+    }
+  }
+  return EXIT_SUCCESS;
+}
+
+int test_aq_lib(const char * query)
 {
   return boost::lexical_cast<int>(query);
 }
