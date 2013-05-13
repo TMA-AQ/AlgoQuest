@@ -6,6 +6,7 @@
 #include <aq/parser/JeqParser.h>
 #include <aq/Exceptions.h>
 #include <aq/BaseDesc.h>
+#include <aq/TreeUtilities.h>
 #include <aq/db_loader/DatabaseLoader.h>
 #include <aq/Logger.h>
 #include <iostream>
@@ -45,7 +46,7 @@ boost::mutex parserMutex;
 class AQEngineSimulate : public AQEngine_Intf
 {
 public:
-	void call(tnode * pNode, int mode, int selectLevel) {
+	void call(tnode * pNode, mode_t mode, int selectLevel) {
 
 		//
 		// Get prefix form of query.
@@ -133,7 +134,7 @@ int processAQMatrix(const std::string& query, const std::string& aqMatrixFileNam
   }
 	VerbNode::Ptr spTree = VerbNode::BuildVerbsTree(pNode, categories_order, baseDesc, &settings );
 	spTree->changeQuery();
-	QueryResolver::cleanQuery( pNode );
+	aq::cleanQuery( pNode );
 
 	strcpy(settings.szAnswerFN, aqMatrixFileName.c_str());
 
@@ -155,8 +156,9 @@ int processAQMatrix(const std::string& query, const std::string& aqMatrixFileNam
 	AQEngineSimulate aqEngine;
 	aqEngine.setAQMatrix(aqMatrix);
 	aqEngine.setTablesIDs(tableIDs);
-
-	QueryResolver queryResolver(pNode, &settings, &aqEngine, baseDesc);
+  
+  unsigned int id_generator = 1;
+	QueryResolver queryResolver(pNode, &settings, &aqEngine, baseDesc, id_generator);
 	if (settings.useRowResolver)
 		queryResolver.solveAQMatriceByRows(spTree);
 	else
@@ -217,7 +219,7 @@ int transformQuery(const std::string& query, TProjectSettings& settings, Base& b
   }
 	VerbNode::Ptr spTree = VerbNode::BuildVerbsTree(pNode, categories_order, baseDesc, &settings );
 	spTree->changeQuery();
-	QueryResolver::cleanQuery( pNode );
+	aq::cleanQuery( pNode );
 	std::cout << std::endl;
 	std::cout << *pNode << std::endl << std::endl;
 	
@@ -329,14 +331,9 @@ int processQuery(const std::string& query, TProjectSettings& settings, Base& bas
 
 		//
 		// Transform SQL request in prefix form, 
-		QueryResolver queryResolver(pNode, &settings, aq_engine, baseDesc);
-		if( (nRet = queryResolver.SolveSQLStatement()) != 0 )
-		{
-			aq::Logger::getInstance().log(AQ_ERROR, "error resolving sql query\n");
-			return EXIT_FAILURE;
-		}
-
-		Table::Ptr result = queryResolver.getResult();
+    unsigned int id_generator = 1;
+		QueryResolver queryResolver(pNode, &settings, aq_engine, baseDesc, id_generator);
+		Table::Ptr result = queryResolver.solve();
 		if (result)
 		{
 			aq::Timer timer;
@@ -481,6 +478,7 @@ int main(int argc, char**argv)
 		bool skipNestedQuery = false;
 		bool loadDatabase = false;
     bool force = false;
+    bool useColumnResolver = false;
 
 		// old args for backward compatibility
 		std::vector<std::string> oldArgs;
@@ -510,7 +508,7 @@ int main(int argc, char**argv)
 			("skip-nested-query", po::bool_switch(&skipNestedQuery), "")
 			("aq-matrix", po::value<std::string>(&aqMatrixFileName), "")
 			("answer-file", po::value<std::string>(&answerFileName)->default_value("answer.txt"), "")
-			("use-row-resolver", po::bool_switch(&settings.useRowResolver), "")
+			("use-column-resolver", po::bool_switch(&useColumnResolver), "")
 			("load-db", po::bool_switch(&loadDatabase), "")
       ("load-table", po::value<unsigned int>(&tableIdToLoad)->default_value(0), "")
 			("backward-compatibility", po::value< std::vector<std::string> >(&oldArgs), "old arguments")
@@ -536,6 +534,14 @@ int main(int argc, char**argv)
 		aq::Logger::getInstance().setLockMode(lock_mode);
 		aq::Logger::getInstance().setDateMode(date_mode);
 		aq::Logger::getInstance().setPidMode(pid_mode);
+
+    //
+    // Column Resolver (old manner)
+    if (useColumnResolver)
+    {
+      aq::Logger::getInstance().log(AQ_INFO, "use column resolver mode");
+      settings.useRowResolver = false;
+    }
 
 		//
 		// Check old args
@@ -591,11 +597,11 @@ int main(int argc, char**argv)
 		{
 			for (size_t t = 0; t < baseDesc.Tables.size(); ++t)
 			{
-        if ((tableIdToLoad != 0) && (tableIdToLoad != baseDesc.Tables[t].ID))
+        if ((tableIdToLoad != 0) && (tableIdToLoad != baseDesc.Tables[t]->ID))
         {
           continue;
         }
-				for (size_t c = 0; c < baseDesc.Tables[t].Columns.size(); ++c)
+				for (size_t c = 0; c < baseDesc.Tables[t]->Columns.size(); ++c)
 				{
 					aq::Logger::getInstance().log(AQ_INFO, "loading column %d of table %d\n", c + 1, t + 1);
 					cut_in_col(propertiesFile.c_str(), t + 1, c + 1);
