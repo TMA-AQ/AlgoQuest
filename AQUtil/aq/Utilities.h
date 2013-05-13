@@ -40,6 +40,9 @@ int GetFiles( const char* pszSrcPath, std::vector<std::string>& files );
 char* ReadValidLine( FILE* pFIn, char* pszTmpBuf, int nSize, int nTrimEnd );
 
 //------------------------------------------------------------------------------
+void CleanFolder( const char * pszPath );
+
+//------------------------------------------------------------------------------
 void DeleteFolder( const char* pszPath );
 
 //------------------------------------------------------------------------------
@@ -86,6 +89,7 @@ void doubleToString( char* strVal, double dVal );
 //------------------------------------------------------------------------------
 std::string getPrmFileName( const char* path, size_t tableIdx, size_t columnIdx, size_t partIdx );
 std::string getThesaurusFileName( const char* path, size_t tableIdx, size_t columnIdx, size_t partIdx );
+std::string getThesaurusTemporaryFileName( size_t tableIdx, size_t columnIdx, size_t partIdx, const char * type, size_t size );
 
 //------------------------------------------------------------------------------
 aq::ColumnType symbole_to_column_type(aq::symbole s);
@@ -95,6 +99,20 @@ void CleanSpaceAtEnd ( char *my_field );
 
 //-------------------------------------------------------------------------------
 void ChangeCommaToDot (  char *string );
+
+/// backup
+enum backup_type_t
+{
+  Empty = 0,
+  Before,
+  After,
+  Exterior_Before,
+  Exterior
+};
+int MakeBackupFile( char *pszPath, backup_type_t type, int level, int id );
+
+/// write a record
+void FileWriteEnreg( aq::ColumnType col_type, const int col_size, char *my_field, FILE *fcol );
 
 }
 

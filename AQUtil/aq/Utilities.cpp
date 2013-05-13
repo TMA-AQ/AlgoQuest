@@ -1,4 +1,5 @@
 #include "Utilities.h"
+#include "DateConversion.h"
 #include "Exceptions.h"
 #include "Logger.h"
 #include <cstdio>
@@ -187,6 +188,31 @@ char* ReadValidLine( FILE* pFIn, char* pszTmpBuf, int nSize, int nTrimEnd ) {
 	}
 
 	return psz;
+}
+
+//------------------------------------------------------------------------------
+void CleanFolder( const char * pszPath )
+{
+	boost::filesystem::path p(pszPath);
+	if (!boost::filesystem::exists(p))
+	{
+		aq::Logger::getInstance().log(AQ_INFO, "path %s doesn't exists\n", p.string().c_str());
+	}
+	else
+	{
+		boost::system::error_code ec;
+    for (boost::filesystem::directory_iterator file(p); file != boost::filesystem::directory_iterator(); ++file)
+    {
+      if (!boost::filesystem::remove_all(*file, ec))
+      {
+        aq::Logger::getInstance().log(AQ_ERROR, "cannot delete path %s\n", (*file).path().string().c_str());
+      }
+      else
+      {
+        aq::Logger::getInstance().log(AQ_ERROR, "delete path %s\n", (*file).path().string().c_str());
+      }
+    }
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -393,6 +419,14 @@ std::string getThesaurusFileName( const char* path, size_t tableIdx, size_t colu
 }
 
 //------------------------------------------------------------------------------
+std::string getThesaurusTemporaryFileName( size_t tableIdx, size_t columnIdx, size_t partIdx, const char * type, size_t size )
+{
+	char szFN[ _MAX_PATH ];
+  sprintf( szFN, "B001TMP%.4uC%.4u%s%.4uP%.12u.the", tableIdx, columnIdx, type, size, partIdx );
+	return szFN;
+}
+
+//------------------------------------------------------------------------------
 aq::ColumnType symbole_to_column_type(symbole s)
 {
   switch (s)
@@ -433,6 +467,139 @@ void ChangeCommaToDot (  char *string )
 	p = strchr(string, ',' );
 	// modify string ',' become '.'  
 	if (p != NULL )  *p = '.' ;
+}
+
+//------------------------------------------------------------------------------
+int MakeBackupFile( char *pszPath, backup_type_t type, int level, int id )
+{
+	char szBuffer[STR_BUF_SIZE];
+	memset(szBuffer, 0, STR_BUF_SIZE);
+	char		szDstPath[_MAX_PATH];
+	size_t	len = 0;
+	strcpy( szBuffer, pszPath );
+	len = strlen(szBuffer);
+	if( len < 3 )
+	{
+		aq::Logger::getInstance().log(AQ_DEBUG, "MakeBackupFile : Invalid filename %s !", szBuffer );
+		return -1;
+	}
+	szBuffer[len - 4] = '\0';
+	char *typeChar = "";
+	switch( type )
+	{
+  case backup_type_t::Empty: break;
+  case backup_type_t::Before: typeChar = "_Before"; break;
+	case backup_type_t::After: typeChar = "_After"; break;
+	case backup_type_t::Exterior_Before: typeChar = "_Exterior_Before"; break;
+	case backup_type_t::Exterior: typeChar = "_Exterior"; break;
+	default: ;
+	}
+	sprintf( szDstPath, "%s_%.2d_%.2d%s.%s", szBuffer, level, id, typeChar, &pszPath[len - 3] );
+	if( FileRename( pszPath, szDstPath ) != 0 )
+	{
+		aq::Logger::getInstance().log(AQ_DEBUG, "MakeBackupFile : Error renaming file %s to %s !", pszPath, szDstPath );
+		return -1;
+	}
+	return 0;
+}
+
+//-------------------------------------------------------------------------------
+void FileWriteEnreg( aq::ColumnType col_type, const int col_size, char *my_field, FILE *fcol )
+{
+	int dum_int;
+	int * my_int = & dum_int;
+
+	double dum_double; // 2009/09/01 
+	double * my_double = &dum_double; // 2009/09/01 
+
+	long long int dum_long_long;
+	long long int *my_long_long = &dum_long_long;
+
+	if ( (int) strlen ( my_field ) >= col_size ) my_field[ col_size ] = 0 ;
+
+	switch (  col_type )
+	{
+	case COL_TYPE_INT :
+		if ( strcmp ( my_field, "NULL")  ==   0 )  *my_int = 'NULL'; // ****
+		else  *my_int = atoi ( my_field );
+		fwrite( my_int , sizeof(int), 1, fcol  );
+		break;
+
+	case COL_TYPE_BIG_INT :
+		if ( strcmp ( my_field, "NULL")  ==   0 )  *my_long_long  = 'NULL'; // ****  
+#ifdef WIN32
+		else  *my_long_long  = _atoi64 (my_field );   
+#else
+		else  *my_long_long  = atoll (my_field );   
+#endif
+		fwrite( my_long_long , sizeof(long long), 1, fcol );
+		break;
+
+	case COL_TYPE_DOUBLE :
+		if (  strcmp ( my_field, "NULL")  ==   0 )  *my_double = 'NULL'; // ****  
+		else
+		{
+			// step 1 convert ',' in '.'
+			ChangeCommaToDot (  my_field );
+			// step 2 : use strtod
+			*my_double =     strtod ( my_field, NULL );  // atof  ( field );
+		}
+		fwrite( my_double, sizeof(double), 1, fcol );
+		break;
+
+	case COL_TYPE_DATE1 :
+	case COL_TYPE_DATE2 :
+	case COL_TYPE_DATE3 :
+		{
+			char *dateBuf;
+			DateType dateType;
+			switch( col_type )
+			{
+			case COL_TYPE_DATE1 :
+				dateBuf = "DD/MM/YYYY HH:MM:SS";
+				dateType = DDMMYYYY_HHMMSS;
+				break;
+			case COL_TYPE_DATE2 :
+				dateBuf = "DD/MM/YYYY";
+				dateType = DDMMYYYY;
+				break;
+			case COL_TYPE_DATE3 :
+				dateBuf = "DD/MM/YY";
+				dateType = DDMMYY;
+				break;
+			default:
+				throw generic_error(generic_error::TYPE_MISMATCH, "");
+			}
+			if ( (strcmp ( my_field, "NULL")  ==   0) ||	(strcmp( my_field, "" ) == 0) )  *my_long_long  = 'NULL'; // ****
+			else
+			{
+				if ( dateToBigInt(my_field, dateType, my_long_long) )
+				{
+					fwrite( my_long_long , sizeof(long long), 1, fcol );
+				}
+				else
+				{
+					//sprintf ( a_message, "Champ DATE invalide. Format attendu: %s. Champ: %s.", dateBuf, my_field );
+					throw generic_error(generic_error::TYPE_MISMATCH, "");
+				}
+			}
+		}
+		break;
+
+	case COL_TYPE_VARCHAR :
+		// check my_field size
+		if ( (int) strlen ( my_field ) >= col_size ) my_field[ col_size ] = 0 ;
+		// clean all space at the end
+		CleanSpaceAtEnd (my_field );
+		// write string record and go to next
+		fwrite(my_field, sizeof(char), strlen( my_field ) , fcol );
+		fwrite("\0",sizeof(char),1, fcol );
+		break;
+
+	default:
+		throw generic_error(generic_error::TYPE_MISMATCH, "");
+		break;
+	}
 }
 
 }

@@ -4,6 +4,16 @@
 namespace aq
 {
 
+enum aggregate_function_t // FIXME : not at the right place
+{
+  NONE,
+  MIN,
+  MAX,
+  SUM,
+  AVG,
+  COUNT
+};
+
 //------------------------------------------------------------------------------
 enum ColumnType
 {
