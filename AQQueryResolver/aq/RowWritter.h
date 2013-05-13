@@ -1,5 +1,5 @@
 #ifndef __ROW_WRITTER_H__
-#define __ROW_WRITTE_H__
+#define __ROW_WRITTER_H__
 
 #include "Table.h"
 #include "verbs/VerbNode.h"
@@ -15,6 +15,7 @@ public:
 	RowWritter(const std::string& filePath);
 	~RowWritter();
 
+  virtual const std::vector<Column::Ptr>& getColumns() const { return this->columns; }
 	void setColumn(std::vector<Column::Ptr> _columns) { this->columns = _columns; }
 	virtual int process(Row& row);
 

@@ -828,64 +828,98 @@ void GroupVerb::addResult(aq::RowProcess_Intf::Row& row,
                           VerbResult::Ptr resRight, 
                           VerbResult::Ptr resNext )
 {
-  assert((this->row_acc.row.size() == 0) || (row.row.size() == this->row_acc.row.size()));
-  assert((this->row_prv.row.size() == 0) || (row.row.size() == this->row_prv.row.size()));
+  assert((this->row_acc.row.size() == 0) || (row.flush) || (row.row.size() == this->row_acc.row.size()));
+  assert((this->row_prv.row.size() == 0) || (row.flush) || (row.row.size() == this->row_prv.row.size()));
   assert(this->row_prv.row.size() == this->row_acc.row.size());
-  if (this->row_acc.row.size() == 0)
+  
+  row.completed = false;
+
+  // flush
+  if (row.flush)
+  {
+    row.completed = true;
+    row.row.clear();
+    std::copy(this->row_acc.row.begin(), this->row_acc.row.end(), std::back_inserter<aq::RowProcess_Intf::row_t>(row.row));
+    return;
+  }
+
+  // check if new group
+  bool new_group = false;
+  if (row_prv.row.size() > 0)
+  {
+    for (size_t i = 0; i < row.row.size(); ++i)
+    {
+      if (row.row[i].grouped && !ColumnItem::equal(row_prv.row[i].item.get(), row.row[i].item.get(), row_prv.row[i].type))
+      {
+        new_group = true;
+      }
+    }
+  }
+  row.completed = new_group;
+
+  // store prv
+  if (this->row_prv.row.size() == 0)
   {
     row.completed = false;
-    std::copy(row.row.begin(), row.row.end(), std::back_inserter<aq::RowProcess_Intf::row_t>(this->row_acc.row));
     std::copy(row.row.begin(), row.row.end(), std::back_inserter<aq::RowProcess_Intf::row_t>(this->row_prv.row));
   }
-  else
-  {
 
-    // check if new group
-    bool new_group = false;
-    if (row_prv.row.size() != 0)
+  row_prv.row.clear();
+  std::copy(row.row.begin(), row.row.end(), std::back_inserter<aq::RowProcess_Intf::row_t>(this->row_prv.row));
+
+  if (new_group)
+  {
+    row.row.clear();
+    std::copy(this->row_acc.row.begin(), this->row_acc.row.end(), std::back_inserter<aq::RowProcess_Intf::row_t>(row.row));
+    this->row_acc.row.clear();
+  }
+   
+  // compute and store in row_acc
+  double count = this->row_prv.row[0].item->numval;
+  if (this->row_acc.row.empty())
+  {
+    std::copy(this->row_prv.row.begin(), this->row_prv.row.end(), std::back_inserter<aq::RowProcess_Intf::row_t>(this->row_acc.row));
+    for (size_t i = 1; i < row.row.size(); ++i)
     {
-      for (size_t i = 0; i < row.row.size(); ++i)
+      if (row_acc.row[i].item == NULL)
       {
-        if (!row.row[i].computed && !ColumnItem::equal(row_prv.row[i].item.get(), row.row[i].item.get(), row_prv.row[i].type))
+        row_acc.row[i].item = row_prv.row[i].item;
+        switch (row.row[i].aggFunc)
         {
-          new_group = true;
+        case SUM:
+          row_acc.row[i].item->numval *= count;
+          break;
+        default:
           break;
         }
       }
     }
-    else
-    {
-      new_group = true;
-    }
-
-    // compute
-    if (new_group)
-    {
-      row_prv.row.clear();
-      std::copy(row.row.begin(), row.row.end(), std::back_inserter<aq::RowProcess_Intf::row_t>(this->row_prv.row));
-      row.row.clear();
-      std::copy(this->row_acc.row.begin(), this->row_acc.row.end(), std::back_inserter<aq::RowProcess_Intf::row_t>(row.row));
-      this->row_acc.row.clear();
-      std::copy(this->row_prv.row.begin(), this->row_prv.row.end(), std::back_inserter<aq::RowProcess_Intf::row_t>(this->row_acc.row));
-      row.completed = true;
-    }
-    else
-    {
-      row.completed = false;
-      uint64_t count = static_cast<uint64_t>((*row.row.rbegin()).item->numval);
-      // FOR TEST : i just count (the first element in row is the count)
-      (*this->row_acc.row.begin()).item->numval += count;
-
-      for (size_t i = 1; i < row.row.size(); ++i)
-      {
-        // TODO : apply aggregate function on items whose need it
-        assert((row_acc.row[i].item != NULL) && (row.row[i].item != NULL));
-        // row_acc.row[i].item->numval += row.row[i].item->numval;
-        // row_acc.apply(row.row[i]);
-      }
-
-    }    
   }
+  else
+  {
+    for (size_t i = 1; i < row.row.size(); ++i)
+    {
+      switch (row.row[i].aggFunc)
+      {
+      case MIN:
+        row_acc.row[i].item->numval = (std::min)(row_acc.row[i].item->numval, row_prv.row[i].item->numval);
+        break;
+      case MAX:
+        row_acc.row[i].item->numval = (std::max)(row_acc.row[i].item->numval, row_prv.row[i].item->numval);
+        break;
+      case SUM:
+        row_acc.row[i].item->numval += (count * row_prv.row[i].item->numval);
+        break;
+      case AVG:
+        row_acc.row[i].item->numval = ((row_acc.row[0].item->numval * row_acc.row[i].item->numval) + (count * row_prv.row[i].item->numval)) / (row_acc.row[0].item->numval + count);
+        break;
+      case COUNT:
+        break;
+      }
+    }
+    this->row_acc.row[0].item->numval += count;
+  }
+
 }
 
 //------------------------------------------------------------------------------

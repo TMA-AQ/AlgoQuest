@@ -87,6 +87,36 @@ void AggregateVerb::changeResult(	Table::Ptr table,
 	table->GroupByApplied = oldGroupByApplied;
 }
 
+//------------------------------------------------------------------------------
+void AggregateVerb::addResult(aq::RowProcess_Intf::Row& row, 
+                        VerbResult::Ptr resLeft,
+                        VerbResult::Ptr resRight, 
+                        VerbResult::Ptr resNext )
+{
+  Scalar * scalar = dynamic_cast<Scalar*>(resLeft.get());
+  assert(scalar != 0);
+  switch (this->getVerbType())
+  {
+  case K_MIN:
+    scalar->aggFunc = aq::aggregate_function_t::MIN;
+    break;
+  case K_MAX:
+    scalar->aggFunc = aq::aggregate_function_t::MAX;
+    break;
+  case K_SUM:
+    scalar->aggFunc = aq::aggregate_function_t::SUM;
+    break;
+  case K_AVG:
+    scalar->aggFunc = aq::aggregate_function_t::AVG;
+    break;
+  case K_COUNT:
+    scalar->aggFunc = aq::aggregate_function_t::COUNT;
+    break;
+  }
+  this->Result = resLeft;
+}
+
+//------------------------------------------------------------------------------
 void AggregateVerb::accept(VerbVisitor* visitor)
 {
   visitor->visit(this);
@@ -206,15 +236,6 @@ Scalar::Ptr SumVerb::computeResultRegular(	Column::Ptr column,
 }
 
 //------------------------------------------------------------------------------
-void SumVerb::addResult(aq::RowProcess_Intf::Row& row, 
-                        VerbResult::Ptr resLeft,
-                        VerbResult::Ptr resRight, 
-                        VerbResult::Ptr resNext )
-{
-  this->Result = resLeft;
-}
-
-//------------------------------------------------------------------------------
 void SumVerb::accept(VerbVisitor* visitor)
 {
 	visitor->visit(this);
@@ -301,6 +322,12 @@ VerbResult::Ptr CountVerb::computeResultPartition(	Column::Ptr column,
 }
 
 //------------------------------------------------------------------------------
+void CountVerb::accept(VerbVisitor* visitor)
+{
+	visitor->visit(this);
+}
+
+//------------------------------------------------------------------------------
 VERB_IMPLEMENT(AvgVerb);
 
 //------------------------------------------------------------------------------
@@ -367,6 +394,12 @@ VerbResult::Ptr AvgVerb::computeResultPartition(	Column::Ptr column,
 	}
 
 	return avg;
+}
+
+//------------------------------------------------------------------------------
+void AvgVerb::accept(VerbVisitor* visitor)
+{
+	visitor->visit(this);
 }
 
 //------------------------------------------------------------------------------
@@ -515,6 +548,12 @@ VerbResult::Ptr MinVerb::computeResultPartition(	Column::Ptr column,
 }
 
 //------------------------------------------------------------------------------
+void MinVerb::accept(VerbVisitor* visitor)
+{
+	visitor->visit(this);
+}
+
+//------------------------------------------------------------------------------
 VERB_IMPLEMENT(MaxVerb);
 
 //------------------------------------------------------------------------------
@@ -548,6 +587,11 @@ VerbResult::Ptr MaxVerb::computeResultPartition(	Column::Ptr column,
 	return computeMinMaxPartition( column, partition, false );
 }
 
+//------------------------------------------------------------------------------
+void MaxVerb::accept(VerbVisitor* visitor)
+{
+	visitor->visit(this);
+}
 
 //------------------------------------------------------------------------------
 VERB_IMPLEMENT( FirstValueVerb );

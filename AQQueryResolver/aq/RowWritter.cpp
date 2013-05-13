@@ -21,11 +21,15 @@ RowWritter::~RowWritter()
 
 int RowWritter::process(Row& row)
 {
+  assert(row.row.size() > 0);
+
 	if (this->firstRow)
 	{
 		//write column names
-		for(size_t idx = 0; idx < row.row.size(); ++idx)
+		for(size_t idx = row.row.size() - 1; idx > 0; --idx)
     {
+      if (!row.row[idx].displayed)
+        continue;
       fputs(" ; ", pFOut);
       if (row.row[idx].tableName != "")
       {
@@ -40,8 +44,10 @@ int RowWritter::process(Row& row)
 
   if (row.completed)
   {
-    for (row_t::const_iterator it = row.row.begin(); it != row.row.end(); ++it)
+    for (row_t::const_reverse_iterator it = row.row.rbegin(); it != row.row.rend(); ++it)
     {
+      if (!(*it).displayed)
+        continue;
       assert((*it).item != NULL);
       (*it).item->toString(value, (*it).type);
       fputs(" ; ", pFOut);

@@ -47,6 +47,7 @@ class Scalar;
 tnode& set_data( tnode& pNode, const aq::data_holder_t data, aq::ColumnType type );
 std::string to_string(const tnode* const pNode );
 tnode* clone_subtree( tnode* pNode );
+void to_upper(tnode* pNode);
 
 //------------------------------------------------------------------------------
 void treeListToNodeArray( tnode* pNode, std::vector<tnode*>& nodes, int tag );

@@ -132,7 +132,7 @@ void Table::loadFromTableAnswerByColumn(aq::AQMatrix& table, const std::vector<l
 		size_t idxColumn = 0;
 		std::string tableName = columnTypes[idx]->getTableName();
 		size_t tableIdx = BaseDesc.getTableIdx( tableName );
-		size_t tableID = BaseDesc.Tables[tableIdx].ID;
+		size_t tableID = BaseDesc.Tables[tableIdx]->ID;
 		for( size_t idx2 = 0; idx2 < tableIDs.size(); ++idx2 )
 			if( tableID == tableIDs[idx2] )
 			{
@@ -326,7 +326,7 @@ void Table::loadColumn(Column::Ptr col, const std::vector<size_t>& uniqueIndex, 
 {		
 	std::string tableName = columnType->getTableName();
 	size_t tableIdx = BaseDesc.getTableIdx( tableName );
-	size_t tableID = BaseDesc.Tables[tableIdx].ID;
+	size_t tableID = BaseDesc.Tables[tableIdx]->ID;
 
 	//load the required column values
 	llong currentNumPack = -1;
@@ -1005,7 +1005,7 @@ size_t Base::getTableIdx( const std::string& name ) const
 	strtoupr( auxName );
 	aq::Trim( auxName );
 	for( size_t idx = 0; idx < this->Tables.size(); ++idx )
-		if( auxName == this->Tables[idx].getName() )
+		if( auxName == this->Tables[idx]->getName() )
 			return idx;
 	throw generic_error(generic_error::INVALID_TABLE, "cannot find table %s", name.c_str());
 }
@@ -1015,10 +1015,10 @@ void Base::loadFromBaseDesc(const aq::base_t& base)
 {
   this->Name = base.nom;
   std::for_each(base.table.begin(), base.table.end(), [&] (const base_t::table_t& table) {
-		Table	pTD(table.nom, table.num );
-		pTD.TotalCount = table.nb_enreg;
+		Table::Ptr pTD(new Table(table.nom, table.num));
+		pTD->TotalCount = table.nb_enreg;
     std::for_each(table.colonne.begin(), table.colonne.end(), [&] (const base_t::table_t::col_t& column) {
-      pTD.Columns.push_back(new Column(column.nom, column.num, column.taille, aq::symbole_to_column_type(column.type)));
+      pTD->Columns.push_back(new Column(column.nom, column.num, column.taille, aq::symbole_to_column_type(column.type)));
 		});
 		this->Tables.push_back(pTD);
   });
@@ -1079,8 +1079,8 @@ void Base::loadFromRawFile( const char* pszDataBaseFile ) {
 			throw generic_error(generic_error::INVALID_BASE_FILE, "");
 
 		// Add Table
-		Table	pTD( std::string(szTableName), nTableId );
-		pTD.TotalCount = nTableRecordsNb;
+		Table::Ptr pTD(new Table(std::string(szTableName), nTableId));
+		pTD->TotalCount = nTableRecordsNb;
 		for ( iColumn = 0; iColumn < nColumnCount; iColumn++ ) {
 			pszStr = SkipToNextLine_sFirstChar( pszStr );
 			if ( pszStr == NULL || *pszStr == '\0' || *pszStr != '"' ) 
@@ -1113,7 +1113,7 @@ void Base::loadFromRawFile( const char* pszDataBaseFile ) {
 			else // if ( strcmp( szColumnType, "VARCHAR2" ) == 0 )	// Same for CHAR
 				eColumnType = COL_TYPE_VARCHAR;
 
-			pTD.Columns.push_back( new Column( std::string(szColumnName), nColumnId, nColumnSize, eColumnType ) );
+			pTD->Columns.push_back( new Column( std::string(szColumnName), nColumnId, nColumnSize, eColumnType ) );
 		}
 
 		this->Tables.push_back( pTD );
@@ -1132,7 +1132,7 @@ void Base::saveToRawFile( const char* pszDataBaseFile )
 	fprintf( pFOut, "\n%u\n", this->Tables.size() );
 	for( size_t idx = 0; idx < this->Tables.size(); ++idx )
 	{
-		Table& table = this->Tables[idx];
+		Table& table = *this->Tables[idx];
 		if( table.Columns.size() == 0 )
 			throw generic_error(generic_error::INVALID_TABLE, "");
 		size_t nrColumns = table.Columns.size();

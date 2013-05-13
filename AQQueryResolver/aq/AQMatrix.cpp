@@ -151,6 +151,18 @@ void AQMatrix::load(const char * filePath, const char fieldSeparator, std::vecto
 	llong lineNr = 0;
 	size_t expected_size = 0;
 	std::vector<std::pair<size_t, size_t> > description;
+
+  // read until the first ';'
+  char c = '\0';
+  while (!feof(pFIn) && c != ';')
+  {
+    fread(&c, sizeof(char), 1, pFIn);
+  }
+  if (c == ';')
+  {
+    fseek(pFIn, -1, SEEK_CUR);
+  }
+
 	while( psz = ReadValidLine( pFIn, pszBigBuffer, STR_BIG_BUF_SIZE, 0 ) )
 	{
 		std::vector<char*> fields;
@@ -161,7 +173,7 @@ void AQMatrix::load(const char * filePath, const char fieldSeparator, std::vecto
 			{
 				if( psz[0] != fieldSeparator )
 				{
-					return;
+          throw aq::generic_error(aq::generic_error::AQ_ENGINE, "bad format of aq engine matrix");
 				}
 				//answer is empty, but this is not an error
 				if( fields.size() < 1 )

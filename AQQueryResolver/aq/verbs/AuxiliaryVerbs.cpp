@@ -105,7 +105,7 @@ void ColumnVerb::addResult(aq::RowProcess_Intf::Row& row,
 {
   for (aq::RowProcess_Intf::row_t::iterator it = row.row.begin(); it != row.row.end(); ++it)
   {
-    if ((*it).match(this->TableName, this->ColumnName))
+    if ((*it).match(this->TableName, this->ColumnOnlyName))
     {
       this->Result.reset(new Scalar((*it).type, *(*it).item.get()));
       break;
@@ -184,6 +184,16 @@ void CommaVerb::changeResult(	Table::Ptr table,
 	this->Result = resArray;
 }
 
+//------------------------------------------------------------------------------
+void CommaVerb::addResult( aq::RowProcess_Intf::Row& row, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext )
+{
+  if (this->Context == K_SELECT)
+  {
+    // TODO
+  }
+}
+
+//------------------------------------------------------------------------------
 void CommaVerb::accept(VerbVisitor* visitor)
 {
 	visitor->visit(this);
@@ -390,11 +400,16 @@ void AsVerb::addResult(aq::RowProcess_Intf::Row& row,
                        VerbResult::Ptr resRight, 
                        VerbResult::Ptr resNext )
 {
-  Scalar * scalar = dynamic_cast<Scalar*>(resLeft.get());
-  if (scalar != 0)
+  if (this->Context == K_SELECT)
   {
-    ColumnItem::Ptr item(new ColumnItem(scalar->Item));
-    row.row.push_back(aq::RowProcess_Intf::row_item_t(item, scalar->Type, "", this->ident, true));
+    Scalar * scalar = dynamic_cast<Scalar*>(resLeft.get()); // FIXME : not optimal
+    if (scalar != 0)
+    {
+      ColumnItem::Ptr item(new ColumnItem(scalar->Item));
+      row.row.push_back(aq::RowProcess_Intf::row_item_t(item, scalar->Type, "", this->ident, true));
+      (*row.row.rbegin()).aggFunc = scalar->aggFunc;
+      (*row.row.rbegin()).displayed = true;
+    }
   }
 }
 

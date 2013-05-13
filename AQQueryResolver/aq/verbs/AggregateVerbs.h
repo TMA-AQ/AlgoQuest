@@ -12,6 +12,7 @@ public:
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
+  virtual void addResult(aq::RowProcess_Intf::Row& row, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
   virtual void accept(VerbVisitor* visitor);
 protected:
 	virtual Scalar::Ptr computeResultRegular(	Column::Ptr column, 
@@ -39,8 +40,6 @@ protected:
 	virtual VerbResult::Ptr computeResultPartition(	Column::Ptr column, 
 													Table::Ptr table,
 													TablePartition::Ptr partition );
-  void addResult(aq::RowProcess_Intf::Row& row, 
-    VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
   void accept(VerbVisitor* visitor);
 };
 
@@ -51,6 +50,7 @@ class CountVerb: public AggregateVerb
 public:
 	virtual int getVerbType() const { return K_COUNT; };
 	virtual bool preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal );
+  void accept(VerbVisitor* visitor);
 protected:
 	virtual Scalar::Ptr computeResultRegular(	Column::Ptr column, 
 												Table::Ptr table,
@@ -67,6 +67,7 @@ class AvgVerb: public AggregateVerb
 	VERB_DECLARE( AvgVerb );
 public:
 	virtual int getVerbType() const { return K_AVG; };
+  void accept(VerbVisitor* visitor);
 protected:
 	virtual Scalar::Ptr computeResultRegular(	Column::Ptr column, 
 												Table::Ptr table,
@@ -83,6 +84,7 @@ class MinVerb: public AggregateVerb
 	VERB_DECLARE( MinVerb );
 public:
 	virtual int getVerbType() const { return K_MIN; };
+  void accept(VerbVisitor* visitor);
 protected:
 	virtual Scalar::Ptr computeResultRegular(	Column::Ptr column, 
 												Table::Ptr table,
@@ -99,6 +101,7 @@ class MaxVerb: public AggregateVerb
 	VERB_DECLARE( MaxVerb );
 public:
 	virtual int getVerbType() const { return K_MAX; };
+  void accept(VerbVisitor* visitor);
 protected:
 	virtual Scalar::Ptr computeResultRegular(	Column::Ptr column, 
 												Table::Ptr table,

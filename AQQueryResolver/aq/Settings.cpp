@@ -24,7 +24,7 @@ TProjectSettings::TProjectSettings()
   computeAnswer(true),
 	csvFormat(false),
 	executeNestedQuery(true),
-	useRowResolver(false)
+	useRowResolver(true)
 {
   ::memset(szSQLReqFN, 0, _MAX_PATH);
   ::memset(szDBDescFN, 0, _MAX_PATH);

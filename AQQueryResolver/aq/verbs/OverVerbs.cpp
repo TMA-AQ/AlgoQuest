@@ -29,26 +29,10 @@ VERB_IMPLEMENT(PartitionVerb);
 PartitionVerb::PartitionVerb()
 {}
 
-namespace{
-
 //------------------------------------------------------------------------------
-//Column* equalColumn; // tma FIXME
-//bool equalColumnFct(int idx1, int idx2)
-//{
-//	return equal(	equalColumn->Items[idx1].get(), 
-//					equalColumn->Items[idx2].get(), 
-//					equalColumn->Type );
-//}
-//
-////------------------------------------------------------------------------------
-//Column* lessThanColumn; // tma FIXME
-//bool lessThanColumnFct(int idx1, int idx2)
-//{
-//	return lessThan(	lessThanColumn->Items[idx1].get(), 
-//						lessThanColumn->Items[idx2].get(), 
-//						lessThanColumn->Type );
-//}
-
+bool PartitionVerb::changeQuery( tnode* pStart, tnode* pNode, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext )
+{
+  return false;
 }
 
 //------------------------------------------------------------------------------
@@ -72,13 +56,7 @@ void PartitionVerb::changeResult(	Table::Ptr table,
 	}
 	if( table->Columns[0]->Items.size() < 2 )
 		return; //nothing to partition
-/*
-	//index = 0, 1, 2, 3 ..
-	vector<size_t> index;
-	index.resize( table->Columns[0]->Items.size() );
-	for( size_t idx = 0; idx < index.size(); ++idx )
-		index[idx] = idx;
-*/
+
 	TablePartition::Ptr partition = NULL;
 	if( resRight )
 	{
@@ -88,80 +66,13 @@ void PartitionVerb::changeResult(	Table::Ptr table,
 	else
 		partition = new TablePartition();
 	table->orderBy( columns, partition );
-/*	std::vector<int>& partitions = partition->Rows;
-	partitions.clear();
-	partitions.push_back( 0 );
 
-	//need final pass to gather partitions of last sorted column
-	columns.push_back( NULL );
-	
-	for( size_t idx = 0; idx < columns.size(); ++idx )
-	{
-		Column::Ptr column;
-		if( idx < columns.size() - 1 )
-		{
-			column = columns[idx];
-			lessThanColumn = column.get();
-		}
-
-		Column::Ptr lastColumn;
-		if( idx > 0 )
-		{
-			lastColumn = columns[idx - 1];
-			equalColumn = lastColumn.get();
-		}
-
-		vector<size_t>::iterator itBegin = index.begin();
-		vector<size_t>::iterator itEnd = index.begin();
-		while( itEnd != index.end() )
-		{
-			++itEnd;
-			bool foundPartition = false;
-			if( idx == 0 || itEnd == index.end() )
-			{
-				itEnd = index.end();
-				foundPartition = true;
-			}
-			else
-			{
-				foundPartition = !equalColumnFct( *itBegin, *itEnd );
-			}
-			if( foundPartition )
-			{
-				if( (idx == (columns.size() - 1)) )
-				{
-					if( itEnd != index.end() )
-						partitions.push_back( itEnd - index.begin() );
-				}	
-				else
-				{
-					sort( itBegin, itEnd, lessThanColumnFct);
-				}
-				itBegin = itEnd;
-			}
-		}
-	}
-
-	partitions.push_back( index.size() );
-
-	//create sorted table
-	vector<Column::Ptr> newColumns;
-	for( size_t idx = 0; idx < table->Columns.size(); ++idx )
-	{
-		Column& col = *table->Columns[idx].get();
-		Column::Ptr newColumn = new Column( col.getOriginalName(), col.ID, 
-			col.Size, col.Type );
-		newColumns.push_back( newColumn );
-		if( columns[columns.size()-2].get() == table->Columns[idx].get() )
-			partition->LastColumn = newColumn;
-	}
-
-	for( size_t idx = 0; idx < index.size(); ++idx )
-		for( size_t idx2 = 0; idx2 < table->Columns.size(); ++idx2 )
-			newColumns[idx2]->Items.push_back( table->Columns[idx2]->Items[index[idx]] );
-	
-	table->Columns = newColumns;*/
 	this->Result = partition;
+}
+
+//------------------------------------------------------------------------------
+void PartitionVerb::addResult( aq::RowProcess_Intf::Row& row, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext )
+{
 }
 
 //------------------------------------------------------------------------------

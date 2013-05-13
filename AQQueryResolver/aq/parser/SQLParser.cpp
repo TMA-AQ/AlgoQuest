@@ -9,6 +9,7 @@
 #include <cassert>
 #include <cerrno>
 #include <stack>
+#include <boost/algorithm/string.hpp>
 
 #define STR_BUF_SIZE_ROUND_UP	4096
 #define EXIT_ON_MEM_ERROR		1
@@ -339,6 +340,16 @@ tnode* clone_subtree( tnode* pNode )
 		}
 	}
 	return pClone;
+}
+
+//------------------------------------------------------------------------------
+void to_upper(tnode* pNode)
+{
+  if (pNode == NULL) return;
+  if (pNode->eNodeDataType == NODE_DATA_STRING) boost::to_upper(pNode->data.val_str);
+  to_upper(pNode->left);
+  to_upper(pNode->right);
+  to_upper(pNode->next);
 }
 
 //------------------------------------------------------------------------------

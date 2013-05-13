@@ -17,7 +17,7 @@ ColumnItem::Ptr getMinMaxFromThesaurus(	size_t tableIdx, size_t colIdx, size_t p
 	if ( pFIn == NULL )
 		return minMax;
 	FileCloser fileCloser(pFIn);
-	Column::Ptr column = BaseDesc.Tables[tableIdx].Columns[colIdx];
+	Column::Ptr column = BaseDesc.Tables[tableIdx]->Columns[colIdx];
 
 	size_t binItemSize	= 0;
 	size_t tmpBufSize = 1000;
@@ -115,8 +115,8 @@ Table::Ptr solveOptimalMinMax(	VerbNode::Ptr spTree, Base& BaseDesc,
 
 	ColumnVerb::Ptr columnVerb = dynamic_pointer_cast<ColumnVerb>( verb2 );
 	size_t tableIdx = BaseDesc.getTableIdx( columnVerb->getTableName() );
-	size_t colIdx = BaseDesc.Tables[tableIdx].getColumnIdx( columnVerb->getColumnOnlyName() );
-	Column::Ptr column = BaseDesc.Tables[tableIdx].Columns[colIdx];
+	size_t colIdx = BaseDesc.Tables[tableIdx]->getColumnIdx( columnVerb->getColumnOnlyName() );
+	Column::Ptr column = BaseDesc.Tables[tableIdx]->Columns[colIdx];
 	ColumnItem::Ptr minMax = NULL;
 	bool min = verb1->getVerbType() == K_MIN;
 	for( int partIdx = 0; ; ++partIdx )

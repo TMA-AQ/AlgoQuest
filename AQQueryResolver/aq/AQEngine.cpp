@@ -20,13 +20,23 @@ AQEngine::~AQEngine(void)
 {
 }
 
-void AQEngine::call(tnode *pNode, int mode, int selectLevel)
+void AQEngine::call(tnode *pNode, mode_t mode, int selectLevel)
 {
 	std::string query;
 	aq::syntax_tree_to_prefix_form( pNode, query );
 
   // FIXME
-  // ParseJeq( query );
+  std::string::size_type pos = query.find("GROUP");
+  if (pos != std::string::npos)
+  {
+    std::string queryTmp = query.substr(0, pos);
+    ParseJeq( queryTmp );
+    query = queryTmp + query.substr(pos);
+  }
+  else
+  {
+    ParseJeq( query );
+  }
 	
 	if (query.size() < 2048) // fixme
 		aq::Logger::getInstance().log(AQ_DEBUG, "\n%s\n", query.c_str());
@@ -69,7 +79,7 @@ void AQEngine::call(tnode *pNode, int mode, int selectLevel)
 	{
     int rc = 1;
     std::string prg = settings.szEnginePath;
-    std::string arg = mode == 0 ? settings.szEngineParamsDisplay : settings.szEngineParamsNoDisplay;
+    std::string arg = mode == NESTED_2 ? settings.szEngineParamsNoDisplay : settings.szEngineParamsDisplay;
     if ((rc = this->run(prg.c_str(), arg.c_str())) != 0)
     {
 			aq::Logger::getInstance().log(AQ_ERROR, "call to %s %s failed [ExitCode:%d]\n", prg.c_str(), arg.c_str(), rc);
@@ -85,16 +95,23 @@ void AQEngine::call(tnode *pNode, int mode, int selectLevel)
 
 	aq::Logger::getInstance().log(AQ_NOTICE, "AQ Engine Time elapsed: %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
 
-	if ( mode == 0 )
+	if ((mode == REGULAR) || (mode == NESTED_1))
 	{
-    aq::DeleteFolder( settings.szTempPath1 );
+    if (mode == REGULAR)
+    {
+      aq::DeleteFolder( settings.szTempPath1 );
+    }
+    else
+    {
+      aq::CleanFolder( settings.szTempPath1 );
+    }
     timer.start();
     tableIDs.clear();
     aqMatrix.reset(new aq::AQMatrix(settings));
     aqMatrix->load(settings.szAnswerFN, settings.fieldSeparator, this->tableIDs);
     aq::Logger::getInstance().log(AQ_INFO, "Load From AQ Matrix: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
   }
-  else if ( mode == 1 )
+  else if (mode == NESTED_2)
 	{
     std::vector<std::string> files;
 		if( aq::GetFiles( settings.szTempPath1, files ) != 0 )
@@ -142,11 +159,11 @@ void AQEngine::call(tnode *pNode, int mode, int selectLevel)
 void AQEngine::generateAQMatrixFromPRM(const std::string tableName, tnode * whereNode)
 {
 	size_t tableIdx = this->baseDesc.getTableIdx(tableName);
-	size_t nbRows = this->baseDesc.Tables[tableIdx].TotalCount;
+	size_t nbRows = this->baseDesc.Tables[tableIdx]->TotalCount;
 	this->aqMatrix.reset(new aq::AQMatrix(this->settings));
 	this->aqMatrix->simulate(nbRows, 2);
 	this->tableIDs.clear();
-	this->tableIDs.push_back(this->baseDesc.Tables[tableIdx].ID);
+	this->tableIDs.push_back(this->baseDesc.Tables[tableIdx]->ID);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -160,7 +177,6 @@ int AQEngineWindows::run(const char * prg, const char * args) const
   aq::Logger::getInstance().log(AQ_NOTICE, "call: '%s %s'\n", prg, args);
   int rc = 1;
   STARTUPINFOW si;
-  // LPSTARTUPINFOA si;
   PROCESS_INFORMATION pi;
   ZeroMemory(&si, sizeof(si));
   si.cb = sizeof(si);
@@ -170,10 +186,7 @@ int AQEngineWindows::run(const char * prg, const char * args) const
   std::wstring warg = aq::string2Wstring(args);
   LPCWSTR prg_wstr = wprg.c_str();
   LPCWSTR arg_wstr = warg.c_str();
-  //if (CreateProcess(prg.c_str(), (LPSTR)arg.c_str(), NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, si, &pi))
   if (CreateProcessW(prg_wstr, (LPWSTR)arg_wstr, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi))
-    //if (CreateProcess(NULL, "E:/Project_AQ/Bin/AQ_Engine.exe E:/AQ_DATABASES/DB/MSALGOQUEST/calculus/test_aq_engine/aqengine.ini test_aq_engine Dpy", 
-      //  NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, si, &pi))
   {
     rc = WaitForSingleObject(pi.hProcess, INFINITE);
     CloseHandle(pi.hProcess);

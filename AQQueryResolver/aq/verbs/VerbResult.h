@@ -4,6 +4,7 @@
 #include <aq/Object.h>
 #include <aq/ColumnItem.h>
 #include <aq/DBTypes.h>
+#include <aq/RowProcess_Intf.h>
 
 #include <vector>
 #include <deque>
@@ -22,8 +23,7 @@ public:
 		ASTERISK,
 		ROW_VALIDATION
 	};
-	// virtual int getType(){ assert(0); return -1; }; //abstract class semantics
-	virtual int getType() const = 0; // real abstract class
+	virtual int getType() const = 0;
 };
 
 //------------------------------------------------------------------------------
@@ -31,16 +31,18 @@ class Scalar: public VerbResult
 {
 	OBJECT_DECLARE( Scalar );
 public:
+
 	virtual int getType() const { return VerbResult::SCALAR; }
+	const aq::data_holder_t getValue() const;
 
 	std::string				Name;
 
-	Scalar( aq::ColumnType type ): Type(type){}
-	Scalar( aq::ColumnType type, const ColumnItem& item ): Type(type), Item(item){}
+	Scalar( aq::ColumnType type ): Type(type), aggFunc(aq::aggregate_function_t::NONE) {}
+	Scalar( aq::ColumnType type, const ColumnItem& item ): Item(item), Type(type), aggFunc(aq::aggregate_function_t::NONE) {}
 	ColumnItem	Item;
 	aq::ColumnType	Type;
+  aq::aggregate_function_t aggFunc;
 
-	const aq::data_holder_t getValue() const;
 };
 
 //------------------------------------------------------------------------------

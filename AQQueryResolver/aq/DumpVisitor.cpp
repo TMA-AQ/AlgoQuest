@@ -2,21 +2,6 @@
 #include "parser/ID2Str.h"
 #include <aq/Logger.h>
 
-// Default Verbs
-void DumpVisitor::visit(Verb* v)
-{
-	aq::Logger::getInstance().log(AQ_WARNING, "verb %s not implemented for DumpVisitor\n", id_to_string(v->getVerbType()));
-}
-
-void DumpVisitor::visit(VerbNode* v)
-{
-	aq::Logger::getInstance().log(AQ_WARNING, "verb %s not implemented for DumpVisitor\n", id_to_string(v->getVerbType()));
-  
-	if (v->getLeftChild()) v->getLeftChild()->accept(this);
-	if (v->getRightChild()) v->getRightChild()->accept(this);
-	if (v->getBrother()) v->getBrother()->accept(this);
-}
-
 // Aggregate Verbs
 void DumpVisitor::visit(AggregateVerb*)
 {

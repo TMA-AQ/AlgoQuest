@@ -12,7 +12,8 @@ extern const int inverseTypes[];
 
 namespace aq
 {
-  
+ 
+void addAlias( tnode* pNode );
 void addConditionsToWhere( tnode* pCond, tnode* pStart );
 void addInnerOuterNodes( tnode* pNode, int leftTag, int rightTag );
 void mark_as_deleted( tnode* pNode );
@@ -63,5 +64,13 @@ void getTablesList( tnode* pNode, std::list<std::string>& tables );
 tnode* getLastTag( tnode*& pNode, tnode* pLastTag, tnode* pCheckNode, int tag );
 
 void generate_parent(tnode* pNode, tnode* parent);
+
+void getColumnTypes( tnode* pNode, std::vector<Column::Ptr>& columnTypes, Base& baseDesc );
+
+void cleanQuery( tnode*& pNode );
+	
+tnode* GetNode( ColumnItem::Ptr item, ColumnType type );
+
+tnode* GetTree( Table& table );
 
 }

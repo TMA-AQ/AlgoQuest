@@ -43,9 +43,9 @@ int get_table_and_column_id_from_table_array( Base* baseDesc,
 	size_t idx = baseDesc->getTableIdx( std::string(pszTableName) );
 
 	if ( pnTableId != NULL )
-		*pnTableId = static_cast<unsigned int>(baseDesc->Tables[idx].ID);
+		*pnTableId = static_cast<unsigned int>(baseDesc->Tables[idx]->ID);
 
-	if ( get_column_id_from_table( baseDesc->Tables[idx], pszColumnName, pnColumnId, pnColumnSize, peColumnType ) != 0 ) {
+	if ( get_column_id_from_table( *baseDesc->Tables[idx], pszColumnName, pnColumnId, pnColumnSize, peColumnType ) != 0 ) {
 #ifdef CREATE_LOG
 		Log( "get_table_and_column_id_from_table_array() : Function get_column_id_from_table( T:<%s>, C:<%s> ) returned NULL !\n", pszTableName, pszColumnName );
 #endif
@@ -243,7 +243,7 @@ TColumn2TablesArray* add_table_columns_to_column2tables_array(	TColumn2TablesArr
 	TColumn2Tables *pC2T;
 	
 	size_t tableIdx = baseDesc->getTableIdx( std::string(pszTableName) );
-	Table& pTD = baseDesc->Tables[tableIdx];
+	Table& pTD = *baseDesc->Tables[tableIdx];
 
 	for ( iColumn = 0; iColumn < pTD.Columns.size(); iColumn++ ) {
 		pC2T = find_column_in_column2tables_array( parrC2T, pTD.Columns[ iColumn ]->getName().c_str() );

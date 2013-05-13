@@ -6,8 +6,12 @@
 namespace aq 
 {
   
-void solveAQMatrix(aq::AQMatrix& aqMatrix, const std::vector<llong>& tableIDs, 
-                   const std::vector<Column::Ptr>& columnTypes, const TProjectSettings& settings, const Base& BaseDesc, 
+void solveAQMatrix(aq::AQMatrix& aqMatrix, 
+                   const std::vector<llong>& tableIDs, 
+                   const std::vector<Column::Ptr>& columnTypes, 
+                   const std::vector<tnode**> columnGroup,
+                   const TProjectSettings& settings, 
+                   const Base& BaseDesc, 
                    boost::shared_ptr<aq::RowProcess_Intf> rowProcess)
   {
     aq::Timer timer;
@@ -31,11 +35,21 @@ void solveAQMatrix(aq::AQMatrix& aqMatrix, const std::vector<llong>& tableIDs,
       Column::Ptr c(new Column(*columnTypes[i]));
 
       size_t tableIdx = BaseDesc.getTableIdx(c->getTableName());
-      c->TableID = BaseDesc.Tables[tableIdx].ID;
+      c->TableID = BaseDesc.Tables[tableIdx]->ID;
+
+      for (std::vector<tnode**>::const_iterator it = columnGroup.begin(); it != columnGroup.end(); ++it)
+      {
+        const tnode * node = **it;
+        if ((strcmp(c->getTableName().c_str(), node->left->data.val_str) == 0) && (strcmp(c->getName().c_str(), node->right->data.val_str) == 0))
+        {
+          c->GroupBy = true;
+          break;
+        }
+      }
       columns.push_back(c);
 
       columnTypes[i]->TableID = BaseDesc.getTableIdx(columnTypes[i]->getTableName());
-      columnTypes[i]->TableID = BaseDesc.Tables[columnTypes[i]->TableID].ID;
+      columnTypes[i]->TableID = BaseDesc.Tables[columnTypes[i]->TableID]->ID;
       ColumnMapper::Ptr cm(new ColumnMapper(aq::ColumnMapper(settings.szThesaurusPath, columnTypes[i]->TableID, columnTypes[i]->ID, columnTypes[i]->Type, columnTypes[i]->Size, settings.packSize)));
       columnsMapper.push_back(cm);
     }
@@ -76,6 +90,7 @@ void solveAQMatrix(aq::AQMatrix& aqMatrix, const std::vector<llong>& tableIDs,
               columnTypes[c]->Type,
               columns[c]->getTableName(),
               columns[c]->getName());
+            row.row[c+1].grouped = columns[c]->GroupBy;
           }
         }
       }
@@ -88,7 +103,15 @@ void solveAQMatrix(aq::AQMatrix& aqMatrix, const std::vector<llong>& tableIDs,
 
       rowProcess->process(row);
 
+      if ((i % 10000) == 0)
+      {
+        std::cout << i << std::endl;
+      }
+
     }
+    
+    rowProcess->flush();
+
   }
 
   void solveAQMatrix(

@@ -10,7 +10,7 @@ public:
 	AQEngine(Base& _baseDesc, TProjectSettings& _settings);
 	~AQEngine();
 
-	void call(tnode *pNode, int mode, int selectLevel);
+	void call(tnode *pNode, mode_t mode, int selectLevel);
   virtual int run(const char * prg, const char * args) const = 0;
 
 	boost::shared_ptr<aq::AQMatrix> getAQMatrix() { return aqMatrix; }

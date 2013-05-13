@@ -14,6 +14,61 @@ const int inverseTypes[] = { K_JEQ, K_JAUTO, K_JNEQ, K_JSUP, K_JSEQ, K_JINF, K_J
 
 namespace aq
 {
+  
+//------------------------------------------------------------------------------
+void getRowItemName( tnode* pNode, std::string& name)
+{
+  if (pNode->tag == K_PERIOD)
+  {
+    name = pNode->left->data.val_str;
+    name += ".";
+    name += pNode->right->data.val_str;
+  }
+  else
+  {
+    name = pNode->data.val_str;
+  }
+}
+
+//------------------------------------------------------------------------------
+void addAlias( tnode* pNode )
+{
+  if (pNode == NULL) 
+    return;
+  if (pNode->tag == K_COMMA)
+  {
+    assert(pNode->right != NULL);
+    if (pNode->right->tag != K_AS)
+    {
+      tnode * as_node = new_node(K_AS);
+      as_node->left = pNode->right;
+      as_node->right = new_node(K_IDENT);
+      as_node->right->eNodeDataType = NODE_DATA_STRING;
+      std::string name;
+      getRowItemName(as_node->left, name);
+      as_node->right->data.val_str = static_cast<char*>(::malloc((name.size() + 1)*sizeof(char)));
+      strcpy(as_node->right->data.val_str, name.c_str());
+      pNode->right = as_node;
+    }
+    assert(pNode->left != NULL);
+    if ((pNode->left->tag != K_COMMA) && (pNode->left->tag != K_AS))
+    {
+      tnode * as_node = new_node(K_AS);
+      as_node->left = pNode->left;
+      as_node->right = new_node(K_IDENT);
+      as_node->right->eNodeDataType = NODE_DATA_STRING;
+      std::string name;
+      getRowItemName(as_node->left, name);
+      as_node->right->data.val_str = static_cast<char*>(::malloc((name.size() + 1)*sizeof(char)));
+      strcpy(as_node->right->data.val_str, name.c_str());
+      pNode->left = as_node;
+    }
+    else
+    {
+      addAlias(pNode->left);
+    }
+  }
+}
 
 //------------------------------------------------------------------------------
 void addConditionsToWhere( tnode* pCond, tnode* pStart )
@@ -139,7 +194,7 @@ void solveSelectStar(	tnode* pNode,
 	{
 		assert( tables[idx] && tables[idx]->tag == K_IDENT );
 		size_t tableIdx = BaseDesc.getTableIdx( tables[idx]->data.val_str );
-		std::vector<Column::Ptr>& columns = BaseDesc.Tables[tableIdx].Columns;
+		std::vector<Column::Ptr>& columns = BaseDesc.Tables[tableIdx]->Columns;
 		for( size_t idx2 = 0; idx2 < columns.size(); ++idx2 )
 		{
 			tnode* colRef = new_node( K_PERIOD );
@@ -197,9 +252,9 @@ void solveOneTableInFrom( tnode* pStart, Base& BaseDesc )
 		return;
 	char* tName = tables[0]->data.val_str;
 	size_t tIdx = BaseDesc.getTableIdx( tName );
-	if( BaseDesc.Tables[tIdx].Columns.size() == 0 )
+	if( BaseDesc.Tables[tIdx]->Columns.size() == 0 )
 		return;
-	Column::Ptr col = BaseDesc.Tables[tIdx].Columns[0];
+	Column::Ptr col = BaseDesc.Tables[tIdx]->Columns[0];
 	if( !col )
 		return;
 	
@@ -645,7 +700,7 @@ void SolveMinMaxGroupBy::modifyTmpFiles(	const char* tmpPath,
 		return; //nothing to modify
 	sort( rows.begin(), rows.end() );*/
 
-	Table& templateTable = BaseDesc.Tables[tIdx1];
+	Table& templateTable = *BaseDesc.Tables[tIdx1];
 	std::vector<int> colIds;
 	getColumnsIds( templateTable, this->columns, colIds );
 
@@ -846,12 +901,151 @@ tnode* getLastTag( tnode*& pNode, tnode* pLastTag, tnode* pCheckNode, int tag )
 	return res;
 }
 
+//------------------------------------------------------------------------------
 void generate_parent(tnode* pNode, tnode* parent)
 {
   pNode->parent = parent;
   if (pNode->right) generate_parent(pNode->right, pNode);
   if (pNode->left) generate_parent(pNode->left, pNode);
   if (pNode->next) generate_parent(pNode->next, NULL);
+}
+
+//------------------------------------------------------------------------------
+void cleanQuery( tnode*& pNode )
+{
+	if( !pNode )
+		return;
+	if( pNode->tag == K_DELETED )
+	{
+		delete_subtree( pNode );
+		pNode = NULL;
+		return;
+	}
+	//K_IN_VALUES can have a very deep sub-tree, stack overflow danger
+	if( pNode->tag == K_IN_VALUES )
+		return;
+	cleanQuery( pNode->next );
+	cleanQuery( pNode->left );
+	cleanQuery( pNode->right );
+
+	if( pNode->tag != K_COMMA )
+		return;
+
+	if( pNode->left != NULL && pNode->right != NULL )
+		return; //no null to delete
+	if( pNode->left == NULL && pNode->right == NULL )
+	{
+		//delete entire node
+		delete_node( pNode );
+		pNode = NULL;
+		return;
+	}
+	//delete left null
+	tnode* newNode = pNode->left;
+	if( pNode->right != NULL )
+		newNode = pNode->right; //or right null
+	delete_node( pNode );
+	pNode = newNode;
+}
+
+//------------------------------------------------------------------------------
+void getColumnTypes( tnode* pNode, std::vector<Column::Ptr>& columnTypes, Base& BaseDesc )
+{
+	if( !pNode || !pNode->left )
+		return;
+//	assert( pNode->left ); //debug13 not necessarily true, I should really start to handle this case
+	while( pNode->left->tag == K_PERIOD || pNode->left->tag == K_COMMA )
+	{
+		pNode = pNode->left;
+		tnode* colNode;
+		if( pNode->tag == K_PERIOD )
+			colNode = pNode;
+		else
+		{
+			colNode = pNode->right;
+			assert( colNode->tag == K_PERIOD );
+		}
+		assert( colNode );
+		assert( colNode->left && colNode->left->tag == K_IDENT );
+		assert( colNode->right && colNode->right->tag == K_COLUMN );
+		size_t tableIdx = BaseDesc.getTableIdx( colNode->left->data.val_str );
+		assert( tableIdx < BaseDesc.Tables.size() ); //debug13 possible wrong query formatting, should throw
+		Table& table = *BaseDesc.Tables[tableIdx];
+		bool found = false;
+		Column auxCol;
+		auxCol.setName(colNode->right->data.val_str);
+		for( size_t idx = 0; idx < table.Columns.size(); ++idx )
+			if( table.Columns[idx]->getName() == auxCol.getName() )
+			{
+				Column::Ptr column = new Column();
+				column->Type = table.Columns[idx]->Type;
+				column->setTableName( table.getName() );
+				column->setName( table.Columns[idx]->getName() );
+				column->Size = table.Columns[idx]->Size;
+				column->ID = table.Columns[idx]->ID;
+				columnTypes.push_back( column );
+				found = true;
+				break;
+			}
+		assert( found ); // tma: FIXME: raise an exception
+	}
+	reverse(columnTypes.begin(), columnTypes.end());
+}
+
+//------------------------------------------------------------------------------
+tnode* GetNode( ColumnItem::Ptr item, ColumnType type )
+{
+	tnode	*pNode = NULL;
+	if( !item )
+		return pNode;
+	switch( type )
+	{
+	case COL_TYPE_INT:
+	case COL_TYPE_DATE1:
+	case COL_TYPE_DATE2:
+	case COL_TYPE_DATE3:
+		pNode = new_node( K_INTEGER );
+		set_int_data( pNode, (llong) item->numval );
+		break;
+	case COL_TYPE_DOUBLE:
+		pNode = new_node( K_REAL );
+		set_double_data( pNode, item->numval );
+		break;
+	default:
+		pNode = new_node( K_STRING );
+		set_string_data( pNode, item->strval.c_str() );
+	}
+	return pNode;
+}
+
+//------------------------------------------------------------------------------
+tnode* GetTree( Table& table )
+{
+	tnode	*pNode = NULL;
+	tnode	*pStart = NULL;
+
+	if( table.Columns.size() < 1 )
+		return NULL;
+	Column& column = *table.Columns[0];
+	if( column.Items.size() < 1 )
+		return NULL;
+	if( column.Items.size() < 2 )
+		return GetNode(column.Items[0], column.Type);
+
+	//we have a list
+	pNode = new_node( K_COMMA );
+	pStart = pNode;
+	size_t size = column.Items.size();
+	for( size_t idx = 0; idx < size - 2; ++idx )
+	{
+		pNode->right = new_node( K_COMMA );
+		pNode->left = GetNode(column.Items[idx], column.Type);
+		pNode = pNode->right;
+	}
+	pNode->left = GetNode(column.Items[size - 2], column.Type);
+	pNode->right = GetNode(column.Items[size - 1], column.Type);
+	
+	return pStart;
 }
 
 }

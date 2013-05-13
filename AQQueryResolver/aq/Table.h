@@ -95,7 +95,7 @@ class Base: public Object
 {
 	OBJECT_DECLARE( Base );
 public:
-	typedef std::vector<Table> tables_t;
+	typedef std::vector<Table::Ptr> tables_t;
 	tables_t Tables;
 	std::string Name;
 

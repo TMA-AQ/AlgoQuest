@@ -13,13 +13,27 @@
 #include "OverVerbs.h"
 #include "ScalarVerbs.h"
 
+#include <aq/parser/ID2Str.h>
+#include <aq/logger.h>
+
 class VerbVisitor
 {
 public:
 
 	// Default Verbs
-	virtual void visit(Verb*) = 0;
-	virtual void visit(VerbNode*) = 0;
+  virtual void visit(Verb* v)
+  {
+    aq::Logger::getInstance().log(AQ_WARNING, "verb %s not implemented for DumpVisitor\n", id_to_string(v->getVerbType()));
+  }
+
+  virtual void visit(VerbNode* v)
+  {
+    aq::Logger::getInstance().log(AQ_WARNING, "verb %s not implemented for DumpVisitor\n", id_to_string(v->getVerbType()));
+
+    if (v->getLeftChild()) v->getLeftChild()->accept(this);
+    if (v->getRightChild()) v->getRightChild()->accept(this);
+    if (v->getBrother()) v->getBrother()->accept(this);
+  }
 
 	// Aggregate Verbs
 	virtual void visit(AggregateVerb*) = 0;
