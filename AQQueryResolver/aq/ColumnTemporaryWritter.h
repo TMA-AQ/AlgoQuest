@@ -13,9 +13,15 @@ class ColumnTemporaryWritter
 
 public:
 
+  ColumnTemporaryWritter()
+    : nbEl(0)
+  {
+  }
+
   Column::Ptr column;
   std::string filename;
   FILE * file;
+  size_t nbEl;
 
 };
 
