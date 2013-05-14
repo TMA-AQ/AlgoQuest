@@ -51,7 +51,7 @@ public:
 	bool			NoAnswer;
 
 	Table();
-	Table(const std::string& name, unsigned int ID );
+	Table(const std::string& name, unsigned int ID, bool temporary = false );
 
 	int getColumnIdx( const std::string& name );
 	
@@ -78,6 +78,9 @@ public:
 	void updateColumnsContent( const std::vector<Column::Ptr>& newColumns );
 	void unravel( TablePartition::Ptr partition );
   
+  bool isTemporary() const { return temporary; }
+  const char * getTemporaryName() const { return temporaryName.c_str(); }
+
 	void dumpRaw( std::ostream& os );
 	void dumpXml( std::ostream& os );
 
@@ -86,8 +89,10 @@ private:
 
 	std::string		Name;
 	std::string		OriginalName;
+  std::string   temporaryName;
 	std::vector<size_t> Index;
 	char szBuffer[STR_BUF_SIZE];
+  bool temporary;
 };
 
 //------------------------------------------------------------------------------

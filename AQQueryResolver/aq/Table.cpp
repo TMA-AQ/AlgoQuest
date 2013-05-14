@@ -38,14 +38,15 @@ Table::Table():
 }
 
 //------------------------------------------------------------------------------
-Table::Table( const std::string& name, unsigned int ID ): 
+Table::Table( const std::string& name, unsigned int ID, bool _temporary ): 
 	ID(ID), 
 	HasCount(false), 
 	TotalCount(0), 
 	GroupByApplied(false), 
 	Partition(NULL),
 	OrderByApplied(false),
-	NoAnswer(false)
+	NoAnswer(false),
+  temporary(_temporary)
 {
 	this->setName( name );
 	memset(szBuffer, 0, STR_BUF_SIZE);

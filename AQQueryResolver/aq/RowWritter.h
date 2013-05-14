@@ -18,10 +18,12 @@ public:
   virtual const std::vector<Column::Ptr>& getColumns() const { return this->columns; }
 	void setColumn(std::vector<Column::Ptr> _columns) { this->columns = _columns; }
 	virtual int process(Row& row);
+  unsigned int getTotalCount() const { return this->totalCount; }
 
-private:
+protected:
   VerbNode::Ptr spTree;
 	std::vector<Column::Ptr> columns;
+  unsigned int totalCount;
 	char * value;
 	FILE * pFOut;
 	bool firstRow;

@@ -17,12 +17,10 @@ public:
   RowTemporaryWritter(unsigned int _tableId, const char * _path);
   ~RowTemporaryWritter();
   virtual int process(Row& row);
-  const std::vector<Column::Ptr>& getColumns() const { return this->columns; }
 private:
   std::string path;
   unsigned int tableId;
   std::vector<boost::shared_ptr<ColumnTemporaryWritter> > columnsWritter;
-  std::vector<Column::Ptr> columns;
 };
 
 }

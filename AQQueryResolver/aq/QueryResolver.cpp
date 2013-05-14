@@ -82,6 +82,8 @@ Table::Ptr QueryResolver::SolveSelectRegular()
 	aq::Timer timer;
 	Table::Ptr table;
 
+  this->changeTemporaryTableName(this->sqlStatement);
+
 #ifdef OUTPUT_NESTED_QUERIES
 	std::string str;
 	aq::syntax_tree_to_prefix_form( this->sqlStatement, str );
@@ -135,6 +137,8 @@ Table::Ptr QueryResolver::SolveSelectRegular()
   }
 #endif
 
+  std::set<tnode*> nodes;
+  checkTree( this->sqlStatement, nodes);
 	aq::cleanQuery( this->sqlStatement );
 	aq::Logger::getInstance().log(AQ_INFO, "Query Preprocessing: Time elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
   
@@ -161,6 +165,7 @@ Table::Ptr QueryResolver::SolveSelectRegular()
 		if (pSettings->useRowResolver) // && !this->nested && !this->hasOrderBy && !this->hasPartitionBy)
 		{
 			this->solveAQMatriceByRows(spTree);
+      table = this->result;
 		}
 		else
 		{
@@ -291,17 +296,8 @@ void QueryResolver::buildTemporaryTable(tnode * pNode)
   as->next = NULL;
   
   // update base desc
-  Table::Ptr table(new Table(alias, this->id_generator + 1));
-  this->BaseDesc.Tables.push_back(table);
-  //
-  std::vector<Column::Ptr> columns = interiorQuery->getColumns();
-  for (std::vector<Column::Ptr>::const_iterator it = columns.begin(); it != columns.end(); ++it)
-  {
-    // TODO
-    Column::Ptr column = (*it);
-    column->setTableName(alias);
-    table->Columns.push_back(column);
-  }
+  this->BaseDesc.Tables.push_back(interiorQuery->result);
+
 }
 
 //------------------------------------------------------------------------------
@@ -461,12 +457,22 @@ void QueryResolver::solveAQMatriceByRows(VerbNode::Ptr spTree)
 
   // build result from aq matrix
 	timer.start();
-	Table::Ptr table = new Table();
 	aq::solveAQMatrix(*(aq_engine->getAQMatrix()), aq_engine->getTablesIDs(), columnTypes, columnNodes, *pSettings, BaseDesc, processes );
 	aq::Logger::getInstance().log(AQ_INFO, "Load From Answer: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
   
-  const std::vector<Column::Ptr>& columns = rowWritter->getColumns();
-  std::copy(columns.begin(), columns.end(), std::back_inserter(this->columns));
+  const std::vector<Column::Ptr>& columnsWritter = rowWritter->getColumns();
+  std::copy(columnsWritter.begin(), columnsWritter.end(), std::back_inserter(this->columns));
+  
+  // build result
+  this->result.reset(new Table(this->resultName, this->BaseDesc.Tables.size() + 1, true));
+  for (std::vector<Column::Ptr>::const_iterator it = this->columns.begin(); it != this->columns.end(); ++it)
+  {
+    Column::Ptr column = (*it);
+    column->setTableName(this->resultName);
+    this->result->Columns.push_back(column);
+  }
+  this->result->TotalCount = rowWritter->getTotalCount();
+
 }
 
 //------------------------------------------------------------------------------
@@ -515,4 +521,72 @@ Table::Ptr QueryResolver::solveAQMatriceByColumns(VerbNode::Ptr spTree)
 
 	this->result = table;
 	return table;
+}
+
+//------------------------------------------------------------------------------
+void QueryResolver::changeTemporaryTableName(tnode * pNode)
+{
+  if (pNode == NULL) return;
+  if (pNode->tag == K_PERIOD)
+  {
+    tnode * table = pNode->left;
+    tnode * column = pNode->right;
+    assert((table != NULL) && (table->tag == K_IDENT) && (table->eNodeDataType == NODE_DATA_STRING));
+    assert((column != NULL) && (table->tag == K_IDENT) && (table->eNodeDataType == NODE_DATA_STRING));
+    for (std::map<std::string, boost::shared_ptr<QueryResolver> >::const_iterator it = this->nestedTables.begin(); it != this->nestedTables.end(); ++it) 
+    {
+      if (it->first == table->data.val_str)
+      {
+        Table::Ptr tmp = it->second->getResult();
+        for (std::vector<Column::Ptr>::const_iterator itCol = tmp->Columns.begin(); itCol != tmp->Columns.end(); ++itCol)
+        {
+          if ((*itCol)->getName() == column->data.val_str)
+          {
+            char * buf = static_cast<char*>(malloc(6 * sizeof(char)));
+            std::string type_str;
+            switch((*itCol)->Type)
+            {
+            case aq::ColumnType::COL_TYPE_VARCHAR: type_str = "CHA"; break;
+            case aq::ColumnType::COL_TYPE_INT: type_str = "INT"; break;
+            case aq::ColumnType::COL_TYPE_DOUBLE: type_str = "DOU"; break;
+            case aq::ColumnType::COL_TYPE_BIG_INT:
+            case aq::ColumnType::COL_TYPE_DATE1:
+            case aq::ColumnType::COL_TYPE_DATE2:
+            case aq::ColumnType::COL_TYPE_DATE3:
+            case aq::ColumnType::COL_TYPE_DATE4: type_str = "LON"; break;
+            }
+            sprintf(buf, "C%.4u%s%.4u", (*itCol)->ID, type_str.c_str(), (*itCol)->Size);
+            set_string_data(column, buf);
+          }
+        }
+      }
+    }
+    changeTemporaryTableName(table);
+    return;
+  }
+  else if ((pNode->tag == K_IDENT) && (pNode->eNodeDataType == NODE_DATA_STRING))
+  {
+    for (std::map<std::string, boost::shared_ptr<QueryResolver> >::const_iterator it = this->nestedTables.begin(); it != this->nestedTables.end(); ++it) 
+    {
+      if (it->first == pNode->data.val_str)
+      {
+        char * buf = static_cast<char*>(malloc(8 * sizeof(char)));
+        sprintf(buf, "TMP%.4u%.10u", it->second->getResult()->ID, it->second->getResult()->TotalCount);
+        set_string_data(pNode, buf);
+      }
+    }
+  }
+  changeTemporaryTableName(pNode->left);
+  changeTemporaryTableName(pNode->right);
+  changeTemporaryTableName(pNode->next);
+  
+  if (pNode == this->sqlStatement)
+  {
+    for (std::map<std::string, boost::shared_ptr<QueryResolver> >::const_iterator itTemp = this->nestedTables.begin(); itTemp != this->nestedTables.end(); ++itTemp)
+    {
+      char * name = static_cast<char*>(malloc(8 * sizeof(char)));
+      sprintf(name, "TMP%.4u%.10u", itTemp->second->result->ID, itTemp->second->result->TotalCount);
+      itTemp->second->result->setName(name);
+    }
+  }
 }

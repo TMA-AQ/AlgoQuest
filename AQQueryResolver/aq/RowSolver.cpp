@@ -65,7 +65,7 @@ void solveAQMatrix(aq::AQMatrix& aqMatrix,
       ColumnItem::Ptr item(new ColumnItem((double)aqMatrix.getTotalCount()));
       // aq::RowProcess_Intf::row_t row(1, aq::RowProcess_Intf::row_item_t(item, COL_TYPE_INT, "", "Count"));
       aq::RowProcess_Intf::Row row;
-      row.row.push_back(aq::RowProcess_Intf::row_item_t(item, COL_TYPE_INT, "", "Count"));
+      row.row.push_back(aq::RowProcess_Intf::row_item_t(item, COL_TYPE_INT, 4, "", "Count"));
       rowProcess->process(row);
       return;
     }
@@ -77,7 +77,7 @@ void solveAQMatrix(aq::AQMatrix& aqMatrix,
     {
 
       aq::RowProcess_Intf::Row row;
-      row.row.resize(row_size, RowProcess_Intf::row_item_t(ColumnItem::Ptr(), COL_TYPE_BIG_INT, "", ""));
+      row.row.resize(row_size, RowProcess_Intf::row_item_t(ColumnItem::Ptr(), COL_TYPE_BIG_INT, 8, "", ""));
       for (size_t j = 0; j < mapToUniqueIndex.size(); ++j) 
       {
         for (size_t c = 0; c < columns.size(); ++c)
@@ -88,6 +88,7 @@ void solveAQMatrix(aq::AQMatrix& aqMatrix,
             row.row[c+1] = RowProcess_Intf::row_item_t(
               columnsMapper[c]->loadValue(uniqueIndex[j][mapToUniqueIndex[j][i]]), 
               columnTypes[c]->Type,
+              columnTypes[c]->Size,
               columns[c]->getTableName(),
               columns[c]->getName());
             row.row[c+1].grouped = columns[c]->GroupBy;
@@ -98,7 +99,7 @@ void solveAQMatrix(aq::AQMatrix& aqMatrix,
       if (aqMatrix.hasCountColumn())
       {
         ColumnItem::Ptr item(new ColumnItem((double)count[i]));
-        row.row[0] = RowProcess_Intf::row_item_t(item, COL_TYPE_BIG_INT, "", "Count", true);
+        row.row[0] = RowProcess_Intf::row_item_t(item, COL_TYPE_BIG_INT, 8, "", "Count", true);
       }
 
       rowProcess->process(row);

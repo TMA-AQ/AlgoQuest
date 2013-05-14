@@ -25,6 +25,9 @@ public:
   const std::vector<Column::Ptr> getColumns() const { return this->columns; }
   const ColumnItem& getValue(size_t row, size_t column) const;
 
+  void setResultName(const char * value) { this->resultName = value; }
+  const char * getResultName() const { return this->resultName.c_str(); }
+
   //const char * getTableName() const;
   //size_t getNbRows() const;
 
@@ -34,6 +37,7 @@ private:
 	void SolveSelectRecursive(	tnode*& pNode, unsigned int nSelectLevel, tnode* pLastSelect, bool inFrom, bool inIn  );
 	boost::shared_ptr<QueryResolver> SolveSelectFromSelect(	tnode* pInteriorSelect, tnode* pExteriorSelect, int nSelectLevel );
   void buildTemporaryTable(tnode * pInteriorSelect);
+  void changeTemporaryTableName(tnode * pNode);
 
   ////////////////////////////////////////////////////////////////////////////
 	// Variables Members
@@ -50,6 +54,7 @@ private:
   // query
 	tnode *sqlStatement;
   std::vector<Column::Ptr> columns;
+  std::string resultName;
 	Table::Ptr result;
   std::map<size_t, tnode*> values;
   std::map<std::string, boost::shared_ptr<QueryResolver> > nestedTables;

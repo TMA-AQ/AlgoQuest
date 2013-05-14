@@ -17,6 +17,7 @@ namespace aq
     {
       ColumnItem::Ptr item;
       aq::ColumnType type;
+      unsigned int size;
       std::string tableName;
       std::string columnName;
       aq::aggregate_function_t aggFunc;
@@ -25,11 +26,13 @@ namespace aq
       bool displayed;
       row_item_t(ColumnItem::Ptr _item,
         aq::ColumnType _type,
+        unsigned int _size,
         std::string _tableName,
         std::string _columnName,
         bool _computed = false)
         : item(_item),
         type(_type),
+        size(_size),
         tableName(_tableName),
         columnName(_columnName),
         computed(_computed),

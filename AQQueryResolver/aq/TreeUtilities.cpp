@@ -46,8 +46,7 @@ void addAlias( tnode* pNode )
       as_node->right->eNodeDataType = NODE_DATA_STRING;
       std::string name;
       getRowItemName(as_node->left, name);
-      as_node->right->data.val_str = static_cast<char*>(::malloc((name.size() + 1)*sizeof(char)));
-      strcpy(as_node->right->data.val_str, name.c_str());
+      set_string_data(as_node->right, name.c_str());
       pNode->right = as_node;
     }
     assert(pNode->left != NULL);
@@ -59,8 +58,7 @@ void addAlias( tnode* pNode )
       as_node->right->eNodeDataType = NODE_DATA_STRING;
       std::string name;
       getRowItemName(as_node->left, name);
-      as_node->right->data.val_str = static_cast<char*>(::malloc((name.size() + 1)*sizeof(char)));
-      strcpy(as_node->right->data.val_str, name.c_str());
+      set_string_data(as_node->right, name.c_str());
       pNode->left = as_node;
     }
     else

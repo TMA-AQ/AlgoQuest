@@ -4,7 +4,7 @@
 using namespace aq;
 
 RowWritter::RowWritter(const std::string& filePath)
-	: firstRow(true)
+	: totalCount(0), firstRow(true)
 {
 	value = static_cast<char*>(malloc(128 * sizeof(char)));
 	if (filePath == "stdout")
@@ -16,7 +16,8 @@ RowWritter::RowWritter(const std::string& filePath)
 RowWritter::~RowWritter()
 {
 	free(value);
-	fclose(pFOut);
+  if (pFOut)
+    fclose(pFOut);
 }
 
 int RowWritter::process(Row& row)
@@ -44,6 +45,7 @@ int RowWritter::process(Row& row)
 
   if (row.completed)
   {
+    this->totalCount += 1;
     for (row_t::const_reverse_iterator it = row.row.rbegin(); it != row.row.rend(); ++it)
     {
       if (!(*it).displayed)
