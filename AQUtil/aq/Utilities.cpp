@@ -422,7 +422,7 @@ std::string getThesaurusFileName( const char* path, size_t tableIdx, size_t colu
 std::string getThesaurusTemporaryFileName( size_t tableIdx, size_t columnIdx, size_t partIdx, const char * type, size_t size )
 {
 	char szFN[ _MAX_PATH ];
-  sprintf( szFN, "B001TMP%.4uC%.4u%s%.4uP%.12u.the", tableIdx, columnIdx, type, size, partIdx );
+  sprintf( szFN, "B001TMP%.4uC%.4u%s%.4uP%.12u.tmp", tableIdx, columnIdx, type, size, partIdx );
 	return szFN;
 }
 
