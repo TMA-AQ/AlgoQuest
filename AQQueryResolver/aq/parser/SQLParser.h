@@ -4,6 +4,7 @@
 //------------------------------------------------------------------------------
 #include <aq/Utilities.h>
 #include <aq/DBTypes.h>
+#include <set>
 #include <vector>
 #include <string>
 #include <sstream>
@@ -65,6 +66,8 @@ tnode* find_deeper_node(tnode * pNode, int tag, bool with_next = false );
 // debug purpose
 void dump(const tnode * const pNode, std::ostream& os, std::string indent = "");
 std::ostream& operator<<(std::ostream& os, const tnode& pNode);
+
+void checkTree( tnode * tree, std::set<tnode*>& nodes);
 
 //------------------------------------------------------------------------------
 /* Returns 0 on success, 1 on error */

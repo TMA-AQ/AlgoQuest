@@ -443,7 +443,7 @@ tnode* find_deeper_node(tnode * pNode, int tag, bool with_next ) {
 	return NULL;
 }
 
-
+//------------------------------------------------------------------------------
 void dump(const tnode * const pNode, std::ostream& os, std::string indent)
 {
   if (indent.size() > 100) 
@@ -453,7 +453,7 @@ void dump(const tnode * const pNode, std::ostream& os, std::string indent)
   }
 
 
-	os << indent << "'" << id_to_sql_string(pNode->tag) << "' [" << pNode->tag << ", " << pNode->inf << "] : " << to_string(pNode) << " [address:" << pNode << "]" << std::endl;
+	os << indent << "'" << id_to_kstring(pNode->tag) << "' [" << pNode->tag << ", " << pNode->inf << "] : " << to_string(pNode) << " [address:" << pNode << "]" << std::endl;
 
   if ((pNode->left != NULL) || (pNode->right != NULL))
   {
@@ -471,8 +471,36 @@ void dump(const tnode * const pNode, std::ostream& os, std::string indent)
 	}
 }
 
+//------------------------------------------------------------------------------
 std::ostream& operator<<(std::ostream& os, const tnode& pNode)
 {
 	dump(&pNode, os);
 	return os;
+}
+
+//------------------------------------------------------------------------------
+void checkTree( tnode * tree, std::set<tnode*>& nodes)
+{
+
+  if (tree == NULL) return;
+
+  std::set<tnode*>::iterator it = nodes.find(tree);
+  assert(it == nodes.end());
+  nodes.insert(tree);
+
+  switch (tree->eNodeDataType)
+  {
+  case NODE_DATA_INT: break;
+  case NODE_DATA_NUMBER: break;
+  case NODE_DATA_STRING: 
+    assert(tree->data.val_str != NULL); 
+    assert((tree->nStrBufCb % STR_BUF_SIZE_ROUND_UP) == 0);
+    assert(tree->nStrBufCb >= strlen(tree->data.val_str));
+    break;
+  }
+
+  checkTree(tree->left, nodes);
+  checkTree(tree->right, nodes);
+  checkTree(tree->next, nodes);
+
 }
