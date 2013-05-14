@@ -54,10 +54,10 @@ void AQEngine::call(tnode *pNode, mode_t mode, int selectLevel)
 
 	//
 	// get temporary files created by previous calls
-	aq::DeleteFolder( settings.szTempPath1 );
-	char path[_MAX_PATH];
-	sprintf( path, "%s_%d", settings.szTempPath1, selectLevel );
-	rename( path, settings.szTempPath1 );
+	//aq::DeleteFolder( settings.szTempPath1 );
+	//char path[_MAX_PATH];
+	//sprintf( path, "%s_%d", settings.szTempPath1, selectLevel );
+	//rename( path, settings.szTempPath1 );
 
 	//
 	// If mono table query, read PRM or TMP files to get the rows indexes
@@ -71,8 +71,8 @@ void AQEngine::call(tnode *pNode, mode_t mode, int selectLevel)
 
 	//
 	// create folders for the engine
-	mkdir( settings.szTempPath1 );
-	mkdir( settings.szTempPath2 );
+	// mkdir( settings.szTempPath1 );
+	// mkdir( settings.szTempPath2 );
 
 	aq::Timer timer;
 	if ((mode == 0) || (settings.executeNestedQuery))
