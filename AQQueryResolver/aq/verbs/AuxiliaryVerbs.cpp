@@ -107,7 +107,7 @@ void ColumnVerb::addResult(aq::RowProcess_Intf::Row& row,
   {
     if ((*it).match(this->TableName, this->ColumnOnlyName))
     {
-      this->Result.reset(new Scalar((*it).type, *(*it).item.get()));
+      this->Result.reset(new Scalar((*it).type, (*it).size, *(*it).item.get()));
       break;
     }
   }
@@ -292,7 +292,7 @@ IntValueVerb::IntValueVerb()
 bool IntValueVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal )
 {
 	assert( pNode->eNodeDataType == NODE_DATA_INT );
-	this->Result = new Scalar(COL_TYPE_INT, ColumnItem((double)pNode->data.val_int));
+	this->Result = new Scalar(COL_TYPE_INT, 4, ColumnItem((double)pNode->data.val_int));
 	return false;
 }
 
@@ -313,7 +313,7 @@ DoubleValueVerb::DoubleValueVerb()
 bool DoubleValueVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal )
 {
 	assert( pNode->eNodeDataType == NODE_DATA_NUMBER );
-	this->Result = new Scalar(COL_TYPE_DOUBLE, ColumnItem(pNode->data.val_number));
+	this->Result = new Scalar(COL_TYPE_DOUBLE, 8, ColumnItem(pNode->data.val_number));
 	return false;
 }
 
@@ -334,7 +334,7 @@ StringValueVerb::StringValueVerb()
 bool StringValueVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal )
 {
 	assert( pNode->eNodeDataType == NODE_DATA_STRING );
-	this->Result = new Scalar(COL_TYPE_VARCHAR, ColumnItem(pNode->data.val_str));
+	this->Result = new Scalar(COL_TYPE_VARCHAR, 128, ColumnItem(pNode->data.val_str)); // FIXME
 	return false;
 }
 
@@ -406,7 +406,7 @@ void AsVerb::addResult(aq::RowProcess_Intf::Row& row,
     if (scalar != 0)
     {
       ColumnItem::Ptr item(new ColumnItem(scalar->Item));
-      row.row.push_back(aq::RowProcess_Intf::row_item_t(item, scalar->Type, "", this->ident, true));
+      row.row.push_back(aq::RowProcess_Intf::row_item_t(item, scalar->Type, scalar->Size, "", this->ident, true));
       (*row.row.rbegin()).aggFunc = scalar->aggFunc;
       (*row.row.rbegin()).displayed = true;
     }

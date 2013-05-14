@@ -232,7 +232,7 @@ Scalar::Ptr SumVerb::computeResultRegular(	Column::Ptr column,
 	if( table->HasCount )
 		count = table->Columns[table->Columns.size() - 1];
 	double sum = computeSum(column, count, start, end);
-	return new Scalar(column->Type, ColumnItem(sum));
+	return new Scalar(column->Type, column->Size, ColumnItem(sum));
 }
 
 //------------------------------------------------------------------------------
@@ -277,7 +277,7 @@ Scalar::Ptr CountVerb::computeResultRegular(	Column::Ptr column,
 												llong end )
 {
 	llong count = computeCount(table, start, end);
-	return new Scalar(COL_TYPE_INT, ColumnItem( (double) count ));
+	return new Scalar(COL_TYPE_INT, 4, ColumnItem( (double) count ));
 }
 
 //------------------------------------------------------------------------------
@@ -358,7 +358,7 @@ Scalar::Ptr AvgVerb::computeResultRegular(	Column::Ptr column,
 		avg = sum / count;
 	else
 		avg = (double)((llong)((sum / count) + 0.5));
-	return new Scalar(column->Type, ColumnItem(avg));
+	return new Scalar(column->Type, column->Size, ColumnItem(avg));
 }
 
 //------------------------------------------------------------------------------

@@ -38,9 +38,10 @@ public:
 	std::string				Name;
 
 	Scalar( aq::ColumnType type ): Type(type), aggFunc(aq::aggregate_function_t::NONE) {}
-	Scalar( aq::ColumnType type, const ColumnItem& item ): Item(item), Type(type), aggFunc(aq::aggregate_function_t::NONE) {}
+	Scalar( aq::ColumnType type, unsigned int size, const ColumnItem& item ): Item(item), Type(type), Size(size), aggFunc(aq::aggregate_function_t::NONE) {}
 	ColumnItem	Item;
 	aq::ColumnType	Type;
+  unsigned int Size;
   aq::aggregate_function_t aggFunc;
 
 };

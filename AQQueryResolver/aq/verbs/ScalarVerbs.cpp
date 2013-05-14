@@ -113,7 +113,7 @@ void ScalarVerb::addResult(	aq::RowProcess_Intf::Row& row,
   if (scalar != 0)
   {
     ColumnItem::Ptr item(new ColumnItem(scalar->Item));
-    row.row.push_back(aq::RowProcess_Intf::row_item_t(item, scalar->Type, "", ""));
+    row.row.push_back(aq::RowProcess_Intf::row_item_t(item, scalar->Type, scalar->Size, "", ""));
   }
 }
 
