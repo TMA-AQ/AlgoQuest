@@ -11,10 +11,10 @@ JoinVerb::JoinVerb()
 }
 
 //------------------------------------------------------------------------------
-bool JoinVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal )
+bool JoinVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
 	assert( pNode && pStart );
-	tnode* pJoin = pNode;
+	aq::tnode* pJoin = pNode;
 	while( pJoin->left && pJoin->tag != K_JOIN )
 		pJoin = pJoin->left;
 	assert( pJoin->tag == K_JOIN );
@@ -30,9 +30,9 @@ bool JoinVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOrigin
 	assert( pJoin->right && (pJoin->right->tag == K_IDENT
 		|| pJoin->right->tag == K_AS && pJoin->right->left
 		&& pJoin->right->left->tag == K_IDENT ) );
-	tnode* table1 = pJoin->left;
+	aq::tnode* table1 = pJoin->left;
 	pJoin->left = NULL;
-	tnode* table2 = pJoin->right;
+	aq::tnode* table2 = pJoin->right;
 	pJoin->right = NULL;
 	delete_subtree( pNode->left );
 	delete_subtree( pNode->right );

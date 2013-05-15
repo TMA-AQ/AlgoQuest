@@ -113,6 +113,7 @@ public:
 	bool			Invisible;
 	bool			GroupBy;
 	bool			OrderBy;
+  bool      Temporary;
 
 };
 

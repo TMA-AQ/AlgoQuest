@@ -20,7 +20,7 @@ SelectVerb::SelectVerb()
 }
 
 //------------------------------------------------------------------------------
-void getAllColumns( tnode* pNode, vector<tnode*>& columns )
+void getAllColumns( aq::tnode* pNode, vector<aq::tnode*>& columns )
 {
 	if( !pNode || pNode->inf == 1 && pNode->tag != K_COMMA || pNode->tag == K_JNO )
 		return;
@@ -62,7 +62,7 @@ void getAllColumns( tnode* pNode, vector<tnode*>& columns )
 }
 
 //------------------------------------------------------------------------------
-void extractName( tnode* pNode, std::string& name )
+void extractName( aq::tnode* pNode, std::string& name )
 {
 	if( !pNode )
 		return;
@@ -97,10 +97,10 @@ void extractName( tnode* pNode, std::string& name )
 }
 
 //------------------------------------------------------------------------------
-bool SelectVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal )
+bool SelectVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
 	assert( pStartOriginal->tag == pNode->tag );
-	vector<tnode*> columns;
+	vector<aq::tnode*> columns;
 	columns.clear();
 	getColumnsList( pStartOriginal->left, columns );
 	for( size_t idx = 0; idx < columns.size(); ++idx )
@@ -113,7 +113,7 @@ bool SelectVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOrig
 }
 
 //------------------------------------------------------------------------------
-bool SelectVerb::changeQuery(	tnode* pStart, tnode* pNode,
+bool SelectVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 								VerbResult::Ptr resLeft, 
 								VerbResult::Ptr resRight, 
 								VerbResult::Ptr resNext )
@@ -125,7 +125,7 @@ bool SelectVerb::changeQuery(	tnode* pStart, tnode* pNode,
 		solveSelectStar( pNode, *this->m_baseDesc, this->Columns, this->ColumnsDisplay );
 		return false;
 	}
-	vector<tnode*> columns;
+	vector<aq::tnode*> columns;
 	getColumnsList( pNode->left, columns );
 	for( size_t idx = 0; idx < columns.size(); ++idx )
 	{
@@ -164,7 +164,7 @@ bool SelectVerb::changeQuery(	tnode* pStart, tnode* pNode,
 			pNode = pNode->left;
 	}
 	
-	tnode* pAuxNode = pNode->left;
+	aq::tnode* pAuxNode = pNode->left;
 	pNode->left = new_node( K_COMMA );
 	pNode = pNode->left;
 	pNode->right = pAuxNode;
@@ -296,7 +296,7 @@ WhereVerb::WhereVerb()
 //<, <=, >, >=, =, <>, BETWEEN, LIKE : change into the inverse version
 //OR : change to AND, apply NOT on children
 //AND: change to OR, apply NOT on children
-void processNot( tnode*& pNode, bool applyNot )
+void processNot( aq::tnode*& pNode, bool applyNot )
 {
 	if( !pNode )
 		return;
@@ -304,7 +304,7 @@ void processNot( tnode*& pNode, bool applyNot )
 	{
 	case K_NOT:
 		{
-			tnode* auxNode = pNode;
+			aq::tnode* auxNode = pNode;
 			pNode = pNode->left;
 			auxNode->left = NULL;
 			delete_node( auxNode );
@@ -411,13 +411,13 @@ void processNot( tnode*& pNode, bool applyNot )
 		if( pNode->right->tag == K_NOT && 
 			pNode->right->left && pNode->right->left->tag == K_NULL )
 		{
-			tnode* auxNode = pNode->right;
+			aq::tnode* auxNode = pNode->right;
 			pNode->right = pNode->right->left;
 			delete_node( auxNode );
 		}
 		else if( pNode->right->tag == K_NULL )
 		{
-			tnode* auxNode = new_node( K_NOT );
+			aq::tnode* auxNode = new_node( K_NOT );
 			auxNode->left = pNode->right;
 			pNode->right = auxNode;
 		}
@@ -429,7 +429,7 @@ void processNot( tnode*& pNode, bool applyNot )
 }
 
 //------------------------------------------------------------------------------
-bool WhereVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal )
+bool WhereVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
 	//eliminate K_NOT
 	processNot( pNode->left, false );
@@ -438,7 +438,7 @@ bool WhereVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOrigi
 }
 
 //------------------------------------------------------------------------------
-bool WhereVerb::changeQuery( tnode* pStart, tnode* pNode,
+bool WhereVerb::changeQuery( aq::tnode* pStart, aq::tnode* pNode,
 	VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext )
 {
 	addInnerOuterNodes( pNode->left, K_INNER, K_INNER );
@@ -483,7 +483,7 @@ OrderVerb::OrderVerb()
 {}
 
 /*//------------------------------------------------------------------------------
-void replaceColumnAlias( tnode* pNode, const char* alias, tnode* column )
+void replaceColumnAlias( aq::tnode* pNode, const char* alias, aq::tnode* column )
 {
 	if( !pNode )
 		return;
@@ -503,11 +503,11 @@ void replaceColumnAlias( tnode* pNode, const char* alias, tnode* column )
 }*/
 
 //------------------------------------------------------------------------------
-bool OrderVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal )
+bool OrderVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
-	vector<tnode*> columns;
+	vector<aq::tnode*> columns;
 	getColumnsList( pNode->left->left, columns );
-	vector<tnode*> selectColumns;
+	vector<aq::tnode*> selectColumns;
 	getColumnsList( pStart->left, selectColumns );
 	for( size_t idx = 0; idx < columns.size(); ++idx )
 		if( columns[idx]->tag == K_IDENT || 
@@ -533,7 +533,7 @@ bool OrderVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOrigi
 }
 
 //------------------------------------------------------------------------------
-bool OrderVerb::changeQuery(	tnode* pStart, tnode* pNode,
+bool OrderVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 								VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext )
 {
 	pNode->tag = K_DELETED;
@@ -640,7 +640,7 @@ ByVerb::ByVerb()
 {}
 
 //------------------------------------------------------------------------------
-bool ByVerb::changeQuery( tnode* pStart, tnode* pNode,
+bool ByVerb::changeQuery( aq::tnode* pStart, aq::tnode* pNode,
 							VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext )
 {
 	return false;
@@ -669,7 +669,7 @@ FromVerb::FromVerb()
 {}
 /*
 //------------------------------------------------------------------------------
-void replaceTableIdent( tnode* pNode, const char* oldIdent, const char* newIdent )
+void replaceTableIdent( aq::tnode* pNode, const char* oldIdent, const char* newIdent )
 {
 	if( !pNode )
 		return;
@@ -688,7 +688,7 @@ void replaceTableIdent( tnode* pNode, const char* oldIdent, const char* newIdent
 */
 
 //------------------------------------------------------------------------------
-void PreProcessSelect( tnode *pNode, Base& BaseDesc )
+void PreProcessSelect( aq::tnode *pNode, Base& BaseDesc )
 {
 	int				nRet;
 	// Corect Column References !
@@ -715,7 +715,7 @@ void PreProcessSelect( tnode *pNode, Base& BaseDesc )
 }
 
 //------------------------------------------------------------------------------
-bool FromVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal )
+bool FromVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
 	PreProcessSelect( pStart, *this->m_baseDesc );
   getTablesList(pNode, this->tables);
@@ -723,7 +723,7 @@ bool FromVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOrigin
 }
 
 //------------------------------------------------------------------------------
-bool FromVerb::changeQuery( tnode* pStart, tnode* pNode,
+bool FromVerb::changeQuery( aq::tnode* pStart, aq::tnode* pNode,
 	VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext )
 {
 	solveOneTableInFrom( pStart, *this->m_baseDesc );
@@ -745,13 +745,13 @@ GroupVerb::GroupVerb()
 {}
 
 //------------------------------------------------------------------------------
-bool GroupVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal )
+bool GroupVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
   return this->useRowResolver;
 }
 
 //------------------------------------------------------------------------------
-bool GroupVerb::changeQuery(	tnode* pStart, tnode* pNode,
+bool GroupVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 								VerbResult::Ptr resLeft, 
 								VerbResult::Ptr resRight, 
 								VerbResult::Ptr resNext )
@@ -936,8 +936,8 @@ HavingVerb::HavingVerb()
 {}
 
 //------------------------------------------------------------------------------
-bool HavingVerb::preprocessQuery(	tnode* pStart, tnode* pNode, 
-									tnode* pStartOriginal )
+bool HavingVerb::preprocessQuery(	aq::tnode* pStart, aq::tnode* pNode, 
+									aq::tnode* pStartOriginal )
 {
 	//eliminate K_NOT
 	processNot( pNode->left, false );

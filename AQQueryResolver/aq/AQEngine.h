@@ -10,14 +10,14 @@ public:
 	AQEngine(Base& _baseDesc, TProjectSettings& _settings);
 	~AQEngine();
 
-	void call(tnode *pNode, mode_t mode, int selectLevel);
+	void call(aq::tnode *pNode, mode_t mode, int selectLevel);
   virtual int run(const char * prg, const char * args) const = 0;
 
 	boost::shared_ptr<aq::AQMatrix> getAQMatrix() { return aqMatrix; }
 	const std::vector<llong>& getTablesIDs() const { return tableIDs; }
 
 private:
-	void generateAQMatrixFromPRM(const std::string prmFile, tnode * whereNode);
+	void generateAQMatrixFromPRM(const std::string prmFile, aq::tnode * whereNode);
 
 	const Base& baseDesc;
 	const TProjectSettings& settings;

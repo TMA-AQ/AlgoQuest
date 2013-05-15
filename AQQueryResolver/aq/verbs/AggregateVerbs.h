@@ -8,7 +8,7 @@ class AggregateVerb: public VerbNode
 	VERB_DECLARE( AggregateVerb );
 public:
 	virtual int getVerbType() const { return -1; };
-	virtual bool changeQuery( tnode* pStart, tnode* pNode,
+	virtual bool changeQuery( aq::tnode* pStart, aq::tnode* pNode,
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
@@ -49,7 +49,7 @@ class CountVerb: public AggregateVerb
 	VERB_DECLARE( CountVerb );
 public:
 	virtual int getVerbType() const { return K_COUNT; };
-	virtual bool preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal );
+	virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
   void accept(VerbVisitor* visitor);
 protected:
 	virtual Scalar::Ptr computeResultRegular(	Column::Ptr column, 
@@ -138,13 +138,13 @@ public:
 	virtual int getVerbType() const { return K_LAG; };
 	~LagVerb();
 
-	virtual bool preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal );
+	virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
   virtual void accept(VerbVisitor* visitor);
 //debug13 ugly hack to let FirstValueVerb use LagVerb private:
 	llong Offset;
-	tnode* Default;
+	aq::tnode* Default;
 };
 
 //------------------------------------------------------------------------------

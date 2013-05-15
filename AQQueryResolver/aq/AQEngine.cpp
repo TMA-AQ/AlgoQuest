@@ -20,7 +20,7 @@ AQEngine::~AQEngine(void)
 {
 }
 
-void AQEngine::call(tnode *pNode, mode_t mode, int selectLevel)
+void AQEngine::call(aq::tnode *pNode, mode_t mode, int selectLevel)
 {
 	std::string query;
 	aq::syntax_tree_to_prefix_form( pNode, query );
@@ -62,7 +62,7 @@ void AQEngine::call(tnode *pNode, mode_t mode, int selectLevel)
 	//
 	// If mono table query, read PRM or TMP files to get the rows indexes
 	//std::string tableName;
-	//tnode * constraint = find_main_node(pNode, K_WHERE);
+	//aq::tnode * constraint = find_main_node(pNode, K_WHERE);
 	//if (isMonoTable(pNode, tableName) && (constraint == NULL))
 	//{
 	//	this->generateAQMatrixFromPRM(tableName, constraint);
@@ -72,7 +72,7 @@ void AQEngine::call(tnode *pNode, mode_t mode, int selectLevel)
 	//
 	// create folders for the engine
 	// mkdir( settings.szTempPath1 );
-	// mkdir( settings.szTempPath2 );
+	mkdir( settings.szTempPath2 );
 
 	aq::Timer timer;
 	if ((mode == 0) || (settings.executeNestedQuery))
@@ -99,7 +99,7 @@ void AQEngine::call(tnode *pNode, mode_t mode, int selectLevel)
 	{
     if (mode == REGULAR)
     {
-      aq::DeleteFolder( settings.szTempPath1 );
+      aq::DeleteFolder( settings.szTempPath2 );
     }
     else
     {
@@ -156,7 +156,7 @@ void AQEngine::call(tnode *pNode, mode_t mode, int selectLevel)
 
 }
 
-void AQEngine::generateAQMatrixFromPRM(const std::string tableName, tnode * whereNode)
+void AQEngine::generateAQMatrixFromPRM(const std::string tableName, aq::tnode * whereNode)
 {
 	size_t tableIdx = this->baseDesc.getTableIdx(tableName);
 	size_t nbRows = this->baseDesc.Tables[tableIdx]->TotalCount;

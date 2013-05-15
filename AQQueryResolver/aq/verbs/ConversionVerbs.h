@@ -10,8 +10,8 @@ class CastVerb: public VerbNode
 public:
 	virtual int getVerbType() const { return K_CAST; };
 
-	virtual bool preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal );
-	virtual bool changeQuery( tnode* pStart, tnode* pNode,
+	virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
+	virtual bool changeQuery( aq::tnode* pStart, aq::tnode* pNode,
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
@@ -40,7 +40,7 @@ class DecodeVerb: public VerbNode
 public:
 	virtual int getVerbType() const { return K_DECODE; };
 
-	virtual bool preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal );
+	virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
   virtual void accept(VerbVisitor* visitor);

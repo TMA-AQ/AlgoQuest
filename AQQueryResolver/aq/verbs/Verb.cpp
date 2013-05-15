@@ -38,7 +38,7 @@ void Verb::accept(VerbVisitor* visitor)
 
 /*
 //------------------------------------------------------------------------------
-void addColumn( tnode* pNode, tnode* pColumnNode )
+void addColumn( aq::tnode* pNode, aq::tnode* pColumnNode )
 {
 	if( !pNode || !pColumnNode )
 		return;
@@ -54,7 +54,7 @@ void addColumn( tnode* pNode, tnode* pColumnNode )
 	while( pNode->right && pNode->right->tag == K_COMMA )
 		pNode = pNode->right;
 	
-	tnode* pAuxNode = pNode->right;
+	aq::tnode* pAuxNode = pNode->right;
 	pNode->right = new_node( K_COMMA );
 	pNode->right->left = pAuxNode;
 	pNode->right->right = pColumnNode;

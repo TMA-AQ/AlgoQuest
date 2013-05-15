@@ -9,7 +9,7 @@ class ScalarVerb: public VerbNode
 	VERB_DECLARE( ScalarVerb );
 public:
 	virtual int getVerbType() const { return -1; };
-	virtual bool changeQuery( tnode* pStart, tnode* pNode,
+	virtual bool changeQuery( aq::tnode* pStart, aq::tnode* pNode,
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
@@ -50,7 +50,7 @@ class SubstringVerb: public ScalarVerb
 	VERB_DECLARE( SubstringVerb );
 public:
 	virtual int getVerbType() const { return K_SUBSTRING; }
-	bool preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal );
+	bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
   void accept(VerbVisitor*);
   llong getStartPos() const { return StartPos; }
   llong getSize() const { return Size; }
@@ -66,7 +66,7 @@ class ToDateVerb: public ScalarVerb
 	VERB_DECLARE( ToDateVerb );
 public:
 	virtual int getVerbType() const { return K_TO_DATE; };
-	bool preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal );
+	bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
 protected:
 	virtual void transformItem( const ColumnItem& item, ColumnItem& result );
 	virtual aq::ColumnType outputType( aq::ColumnType inputType );
@@ -112,7 +112,7 @@ class ToCharVerb: public ScalarVerb
 	VERB_DECLARE( ToCharVerb );
 public:
 	virtual int getVerbType() const { return K_TO_CHAR; };
-	virtual bool changeQuery(	tnode* pStart, tnode* pNode,
+	virtual bool changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 								VerbResult::Ptr resLeft, 
 								VerbResult::Ptr resRight, 
 								VerbResult::Ptr resNext );

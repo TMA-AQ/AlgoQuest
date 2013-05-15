@@ -1,5 +1,5 @@
-#ifndef __FIAN_NESTEDQUERIES_H__
-#define __FIAN_NESTEDQUERIES_H__
+#ifndef __AQ_NESTEDQUERIES_H__
+#define __AQ_NESTEDQUERIES_H__
 
 #include "parser/SQLParser.h"
 #include <aq/Utilities.h>
@@ -13,7 +13,7 @@
 class QueryResolver
 {
 public:
-	QueryResolver(tnode * _sqlStatement, TProjectSettings * _pSettings, AQEngine_Intf * _aq_engine, Base& _baseDesc, unsigned int& _id, unsigned int _level = 1);
+	QueryResolver(aq::tnode * _sqlStatement, TProjectSettings * _pSettings, AQEngine_Intf * _aq_engine, Base& _baseDesc, unsigned int& _id, unsigned int _level = 1);
 	~QueryResolver();
 
 	Table::Ptr solve();
@@ -34,10 +34,10 @@ public:
 private:
 	/// Solve Select Statement	
 	Table::Ptr SolveSelectRegular();
-	void SolveSelectRecursive(	tnode*& pNode, unsigned int nSelectLevel, tnode* pLastSelect, bool inFrom, bool inIn  );
-	boost::shared_ptr<QueryResolver> SolveSelectFromSelect(	tnode* pInteriorSelect, tnode* pExteriorSelect, int nSelectLevel );
-  void buildTemporaryTable(tnode * pInteriorSelect);
-  void changeTemporaryTableName(tnode * pNode);
+	void SolveSelectRecursive(	aq::tnode*& pNode, unsigned int nSelectLevel, aq::tnode* pLastSelect, bool inFrom, bool inIn  );
+	boost::shared_ptr<QueryResolver> SolveSelectFromSelect(	aq::tnode* pInteriorSelect, aq::tnode* pExteriorSelect, int nSelectLevel );
+  void buildTemporaryTable(aq::tnode * pInteriorSelect);
+  void changeTemporaryTableName(aq::tnode * pNode);
 
   ////////////////////////////////////////////////////////////////////////////
 	// Variables Members
@@ -52,11 +52,11 @@ private:
 	char szBuffer[STR_BUF_SIZE];
 
   // query
-	tnode *sqlStatement;
+	aq::tnode *sqlStatement;
   std::vector<Column::Ptr> columns;
   std::string resultName;
 	Table::Ptr result;
-  std::map<size_t, tnode*> values;
+  std::map<size_t, aq::tnode*> values;
   std::map<std::string, boost::shared_ptr<QueryResolver> > nestedTables;
   unsigned int& id_generator;
   const unsigned int id;

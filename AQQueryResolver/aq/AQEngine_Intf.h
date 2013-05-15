@@ -22,7 +22,7 @@ public:
 
 	virtual ~AQEngine_Intf() {}
 
-	virtual void call(tnode *pNode, mode_t mode, int selectLevel) = 0;
+	virtual void call(aq::tnode *pNode, mode_t mode, int selectLevel) = 0;
 
 	virtual boost::shared_ptr<aq::AQMatrix> getAQMatrix() = 0;
 	virtual const std::vector<llong>& getTablesIDs() const = 0;

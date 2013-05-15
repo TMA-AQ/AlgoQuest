@@ -30,7 +30,7 @@ PartitionVerb::PartitionVerb()
 {}
 
 //------------------------------------------------------------------------------
-bool PartitionVerb::changeQuery( tnode* pStart, tnode* pNode, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext )
+bool PartitionVerb::changeQuery( aq::tnode* pStart, aq::tnode* pNode, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext )
 {
   return false;
 }
@@ -88,7 +88,7 @@ FrameVerb::FrameVerb()
 {}
 
 //------------------------------------------------------------------------------
-void extractFrameTypeOffset(	tnode* bound, TablePartition::FrameBoundType& type, 
+void extractFrameTypeOffset(	aq::tnode* bound, TablePartition::FrameBoundType& type, 
 								int& offset, bool start, int verbTag )
 {
 	assert( bound );
@@ -132,7 +132,7 @@ void extractFrameTypeOffset(	tnode* bound, TablePartition::FrameBoundType& type,
 }
 
 //------------------------------------------------------------------------------
-bool FrameVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal )
+bool FrameVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
 	assert( pNode );
 	assert( pNode->left );
@@ -152,11 +152,11 @@ bool FrameVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOrigi
 	{
 	case K_AND:
 		{
-			tnode* startBound = pNode->right->left;
+			aq::tnode* startBound = pNode->right->left;
 			extractFrameTypeOffset( startBound, type, offset, true, this->getVerbType() );
 			partition->FrameStartType = type;
 			partition->FrameStart = offset;
-			tnode* endBound = pNode->right->right;
+			aq::tnode* endBound = pNode->right->right;
 			extractFrameTypeOffset( endBound, type, offset, false, this->getVerbType() );
 			partition->FrameEndType = type;
 			partition->FrameEnd = offset;
@@ -164,7 +164,7 @@ bool FrameVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOrigi
 		break;
 	case K_PRECEDING:
 		{
-			tnode* startBound = pNode->right;
+			aq::tnode* startBound = pNode->right;
 			extractFrameTypeOffset( startBound, type, offset, true, this->getVerbType() );
 			partition->FrameStartType = type;
 			partition->FrameStart = offset;

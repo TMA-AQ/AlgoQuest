@@ -217,6 +217,12 @@
     <ClInclude Include="aq\statement_resolver.h">
       <Filter>Header Files\aq\statement_resolver</Filter>
     </ClInclude>
+    <ClInclude Include="aq\TemporaryColumnMapper.h">
+      <Filter>Header Files\aq</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\ColumnMapper_Intf.h">
+      <Filter>Header Files\aq</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="aq\verbs\AggregateVerbs.cpp">
@@ -344,6 +350,9 @@
     </ClCompile>
     <ClCompile Include="aq\statement_resolver.cpp">
       <Filter>Source Files\aq\statement_resolver</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\TemporaryColumnMapper.cpp">
+      <Filter>Source Files\aq</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

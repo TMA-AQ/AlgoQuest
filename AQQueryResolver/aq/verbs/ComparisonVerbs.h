@@ -9,7 +9,7 @@ class ComparisonVerb: public VerbNode
 	VERB_DECLARE( ComparisonVerb );
 public:
 	virtual int getVerbType() const { return -1; };
-	virtual bool changeQuery(	tnode* pStart, tnode* pNode,
+	virtual bool changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 								VerbResult::Ptr resLeft, 
 								VerbResult::Ptr resRight, 
 								VerbResult::Ptr resNext );
@@ -208,8 +208,8 @@ class IsVerb: public VerbNode
 	VERB_DECLARE( IsVerb );
 public:
 	virtual int getVerbType() const { return K_IS; };
-	virtual bool preprocessQuery(	tnode* pStart, tnode* pNode, 
-									tnode* pStartOriginal );
+	virtual bool preprocessQuery(	aq::tnode* pStart, aq::tnode* pNode, 
+									aq::tnode* pStartOriginal );
 	virtual void changeResult(	Table::Ptr table, 
 								VerbResult::Ptr resLeft, 
 								VerbResult::Ptr resRight, 

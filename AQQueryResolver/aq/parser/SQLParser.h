@@ -1,5 +1,5 @@
-#ifndef __FIAN_SQLPARSER_H__
-#define __FIAN_SQLPARSER_H__
+#ifndef __AQ_SQLPARSER_H__
+#define __AQ_SQLPARSER_H__
 
 //------------------------------------------------------------------------------
 #include <aq/Utilities.h>
@@ -9,21 +9,24 @@
 #include <string>
 #include <sstream>
 
+namespace aq
+{
+
 //------------------------------------------------------------------------------
 typedef enum {
 	NODE_DATA_STRING,
 	NODE_DATA_INT,
 	NODE_DATA_NUMBER
-} TNodeDataType;
+} tnodeDataType;
 
 //------------------------------------------------------------------------------
 struct tnode 
 {
 	short tag;
-	TNodeDataType	eNodeDataType;
-	aq::data_holder_t data;		 // - feuille - le contenu du noeud
-	size_t nStrBufCb;		// String Buffer (data.val_str) allocated bytes
-	int inf; // used by Verbs to exchange information
+	tnodeDataType	eNodeDataType;
+	data_holder_t data;		 /// data of the node
+	size_t nStrBufCb;		/// String Buffer (data.val_str) allocated bytes
+	int inf; /// used by Verbs to exchange information, TODO : use a callback interface
 
 	struct tnode * left;
 	struct tnode * right;
@@ -43,9 +46,7 @@ tnode* set_double_data( tnode* pNode, double dVal );
 tnode* delete_node( tnode* pNode );
 void delete_subtree( tnode* pNode );
 tnode* get_leftmost_child( tnode *pNode );
-class Scalar;
-// tnode* set_data( tnode* pNode, const Scalar& scalar );
-tnode& set_data( tnode& pNode, const aq::data_holder_t data, aq::ColumnType type );
+tnode& set_data( tnode& pNode, const data_holder_t data, ColumnType type );
 std::string to_string(const tnode* const pNode );
 tnode* clone_subtree( tnode* pNode );
 void to_upper(tnode* pNode);
@@ -69,9 +70,11 @@ std::ostream& operator<<(std::ostream& os, const tnode& pNode);
 
 void checkTree( tnode * tree, std::set<tnode*>& nodes);
 
-//------------------------------------------------------------------------------
-/* Returns 0 on success, 1 on error */
-/* Returns in *ppNode the created sintax tree */
-int SQLParse( const char *pszStr, tnode** ppNode );
+}
 
-#endif /* __FIAN_SQLPARSER_H__ */
+//------------------------------------------------------------------------------
+/// Returns 0 on success, 1 on error
+/// Returns in *ppNode the created sintax tree
+int SQLParse( const char *pszStr, aq::tnode** ppNode );
+
+#endif /* __AQ_SQLPARSER_H__ */

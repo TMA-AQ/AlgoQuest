@@ -7,7 +7,7 @@
 #include <boost/scoped_array.hpp>
 
 //------------------------------------------------------------------------------
-Table::Ptr solve( tnode* sqlStatement )
+Table::Ptr solve( aq::tnode* sqlStatement )
 {
 	if( !sqlStatement )
 		throw aq::generic_error(aq::generic_error::INVALID_QUERY, "");
@@ -61,7 +61,7 @@ Table::Ptr solve( tnode* sqlStatement )
 }
 
 //------------------------------------------------------------------------------
-void addUnionMinusNode(int tag, std::vector<tnode*>& queries, std::vector<int>& operation, tnode* pNode,
+void addUnionMinusNode(int tag, std::vector<aq::tnode*>& queries, std::vector<int>& operation, aq::tnode* pNode,
                        TProjectSettings * pSettings, AQEngine_Intf * aq_engine, Base& BaseDesc)
 {
 	assert( pNode );
@@ -114,13 +114,13 @@ void SolveInsertAux(Table& table, size_t tableIdx, size_t colIdx, size_t packNum
 }
 
 //------------------------------------------------------------------------------
-void SolveInsert(tnode* pNode,
+void SolveInsert(aq::tnode* pNode,
                  TProjectSettings * pSettings, AQEngine_Intf * aq_engine, Base& BaseDesc)
 {
 	if( !pNode || pNode->tag != K_INSERT )
 		return;
 	size_t tableIdx = BaseDesc.getTableIdx( pNode->left->data.val_str );
-	std::vector<tnode*> columns;
+	std::vector<aq::tnode*> columns;
 	commaListToNodeArray( pNode->right->left, columns );
 	std::reverse( columns.begin(), columns.end() );
 	if( columns.size() == 0 )
@@ -147,7 +147,7 @@ void SolveInsert(tnode* pNode,
 	}
 	else
 	{
-		std::vector<tnode*> values;
+		std::vector<aq::tnode*> values;
 		commaListToNodeArray( pNode->right->right, values );
 		std::reverse( values.begin(), values.end() );
 		if( columns.size() != values.size() )
@@ -267,7 +267,7 @@ void SolveInsert(tnode* pNode,
 }
 
 //------------------------------------------------------------------------------
-void SolveUpdateDelete(tnode* pNode,
+void SolveUpdateDelete(aq::tnode* pNode,
                        TProjectSettings * pSettings, AQEngine_Intf * aq_engine, Base& BaseDesc)
 {
 	size_t tableIdx = BaseDesc.getTableIdx( pNode->left->data.val_str );
@@ -285,7 +285,7 @@ void SolveUpdateDelete(tnode* pNode,
 	if( fNewTable == NULL )
 		throw aq::generic_error(aq::generic_error::COULD_NOT_OPEN_FILE, "");
 
-	std::vector<tnode*> updates;
+	std::vector<aq::tnode*> updates;
 	std::vector<size_t> updateToTableMap;
 	std::vector<size_t> tableToUpdateMap;
 	if( pNode->tag == K_UPDATE )
@@ -324,7 +324,7 @@ void SolveUpdateDelete(tnode* pNode,
 	boost::scoped_array<char> myRecordDel( myRecord );
 
 	Table::Ptr condTable = new Table();
-	tnode* conditionsRoot;
+	aq::tnode* conditionsRoot;
 	if( pNode->tag == K_UPDATE )
 		conditionsRoot = pNode->right->right;
 	else
@@ -332,7 +332,7 @@ void SolveUpdateDelete(tnode* pNode,
 	if( conditionsRoot->tag == K_IN )
 	{
 		std::vector<int> valuePos;
-		std::vector<tnode*> conditions;
+		std::vector<aq::tnode*> conditions;
 		commaListToNodeArray( conditionsRoot->left, conditions );
 		std::reverse( conditions.begin(), conditions.end() );
 		aq::getColumnsIds( table, conditions, valuePos );
@@ -362,7 +362,7 @@ void SolveUpdateDelete(tnode* pNode,
 	}
 	else
 	{
-		std::vector<tnode*> conditions;
+		std::vector<aq::tnode*> conditions;
 		commaListToNodeArray( conditionsRoot, conditions );
 		for( size_t idx = 0; idx < conditions.size(); ++idx )
 		{
@@ -458,7 +458,7 @@ void SolveUpdateDelete(tnode* pNode,
 					tColumn->ID, packNr );
 				columnPath += "data_orga\\columns\\";
 				columnPath += szBuffer;
-				tnode* pValNode = NULL;
+				aq::tnode* pValNode = NULL;
 				if( pNode->tag == K_UPDATE )
 					pValNode = updates[idx]->right;
 				column->loadFromFile( columnPath );
@@ -467,13 +467,13 @@ void SolveUpdateDelete(tnode* pNode,
 						if( pValNode )
 							switch( pValNode->eNodeDataType )
 						{
-							case NODE_DATA_INT:
+              case aq::NODE_DATA_INT:
 								column->Items[idx2]->numval = (double) pValNode->data.val_int;
 								break;
-							case NODE_DATA_NUMBER:
+							case aq::NODE_DATA_NUMBER:
 								column->Items[idx2]->numval = pValNode->data.val_number;
 								break;
-							case NODE_DATA_STRING:
+							case aq::NODE_DATA_STRING:
 								column->Items[idx2]->strval = pValNode->data.val_str;
 								break;
 							default:
@@ -526,19 +526,19 @@ void SolveUpdateDelete(tnode* pNode,
 }
 
 //------------------------------------------------------------------------------
-void SolveUnionMinus(tnode* pNode,
+void SolveUnionMinus(aq::tnode* pNode,
                      TProjectSettings * pSettings, AQEngine_Intf * aq_engine, Base& BaseDesc)
 {
-	std::vector<tnode*> queries;
+	std::vector<aq::tnode*> queries;
 	std::vector<int> operation;
 	int lastTag = -1;
 	while( pNode->tag == K_UNION || pNode->tag == K_SEL_MINUS )
 	{
-		addUnionMinusNode( pNode->tag, queries, operation, pNode->right, pSettings, aq_engine,BaseDesc );
+		aq::addUnionMinusNode( pNode->tag, queries, operation, pNode->right, pSettings, aq_engine,BaseDesc );
 		lastTag = pNode->tag;
 		pNode = pNode->left;
 	}
-	addUnionMinusNode( lastTag, queries, operation, pNode, pSettings, aq_engine,BaseDesc );
+	aq::addUnionMinusNode( lastTag, queries, operation, pNode, pSettings, aq_engine,BaseDesc );
 	reverse( queries.begin(), queries.end() );
 	reverse( operation.begin(), operation.end() );
 	Table::Ptr totalTable = NULL;
@@ -631,7 +631,7 @@ void SolveUnionMinus(tnode* pNode,
 };
 
 //------------------------------------------------------------------------------
-void SolveTruncate(tnode* pNode,
+void SolveTruncate(aq::tnode* pNode,
                    TProjectSettings * pSettings, AQEngine_Intf * aq_engine, Base& BaseDesc)
 {
 	size_t tableIdx = -1;
@@ -656,7 +656,7 @@ void SolveTruncate(tnode* pNode,
 }
 
 //------------------------------------------------------------------------------
-void SolveCreate(tnode* pNode,
+void SolveCreate(aq::tnode* pNode,
                  TProjectSettings * pSettings, AQEngine_Intf * aq_engine, Base& BaseDesc)
 {
 	Table::Ptr table = new Table();

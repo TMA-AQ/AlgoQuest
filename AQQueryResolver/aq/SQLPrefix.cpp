@@ -60,7 +60,7 @@ char* realloc_string_buffer( char* pszStr, unsigned int *pncbBuf, unsigned int n
 //------------------------------------------------------------------------------
 // Retuned string must be freed with C-RTL's free() !
 // Returns NULL on error !
-void show_node( tnode *pNode, std::string& str, char* szTmpBuf, char* szBuffer )
+void show_node( aq::tnode *pNode, std::string& str, char* szTmpBuf, char* szBuffer )
 {
 	char *pszToAdd;
 	
@@ -113,7 +113,7 @@ void show_node( tnode *pNode, std::string& str, char* szTmpBuf, char* szBuffer )
 
 //------------------------------------------------------------------------------
 /* Return : 0 false, !=0 true */
-int IsColumnReference( tnode *pNode ) {
+int IsColumnReference( aq::tnode *pNode ) {
 	if ( pNode != NULL ) {
 		if ( pNode->tag == K_COLUMN )
 			return 1;
@@ -130,7 +130,7 @@ int IsColumnReference( tnode *pNode ) {
 }
 
 //------------------------------------------------------------------------------
-void getTableAndColumnName(tnode * n, std::string& table, std::string& column) 
+void getTableAndColumnName(aq::tnode * n, std::string& table, std::string& column) 
 {
 	if (n == NULL) return;
 	
@@ -149,7 +149,7 @@ void getTableAndColumnName(tnode * n, std::string& table, std::string& column)
 }
 
 //------------------------------------------------------------------------------
-bool SameTableAndColumn(tnode * l, tnode * r, const std::map<std::string, std::string>& tablesAlias)
+bool SameTableAndColumn(aq::tnode * l, aq::tnode * r, const std::map<std::string, std::string>& tablesAlias)
 {
 	std::string lt, lc, rt, rc;
 	getTableAndColumnName(l, lt, lc);
@@ -161,7 +161,7 @@ bool SameTableAndColumn(tnode * l, tnode * r, const std::map<std::string, std::s
 	return (lt == rt) && (lc == rc);
 }
 
-void getTableAlias(tnode *pNode, std::map<std::string, std::string>& tablesAlias)
+void getTableAlias(aq::tnode *pNode, std::map<std::string, std::string>& tablesAlias)
 {
 	if (pNode != NULL)
 	{
@@ -180,7 +180,7 @@ void getTableAlias(tnode *pNode, std::map<std::string, std::string>& tablesAlias
 }
 
 //------------------------------------------------------------------------------
-std::string& syntax_tree_to_prefix_form( tnode *pNode, std::string& str )
+std::string& syntax_tree_to_prefix_form( aq::tnode *pNode, std::string& str )
 {
 	if ( pNode == NULL )
 		return str;
@@ -190,11 +190,11 @@ std::string& syntax_tree_to_prefix_form( tnode *pNode, std::string& str )
 	str.clear();
 	char szTmpBuf[1000];
 	char szBuffer[STR_BUF_SIZE];
-	stack<tnode*> nodes;
+	stack<aq::tnode*> nodes;
 	nodes.push( pNode );
 	while( nodes.size() > 0 )
 	{
-		tnode* pTop = nodes.top();
+		aq::tnode* pTop = nodes.top();
 		assert(pTop != NULL);
 		nodes.pop();
 		// Enforce K_JEQ instead of K_EQ !
@@ -234,7 +234,7 @@ std::string& syntax_tree_to_prefix_form( tnode *pNode, std::string& str )
 }
 
 //------------------------------------------------------------------------------
-std::string& syntax_tree_to_sql_form(tnode * pNode, std::string& query, unsigned int level)
+std::string& syntax_tree_to_sql_form(aq::tnode * pNode, std::string& query, unsigned int level)
 {
 	if (pNode == NULL) return query;
 

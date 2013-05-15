@@ -10,8 +10,8 @@ class SelectVerb: public VerbNode
 	VERB_DECLARE( SelectVerb );
 public:
 	virtual int getVerbType() const { return K_SELECT; };
-	virtual bool preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal );
-	virtual bool changeQuery( tnode* pStart, tnode* pNode,
+	virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
+	virtual bool changeQuery( aq::tnode* pStart, aq::tnode* pNode,
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
@@ -35,8 +35,8 @@ class WhereVerb: public VerbNode
 	VERB_DECLARE( WhereVerb );
 public:
 	virtual int getVerbType() const { return K_WHERE; };
-	virtual bool preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal );
-	virtual bool changeQuery( tnode* pStart, tnode* pNode,
+	virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
+	virtual bool changeQuery( aq::tnode* pStart, aq::tnode* pNode,
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
@@ -49,8 +49,8 @@ class OrderVerb: public VerbNode
 	VERB_DECLARE( OrderVerb );
 public:
 	virtual int getVerbType() const { return K_ORDER; };
-	virtual bool preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal );
-	virtual bool changeQuery( tnode* pStart, tnode* pNode,
+	virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
+	virtual bool changeQuery( aq::tnode* pStart, aq::tnode* pNode,
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
@@ -63,7 +63,7 @@ class ByVerb: public VerbNode
 	VERB_DECLARE( ByVerb );
 public:
 	virtual int getVerbType() const { return K_BY; };
-	virtual bool changeQuery( tnode* pStart, tnode* pNode,
+	virtual bool changeQuery( aq::tnode* pStart, aq::tnode* pNode,
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
@@ -76,8 +76,8 @@ class FromVerb: public VerbNode
 	VERB_DECLARE( FromVerb );
 public:
 	virtual int getVerbType() const { return K_FROM; };
-	virtual bool preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal );
-	virtual bool changeQuery( tnode* pStart, tnode* pNode,
+	virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
+	virtual bool changeQuery( aq::tnode* pStart, aq::tnode* pNode,
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
   virtual void setBaseDesc(Base * baseDesc) 
   { 
@@ -96,8 +96,8 @@ class GroupVerb: public VerbNode
 	VERB_DECLARE( GroupVerb );
 public:
 	virtual int getVerbType() const { return K_GROUP; };
-  virtual bool preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal );
-	virtual bool changeQuery( tnode* pStart, tnode* pNode,
+  virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
+	virtual bool changeQuery( aq::tnode* pStart, aq::tnode* pNode,
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
@@ -121,8 +121,8 @@ class HavingVerb: public VerbNode
 	VERB_DECLARE( HavingVerb );
 public:
 	virtual int getVerbType() const { return K_HAVING; };
-	virtual bool preprocessQuery(	tnode* pStart, tnode* pNode, 
-									tnode* pStartOriginal );
+	virtual bool preprocessQuery(	aq::tnode* pStart, aq::tnode* pNode, 
+									aq::tnode* pStartOriginal );
 	virtual void changeResult(	Table::Ptr table, 
 								VerbResult::Ptr resLeft, 
 								VerbResult::Ptr resRight, 

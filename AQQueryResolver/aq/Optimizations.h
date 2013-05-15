@@ -8,4 +8,4 @@ Table::Ptr solveOptimalMinMax(	VerbNode::Ptr spTree, Base& BaseDesc,
 								TProjectSettings& Settings );
 
 //------------------------------------------------------------------------------
-bool trivialSelectFromSelect( tnode* pSelect );
+bool trivialSelectFromSelect( aq::tnode* pSelect );

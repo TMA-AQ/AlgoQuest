@@ -8,7 +8,7 @@ class ColumnVerb: public VerbNode
 	VERB_DECLARE( ColumnVerb );
 public:
 	virtual int getVerbType() const { return K_PERIOD; };
-	virtual bool changeQuery( tnode* pStart, tnode* pNode,
+	virtual bool changeQuery( aq::tnode* pStart, aq::tnode* pNode,
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
@@ -43,7 +43,7 @@ class CommaVerb: public VerbNode
 	VERB_DECLARE( CommaVerb );
 public:
 	virtual int getVerbType() const { return K_COMMA; };
-	bool changeQuery( tnode* pStart, tnode* pNode,
+	bool changeQuery( aq::tnode* pStart, aq::tnode* pNode,
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
@@ -71,9 +71,9 @@ class InVerb: public VerbNode
 	VERB_DECLARE( InVerb );
 public:
 	virtual int getVerbType() const { return K_IN; };
-	virtual bool preprocessQuery(	tnode* pStart, tnode* pNode, 
-									tnode* pStartOriginal );
-	virtual bool changeQuery(	tnode* pStart, tnode* pNode,
+	virtual bool preprocessQuery(	aq::tnode* pStart, aq::tnode* pNode, 
+									aq::tnode* pStartOriginal );
+	virtual bool changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 								VerbResult::Ptr resLeft, 
 								VerbResult::Ptr resRight, 
 								VerbResult::Ptr resNext );
@@ -86,7 +86,7 @@ class IntValueVerb: public VerbNode
 	VERB_DECLARE( IntValueVerb );
 public:
 	virtual int getVerbType() const { return K_INTEGER; };
-	virtual bool preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal );
+	virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
 	virtual void accept(VerbVisitor*);
 };
 
@@ -96,7 +96,7 @@ class DoubleValueVerb: public VerbNode
 	VERB_DECLARE( DoubleValueVerb );
 public:
 	virtual int getVerbType() const { return K_REAL; };
-	virtual bool preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal );
+	virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
 	virtual void accept(VerbVisitor*);
 };
 
@@ -106,7 +106,7 @@ class StringValueVerb: public VerbNode
 	VERB_DECLARE( StringValueVerb );
 public:
 	virtual int getVerbType() const { return K_STRING; };
-	virtual bool preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal );
+	virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
 	virtual void accept(VerbVisitor*);
 };
 
@@ -116,7 +116,7 @@ class AsVerb: public VerbNode
 	VERB_DECLARE( AsVerb );
 public:
 	virtual int getVerbType() const { return K_AS; };
-	virtual bool preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal );
+	virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
   void addResult(aq::RowProcess_Intf::Row& row, 
@@ -133,7 +133,7 @@ class AsteriskVerb: public VerbNode
 	VERB_DECLARE( AsteriskVerb );
 public:
 	virtual int getVerbType() const { return K_STAR; };
-	virtual bool preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal );
+	virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
 	virtual void accept(VerbVisitor*);
 };
 

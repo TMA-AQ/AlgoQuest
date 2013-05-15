@@ -14,6 +14,10 @@ namespace aq
   
   RowTemporaryWritter::~RowTemporaryWritter()
   {
+    std::for_each(this->columnsWritter.begin(), this->columnsWritter.end(), [] (boost::shared_ptr<ColumnTemporaryWritter> ctw) {
+      if (ctw->file)
+        fclose(ctw->file); 
+    });
   }
 
   int RowTemporaryWritter::process(Row& row)
@@ -34,26 +38,15 @@ namespace aq
         unsigned int ID = columnId;
         unsigned int size = (*it).size; 
         aq::ColumnType type = (*it).type;
-        
-        std::string type_str;
-        switch(type)
-        {
-        case ColumnType::COL_TYPE_INT: type_str = "INT"; size = 4; break;
-        case ColumnType::COL_TYPE_DOUBLE: type_str = "DOU"; size = 8; break;
-        case ColumnType::COL_TYPE_VARCHAR: type_str = "CHA"; break;
-        case ColumnType::COL_TYPE_BIG_INT:
-        case ColumnType::COL_TYPE_DATE1:
-        case ColumnType::COL_TYPE_DATE2:
-        case ColumnType::COL_TYPE_DATE3:
-        case ColumnType::COL_TYPE_DATE4: type_str = "LON"; size = 8; break;
-        }
-        
+        std::string type_str = columnTypeToStr(type);
+
         Column::Ptr column(new Column(name, ID, size, type));
+        column->Temporary = true;
         this->columns.push_back(column);
 
         boost::shared_ptr<ColumnTemporaryWritter> ctw(new ColumnTemporaryWritter);
         ctw->column = column;
-        ctw->filename = getThesaurusTemporaryFileName( tableId, columnId, 0, type_str.c_str(), size);
+        ctw->filename = getTemporaryFileName( tableId, columnId, 0, type_str.c_str(), size);
         ctw->filename = path + "/" + ctw->filename;
         ctw->file = fopen(ctw->filename.c_str(), "wb");
         this->columnsWritter.push_back(ctw);
@@ -73,7 +66,37 @@ namespace aq
           continue;
         assert((*it).item != NULL);
 
-        fwrite(&(*it).item->numval, sizeof(double), 1, this->columnsWritter[c]->file);
+        switch (this->columnsWritter[c]->column->Type)
+        {
+        case ColumnType::COL_TYPE_BIG_INT:
+        case ColumnType::COL_TYPE_DATE1:
+        case ColumnType::COL_TYPE_DATE2:
+        case ColumnType::COL_TYPE_DATE3:
+        case ColumnType::COL_TYPE_DATE4:
+          {
+            int64_t value = static_cast<int64_t>((*it).item->numval);
+            fwrite(&value, sizeof(int64_t), 1, this->columnsWritter[c]->file);
+          }
+          break;
+        case ColumnType::COL_TYPE_DOUBLE:
+          {
+            double value = (*it).item->numval;
+            fwrite(&value, sizeof(double), 1, this->columnsWritter[c]->file);
+          }
+          break;
+        case ColumnType::COL_TYPE_INT:
+          {
+            int32_t value = static_cast<int32_t>((*it).item->numval);
+            fwrite(&value, sizeof(int32_t), 1, this->columnsWritter[c]->file);
+          }
+          break;
+        case ColumnType::COL_TYPE_VARCHAR:
+          {
+            fwrite(&(*it).item->strval, sizeof(char) * this->columnsWritter[c]->column->Size, 1, this->columnsWritter[c]->file);
+          }
+          break;
+        }
+
         this->columnsWritter[c]->nbEl += 1;
         c++;
       }
@@ -83,6 +106,7 @@ namespace aq
     {
       std::for_each(this->columnsWritter.begin(), this->columnsWritter.end(), [] (boost::shared_ptr<ColumnTemporaryWritter> ctw) { 
         fclose(ctw->file); 
+        ctw->file = 0;
       });
     }
 

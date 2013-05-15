@@ -152,14 +152,14 @@ VerbNode::Ptr VerbNode::getBrother(){ return this->Brother; }
 //helper struct for BuildVerbsTree
 struct tnodeVerbNode
 {
-	tnodeVerbNode( tnode* pNode, VerbNode::Ptr spNode ): 
+	tnodeVerbNode( aq::tnode* pNode, VerbNode::Ptr spNode ): 
 		pNode(pNode), spNode(spNode){}
-	tnode* pNode;
+	aq::tnode* pNode;
 	VerbNode::Ptr spNode;
 };
 
 //------------------------------------------------------------------------------
-VerbNode::Ptr VerbNode::build( tnode* pStart, tnode* pNode, tnode* pStartOriginal, int context, Base& BaseDesc, TProjectSettings& settings )
+VerbNode::Ptr VerbNode::build( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal, int context, Base& BaseDesc, TProjectSettings& settings )
 {
 	VerbNode::Ptr verb = VerbFactory::GetInstance().getVerb( pNode->tag );
   
@@ -205,17 +205,17 @@ VerbNode::Ptr VerbNode::build( tnode* pStart, tnode* pNode, tnode* pStartOrigina
 }
 
 //------------------------------------------------------------------------------
-VerbNode::Ptr VerbNode::BuildVerbsTree( tnode* pStart, const std::vector<unsigned int>& categories_order, Base& baseDesc, TProjectSettings * settings )
+VerbNode::Ptr VerbNode::BuildVerbsTree( aq::tnode* pStart, const std::vector<unsigned int>& categories_order, Base& baseDesc, TProjectSettings * settings )
 {
 	if( pStart->tag != K_SELECT )
 		throw 0; // TODO
 
-	tnode* pStartOriginal = clone_subtree( pStart );
+	aq::tnode* pStartOriginal = clone_subtree( pStart );
 	
 	VerbNode::Ptr spLast = NULL;
 	for( size_t idx = 0; idx < categories_order.size(); ++idx )
 	{
-		tnode* pNode = pStart;
+		aq::tnode* pNode = pStart;
 		while( pNode && pNode->tag != categories_order[idx] ) 
 			pNode = pNode->next;
 		if( !pNode )
@@ -230,7 +230,7 @@ VerbNode::Ptr VerbNode::BuildVerbsTree( tnode* pStart, const std::vector<unsigne
 }
 
 //------------------------------------------------------------------------------
-VerbNode::Ptr VerbNode::BuildVerbsSubtree(	tnode* pSelect, tnode* pStart, tnode* pStartOriginal, int context, Base& BaseDesc, TProjectSettings *pSettings  )
+VerbNode::Ptr VerbNode::BuildVerbsSubtree(	aq::tnode* pSelect, aq::tnode* pStart, aq::tnode* pStartOriginal, int context, Base& BaseDesc, TProjectSettings *pSettings  )
 {
 	VerbNode::Ptr spStart = VerbNode::build(pSelect, pStart, pStartOriginal, context, BaseDesc, *pSettings);
 	if( !spStart || !spStart->isToSolved() )
@@ -240,40 +240,40 @@ VerbNode::Ptr VerbNode::BuildVerbsSubtree(	tnode* pSelect, tnode* pStart, tnode*
 
 	while( deq.size() > 0 )
 	{
-		tnodeVerbNode& currentNode = deq[0];
+		tnodeVerbNode& currentnode = deq[0];
 		//next
-		if( currentNode.pNode != pStart )
+		if( currentnode.pNode != pStart )
 		{
-			tnode* pNext = currentNode.pNode->next;
+			aq::tnode* pNext = currentnode.pNode->next;
 			if( pNext )
 			{
 				VerbNode::Ptr spNewVerbNode = VerbNode::build(pSelect, pNext, pStartOriginal, context, BaseDesc, *pSettings);
 				if( spNewVerbNode && spNewVerbNode->isToSolved() )
 				{
-					currentNode.spNode->setBrother( spNewVerbNode );
+					currentnode.spNode->setBrother( spNewVerbNode );
 					deq.push_back( tnodeVerbNode( pNext, spNewVerbNode ) );
 				}
 			}
 		}
 		//left
-		tnode* pLeft = currentNode.pNode->left;
+		aq::tnode* pLeft = currentnode.pNode->left;
 		if( pLeft )
 		{
 			VerbNode::Ptr spNewVerbNode = VerbNode::build(pSelect, pLeft, pStartOriginal, context, BaseDesc, *pSettings);
 			if( spNewVerbNode && spNewVerbNode->isToSolved() )
 			{
-				currentNode.spNode->setLeftChild( spNewVerbNode );
+				currentnode.spNode->setLeftChild( spNewVerbNode );
 				deq.push_back( tnodeVerbNode( pLeft, spNewVerbNode ) );
 			}
 		}
 		//right
-		tnode* pRight = currentNode.pNode->right;
+		aq::tnode* pRight = currentnode.pNode->right;
 		if( pRight )
 		{
 			VerbNode::Ptr spNewVerbNode = VerbNode::build(pSelect, pRight, pStartOriginal, context, BaseDesc, *pSettings);
 			if( spNewVerbNode && spNewVerbNode->isToSolved() )
 			{
-				currentNode.spNode->setRightChild( spNewVerbNode );
+				currentnode.spNode->setRightChild( spNewVerbNode );
 				deq.push_back( tnodeVerbNode( pRight, spNewVerbNode ) );
 			}
 		}

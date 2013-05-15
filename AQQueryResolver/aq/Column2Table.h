@@ -1,5 +1,5 @@
-#ifndef __FIAN_COLUMN2TABLE_H__
-#define __FIAN_COLUMN2TABLE_H__
+#ifndef __AQ_COLUMN2TABLE_H__
+#define __AQ_COLUMN2TABLE_H__
 
 #include "parser/SQLParser.h"
 #include "Table.h"
@@ -31,10 +31,10 @@ typedef struct tagColumn2TablesArray {
 
 
 //------------------------------------------------------------------------------
-TColumn2TablesArray* create_column_map_for_tables_used_in_select( tnode *pNode, Base* baseDesc );
+TColumn2TablesArray* create_column_map_for_tables_used_in_select( aq::tnode *pNode, Base* baseDesc );
 void delete_column2tables_array( TColumn2TablesArray* parrC2T );
 
 //------------------------------------------------------------------------------
-void enforce_qualified_column_reference( tnode *pNode, TColumn2TablesArray* parrC2T, int *pErr );
+void enforce_qualified_column_reference( aq::tnode *pNode, TColumn2TablesArray* parrC2T, int *pErr );
 
-#endif /* __FIAN_COLUMN2TABLE_H__ */
+#endif /* __AQ_COLUMN2TABLE_H__ */

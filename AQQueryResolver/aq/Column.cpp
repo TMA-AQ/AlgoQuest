@@ -39,7 +39,8 @@ Column::Column()
 	pTmpBuf(NULL),
 	Invisible(false), 
 	GroupBy(false), 
-	OrderBy(false)
+	OrderBy(false),
+  Temporary(false)
 {
 	this->setBinItemSize();
 	this->pTmpBuf = static_cast<char*>(malloc(128 * sizeof(char)));
@@ -58,7 +59,8 @@ Column::Column(	const std::string& name, unsigned int ID, unsigned int size, Col
 	pTmpBuf(NULL), 
 	Invisible(false), 
 	GroupBy(false), 
-	OrderBy(false)
+	OrderBy(false),
+  Temporary(false)
 {
 	this->setBinItemSize();
 	this->setName( name );
@@ -78,7 +80,8 @@ Column::Column( ColumnType type )
 	pTmpBuf(NULL), 
 	Invisible(false), 
 	GroupBy(false),
-	OrderBy(false)
+	OrderBy(false),
+  Temporary(false)
 {
 	this->setBinItemSize();
 	this->pTmpBuf = static_cast<char*>(malloc(128 * sizeof(char)));
@@ -93,6 +96,7 @@ Column::Column( const Column& source )
 	Invisible(false),
 	GroupBy(false),
 	OrderBy(false),
+  Temporary(source.Temporary),
 	Name(source.Name),
 	OriginalName(source.OriginalName),
 	DisplayName(source.DisplayName),
@@ -118,6 +122,7 @@ Column& Column::operator=(const Column& source)
 		this->Invisible = false;
 		this->GroupBy = false;
 		this->OrderBy = false;
+    this->Temporary = source.Temporary;
 		this->Name = source.Name;
 		this->OriginalName = source.OriginalName;
 		this->DisplayName = source.DisplayName;

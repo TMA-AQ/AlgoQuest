@@ -99,7 +99,7 @@ void BinaryVerb::computeResult( VerbResult::Ptr param1, VerbResult::Ptr param2 )
 }
 
 //------------------------------------------------------------------------------
-bool BinaryVerb::changeQuery(	tnode* pStart, tnode* pNode,
+bool BinaryVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 								VerbResult::Ptr resLeft, 
 								VerbResult::Ptr resRight, 
 								VerbResult::Ptr resNext )

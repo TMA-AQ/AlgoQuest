@@ -1,22 +1,19 @@
 #ifndef __AQ_COLUMN_MAPPER_H__
 #define __AQ_COLUMN_MAPPER_H__
 
-#include "ColumnItem.h"
+#include "ColumnMapper_Intf.h"
 #include <aq/FileMapper.h>
 #include <aq/DBTypes.h>
 #include <set>
 #include <map>
 #include <vector>
-#include <boost/shared_ptr.hpp>
 
 namespace aq
 {
 	
-class ColumnMapper
+class ColumnMapper : public ColumnMapper_Intf
 {
 public:
-	typedef boost::shared_ptr<ColumnMapper> Ptr;
-
 	ColumnMapper(const char * path, size_t tableId, size_t columnId, aq::ColumnType type, size_t _size, size_t _packetSize);
 	~ColumnMapper();
 	ColumnItem::Ptr loadValue(size_t index);

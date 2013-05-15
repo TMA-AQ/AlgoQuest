@@ -21,8 +21,8 @@ public:
 	VerbNode();
 	
   /// Verb interface default implementation
-  virtual bool preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal ) { return false; }
-  virtual bool changeQuery( tnode* pStart, tnode* pNode, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext ) { return false; }
+  virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal ) { return false; }
+  virtual bool changeQuery( aq::tnode* pStart, aq::tnode* pNode, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext ) { return false; }
   virtual void changeResult( Table::Ptr table, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext ) {}
   virtual void addResult ( aq::RowProcess_Intf::Row& row, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext ) {}
 
@@ -48,26 +48,26 @@ public:
   
   bool isToSolved() const { return this->toSolve; }
 
-	static VerbNode::Ptr build( tnode* pStart, tnode* pNode, tnode* pStartOriginal, int context, Base& BaseDesc, TProjectSettings& settings );
+	static VerbNode::Ptr build( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal, int context, Base& BaseDesc, TProjectSettings& settings );
 
 	/// build a subtree for each major category
 	/// order is given by \a categories_order (the last one will be executed first)
 	/// engine actually executes GROUP BY before select and after where, but
 	/// I need to delete it after select gets the grouping columns
-  static VerbNode::Ptr BuildVerbsTree( tnode* pStart, const std::vector<unsigned int>& categories_order, Base& baseDesc, TProjectSettings * settings );
+  static VerbNode::Ptr BuildVerbsTree( aq::tnode* pStart, const std::vector<unsigned int>& categories_order, Base& baseDesc, TProjectSettings * settings );
    
   /// build a VerbNode subtree corresponding to the ppStart subtree
-  /// a branch will end when a VerbNode for that tnode cannot be found
+  /// a branch will end when a VerbNode for that aq::tnode cannot be found
   /// top level node in the subtree will not have a brother
-  static VerbNode::Ptr BuildVerbsSubtree( tnode* pSelect, tnode* pStart, tnode* pStartOriginal, int context, Base& BaseDesc, TProjectSettings *pSettings );
+  static VerbNode::Ptr BuildVerbsSubtree( aq::tnode* pSelect, aq::tnode* pStart, aq::tnode* pStartOriginal, int context, Base& BaseDesc, TProjectSettings *pSettings );
 
   /// Debug purpose
   static void dump(std::ostream& os, VerbNode::Ptr tree, std::string ident = "");
 
 private:
 	// Verb::Ptr VerbObject;
-	tnode* pStart; //top node in the query tree
-	tnode* pNode; //tnode to which this VerbNode corresponds
+	aq::tnode* pStart; //top node in the query tree
+	aq::tnode* pNode; //aq::tnode to which this VerbNode corresponds
 	std::vector<VerbNode*> Parents;
 	VerbNode::Ptr Left, Right, Brother;
   bool toSolve;

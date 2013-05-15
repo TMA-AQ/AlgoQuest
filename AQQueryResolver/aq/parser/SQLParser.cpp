@@ -18,6 +18,9 @@ extern int yyerror ( const char *pszMsg );
 
 using namespace std;
 
+namespace aq
+{
+
 //------------------------------------------------------------------------------
 /* bExit == 1 - exit the app. - ex. for memmory allocation failed */
 void report_error( char* pszMsg, int bExit ) {
@@ -252,24 +255,24 @@ tnode* get_leftmost_child( tnode *pNode ) {
 }
 
 //------------------------------------------------------------------------------
-tnode& set_data( tnode& pNode, aq::data_holder_t data, aq::ColumnType type )
+tnode& set_data( tnode& pNode, data_holder_t data, ColumnType type )
 {
 	switch (type)
 	{
-	case aq::COL_TYPE_INT:
-	case aq::COL_TYPE_BIG_INT:
-	case aq::COL_TYPE_DATE1:
-	case aq::COL_TYPE_DATE2:
-	case aq::COL_TYPE_DATE3:
-	case aq::COL_TYPE_DATE4:
+	case COL_TYPE_INT:
+	case COL_TYPE_BIG_INT:
+	case COL_TYPE_DATE1:
+	case COL_TYPE_DATE2:
+	case COL_TYPE_DATE3:
+	case COL_TYPE_DATE4:
 		pNode.tag = K_INTEGER;
 		set_int_data( &pNode, (llong) data.val_int );
 		break;
-	case aq::COL_TYPE_DOUBLE:
+	case COL_TYPE_DOUBLE:
 		pNode.tag = K_REAL;
 		set_double_data( &pNode, data.val_number );
 		break;
-	case aq::COL_TYPE_VARCHAR:
+	case COL_TYPE_VARCHAR:
 		pNode.tag = K_STRING;
 		set_string_data( &pNode, data.val_str );
 		break;
@@ -293,7 +296,7 @@ std::string to_string(const tnode* const pNode )
 		return szBuffer;
 		break;
 	case NODE_DATA_NUMBER: 
-		aq::doubleToString( szBuffer, pNode->data.val_number );
+		doubleToString( szBuffer, pNode->data.val_number );
 		//sprintf(szBuffer, "%.2lf", pNode->data.val_number);
 		return szBuffer;
 		break;
@@ -502,5 +505,7 @@ void checkTree( tnode * tree, std::set<tnode*>& nodes)
   checkTree(tree->left, nodes);
   checkTree(tree->right, nodes);
   checkTree(tree->next, nodes);
+
+}
 
 }

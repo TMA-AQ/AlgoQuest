@@ -548,7 +548,8 @@ void Table::loadFromAnswerRaw(	const char *filePath, char fieldSeparator,
 			continue;
 		}
 		case 1: //second line is count(*)
-			StrToInt( psz, &this->TotalCount );
+      try { this->TotalCount = boost::lexical_cast<uint64_t>(psz); }
+      catch (const boost::bad_lexical_cast& ex) {}
 			if( this->TotalCount == 0 )
 				this->NoAnswer = true;
 			continue;

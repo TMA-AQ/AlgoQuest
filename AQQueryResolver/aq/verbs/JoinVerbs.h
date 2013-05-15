@@ -8,7 +8,7 @@ class JoinVerb: public VerbNode
 	VERB_DECLARE( JoinVerb );
 public:
 	virtual int getVerbType() const { return -1; };
-	virtual bool preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal );
+	virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
   virtual void accept(VerbVisitor* visitor);
 protected:
 	virtual int leftTag();

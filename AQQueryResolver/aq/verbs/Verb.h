@@ -1,4 +1,5 @@
-#pragma once
+#ifndef __AQ_VERB_H__
+#define __AQ_VERB_H__
 
 #include "VerbResult.h"
 
@@ -28,14 +29,14 @@ public:
 	virtual int getVerbType() const = 0;
 
 	/// preprocess query to gather information about it before it is changed
-	/// or change the tnode subtree before the verb tree is built based on it
+	/// or change the aq::tnode subtree before the verb tree is built based on it
 	/// 1. If the subtree can be solved by the engine, return true.
 	/// 2. If the subtree will be solved by the verb return false.
 	/// pStart - top of the query (SELECT node)
 	/// pNode - node to which this verb corresponds
 	/// Be carefull ! This method is called in top-down order, in the verb tree,
 	/// as the verb tree is being built
-	virtual bool preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal ) = 0;
+	virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal ) = 0;
   //{ 
   //  return false; 
   //}
@@ -48,7 +49,7 @@ public:
 	/// pStart/pNode - same as preprocessQuery
 	/// parameters - array of results from children verbs
 	/// Be carefull ! This method is called in bottom-up order, in the verb tree
-	virtual bool changeQuery( tnode* pStart, tnode* pNode, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext ) = 0;
+	virtual bool changeQuery( aq::tnode* pStart, aq::tnode* pNode, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext ) = 0;
   //{ 
   //  return false; 
   //}
@@ -87,7 +88,7 @@ public:
 	// Visitor accept
 	virtual void accept(VerbVisitor*) = 0;
 
-//debug13 ugly hack used so that FirstValue verb can use LagVerb protected:
+  //FIXME: debug13 ugly hack used so that FirstValue verb can use LagVerb protected:
 	//the result is automatically passed as a parameter to parent verbs
 	//(in VerbNode)
 	VerbResult::Ptr Result;
@@ -105,3 +106,5 @@ public:
 	Verb();
 	virtual ~Verb(){};
 };
+
+#endif

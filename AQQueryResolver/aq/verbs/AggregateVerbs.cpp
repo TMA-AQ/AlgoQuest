@@ -14,7 +14,7 @@ AggregateVerb::AggregateVerb()
 {}
 
 //------------------------------------------------------------------------------
-bool AggregateVerb::changeQuery(	tnode* pStart, tnode* pNode,
+bool AggregateVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 									VerbResult::Ptr resLeft,
 									VerbResult::Ptr resRight, VerbResult::Ptr resNext )
 {
@@ -249,7 +249,7 @@ CountVerb::CountVerb()
 {}
 
 //------------------------------------------------------------------------------
-bool CountVerb::preprocessQuery(	tnode* pStart, tnode* pNode, tnode* pStartOriginal )
+bool CountVerb::preprocessQuery(	aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
 	//count parameter is irrelevant
 	delete_subtree( pNode->left );
@@ -765,7 +765,7 @@ LagVerb::~LagVerb()
 }
 
 //------------------------------------------------------------------------------
-bool LagVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal )
+bool LagVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
 	//debug13 - should have a K_VALUE verb that returns a scalar, but for now
 	//I inspect the query directly, in order to avoid the potential ripple effects
@@ -778,7 +778,7 @@ bool LagVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOrigina
 		assert( pNode->left->right );
 		if( pNode->left->right->tag == K_COMMA )
 		{
-			tnode* pAux = pNode->left->right;
+			aq::tnode* pAux = pNode->left->right;
 			assert( pAux->left && pAux->left->tag == K_INTEGER );
 			this->Offset = pAux->left->data.val_int;
 			assert( pAux->right );

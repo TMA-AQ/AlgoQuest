@@ -17,7 +17,7 @@ CastVerb::CastVerb()
 }
 
 //------------------------------------------------------------------------------
-bool CastVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal )
+bool CastVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
 	assert( pNode && pNode->right );
 	switch( pNode->right->tag )
@@ -152,7 +152,7 @@ void CastVerb::solve( VerbResult::Ptr resLeft )
 }
 
 //------------------------------------------------------------------------------
-bool CastVerb::changeQuery(	tnode* pStart, tnode* pNode,
+bool CastVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 							VerbResult::Ptr resLeft, VerbResult::Ptr resRight, 
 							VerbResult::Ptr resNext )
 {
@@ -267,7 +267,7 @@ DecodeVerb::DecodeVerb()
 }
 
 //------------------------------------------------------------------------------
-bool DecodeVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal )
+bool DecodeVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
 	return false;
 }

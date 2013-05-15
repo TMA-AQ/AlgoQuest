@@ -1,4 +1,5 @@
 #include "RowSolver.h"
+#include "TemporaryColumnMapper.h"
 #include <aq/Exceptions.h>
 #include <aq/Timer.h>
 #include <aq/Logger.h>
@@ -9,7 +10,7 @@ namespace aq
 void solveAQMatrix(aq::AQMatrix& aqMatrix, 
                    const std::vector<llong>& tableIDs, 
                    const std::vector<Column::Ptr>& columnTypes, 
-                   const std::vector<tnode**> columnGroup,
+                   const std::vector<aq::tnode**> columnGroup,
                    const TProjectSettings& settings, 
                    const Base& BaseDesc, 
                    boost::shared_ptr<aq::RowProcess_Intf> rowProcess)
@@ -29,7 +30,7 @@ void solveAQMatrix(aq::AQMatrix& aqMatrix,
     //
     // Prepare Columns and Column Mapper
     std::vector<Column::Ptr> columns;
-    std::vector<aq::ColumnMapper::Ptr> columnsMapper; // order must be the same that columnsType
+    std::vector<aq::ColumnMapper_Intf::Ptr> columnsMapper; // order must be the same that columnsType
     for (size_t i = 0; i < columnTypes.size(); ++i)
     {
       Column::Ptr c(new Column(*columnTypes[i]));
@@ -37,9 +38,9 @@ void solveAQMatrix(aq::AQMatrix& aqMatrix,
       size_t tableIdx = BaseDesc.getTableIdx(c->getTableName());
       c->TableID = BaseDesc.Tables[tableIdx]->ID;
 
-      for (std::vector<tnode**>::const_iterator it = columnGroup.begin(); it != columnGroup.end(); ++it)
+      for (std::vector<aq::tnode**>::const_iterator it = columnGroup.begin(); it != columnGroup.end(); ++it)
       {
-        const tnode * node = **it;
+        const aq::tnode * node = **it;
         if ((strcmp(c->getTableName().c_str(), node->left->data.val_str) == 0) && (strcmp(c->getName().c_str(), node->right->data.val_str) == 0))
         {
           c->GroupBy = true;
@@ -50,7 +51,16 @@ void solveAQMatrix(aq::AQMatrix& aqMatrix,
 
       columnTypes[i]->TableID = BaseDesc.getTableIdx(columnTypes[i]->getTableName());
       columnTypes[i]->TableID = BaseDesc.Tables[columnTypes[i]->TableID]->ID;
-      ColumnMapper::Ptr cm(new ColumnMapper(aq::ColumnMapper(settings.szThesaurusPath, columnTypes[i]->TableID, columnTypes[i]->ID, columnTypes[i]->Type, columnTypes[i]->Size, settings.packSize)));
+      
+      ColumnMapper_Intf::Ptr cm;
+      if (columnTypes[i]->Temporary)
+      {
+        cm.reset(new aq::TemporaryColumnMapper(settings.szTempPath1, columnTypes[i]->TableID, columnTypes[i]->ID, columnTypes[i]->Type, columnTypes[i]->Size, settings.packSize));
+      }
+      else
+      {
+        cm.reset(new aq::ColumnMapper(settings.szThesaurusPath, columnTypes[i]->TableID, columnTypes[i]->ID, columnTypes[i]->Type, columnTypes[i]->Size, settings.packSize));
+      }
       columnsMapper.push_back(cm);
     }
 
@@ -100,6 +110,7 @@ void solveAQMatrix(aq::AQMatrix& aqMatrix,
       {
         ColumnItem::Ptr item(new ColumnItem((double)count[i]));
         row.row[0] = RowProcess_Intf::row_item_t(item, COL_TYPE_BIG_INT, 8, "", "Count", true);
+        // row.row[0].displayed = true;
       }
 
       rowProcess->process(row);
@@ -111,7 +122,9 @@ void solveAQMatrix(aq::AQMatrix& aqMatrix,
 
     }
     
-    rowProcess->flush();
+    // the flush must be done only when an aggregate operation occur
+    if (!columnGroup.empty())
+      rowProcess->flush();
 
   }
 

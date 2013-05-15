@@ -22,8 +22,6 @@ RowWritter::~RowWritter()
 
 int RowWritter::process(Row& row)
 {
-  assert(row.row.size() > 0);
-
 	if (this->firstRow)
 	{
 		//write column names

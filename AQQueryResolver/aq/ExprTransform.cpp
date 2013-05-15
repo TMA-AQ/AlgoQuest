@@ -22,7 +22,7 @@ using namespace aq;
 
 //------------------------------------------------------------------------------
 /* Return 1 for true, 0 for false */
-int is_column_reference( tnode *pNode ) {
+int is_column_reference( aq::tnode *pNode ) {
 	if ( pNode == NULL )
 		return 0;
 	if ( pNode->tag != K_PERIOD )
@@ -64,7 +64,7 @@ int get_thesaurus_for_column(	Column& thesaurus,
 
 //------------------------------------------------------------------------------
 /* Return -1 on error ! */
-int get_thesaurus_info_for_column_reference( tnode *pNode, Base* baseDesc, 
+int get_thesaurus_info_for_column_reference( aq::tnode *pNode, Base* baseDesc, 
 											unsigned int *pnTableId, unsigned int *pnColumnId, 
 											unsigned int *pnColumnSize, 
 											ColumnType *peColumnType, int *pErr ) 
@@ -91,9 +91,9 @@ int get_thesaurus_info_for_column_reference( tnode *pNode, Base* baseDesc,
 //------------------------------------------------------------------------------
 /* nLevel = 0 we have the K_IN node */
 /* nLevel = 1 we have K_COMMA->left=value, ->right=K_COMMA, ... */
-tnode* create_in_subtree( unsigned int nLevel, Column& thesaurus ) {
-	tnode *pNode;
-	tnode *pNodeRight;
+aq::tnode* create_in_subtree( unsigned int nLevel, Column& thesaurus ) {
+	aq::tnode *pNode;
+	aq::tnode *pNodeRight;
 
 	pNode		= NULL;
 	pNodeRight	= NULL;
@@ -178,8 +178,8 @@ tnode* create_in_subtree( unsigned int nLevel, Column& thesaurus ) {
 }
 
 //------------------------------------------------------------------------------
-tnode* create_eq_subtree_string( const char* pszRightItem ) {
-	tnode *pNode;
+aq::tnode* create_eq_subtree_string( const char* pszRightItem ) {
+	aq::tnode *pNode;
 
 	pNode = new_node( K_EQ );
 	if ( pNode == NULL )
@@ -195,8 +195,8 @@ tnode* create_eq_subtree_string( const char* pszRightItem ) {
 }
 
 //------------------------------------------------------------------------------
-tnode* create_eq_subtree_integer( llong nRightItem ) {
-	tnode *pNode;
+aq::tnode* create_eq_subtree_integer( llong nRightItem ) {
+	aq::tnode *pNode;
 
 	pNode = new_node( K_EQ );
 	if ( pNode == NULL )
@@ -212,8 +212,8 @@ tnode* create_eq_subtree_integer( llong nRightItem ) {
 }
 
 //------------------------------------------------------------------------------
-tnode* create_eq_subtree_double( double dRightItem ) {
-	tnode *pNode;
+aq::tnode* create_eq_subtree_double( double dRightItem ) {
+	aq::tnode *pNode;
 
 	pNode = new_node( K_EQ );
 	if ( pNode == NULL )
@@ -258,7 +258,7 @@ char* get_string_without_quotes( char* pszStr ) {
 
 //------------------------------------------------------------------------------
 /* Return 1 on true, 0 on false */
-int check_between_for_transform( tnode *pNode ) {
+int check_between_for_transform( aq::tnode *pNode ) {
 	if ( pNode == NULL )
 		return 0;
 
@@ -266,7 +266,7 @@ int check_between_for_transform( tnode *pNode ) {
 		/* BETWEEN */
 		if ( is_column_reference( pNode->left ) != 0 ) {
 			/* Left is column reference -> check for strings at right */
-			tnode *pNodeTmp;
+			aq::tnode *pNodeTmp;
 			pNodeTmp = pNode->right;
 			if ( pNodeTmp != NULL && pNodeTmp->tag == K_AND ) {
 				if (	pNodeTmp->left != NULL && 
@@ -304,13 +304,13 @@ typedef enum {
 *	pNode->right->right			=> K_STRING
 */
 //------------------------------------------------------------------------------
-tnode* transform_between( tnode* pNode, Base* baseDesc, char* pszPath, int *pErr ) {
+aq::tnode* transform_between( aq::tnode* pNode, Base* baseDesc, char* pszPath, int *pErr ) {
 	int			bNotBetween;
-	tnode		*pNodeTmp;
-	tnode		*pNodeColumnRef;
-	tnode		*pNodeStrBoundLeft;
-	tnode		*pNodeStrBoundRight;
-	tnode		*pNodeRes;
+	aq::tnode		*pNodeTmp;
+	aq::tnode		*pNodeColumnRef;
+	aq::tnode		*pNodeStrBoundLeft;
+	aq::tnode		*pNodeStrBoundRight;
+	aq::tnode		*pNodeRes;
 	Column		thesaurus;
 	Column		thesaurusRes;
 	int			bAddValue;
@@ -441,7 +441,7 @@ tnode* transform_between( tnode* pNode, Base* baseDesc, char* pszPath, int *pErr
 
 //------------------------------------------------------------------------------
 /* Return 1 on true, 0 on false */
-int check_like_for_transform( tnode *pNode ) {
+int check_like_for_transform( aq::tnode *pNode ) {
 	if ( pNode == NULL )
 		return 0;
 
@@ -449,7 +449,7 @@ int check_like_for_transform( tnode *pNode ) {
 		/* LIKE */
 		if ( is_column_reference( pNode->left ) != 0 ) {
 			/* Left is column reference -> check for string or ESCAPE right */
-			tnode *pNodeTmp;
+			aq::tnode *pNodeTmp;
 			pNodeTmp = pNode->right;
 			if ( pNodeTmp != NULL ) {
 				if ( pNodeTmp->tag == K_STRING )
@@ -490,12 +490,12 @@ int check_like_for_transform( tnode *pNode ) {
 *	pNode->right->right			=> K_STRING ( Escape char )
 */
 //------------------------------------------------------------------------------
-tnode* transform_like( tnode* pNode, Base* baseDesc, char* pszPath, int *pErr ) {
+aq::tnode* transform_like( aq::tnode* pNode, Base* baseDesc, char* pszPath, int *pErr ) {
 	int			bNotLike;
-	tnode		*pNodeTmp;
-	tnode		*pNodeColumnRef;
-	tnode		*pNodeStr;
-	tnode		*pNodeRes;
+	aq::tnode		*pNodeTmp;
+	aq::tnode		*pNodeColumnRef;
+	aq::tnode		*pNodeStr;
+	aq::tnode		*pNodeRes;
 	Column		thesaurus;
 	Column		thesaurusRes;
 	int				nRet;
@@ -629,7 +629,7 @@ tnode* transform_like( tnode* pNode, Base* baseDesc, char* pszPath, int *pErr ) 
 
 //------------------------------------------------------------------------------
 /* Return 1 on true, 0 on false */
-int check_cmp_op_for_transform( tnode *pNode ) {
+int check_cmp_op_for_transform( aq::tnode *pNode ) {
 	if ( pNode == NULL )
 		return 0;
 
@@ -667,10 +667,10 @@ int check_cmp_op_for_transform( tnode *pNode ) {
 *	pNode->right				=> column_reference
 */
 //------------------------------------------------------------------------------
-tnode* transform_cmp_op( tnode* pNode, Base* baseDesc, char* pszPath, int *pErr ) {
-	tnode		*pNodeColumnRef;
-	tnode		*pNodeStr;
-	tnode		*pNodeRes;
+aq::tnode* transform_cmp_op( aq::tnode* pNode, Base* baseDesc, char* pszPath, int *pErr ) {
+	aq::tnode		*pNodeColumnRef;
+	aq::tnode		*pNodeStr;
+	aq::tnode		*pNodeRes;
 	Column		thesaurus;
 	Column		thesaurusRes;
 	int			bAddValue;
@@ -850,7 +850,7 @@ tnode* transform_cmp_op( tnode* pNode, Base* baseDesc, char* pszPath, int *pErr 
 // PUBLIC API
 
 //------------------------------------------------------------------------------
-int get_thesaurus_for_column_reference( Column& thesaurus, tnode *pNode, int part, Base* baseDesc, char* pszPath, int *pErr ) {
+int get_thesaurus_for_column_reference( Column& thesaurus, aq::tnode *pNode, int part, Base* baseDesc, char* pszPath, int *pErr ) {
 	unsigned int	nTableId;
 	unsigned int	nColumnId;
 	unsigned int	nColumnSize;
@@ -864,7 +864,7 @@ int get_thesaurus_for_column_reference( Column& thesaurus, tnode *pNode, int par
 
 
 //------------------------------------------------------------------------------
-tnode* expression_transform( tnode *pNode, Base* baseDesc, char* pszPath, int *pErr ) {
+aq::tnode* expression_transform( aq::tnode *pNode, Base* baseDesc, char* pszPath, int *pErr ) {
 	if ( pErr == NULL )
 		return pNode;
 	if ( pNode == NULL )

@@ -17,7 +17,7 @@ ComparisonVerb::ComparisonVerb()
 {}
 
 //------------------------------------------------------------------------------
-bool ComparisonVerb::changeQuery(	tnode* pStart, tnode* pNode,
+bool ComparisonVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 									VerbResult::Ptr resLeft, 
 									VerbResult::Ptr resRight, 
 									VerbResult::Ptr resNext )
@@ -27,9 +27,9 @@ bool ComparisonVerb::changeQuery(	tnode* pStart, tnode* pNode,
 	int pErr = 0;
 	//the argument given to expression_transform will be destroyed if the function
 	//is successful
-	tnode* pNodeClone = new_node( pNode->tag );
+	aq::tnode* pNodeClone = new_node( pNode->tag );
 	*pNodeClone = *pNode;
-	tnode* newNode = pNodeClone;
+	aq::tnode* newNode = pNodeClone;
 	if( this->Context == K_WHERE )
 	{
 		boost::posix_time::ptime begin(boost::posix_time::microsec_clock::local_time());
@@ -328,8 +328,8 @@ IsVerb::IsVerb(): IsNot(false)
 {}
 
 //------------------------------------------------------------------------------
-bool IsVerb::preprocessQuery(	tnode* pStart, tnode* pNode, 
-								tnode* pStartOriginal )
+bool IsVerb::preprocessQuery(	aq::tnode* pStart, aq::tnode* pNode, 
+								aq::tnode* pStartOriginal )
 {
 
 	if( !pNode->right ||

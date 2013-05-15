@@ -314,6 +314,7 @@
     <ClInclude Include="aq\Column2Table.h" />
     <ClInclude Include="aq\ColumnItem.h" />
     <ClInclude Include="aq\ColumnMapper.h" />
+    <ClInclude Include="aq\ColumnMapper_Intf.h" />
     <ClInclude Include="aq\ColumnTemporaryWritter.h" />
     <ClInclude Include="aq\db_loader\DatabaseLoader.h" />
     <ClInclude Include="aq\db_loader\Util.h" />
@@ -338,6 +339,7 @@
     <ClInclude Include="aq\SQLPrefix.h" />
     <ClInclude Include="aq\statement_resolver.h" />
     <ClInclude Include="aq\Table.h" />
+    <ClInclude Include="aq\TemporaryColumnMapper.h" />
     <ClInclude Include="aq\TreeUtilities.h" />
     <ClInclude Include="aq\verbs\AggregateVerbs.h" />
     <ClInclude Include="aq\verbs\ArithmeticVerbs.h" />
@@ -386,6 +388,7 @@
     <ClCompile Include="aq\SQLPrefix.cpp" />
     <ClCompile Include="aq\statement_resolver.cpp" />
     <ClCompile Include="aq\Table.cpp" />
+    <ClCompile Include="aq\TemporaryColumnMapper.cpp" />
     <ClCompile Include="aq\TreeUtilities.cpp" />
     <ClCompile Include="aq\verbs\AggregateVerbs.cpp" />
     <ClCompile Include="aq\verbs\ArithmeticVerbs.cpp" />

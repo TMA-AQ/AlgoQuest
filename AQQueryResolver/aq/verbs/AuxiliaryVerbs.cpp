@@ -19,7 +19,7 @@ ColumnVerb::ColumnVerb()
 {}
 
 //------------------------------------------------------------------------------
-bool ColumnVerb::changeQuery(	tnode* pStart, tnode* pNode,
+bool ColumnVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 								VerbResult::Ptr resLeft, 
 								VerbResult::Ptr resRight, VerbResult::Ptr resNext )
 {
@@ -132,7 +132,7 @@ CommaVerb::CommaVerb()
 {}
 
 //------------------------------------------------------------------------------
-bool CommaVerb::changeQuery(	tnode* pStart, tnode* pNode,
+bool CommaVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 								VerbResult::Ptr resLeft,
 								VerbResult::Ptr resRight, VerbResult::Ptr resNext )
 {
@@ -257,8 +257,8 @@ InVerb::InVerb()
 {}
 
 //------------------------------------------------------------------------------
-bool InVerb::preprocessQuery(	tnode* pStart, tnode* pNode, 
-								tnode* pStartOriginal )
+bool InVerb::preprocessQuery(	aq::tnode* pStart, aq::tnode* pNode, 
+								aq::tnode* pStartOriginal )
 {
 	if( !pNode || !pNode->left )
 		return false;
@@ -268,7 +268,7 @@ bool InVerb::preprocessQuery(	tnode* pStart, tnode* pNode,
 }
 
 //------------------------------------------------------------------------------
-bool InVerb::changeQuery(	tnode* pStart, tnode* pNode,
+bool InVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 							VerbResult::Ptr resLeft,
 							VerbResult::Ptr resRight, VerbResult::Ptr resNext )
 {
@@ -289,7 +289,7 @@ IntValueVerb::IntValueVerb()
 {}
 
 //------------------------------------------------------------------------------
-bool IntValueVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal )
+bool IntValueVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
 	assert( pNode->eNodeDataType == NODE_DATA_INT );
 	this->Result = new Scalar(COL_TYPE_INT, 4, ColumnItem((double)pNode->data.val_int));
@@ -310,7 +310,7 @@ DoubleValueVerb::DoubleValueVerb()
 {}
 
 //------------------------------------------------------------------------------
-bool DoubleValueVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal )
+bool DoubleValueVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
 	assert( pNode->eNodeDataType == NODE_DATA_NUMBER );
 	this->Result = new Scalar(COL_TYPE_DOUBLE, 8, ColumnItem(pNode->data.val_number));
@@ -331,7 +331,7 @@ StringValueVerb::StringValueVerb()
 {}
 
 //------------------------------------------------------------------------------
-bool StringValueVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal )
+bool StringValueVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
 	assert( pNode->eNodeDataType == NODE_DATA_STRING );
 	this->Result = new Scalar(COL_TYPE_VARCHAR, 128, ColumnItem(pNode->data.val_str)); // FIXME
@@ -352,7 +352,7 @@ AsVerb::AsVerb()
 {}
 
 //------------------------------------------------------------------------------
-void replaceTableIdent( tnode* pNode, const char* oldIdent, const char* newIdent )
+void replaceTableIdent( aq::tnode* pNode, const char* oldIdent, const char* newIdent )
 {
 	if( !pNode )
 		return;
@@ -365,7 +365,7 @@ void replaceTableIdent( tnode* pNode, const char* oldIdent, const char* newIdent
 }
 
 //------------------------------------------------------------------------------
-bool AsVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal )
+bool AsVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
 	switch( this->Context )
 	{
@@ -427,7 +427,7 @@ AsteriskVerb::AsteriskVerb()
 {}
 
 //------------------------------------------------------------------------------
-bool AsteriskVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal )
+bool AsteriskVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
 	this->Result = new Asterisk();
 	return false;

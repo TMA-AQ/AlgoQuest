@@ -60,7 +60,7 @@ void ScalarVerb::computeResult( VerbResult::Ptr param )
 }
 
 //------------------------------------------------------------------------------
-bool ScalarVerb::changeQuery(	tnode* pStart, tnode* pNode,
+bool ScalarVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 								VerbResult::Ptr resLeft, 
 								VerbResult::Ptr resRight, 
 								VerbResult::Ptr resNext )
@@ -197,7 +197,7 @@ ColumnType SubstringVerb::outputType( ColumnType inputType )
 }
 
 //------------------------------------------------------------------------------
-bool SubstringVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal )
+bool SubstringVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
 	//debug13 - should have a K_VALUE verb that returns a scalar, but for now
 	//I inspect the query directly, in order to avoid the potential ripple effects
@@ -241,7 +241,7 @@ ToDateVerb::ToDateVerb()
 {}
 
 //------------------------------------------------------------------------------
-bool ToDateVerb::preprocessQuery( tnode* pStart, tnode* pNode, tnode* pStartOriginal )
+bool ToDateVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
 	assert( pNode );
 	this->OutputType = COL_TYPE_DATE1;
@@ -361,7 +361,7 @@ void Convert(	ColumnItem& dest, int destType,
 				const ColumnItem& source, int sourceType );
 
 //------------------------------------------------------------------------------
-bool ToCharVerb::changeQuery(	tnode* pStart, tnode* pNode,
+bool ToCharVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 								VerbResult::Ptr resLeft, 
 								VerbResult::Ptr resRight, 
 								VerbResult::Ptr resNext )

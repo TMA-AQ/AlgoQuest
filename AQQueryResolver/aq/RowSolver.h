@@ -14,7 +14,7 @@ namespace aq {
 void solveAQMatrix(aq::AQMatrix& aqMatrix, 
                    const std::vector<llong>& tableIDs, 
                    const std::vector<Column::Ptr>& columnTypes, 
-                   const std::vector<tnode**> columnGroup,
+                   const std::vector<aq::tnode**> columnGroup,
                    const TProjectSettings& settings, 
                    const Base& BaseDesc, 
                    boost::shared_ptr<aq::RowProcess_Intf> rowProcess);

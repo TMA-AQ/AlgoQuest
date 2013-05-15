@@ -141,16 +141,16 @@ Table::Ptr solveOptimalMinMax(	VerbNode::Ptr spTree, Base& BaseDesc,
 }
 
 //-------------------------------------------------------------------------------
-bool trivialSelectFromSelect( tnode* pSelect )
+bool trivialSelectFromSelect( aq::tnode* pSelect )
 {
 	assert( pSelect && pSelect->tag == K_SELECT );
-	tnode* pFrom = find_main_node( pSelect, K_FROM );
-	vector<tnode*> tables;
+	aq::tnode* pFrom = find_main_node( pSelect, K_FROM );
+	vector<aq::tnode*> tables;
 	commaListToNodeArray( pFrom->left, tables );
 	if( tables.size() != 1 )
 		return false;
-	tnode* pWhere = find_main_node( pSelect, K_WHERE );
-	vector<tnode*> conds;
+	aq::tnode* pWhere = find_main_node( pSelect, K_WHERE );
+	vector<aq::tnode*> conds;
 	andListToNodeArray( pWhere->left, conds );
 	if( conds.size() == 1 && conds[0]->tag == K_JNO )
 		return true;

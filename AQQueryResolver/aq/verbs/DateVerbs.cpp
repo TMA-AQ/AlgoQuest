@@ -15,7 +15,7 @@ CurrentDateVerb::CurrentDateVerb()
 {}
 
 //------------------------------------------------------------------------------
-bool CurrentDateVerb::changeQuery(	tnode* pStart, tnode* pNode,
+bool CurrentDateVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 									VerbResult::Ptr resLeft,
 									VerbResult::Ptr resRight, 
 									VerbResult::Ptr resNext )

@@ -271,7 +271,7 @@ TColumn2TablesArray* add_table_columns_to_column2tables_array(	TColumn2TablesArr
 
 //------------------------------------------------------------------------------
 /* Return -1 on error, 0 on success */
-int add_tnode_tables( tnode *pNode, Base* baseDesc, TColumn2TablesArray* parrC2T ) {
+int add_tnode_tables( aq::tnode *pNode, Base* baseDesc, TColumn2TablesArray* parrC2T ) {
 	/* Check node type against K_COMMA, K_IDENT */
 	if ( pNode->tag == K_COMMA ) {
 		if ( add_tnode_tables( pNode->left, baseDesc, parrC2T ) != 0 ) 
@@ -281,7 +281,7 @@ int add_tnode_tables( tnode *pNode, Base* baseDesc, TColumn2TablesArray* parrC2T
 	} else if ( pNode->tag == K_IDENT ) {
 		if ( add_table_columns_to_column2tables_array( parrC2T, baseDesc, pNode->data.val_str ) == NULL ) {
 #ifdef CREATE_LOG
-		Log( "add_tnode_tables() : Function add_table_columns_to_column2tables_array() returned -1 (error)!\n" );
+		Log( "add_aq::tnode_tables() : Function add_table_columns_to_column2tables_array() returned -1 (error)!\n" );
 #endif
 			return -1;
 		}
@@ -296,11 +296,11 @@ int add_tnode_tables( tnode *pNode, Base* baseDesc, TColumn2TablesArray* parrC2T
 			return -1;
 	} else if ( pNode->tag == K_SELECT ) {
 		/* K_SELECT -> find K_FROM */
-		tnode *pNodeFound;
+		aq::tnode *pNodeFound;
 		pNodeFound = find_main_node( pNode, K_FROM );
 		if ( pNodeFound == NULL ) {
 #ifdef CREATE_LOG
-			Log( "add_tnode_tables() : Function find_main_node() returned NULL !\n" );
+			Log( "add_aq::tnode_tables() : Function find_main_node() returned NULL !\n" );
 #endif
 			return -1;
 		}
@@ -308,7 +308,7 @@ int add_tnode_tables( tnode *pNode, Base* baseDesc, TColumn2TablesArray* parrC2T
 			return -1;
 	} else {
 #ifdef CREATE_LOG
-		Log( "add_tnode_tables() : Invalid TAG (%u) encountered !\n", pNode->tag );
+		Log( "add_aq::tnode_tables() : Invalid TAG (%u) encountered !\n", pNode->tag );
 #endif
 		return -1;
 	}
@@ -317,8 +317,8 @@ int add_tnode_tables( tnode *pNode, Base* baseDesc, TColumn2TablesArray* parrC2T
 }
 
 //------------------------------------------------------------------------------
-TColumn2TablesArray* create_column_map_for_tables_used_in_select( tnode *pNode, Base* baseDesc ) {
-	tnode *pNodeFound;
+TColumn2TablesArray* create_column_map_for_tables_used_in_select( aq::tnode *pNode, Base* baseDesc ) {
+	aq::tnode *pNodeFound;
 	TColumn2TablesArray* parrC2T;
 
 	/* Find K_FROM node */
@@ -343,7 +343,7 @@ TColumn2TablesArray* create_column_map_for_tables_used_in_select( tnode *pNode, 
 }
 
 //------------------------------------------------------------------------------
-void enforce_qualified_column_reference( tnode *pNode, TColumn2TablesArray* parrC2T, int *pErr ) {
+void enforce_qualified_column_reference( aq::tnode *pNode, TColumn2TablesArray* parrC2T, int *pErr ) {
 	if ( pErr == NULL )
 		return;
 
@@ -353,7 +353,7 @@ void enforce_qualified_column_reference( tnode *pNode, TColumn2TablesArray* parr
 	if ( parrC2T == NULL )
 		return;
 
-	vector<tnode*> nodes;
+	vector<aq::tnode*> nodes;
 	nodes.push_back( pNode );
 	size_t idx = 0;
 	while( idx < nodes.size() )
@@ -388,7 +388,7 @@ void enforce_qualified_column_reference( tnode *pNode, TColumn2TablesArray* parr
 				yyerror( szBuf );
 				*pErr = -2;
 			} else {
-				tnode *pNodeColumn, *pNodeTable;
+				aq::tnode *pNodeColumn, *pNodeTable;
 				pNodeColumn = new_node( pNode );
 				if ( pNodeColumn == NULL ) {
 					*pErr = -3;

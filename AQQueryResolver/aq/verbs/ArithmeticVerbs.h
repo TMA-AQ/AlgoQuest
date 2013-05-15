@@ -9,7 +9,7 @@ class BinaryVerb: public VerbNode
 	VERB_DECLARE( BinaryVerb );
 public:
 	virtual int getVerbType() const { return -1; };
-	virtual bool changeQuery( tnode* pStart, tnode* pNode,
+	virtual bool changeQuery( aq::tnode* pStart, aq::tnode* pNode,
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );

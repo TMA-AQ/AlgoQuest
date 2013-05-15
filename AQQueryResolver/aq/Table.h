@@ -43,7 +43,7 @@ public:
 	size_t  	ID;
 	bool			HasCount; //last column is "Count"
 	columns_t Columns;
-	llong			TotalCount;
+	uint64_t  TotalCount;
 	bool			GroupByApplied; //used by aggregate functions to know when
 									//there is a GROUP BY in the query
 	bool			OrderByApplied;
