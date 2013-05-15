@@ -89,7 +89,8 @@ void doubleToString( char* strVal, double dVal );
 //------------------------------------------------------------------------------
 std::string getPrmFileName( const char* path, size_t tableIdx, size_t columnIdx, size_t partIdx );
 std::string getThesaurusFileName( const char* path, size_t tableIdx, size_t columnIdx, size_t partIdx );
-std::string getThesaurusTemporaryFileName( size_t tableIdx, size_t columnIdx, size_t partIdx, const char * type, size_t size );
+std::string getTemporaryFileName( size_t tableIdx, size_t columnIdx, size_t partIdx, const char * type, size_t size );
+void getFileNames( const char* path, std::vector<std::string>& filenames, const char * prefix = NULL );
 
 //------------------------------------------------------------------------------
 aq::ColumnType symbole_to_column_type(aq::symbole s);

@@ -3,7 +3,8 @@
 
 namespace aq
 {
-
+  
+//------------------------------------------------------------------------------
 enum aggregate_function_t // FIXME : not at the right place
 {
   NONE,
@@ -27,14 +28,19 @@ enum ColumnType
 	COL_TYPE_DATE4
 };
 	
+//------------------------------------------------------------------------------
 union data_holder_t 
 {
 	char      *val_str;    // chaine
 	long long	 val_int;    // entier
 	double     val_number; // réel
-} ;
+};
+
 //------------------------------------------------------------------------------
 bool compatibleTypes( ColumnType type1, ColumnType type2 );
+
+//------------------------------------------------------------------------------
+const char * columnTypeToStr(ColumnType type);
 
 }
 

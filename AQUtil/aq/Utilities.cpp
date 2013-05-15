@@ -203,6 +203,8 @@ void CleanFolder( const char * pszPath )
 		boost::system::error_code ec;
     for (boost::filesystem::directory_iterator file(p); file != boost::filesystem::directory_iterator(); ++file)
     {
+      const std::string& filename = (*file).path().string();
+      if ((filename.size() > 4) && (filename.substr(filename.size() - 4) == ".TMP")) continue; // FIXME
       if (!boost::filesystem::remove_all(*file, ec))
       {
         aq::Logger::getInstance().log(AQ_ERROR, "cannot delete path %s\n", (*file).path().string().c_str());
@@ -419,11 +421,32 @@ std::string getThesaurusFileName( const char* path, size_t tableIdx, size_t colu
 }
 
 //------------------------------------------------------------------------------
-std::string getThesaurusTemporaryFileName( size_t tableIdx, size_t columnIdx, size_t partIdx, const char * type, size_t size )
+std::string getTemporaryFileName( size_t tableIdx, size_t columnIdx, size_t partIdx, const char * type, size_t size )
 {
 	char szFN[ _MAX_PATH ];
-  sprintf( szFN, "B001TMP%.4uC%.4u%s%.4uP%.12u.tmp", tableIdx, columnIdx, type, size, partIdx );
+  sprintf( szFN, "B001TMP%.4uC%.4u%s%.4uP%.12u.TMP", tableIdx, columnIdx, type, size, partIdx );
 	return szFN;
+}
+
+//------------------------------------------------------------------------------
+void getFileNames( const char* path, std::vector<std::string>& filenames, const char * prefix )
+{
+  boost::filesystem::path p(path);
+	if (!boost::filesystem::exists(p))
+	{
+		aq::Logger::getInstance().log(AQ_INFO, "path %s doesn't exists\n", p.string().c_str());
+	}
+	else
+	{
+		boost::system::error_code ec;
+    for (boost::filesystem::directory_iterator file(p); file != boost::filesystem::directory_iterator(); ++file)
+    {
+      if ((prefix != NULL) && ((*file).path().string().find(prefix) != std::string::npos))
+      {
+        filenames.push_back((*file).path().string());
+      }
+    }
+	}
 }
 
 //------------------------------------------------------------------------------

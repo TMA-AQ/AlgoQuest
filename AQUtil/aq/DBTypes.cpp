@@ -1,4 +1,5 @@
 #include "DBTypes.h"
+#include <cassert>
 
 namespace aq
 {
@@ -42,6 +43,24 @@ bool compatibleTypes( ColumnType type1, ColumnType type2 )
 		break;
 	}
 	return false;
+}
+
+//------------------------------------------------------------------------------
+const char * columnTypeToStr(ColumnType type)
+{
+  switch (type)
+  {	
+  COL_TYPE_VARCHAR: return "CHA";
+	COL_TYPE_INT: return "INT";
+	COL_TYPE_DOUBLE: return "DOU";
+	COL_TYPE_DATE1:
+	COL_TYPE_DATE2:
+	COL_TYPE_DATE3:
+	COL_TYPE_DATE4:
+	COL_TYPE_BIG_INT: return "LON";
+  }
+  assert(false);
+  return "";
 }
 
 }
