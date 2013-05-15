@@ -46,7 +46,7 @@ boost::mutex parserMutex;
 class AQEngineSimulate : public AQEngine_Intf
 {
 public:
-	void call(tnode * pNode, mode_t mode, int selectLevel) {
+	void call(aq::tnode * pNode, mode_t mode, int selectLevel) {
 
 		//
 		// Get prefix form of query.
@@ -96,7 +96,7 @@ private:
 // -------------------------------------------------------------------------------------------------
 int processAQMatrix(const std::string& query, const std::string& aqMatrixFileName, const std::string& answerFileName, TProjectSettings& settings, Base& baseDesc)
 {
-	tnode	*pNode;
+	aq::tnode	*pNode;
 	int	nRet;
 
 	//
@@ -177,7 +177,7 @@ int processAQMatrix(const std::string& query, const std::string& aqMatrixFileNam
 // -------------------------------------------------------------------------------------------------
 int transformQuery(const std::string& query, TProjectSettings& settings, Base& baseDesc)
 {
-	tnode	*pNode;
+	aq::tnode	*pNode;
 	int	nRet;
 
 	std::cout << query << std::endl << std::endl;
@@ -308,7 +308,7 @@ int processQuery(const std::string& query, TProjectSettings& settings, Base& bas
 	
 		aq::Logger::getInstance().log(AQ_INFO, "processing sql query\n");
 
-		tnode	*pNode  = NULL;
+		aq::tnode	*pNode  = NULL;
 		int	nRet;
 
 		//
@@ -334,7 +334,7 @@ int processQuery(const std::string& query, TProjectSettings& settings, Base& bas
     unsigned int id_generator = 1;
 		QueryResolver queryResolver(pNode, &settings, aq_engine, baseDesc, id_generator);
 		Table::Ptr result = queryResolver.solve();
-		if (result)
+		if (!settings.useRowResolver && result)
 		{
 			aq::Timer timer;
 			result->saveToAnswer(settings.szAnswerFN, settings.fieldSeparator);
