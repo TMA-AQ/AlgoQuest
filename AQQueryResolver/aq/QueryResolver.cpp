@@ -33,6 +33,9 @@
 #include <algorithm>
 #include <boost/scoped_array.hpp>
 
+namespace aq
+{
+
 //------------------------------------------------------------------------------
 QueryResolver::QueryResolver(aq::tnode * _sqlStatement, TProjectSettings * _pSettings, AQEngine_Intf * _aq_engine, Base& _baseDesc, unsigned int& _id, unsigned int _level)
 	:	sqlStatement(_sqlStatement),
@@ -125,13 +128,13 @@ Table::Ptr QueryResolver::SolveSelectRegular()
 	//
 	// Query Pre Processing (TODO : optimize tree by detecting identical subtrees)
 	timer.start();
-	VerbNode::Ptr spTree = VerbNode::BuildVerbsTree( this->sqlStatement, categories_order, this->BaseDesc, this->pSettings );
+	aq::verb::VerbNode::Ptr spTree = aq::verb::VerbNode::BuildVerbsTree( this->sqlStatement, categories_order, this->BaseDesc, this->pSettings );
 	spTree->changeQuery();
 
 #ifdef _DEBUG
   {
     std::cout << *this->sqlStatement << std::endl;
-    VerbNode::dump(std::cout, spTree);
+    aq::verb::VerbNode::dump(std::cout, spTree);
     DumpVisitor printer;
     spTree->accept(&printer);
     std::cout << std::endl << printer.getQuery() << std::endl;
@@ -403,7 +406,7 @@ boost::shared_ptr<QueryResolver> QueryResolver::SolveSelectFromSelect(	aq::tnode
     categories_order.push_back( K_SELECT );
     categories_order.push_back( K_ORDER );
   }
-	VerbNode::Ptr spTree = VerbNode::BuildVerbsTree( pInteriorSelect, categories_order, this->BaseDesc, this->pSettings );
+	aq::verb::VerbNode::Ptr spTree = aq::verb::VerbNode::BuildVerbsTree( pInteriorSelect, categories_order, this->BaseDesc, this->pSettings );
 	spTree->changeQuery();
 	aq::cleanQuery( pInteriorSelect );
 
@@ -421,7 +424,7 @@ boost::shared_ptr<QueryResolver> QueryResolver::SolveSelectFromSelect(	aq::tnode
 }
 
 //------------------------------------------------------------------------------
-void QueryResolver::solveAQMatriceByRows(VerbNode::Ptr spTree)
+void QueryResolver::solveAQMatriceByRows(aq::verb::VerbNode::Ptr spTree)
 {	
 	assert(pSettings->useRowResolver);
 	aq::Timer timer;
@@ -483,7 +486,7 @@ void QueryResolver::solveAQMatriceByRows(VerbNode::Ptr spTree)
 }
 
 //------------------------------------------------------------------------------
-Table::Ptr QueryResolver::solveAQMatriceByColumns(VerbNode::Ptr spTree)
+Table::Ptr QueryResolver::solveAQMatriceByColumns(aq::verb::VerbNode::Ptr spTree)
 {
 	aq::Timer timer;
 
@@ -595,4 +598,6 @@ void QueryResolver::changeTemporaryTableName(aq::tnode * pNode)
       }
     }
   }
+}
+
 }

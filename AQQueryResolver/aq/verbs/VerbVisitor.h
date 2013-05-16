@@ -16,6 +16,9 @@
 #include <aq/parser/ID2Str.h>
 #include <aq/logger.h>
 
+namespace aq {
+namespace verb {
+
 class VerbVisitor
 {
 public:
@@ -119,5 +122,8 @@ public:
   virtual void visit(ScalarVerb*) = 0;
   virtual void visit(SubstringVerb*) = 0;
 };
+
+}
+}
 
 #endif

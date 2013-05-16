@@ -2,6 +2,9 @@
 #include "VerbVisitor.h"
 #include <aq/TreeUtilities.h>
 
+namespace aq {
+namespace verb {
+
 //------------------------------------------------------------------------------
 VERB_IMPLEMENT(JoinVerb);
 
@@ -86,3 +89,6 @@ FullJoinVerb::FullJoinVerb()
 //------------------------------------------------------------------------------
 int FullJoinVerb::leftTag(){ return K_OUTER; };
 int FullJoinVerb::rightTag(){ return K_OUTER; };
+
+}
+}

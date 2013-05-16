@@ -4,6 +4,9 @@
 #include <aq/RowProcess_Intf.h>
 #include <list>
 
+namespace aq {
+namespace verb {
+
 //------------------------------------------------------------------------------
 class SelectVerb: public VerbNode
 {
@@ -129,3 +132,6 @@ public:
 								VerbResult::Ptr resNext );
   virtual void accept(VerbVisitor* visitor);
 };
+
+}
+}

@@ -1,5 +1,8 @@
 #include "VerbResult.h"
 
+namespace aq {
+namespace verb {
+
 //------------------------------------------------------------------------------
 const aq::data_holder_t Scalar::getValue() const
 {
@@ -26,4 +29,7 @@ const aq::data_holder_t Scalar::getValue() const
 		break;
 	}
 	return data;
+}
+
+}
 }

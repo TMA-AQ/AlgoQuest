@@ -21,7 +21,7 @@ public:
   unsigned int getTotalCount() const { return this->totalCount; }
 
 protected:
-  VerbNode::Ptr spTree;
+  aq::verb::VerbNode::Ptr spTree;
 	std::vector<Column::Ptr> columns;
   unsigned int totalCount;
 	FILE * pFOut;

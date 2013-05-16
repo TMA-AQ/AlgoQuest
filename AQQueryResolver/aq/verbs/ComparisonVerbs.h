@@ -3,6 +3,9 @@
 #include "VerbNode.h"
 #include <aq/DBTypes.h>
 
+namespace aq {
+namespace verb {
+
 //------------------------------------------------------------------------------
 class ComparisonVerb: public VerbNode
 {
@@ -218,3 +221,6 @@ public:
 private:
 	bool IsNot;
 };
+
+}
+}

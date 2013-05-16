@@ -2,6 +2,8 @@
 #include "parser/ID2Str.h"
 #include <aq/Logger.h>
 
+using namespace aq::verb;
+
 // Aggregate Verbs
 void DumpVisitor::visit(AggregateVerb*)
 {

@@ -2,6 +2,9 @@
 
 #include "VerbNode.h"
 
+namespace aq {
+namespace verb {
+
 //------------------------------------------------------------------------------
 class JoinVerb: public VerbNode
 {
@@ -45,3 +48,6 @@ protected:
 	virtual int leftTag();
 	virtual int rightTag();
 };
+
+}
+}

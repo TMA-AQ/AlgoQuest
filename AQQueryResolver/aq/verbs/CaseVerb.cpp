@@ -5,8 +5,10 @@
 #include <aq/Exceptions.h>
 #include <algorithm>
 
-using namespace aq;
 using namespace std;
+
+namespace aq {
+namespace verb {
 
 //------------------------------------------------------------------------------
 VERB_IMPLEMENT(CaseVerb);
@@ -179,4 +181,7 @@ void ElseVerb::changeResult(	Table::Ptr table,
 void ElseVerb::accept(VerbVisitor* visitor)
 {
   visitor->visit(this);
+}
+
+}
 }

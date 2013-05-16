@@ -6,6 +6,9 @@
 #include <aq/Exceptions.h>
 #include <boost/scoped_array.hpp>
 
+namespace aq
+{
+
 //------------------------------------------------------------------------------
 Table::Ptr solve( aq::tnode* sqlStatement )
 {
@@ -696,4 +699,6 @@ void SolveCreate(aq::tnode* pNode,
 		//sprintf( szBuffer, "cmd /s /c \"%s %s \"%u\" \"%u\"\"", pSettings->szCutInColPath, pSettings->iniFile.c_str(), BaseDesc.Tables.size(), idx + 1 ); //debug13 - not portable
 		//system( szBuffer );
 	}
+}
+
 }

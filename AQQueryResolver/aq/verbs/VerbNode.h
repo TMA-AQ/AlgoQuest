@@ -10,6 +10,9 @@
 #include <aq/RowProcess_Intf.h>
 #include <aq/parser/SQLParser.h>
 
+namespace aq {
+namespace verb {
+
 // forward declaration
 class VerbVisitor;
 
@@ -72,6 +75,9 @@ private:
 	VerbNode::Ptr Left, Right, Brother;
   bool toSolve;
 };
+
+}
+}
 
 #include "VerbFactory.h"
 

@@ -2,8 +2,11 @@
 #include <algorithm>
 #include <aq/Exceptions.h>
 
-using namespace aq;
 using namespace std;
+
+namespace aq {
+namespace verb {
+
 /*
 //------------------------------------------------------------------------------
 VERB_IMPLEMENT(OverVerb);
@@ -180,4 +183,7 @@ bool FrameVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode*
 //------------------------------------------------------------------------------
 void FrameVerb::accept(VerbVisitor* visitor)
 {
+}
+
+}
 }

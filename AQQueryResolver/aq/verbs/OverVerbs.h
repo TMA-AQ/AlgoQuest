@@ -1,6 +1,10 @@
 #pragma once
 
 #include "VerbNode.h"
+
+namespace aq {
+namespace verb {
+
 /*
 //------------------------------------------------------------------------------
 class OverVerb: public Verb
@@ -34,3 +38,6 @@ public:
 	virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
   virtual void accept(VerbVisitor* visitor);
 };
+
+}
+}

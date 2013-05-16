@@ -4,7 +4,7 @@
 #include "verbs/VerbNode.h"
 
 //------------------------------------------------------------------------------
-Table::Ptr solveOptimalMinMax(	VerbNode::Ptr spTree, Base& BaseDesc, 
+Table::Ptr solveOptimalMinMax(	aq::verb::VerbNode::Ptr spTree, Base& BaseDesc, 
 								TProjectSettings& Settings );
 
 //------------------------------------------------------------------------------

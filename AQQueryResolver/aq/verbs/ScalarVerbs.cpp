@@ -4,8 +4,10 @@
 #include <aq/Exceptions.h>
 #include <aq/DateConversion.h>
 
-using namespace aq;
 using namespace std;
+
+namespace aq {
+namespace verb {
 
 //------------------------------------------------------------------------------
 VERB_IMPLEMENT(ScalarVerb);
@@ -425,4 +427,7 @@ ColumnType DateVerb::outputType( ColumnType inputType )
 		throw verb_error(generic_error::VERB_TYPE_MISMATCH, this->getVerbType() );
 
 	return COL_TYPE_DATE2;
+}
+
+}
 }

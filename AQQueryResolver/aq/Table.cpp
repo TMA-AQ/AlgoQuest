@@ -760,7 +760,7 @@ void Table::updateColumnsContent( const std::vector<Column::Ptr>& newColumns )
 }
 
 //------------------------------------------------------------------------------
-void Table::unravel( TablePartition::Ptr partition )
+void Table::unravel( aq::verb::TablePartition::Ptr partition )
 {
 	if( !this->HasCount )
 		return;
@@ -868,7 +868,7 @@ void Table::groupBy()
 
 //------------------------------------------------------------------------------
 void Table::orderBy(	std::vector<Column::Ptr> columns, 
-						TablePartition::Ptr partition )
+						aq::verb::TablePartition::Ptr partition )
 {
 	std::vector<size_t> index;
 	this->orderBy( columns, partition, index );
@@ -876,7 +876,7 @@ void Table::orderBy(	std::vector<Column::Ptr> columns,
 
 //------------------------------------------------------------------------------
 void Table::orderBy(	std::vector<Column::Ptr> columns, 
-						TablePartition::Ptr partition,
+						aq::verb::TablePartition::Ptr partition,
 						std::vector<size_t>& index )
 {
 	aq::Timer timer;
@@ -895,7 +895,7 @@ void Table::orderBy(	std::vector<Column::Ptr> columns,
 		index[idx] = idx;
 
 	if( !partition )
-		partition = new TablePartition();
+		partition = new aq::verb::TablePartition();
 
 	std::vector<size_t>& partitions = partition->Rows;
 	if( partitions.size() == 0 )

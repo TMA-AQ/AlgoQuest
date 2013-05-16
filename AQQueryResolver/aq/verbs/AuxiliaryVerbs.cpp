@@ -7,8 +7,10 @@
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
 
-using namespace aq;
 using namespace std;
+
+namespace aq {
+namespace verb {
 
 //------------------------------------------------------------------------------
 VERB_IMPLEMENT( ColumnVerb );
@@ -466,4 +468,7 @@ void AscVerb::changeResult(	Table::Ptr table,
 void AscVerb::accept(VerbVisitor* visitor)
 {
 	visitor->visit(this);
+}
+
+}
 }

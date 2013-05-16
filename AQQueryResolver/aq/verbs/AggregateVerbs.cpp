@@ -2,8 +2,10 @@
 #include "VerbVisitor.h"
 #include <aq/Exceptions.h>
 
-using namespace aq;
 using namespace std;
+
+namespace aq {
+namespace verb {
 
 //------------------------------------------------------------------------------
 VERB_IMPLEMENT(AggregateVerb);
@@ -867,4 +869,7 @@ void RowNumberVerb::changeResult(	Table::Ptr table,
 void RowNumberVerb::accept(VerbVisitor* visitor)
 {
   visitor->visit(this);
+}
+
+}
 }

@@ -3,7 +3,7 @@
 namespace aq
 {
   
-    RowVerbProcess::RowVerbProcess(VerbNode::Ptr _spTree) 
+    RowVerbProcess::RowVerbProcess(aq::verb::VerbNode::Ptr _spTree) 
       : spTree(_spTree) 
     {
     }

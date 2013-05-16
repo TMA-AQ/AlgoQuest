@@ -3,8 +3,10 @@
 #include <aq/Exceptions.h>
 #include <aq/DateConversion.h>
 
-using namespace aq;
 using namespace std;
+
+namespace aq {
+namespace verb {
 
 //------------------------------------------------------------------------------
 VERB_IMPLEMENT(CurrentDateVerb);
@@ -30,4 +32,7 @@ bool CurrentDateVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 void CurrentDateVerb::accept(VerbVisitor* visitor)
 {
   visitor->visit(this);
+}
+
+}
 }

@@ -2,8 +2,10 @@
 #include "VerbVisitor.h"
 #include <aq/Exceptions.h>
 
-using namespace aq;
 using namespace std;
+
+namespace aq {
+namespace verb {
 
 //------------------------------------------------------------------------------
 VERB_IMPLEMENT(BinaryVerb);
@@ -274,4 +276,7 @@ ColumnType DivideVerb::outputType( ColumnType inputType1, ColumnType inputType2 
 void DivideVerb::accept(VerbVisitor* visitor)
 {
   visitor->visit(this);
+}
+
+}
 }

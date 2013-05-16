@@ -10,6 +10,9 @@
 #include <aq/parser/sql92_grm_tab.hpp>
 #include <aq/Exceptions.h>
 
+namespace aq {
+namespace verb {
+
 // forward declaration
 class VerbVisitor;
 
@@ -106,5 +109,8 @@ public:
 	Verb();
 	virtual ~Verb(){};
 };
+
+}
+}
 
 #endif

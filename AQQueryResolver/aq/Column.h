@@ -26,7 +26,7 @@
 #define EXPR_TR_ERR_PATTERN_MATCHING				-12
 
 //------------------------------------------------------------------------------
-class Column: public VerbResult 
+class Column: public aq::verb::VerbResult 
 {
 	OBJECT_DECLARE( Column );
 public:

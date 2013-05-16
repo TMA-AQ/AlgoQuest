@@ -4,6 +4,9 @@
 #include <aq/parser/ID2Str.h>
 #include <aq/Logger.h>
 
+namespace aq {
+namespace verb {
+
 //------------------------------------------------------------------------------
 verb_error::verb_error( EType type, int verbTag ):
 	generic_error( type, "" )
@@ -61,3 +64,5 @@ void addColumn( aq::tnode* pNode, aq::tnode* pColumnNode )
 
 */
 
+}
+}

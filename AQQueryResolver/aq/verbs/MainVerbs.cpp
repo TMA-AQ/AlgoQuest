@@ -7,8 +7,10 @@
 #include <aq/Column2Table.h>
 #include <aq/Logger.h>
 
-using namespace aq;
 using namespace std;
+
+namespace aq {
+namespace verb {
 
 //------------------------------------------------------------------------------
 VERB_IMPLEMENT(SelectVerb);
@@ -999,4 +1001,7 @@ void HavingVerb::changeResult(	Table::Ptr table,
 void HavingVerb::accept(VerbVisitor* visitor)
 {
   visitor->visit(this);
+}
+
+}
 }

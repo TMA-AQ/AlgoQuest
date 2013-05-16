@@ -47,7 +47,7 @@ public:
 	bool			GroupByApplied; //used by aggregate functions to know when
 									//there is a GROUP BY in the query
 	bool			OrderByApplied;
-	TablePartition::Ptr	Partition;
+	aq::verb::TablePartition::Ptr	Partition;
 	bool			NoAnswer;
 
 	Table();
@@ -66,9 +66,9 @@ public:
 	void cleanRedundantColumns();
 	void groupBy();
 	void orderBy(	std::vector<Column::Ptr> columns,
-					TablePartition::Ptr partition );
+					aq::verb::TablePartition::Ptr partition );
 	void orderBy(	std::vector<Column::Ptr> columns, 
-					TablePartition::Ptr partition,
+					aq::verb::TablePartition::Ptr partition,
 					std::vector<size_t>& index );
 	std::vector<Column::Ptr> getColumnsByName( std::vector<Column::Ptr>& columns );
 	void setName( const std::string& name );
@@ -76,7 +76,7 @@ public:
 	const std::string& getOriginalName() const;
 	std::vector<Column::Ptr> getColumnsTemplate();
 	void updateColumnsContent( const std::vector<Column::Ptr>& newColumns );
-	void unravel( TablePartition::Ptr partition );
+	void unravel( aq::verb::TablePartition::Ptr partition );
   
   bool isTemporary() const { return temporary; }
   const char * getTemporaryName() const { return temporaryName.c_str(); }

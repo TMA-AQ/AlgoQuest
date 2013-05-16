@@ -10,10 +10,10 @@ namespace aq
   class RowVerbProcess : public RowProcess_Intf
   {
   public:
-    RowVerbProcess(VerbNode::Ptr _spTree);
+    RowVerbProcess(aq::verb::VerbNode::Ptr _spTree);
     int process(Row& row);
   private:
-    VerbNode::Ptr spTree;
+    aq::verb::VerbNode::Ptr spTree;
   };
 
 }

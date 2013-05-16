@@ -1,5 +1,8 @@
 #include "VerbFactory.h"
 
+namespace aq {
+namespace verb {
+
 //------------------------------------------------------------------------------
 VerbFactory& VerbFactory::GetInstance()
 {
@@ -21,4 +24,7 @@ VerbNode::Ptr VerbFactory::getVerb( int verbType ) const
 		if( this->Verbs[idx]->getVerbType() == verbType )
 			return this->Verbs[idx]->clone();
 	return NULL;
+}
+
+}
 }

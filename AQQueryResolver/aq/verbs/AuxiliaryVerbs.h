@@ -2,6 +2,9 @@
 
 #include "VerbNode.h"
 
+namespace aq {
+namespace verb {
+
 //------------------------------------------------------------------------------
 class ColumnVerb: public VerbNode
 {
@@ -147,3 +150,6 @@ public:
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
 	virtual void accept(VerbVisitor*);
 };
+
+}
+}

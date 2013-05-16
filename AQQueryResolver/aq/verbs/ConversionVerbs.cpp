@@ -4,8 +4,10 @@
 #include <aq/Exceptions.h>
 #include <aq/DateConversion.h>
 
-using namespace aq;
 using namespace std;
+
+namespace aq {
+namespace verb {
 
 //------------------------------------------------------------------------------
 VERB_IMPLEMENT(CastVerb);
@@ -369,4 +371,7 @@ void DecodeVerb::changeResult( Table::Ptr table,
 void DecodeVerb::accept(VerbVisitor* visitor)
 {
   visitor->visit(this);
+}
+
+}
 }

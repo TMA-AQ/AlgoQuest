@@ -3,6 +3,9 @@
 #include "VerbNode.h"
 #include <aq/DBTypes.h>
 
+namespace aq {
+namespace verb {
+
 //------------------------------------------------------------------------------
 class CastVerb: public VerbNode
 {
@@ -45,3 +48,6 @@ public:
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
   virtual void accept(VerbVisitor* visitor);
 };
+
+}
+}

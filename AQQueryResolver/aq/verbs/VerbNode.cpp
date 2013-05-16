@@ -3,6 +3,9 @@
 #include "VerbVisitor.h"
 #include <aq/parser/ID2Str.h>
 
+namespace aq {
+namespace verb {
+
 //------------------------------------------------------------------------------
 VerbNode::VerbNode(): pStart(NULL), pNode(NULL)
 {	
@@ -301,4 +304,7 @@ void VerbNode::dump(std::ostream& os, VerbNode::Ptr tree, std::string ident)
   {
     os << "NULL" << std::endl;
   }
+}
+
+}
 }

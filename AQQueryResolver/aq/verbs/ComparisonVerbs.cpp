@@ -5,8 +5,10 @@
 #include <aq/Logger.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-using namespace aq;
 using namespace std;
+
+namespace aq {
+namespace verb {
 
 //------------------------------------------------------------------------------
 VERB_IMPLEMENT( ComparisonVerb );
@@ -365,4 +367,7 @@ void IsVerb::changeResult(	Table::Ptr table,
 void IsVerb::accept(VerbVisitor* visitor)
 {
   visitor->visit(this);
+}
+
+}
 }

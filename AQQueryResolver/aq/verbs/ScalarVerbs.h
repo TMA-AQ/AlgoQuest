@@ -3,6 +3,9 @@
 #include "VerbNode.h"
 #include <aq/DBTypes.h>
 
+namespace aq {
+namespace verb {
+
 //------------------------------------------------------------------------------
 class ScalarVerb: public VerbNode
 {
@@ -133,3 +136,6 @@ protected:
 	virtual void transformItem( const ColumnItem& item, ColumnItem& result );
 	virtual aq::ColumnType outputType( aq::ColumnType inputType );
 };
+
+}
+}

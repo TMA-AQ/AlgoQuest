@@ -3,6 +3,9 @@
 #include "VerbNode.h"
 #include <aq/DBTypes.h>
 
+namespace aq {
+namespace verb {
+
 //------------------------------------------------------------------------------
 class BinaryVerb: public VerbNode
 {
@@ -75,3 +78,6 @@ protected:
 	virtual aq::ColumnType outputType( aq::ColumnType inputType1, aq::ColumnType inputType2 );
 	virtual void accept(VerbVisitor* visitor);
 };
+
+}
+}

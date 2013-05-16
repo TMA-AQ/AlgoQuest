@@ -9,6 +9,9 @@
 #include <vector>
 #include <deque>
 
+namespace aq {
+namespace verb {
+
 class VerbResult: public Object
 {
 	OBJECT_DECLARE( VerbResult );
@@ -119,5 +122,8 @@ public:
 
 	std::deque<VerbResult::Ptr>	Results;
 };
+
+}
+}
 
 #endif

@@ -89,22 +89,22 @@ ColumnItem::Ptr getMinMaxFromThesaurus(	size_t tableIdx, size_t colIdx, size_t p
 }
 
 //-------------------------------------------------------------------------------
-Table::Ptr solveOptimalMinMax(	VerbNode::Ptr spTree, Base& BaseDesc, 
+Table::Ptr solveOptimalMinMax(	aq::verb::VerbNode::Ptr spTree, Base& BaseDesc, 
 								TProjectSettings& Settings )
 {
 	if( !spTree->getLeftChild() )
 		throw generic_error(generic_error::INVALID_QUERY, "");
-	Verb::Ptr verb1 = spTree->getLeftChild();
+	aq::verb::Verb::Ptr verb1 = spTree->getLeftChild();
 	if( !verb1 || 
 		verb1->getVerbType() != K_MIN && 
 		verb1->getVerbType() != K_MAX )
 		return NULL;
-	Verb::Ptr verb2 = spTree->getLeftChild()->getLeftChild();
+	aq::verb::Verb::Ptr verb2 = spTree->getLeftChild()->getLeftChild();
 	if( verb2->getVerbType() != K_PERIOD )
 		return NULL;
 	if( spTree->getBrother() == NULL )
 		return NULL;
-	VerbNode::Ptr spNode = spTree;
+	aq::verb::VerbNode::Ptr spNode = spTree;
 	do
 	{
 		if( spNode->getVerbType() == K_WHERE )
@@ -112,7 +112,7 @@ Table::Ptr solveOptimalMinMax(	VerbNode::Ptr spTree, Base& BaseDesc,
 		spNode = spNode->getBrother();
 	}while( spNode->getBrother() );
 
-	ColumnVerb::Ptr columnVerb = dynamic_pointer_cast<ColumnVerb>( verb2 );
+	aq::verb::ColumnVerb::Ptr columnVerb = dynamic_pointer_cast<aq::verb::ColumnVerb>( verb2 );
 	size_t tableIdx = BaseDesc.getTableIdx( columnVerb->getTableName() );
 	size_t colIdx = BaseDesc.Tables[tableIdx]->getColumnIdx( columnVerb->getColumnOnlyName() );
 	Column::Ptr column = BaseDesc.Tables[tableIdx]->Columns[colIdx];

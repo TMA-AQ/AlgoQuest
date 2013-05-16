@@ -762,7 +762,7 @@ void SolveMinMaxGroupBy::modifyTmpFiles(	const char* tmpPath,
 
 	table.loadFromTableAnswerByColumn( aqMatrix, tableIDs, columnTypes, Settings, BaseDesc );
 
-	TablePartition::Ptr partition = new TablePartition();
+	aq::verb::TablePartition::Ptr partition = new aq::verb::TablePartition();
 	std::vector<size_t> index;
 	std::vector<Column::Ptr> orderColumns;
 	for( size_t idx = 0; idx < table.Columns.size(); ++idx )

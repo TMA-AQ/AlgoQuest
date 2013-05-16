@@ -3,6 +3,9 @@
 
 #include "VerbNode.h"
 
+namespace aq {
+namespace verb {
+
 //--------------------------------------------------------------------------
 class VerbFactory
 {
@@ -40,5 +43,8 @@ private:
 //------------------------------------------------------------------------------
 #define VERB_IMPLEMENT( class_name )\
 	class_name::FactoryRegister##class_name class_name::FactoryRegisterObj##class_name;
+
+}
+}
 
 #endif

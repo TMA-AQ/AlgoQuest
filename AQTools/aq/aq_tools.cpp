@@ -132,7 +132,7 @@ int processAQMatrix(const std::string& query, const std::string& aqMatrixFileNam
     categories_order.push_back( K_SELECT );
     categories_order.push_back( K_ORDER );
   }
-	VerbNode::Ptr spTree = VerbNode::BuildVerbsTree(pNode, categories_order, baseDesc, &settings );
+	aq::verb::VerbNode::Ptr spTree = aq::verb::VerbNode::BuildVerbsTree(pNode, categories_order, baseDesc, &settings );
 	spTree->changeQuery();
 	aq::cleanQuery( pNode );
 
@@ -158,7 +158,7 @@ int processAQMatrix(const std::string& query, const std::string& aqMatrixFileNam
 	aqEngine.setTablesIDs(tableIDs);
   
   unsigned int id_generator = 1;
-	QueryResolver queryResolver(pNode, &settings, &aqEngine, baseDesc, id_generator);
+	aq::QueryResolver queryResolver(pNode, &settings, &aqEngine, baseDesc, id_generator);
 	if (settings.useRowResolver)
 		queryResolver.solveAQMatriceByRows(spTree);
 	else
@@ -217,7 +217,7 @@ int transformQuery(const std::string& query, TProjectSettings& settings, Base& b
     categories_order.push_back( K_SELECT );
     categories_order.push_back( K_ORDER );
   }
-	VerbNode::Ptr spTree = VerbNode::BuildVerbsTree(pNode, categories_order, baseDesc, &settings );
+	aq::verb::VerbNode::Ptr spTree = aq::verb::VerbNode::BuildVerbsTree(pNode, categories_order, baseDesc, &settings );
 	spTree->changeQuery();
 	aq::cleanQuery( pNode );
 	std::cout << std::endl;
@@ -332,7 +332,7 @@ int processQuery(const std::string& query, TProjectSettings& settings, Base& bas
 		//
 		// Transform SQL request in prefix form, 
     unsigned int id_generator = 1;
-		QueryResolver queryResolver(pNode, &settings, aq_engine, baseDesc, id_generator);
+		aq::QueryResolver queryResolver(pNode, &settings, aq_engine, baseDesc, id_generator);
 		Table::Ptr result = queryResolver.solve();
 		if (!settings.useRowResolver && result)
 		{

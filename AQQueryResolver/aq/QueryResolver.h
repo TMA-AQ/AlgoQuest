@@ -10,6 +10,9 @@
 #include <vector>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
+namespace aq
+{
+
 class QueryResolver
 {
 public:
@@ -18,8 +21,8 @@ public:
 
 	Table::Ptr solve();
 
-	void solveAQMatriceByRows(VerbNode::Ptr spTree);
-	Table::Ptr solveAQMatriceByColumns(VerbNode::Ptr spTree);
+	void solveAQMatriceByRows(aq::verb::VerbNode::Ptr spTree);
+	Table::Ptr solveAQMatriceByColumns(aq::verb::VerbNode::Ptr spTree);
 
 	Table::Ptr getResult() { return this->result; }
   const std::vector<Column::Ptr> getColumns() const { return this->columns; }
@@ -67,5 +70,7 @@ private:
 	bool hasOrderBy;
 	bool hasPartitionBy;
 };
+
+}
 
 #endif
