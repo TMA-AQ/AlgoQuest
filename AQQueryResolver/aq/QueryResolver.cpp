@@ -1,5 +1,6 @@
 #include "QueryResolver.h"
 #include "SQLPrefix.h"
+#include "QueryAnalyzer.h"
 #include "parser/sql92_grm_tab.hpp"
 #include "Table.h"
 
@@ -213,7 +214,16 @@ void QueryResolver::SolveSelectRecursive(	aq::tnode*& pNode, unsigned int nSelec
       //   - Fold Up => pNode will be modified.
       //   - Temporary Table => create a table used to perform join on it, this is a complex task.
 
-      this->buildTemporaryTable(pNode);
+      aq::analyze::type_t type = aq::analyze::analyze_query(pNode);
+      switch (type)
+      {
+      case aq::analyze::type_t::TEMPORARY_TABLE:
+        this->buildTemporaryTable(pNode);
+        break;
+      case aq::analyze::type_t::FOLD_UP_QUERY:
+        this->SolveSelectFromSelect(pNode, pLastSelect, ++this->nestedId);
+        break;
+      }
 
     }
     else if ( inIn )
