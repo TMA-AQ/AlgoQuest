@@ -1020,7 +1020,20 @@ void Base::loadFromBaseDesc(const aq::base_t& base)
 		Table::Ptr pTD(new Table(table.nom, table.num));
 		pTD->TotalCount = table.nb_enreg;
     std::for_each(table.colonne.begin(), table.colonne.end(), [&] (const base_t::table_t::col_t& column) {
-      pTD->Columns.push_back(new Column(column.nom, column.num, column.taille, aq::symbole_to_column_type(column.type)));
+      aq::ColumnType type = aq::symbole_to_column_type(column.type);
+      unsigned int size = 0;
+      switch (type)
+      {
+      case COL_TYPE_VARCHAR: size = column.taille * sizeof(char); break;
+      case COL_TYPE_INT: size = 4; break;
+      case COL_TYPE_BIG_INT:
+      case COL_TYPE_DOUBLE:
+      case COL_TYPE_DATE1:
+      case COL_TYPE_DATE2:
+      case COL_TYPE_DATE3:
+      case COL_TYPE_DATE4: size = 8; break;
+      }
+      pTD->Columns.push_back(new Column(column.nom, column.num, size, type));
 		});
 		this->Tables.push_back(pTD);
   });
@@ -1097,23 +1110,50 @@ void Base::loadFromRawFile( const char* pszDataBaseFile ) {
 
 			strtoupr( szColumnType );
 			if ( strcmp( szColumnType, "NUMBER" ) == 0 )
+      {
+        nColumnSize = 8;
 				eColumnType = COL_TYPE_INT;
+      }
 			else if ( strcmp( szColumnType, "INT" ) == 0 )
+      {
+        nColumnSize = 4;
 				eColumnType = COL_TYPE_INT;
+      }
 			else if ( strcmp( szColumnType, "BIG_INT" ) == 0 )
+      {
+        nColumnSize = 8;
 				eColumnType = COL_TYPE_BIG_INT;
+      }
 			else if ( strcmp( szColumnType, "FLOAT" ) == 0 )
+      {
+        nColumnSize = 8;
 				eColumnType = COL_TYPE_DOUBLE;
+      }
 			else if ( strcmp( szColumnType, "DOUBLE" ) == 0 )
+      {
+        nColumnSize = 8;
 				eColumnType = COL_TYPE_DOUBLE;
+      }
 			else if ( strcmp( szColumnType, "DATE1" ) == 0 )
+      {
+        nColumnSize = 8;
 				eColumnType = COL_TYPE_DATE1;
+      }
 			else if ( strcmp( szColumnType, "DATE2" ) == 0 )
+      {
+        nColumnSize = 8;
 				eColumnType = COL_TYPE_DATE2;
+      }
 			else if ( strcmp( szColumnType, "DATE3" ) == 0 )
+      {
+        nColumnSize = 8;
 				eColumnType = COL_TYPE_DATE3;
+      }
 			else // if ( strcmp( szColumnType, "VARCHAR2" ) == 0 )	// Same for CHAR
+      {
+        nColumnSize *= sizeof(char);
 				eColumnType = COL_TYPE_VARCHAR;
+      }
 
 			pTD->Columns.push_back( new Column( std::string(szColumnName), nColumnId, nColumnSize, eColumnType ) );
 		}
