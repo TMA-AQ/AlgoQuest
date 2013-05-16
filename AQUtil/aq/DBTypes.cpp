@@ -50,14 +50,14 @@ const char * columnTypeToStr(ColumnType type)
 {
   switch (type)
   {	
-  COL_TYPE_VARCHAR: return "CHA";
-	COL_TYPE_INT: return "INT";
-	COL_TYPE_DOUBLE: return "DOU";
-	COL_TYPE_DATE1:
-	COL_TYPE_DATE2:
-	COL_TYPE_DATE3:
-	COL_TYPE_DATE4:
-	COL_TYPE_BIG_INT: return "LON";
+    case COL_TYPE_VARCHAR: return "CHA"; break;
+    case COL_TYPE_INT: return "INT"; break;
+    case COL_TYPE_DOUBLE: return "DOU"; break;
+    case COL_TYPE_DATE1:
+    case COL_TYPE_DATE2:
+    case COL_TYPE_DATE3:
+    case COL_TYPE_DATE4:
+    case COL_TYPE_BIG_INT: return "LON"; break;
   }
   assert(false);
   return "";
