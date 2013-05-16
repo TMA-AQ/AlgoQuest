@@ -4,8 +4,6 @@
 #include <aq/parser/ID2Str.h>
 #include <aq/Logger.h>
 
-using namespace boost;
-
 //------------------------------------------------------------------------------
 verb_error::verb_error( EType type, int verbTag ):
 	generic_error( type, "" )

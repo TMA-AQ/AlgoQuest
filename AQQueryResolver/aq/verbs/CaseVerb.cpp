@@ -7,7 +7,6 @@
 
 using namespace aq;
 using namespace std;
-using namespace boost;
 
 //------------------------------------------------------------------------------
 VERB_IMPLEMENT(CaseVerb);

@@ -5,7 +5,6 @@
 
 using namespace aq;
 using namespace std;
-using namespace boost;
 
 //-------------------------------------------------------------------------------
 ColumnItem::Ptr getMinMaxFromThesaurus(	size_t tableIdx, size_t colIdx, size_t partIdx, bool min, Base& BaseDesc, TProjectSettings& Settings )

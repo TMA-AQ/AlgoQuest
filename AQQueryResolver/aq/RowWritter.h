@@ -24,10 +24,11 @@ protected:
   VerbNode::Ptr spTree;
 	std::vector<Column::Ptr> columns;
   unsigned int totalCount;
-	char * value;
 	FILE * pFOut;
 	bool firstRow;
 
+private:
+	char * value;
 };
 
 }

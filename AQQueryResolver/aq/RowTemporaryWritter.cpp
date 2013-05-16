@@ -42,6 +42,7 @@ namespace aq
 
         Column::Ptr column(new Column(name, ID, size, type));
         column->Temporary = true;
+        // column->Size = strlen((*it).item->strval.c_str()); // FIXME
         this->columns.push_back(column);
 
         boost::shared_ptr<ColumnTemporaryWritter> ctw(new ColumnTemporaryWritter);
@@ -92,7 +93,9 @@ namespace aq
           break;
         case ColumnType::COL_TYPE_VARCHAR:
           {
-            fwrite(&(*it).item->strval, sizeof(char) * this->columnsWritter[c]->column->Size, 1, this->columnsWritter[c]->file);
+            const char * value = (*it).item->strval.c_str();
+            assert(strlen(value) == this->columnsWritter[c]->column->Size);
+            fwrite(value, sizeof(char) * this->columnsWritter[c]->column->Size, 1, this->columnsWritter[c]->file);
           }
           break;
         }

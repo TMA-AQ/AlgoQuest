@@ -9,7 +9,6 @@
 
 using namespace aq;
 using namespace std;
-using namespace boost;
 
 //------------------------------------------------------------------------------
 VERB_IMPLEMENT( ColumnVerb );
@@ -44,6 +43,7 @@ bool ColumnVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 	//update: it IS possible
 
   boost::to_upper(this->TableName);
+  boost::to_upper(this->ColumnOnlyName);
   boost::to_upper(this->ColumnName);
 
 	if( this->Context != K_WHERE )
@@ -143,6 +143,7 @@ bool CommaVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 		resArray->Results.push_back( resRight );
 	}
 	else
+  {
 		if( resRight && resRight->getType() == VerbResult::ARRAY )
 		{
 			resArray = static_pointer_cast<VerbResultArray>( resRight );
@@ -154,6 +155,7 @@ bool CommaVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 			resArray->Results.push_back( resLeft );
 			resArray->Results.push_back( resRight );
 		}
+  }
 	this->Result = resArray;
 	return false;
 }
@@ -162,35 +164,38 @@ bool CommaVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 void CommaVerb::changeResult(	Table::Ptr table, 
 								VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext )
 {
-	VerbResultArray::Ptr resArray = NULL;
 	if( resLeft && resLeft->getType() == VerbResult::ARRAY )
 	{
-		resArray = static_pointer_cast<VerbResultArray>( resLeft );
+		VerbResultArray::Ptr resArray = static_pointer_cast<VerbResultArray>( resLeft );
 		resArray->Results.push_back( resRight );
+    this->Result = resArray;
 	}
 	else
+  {
 		if( resRight && resRight->getType() == VerbResult::ARRAY )
 		{
-			resArray = static_pointer_cast<VerbResultArray>( resRight );
+			VerbResultArray::Ptr resArray = static_pointer_cast<VerbResultArray>( resRight );
 			resArray->Results.push_front( resLeft );
+      this->Result = resArray;
 		}
-		else
+		else if ( resRight )
 		{
-			resArray = new VerbResultArray();
+			VerbResultArray::Ptr resArray = new VerbResultArray();
 			resArray->Results.push_back( resLeft );
 			resArray->Results.push_back( resRight );
+      this->Result = resArray;
 		}
-	//if( resRight ) //debug13 - LAG uses comma with K_VALUE which has no verb implemented yet
-	this->Result = resArray;
+    else
+    {
+      this->Result = resLeft;
+    }
+  }
 }
 
 //------------------------------------------------------------------------------
 void CommaVerb::addResult( aq::RowProcess_Intf::Row& row, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext )
 {
-  if (this->Context == K_SELECT)
-  {
-    // TODO
-  }
+  this->changeResult(NULL, resLeft, resRight, resNext);
 }
 
 //------------------------------------------------------------------------------
