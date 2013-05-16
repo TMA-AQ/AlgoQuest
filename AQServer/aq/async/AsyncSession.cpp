@@ -1,11 +1,11 @@
 #include "AsyncSession.h"
 
-#include <SQLParser/AQEngine.h>
-#include <SQLParser/SQLParser.h>
-#include <SQLParser/SQLPrefix.h>
-#include <SQLParser/Column2Table.h>
-#include <SQLParser/QueryResolver.h>
-#include <SQLParser/JeqParser.h>
+#include <aq/AQEngine.h>
+#include <aq/SQLPrefix.h>
+#include <aq/Column2Table.h>
+#include <aq/QueryResolver.h>
+#include <aq/parser/SQLParser.h>
+#include <aq/parser/JeqParser.h>
 #include <aq/Exceptions.h>
 #include <aq/Logger.h>
 
@@ -248,14 +248,10 @@ void Session::processSQL(std::string& sqlQuery)
 
 			//
 			// Transform SQL request in prefix form
-			QueryResolver queryResolver(pNode, this->m_current_db_cfg->settings.get(), this->m_current_db_cfg->m_aq_engine, *this->m_current_db_cfg->baseDesc.get());
+			unsigned int id = 1;
+      QueryResolver queryResolver(pNode, this->m_current_db_cfg->settings.get(), this->m_current_db_cfg->m_aq_engine, *this->m_current_db_cfg->baseDesc.get(), id);
 			aq::Logger::getInstance().log(AQ_INFO, "execute query %s\n", sqlQuery.c_str());
-			if( (nRet = queryResolver.SolveSQLStatement()) != 0 )
-			{
-				oss << "error converting into prefix form sql query '" << sqlQuery << "'" << std::endl;
-				aq::Logger::getInstance().log(AQ_ERROR, oss.str().c_str());
-				throw generic_error(generic_error::GENERIC, oss.str());
-			}
+			queryResolver.solve();
 
 			//
 			// read result file and deliver on the socket

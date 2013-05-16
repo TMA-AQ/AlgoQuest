@@ -1,11 +1,11 @@
 #define WIN32_LEAN_AND_MEAN
 
-#include <SQLParser/AQEngine.h>
-#include <SQLParser/SQLParser.h>
-#include <SQLParser/SQLPrefix.h>
-#include <SQLParser/Column2Table.h>
-#include <SQLParser/QueryResolver.h>
-#include <SQLParser/JeqParser.h>
+#include <aq/AQEngine.h>
+#include <aq/SQLPrefix.h>
+#include <aq/Column2Table.h>
+#include <aq/QueryResolver.h>
+#include <aq/parser/SQLParser.h>
+#include <aq/parser/JeqParser.h>
 #include <aq/Exceptions.h>
 
 #include <aq/sync/SyncServer.h>

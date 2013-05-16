@@ -2,8 +2,8 @@
 #define __CONFIGURATION_H__
 
 #include <aq/Utilities.h>
-#include <SQLParser/Table.h>
-#include <SQLParser/AQEngine_Intf.h>
+#include <aq/Table.h>
+#include <aq/AQEngine_Intf.h>
 
 #include <map>
 #include <boost/shared_ptr.hpp>

@@ -119,7 +119,7 @@ int processQuery(const std::string& query, TProjectSettings& settings, Base& bas
 	
 		aq::Logger::getInstance().log(AQ_INFO, "processing sql query\n");
 
-		tnode	*pNode  = NULL;
+		aq::tnode	*pNode  = NULL;
 		int	nRet;
 
 		//
@@ -142,15 +142,12 @@ int processQuery(const std::string& query, TProjectSettings& settings, Base& bas
 
 		//
 		// Transform SQL request in prefix form, 
-		QueryResolver queryResolver(pNode, &settings, aq_engine, baseDesc);
-		if( (nRet = queryResolver.SolveSQLStatement()) != 0 )
-		{
-			aq::Logger::getInstance().log(AQ_ERROR, "error resolving sql query\n");
-			return EXIT_FAILURE;
-		}
+    unsigned int id = 1;
+		QueryResolver queryResolver(pNode, &settings, aq_engine, baseDesc, id);
+    queryResolver.solve();
 
 		Table::Ptr result = queryResolver.getResult();
-		if (result)
+		if (!settings.useRowResolver && result)
 		{
 			aq::Timer timer;
 			result->saveToAnswer(settings.szAnswerFN, settings.fieldSeparator);
@@ -348,11 +345,11 @@ int load_db(const char * propertiesFile, unsigned int tableId)
   // load base
   for (size_t t = 0; t < baseDesc.Tables.size(); ++t)
   {
-    if ((tableId != 0) && (tableId != baseDesc.Tables[t].ID))
+    if ((tableId != 0) && (tableId != baseDesc.Tables[t]->ID))
     {
       continue;
     }
-    for (size_t c = 0; c < baseDesc.Tables[t].Columns.size(); ++c)
+    for (size_t c = 0; c < baseDesc.Tables[t]->Columns.size(); ++c)
     {
       aq::Logger::getInstance().log(AQ_INFO, "loading column %d of table %d\n", c + 1, t + 1);
       cut_in_col(propertiesFile, t + 1, c + 1);

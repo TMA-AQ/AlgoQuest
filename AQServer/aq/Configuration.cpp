@@ -1,5 +1,5 @@
 #include "Configuration.h"
-#include <SQLParser/AQEngine.h>
+#include <aq/AQEngine.h>
 #include <aq/Logger.h>
 #include <aq/Exceptions.h>
 #include <fstream>
@@ -54,7 +54,7 @@ void Configuration::load()
 			base_cfg::Ptr cfg(new base_cfg);
 			cfg->settings->load(iniFile);
 			cfg->baseDesc->loadFromRawFile(cfg->settings->szDBDescFN);
-			cfg->m_aq_engine = new AQEngine(*cfg->baseDesc, *cfg->settings); 
+			cfg->m_aq_engine = new AQEngineSystem(*cfg->baseDesc, *cfg->settings); 
 			this->m_cfgs.insert(std::make_pair(dbName, cfg));
 		}
 	}
