@@ -329,6 +329,16 @@ int processQuery(const std::string& query, TProjectSettings& settings, Base& bas
 
 		}
 
+    //aq::tnode * tree = aq::clone_subtree(pNode);
+    //std::cout << "=============" << std::endl;
+    //std::cout << *pNode << std::endl;
+    //std::cout << "=============" << std::endl;
+    //std::cout << *tree << std::endl;
+    //std::cout << "=============" << std::endl;
+    //aq::delete_subtree(pNode);
+    //aq::delete_subtree(tree);
+    //exit(0);
+
 		//
 		// Transform SQL request in prefix form, 
     unsigned int id_generator = 1;
@@ -443,6 +453,11 @@ int processSQLQueries(std::list<std::string>::const_iterator itBegin, std::list<
 // -------------------------------------------------------------------------------------------------
 int main(int argc, char**argv)
 {
+
+  //aq::tnode * node = aq::new_node(K_IDENT);
+  //aq::set_string_data(node, "Thomas Martinez");
+  //std::cout << *node << std::endl;
+  //exit(EXIT_SUCCESS);
 
 	try
 	{

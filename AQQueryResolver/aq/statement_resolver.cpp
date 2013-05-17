@@ -122,7 +122,7 @@ void SolveInsert(aq::tnode* pNode,
 {
 	if( !pNode || pNode->tag != K_INSERT )
 		return;
-	size_t tableIdx = BaseDesc.getTableIdx( pNode->left->data.val_str );
+	size_t tableIdx = BaseDesc.getTableIdx( pNode->left->getData().val_str );
 	std::vector<aq::tnode*> columns;
 	commaListToNodeArray( pNode->right->left, columns );
 	std::reverse( columns.begin(), columns.end() );
@@ -168,10 +168,10 @@ void SolveInsert(aq::tnode* pNode,
 			case aq::COL_TYPE_DATE2:
 			case aq::COL_TYPE_DATE3:
       case aq::COL_TYPE_DOUBLE:
-				column->Items.push_back( new ColumnItem(static_cast<double>(pNode->data.val_int)) );
+				column->Items.push_back( new ColumnItem(static_cast<double>(pNode->getData().val_int)) );
 				break;
       case aq::COL_TYPE_VARCHAR:
-				column->Items.push_back( new ColumnItem(pNode->data.val_str) );
+				column->Items.push_back( new ColumnItem(pNode->getData().val_str) );
 				break;
 			}
 			valuesToInsert->Columns.push_back( column );
@@ -273,7 +273,7 @@ void SolveInsert(aq::tnode* pNode,
 void SolveUpdateDelete(aq::tnode* pNode,
                        TProjectSettings * pSettings, AQEngine_Intf * aq_engine, Base& BaseDesc)
 {
-	size_t tableIdx = BaseDesc.getTableIdx( pNode->left->data.val_str );
+	size_t tableIdx = BaseDesc.getTableIdx( pNode->left->getData().val_str );
 	std::vector<Column::Ptr>& columns = BaseDesc.Tables[tableIdx]->Columns;
 	Table& table = *BaseDesc.Tables[tableIdx];
 
@@ -299,7 +299,7 @@ void SolveUpdateDelete(aq::tnode* pNode,
 
 		for( size_t idx = 0; idx < updates.size(); ++idx )
 		{
-			std::string str(updates[idx]->left->data.val_str);
+			std::string str(updates[idx]->left->getData().val_str);
 			aq::strtoupr( str );
 			for( size_t idx2 = 0; idx2 < columns.size(); ++idx2 )
 				if( str == columns[idx2]->getName() )
@@ -369,7 +369,7 @@ void SolveUpdateDelete(aq::tnode* pNode,
 		commaListToNodeArray( conditionsRoot, conditions );
 		for( size_t idx = 0; idx < conditions.size(); ++idx )
 		{
-			std::string str(conditions[idx]->left->data.val_str);
+			std::string str(conditions[idx]->left->getData().val_str);
 			aq::strtoupr( str );
 			bool found = false;
 			for( size_t idx2 = 0; idx2 < columns.size(); ++idx2 )
@@ -385,10 +385,10 @@ void SolveUpdateDelete(aq::tnode* pNode,
 					case aq::COL_TYPE_DATE2:
 					case aq::COL_TYPE_DATE3:
           case aq::COL_TYPE_DOUBLE:
-						newCol->Items.push_back( new ColumnItem(static_cast<double>(conditions[idx]->right->data.val_int)) );
+						newCol->Items.push_back( new ColumnItem(static_cast<double>(conditions[idx]->right->getData().val_int)) );
 						break;
           case aq::COL_TYPE_VARCHAR:
-						newCol->Items.push_back( new ColumnItem(conditions[idx]->right->data.val_str) );
+						newCol->Items.push_back( new ColumnItem(conditions[idx]->right->getData().val_str) );
 						break;
 					}
 
@@ -468,16 +468,16 @@ void SolveUpdateDelete(aq::tnode* pNode,
 				for( size_t idx2 = 0; idx2 < updatedRows.size(); ++idx2 )
 					if( updatedRows[idx2] )
 						if( pValNode )
-							switch( pValNode->eNodeDataType )
+							switch( pValNode->getDataType() )
 						{
               case aq::NODE_DATA_INT:
-								column->Items[idx2]->numval = (double) pValNode->data.val_int;
+								column->Items[idx2]->numval = (double) pValNode->getData().val_int;
 								break;
 							case aq::NODE_DATA_NUMBER:
-								column->Items[idx2]->numval = pValNode->data.val_number;
+								column->Items[idx2]->numval = pValNode->getData().val_number;
 								break;
 							case aq::NODE_DATA_STRING:
-								column->Items[idx2]->strval = pValNode->data.val_str;
+								column->Items[idx2]->strval = pValNode->getData().val_str;
 								break;
 							default:
 								assert( 0 );
@@ -507,7 +507,7 @@ void SolveUpdateDelete(aq::tnode* pNode,
 						fwrite( fields[idx2], sizeof(char), strlen(fields[idx2]), fNewTable );
 					else
 					{
-						std::string str = to_string(updates[tableToUpdateMap[idx2]]->right);
+						std::string str = updates[tableToUpdateMap[idx2]]->right->to_string();
 						fwrite( str.c_str(), sizeof(char), str.size(), fNewTable );
 					}
 					if( idx2 + 1 < fields.size() )
@@ -639,7 +639,7 @@ void SolveTruncate(aq::tnode* pNode,
 {
 	size_t tableIdx = -1;
 	Table::Ptr table = new Table();
-	table->setName( pNode->left->data.val_str );
+	table->setName( pNode->left->getData().val_str );
 	bool found = true;
 	for( size_t idx = 0; idx < BaseDesc.Tables.size(); ++idx )
 		if( table->getName() == BaseDesc.Tables[idx]->getName() )
@@ -663,7 +663,7 @@ void SolveCreate(aq::tnode* pNode,
                  TProjectSettings * pSettings, AQEngine_Intf * aq_engine, Base& BaseDesc)
 {
 	Table::Ptr table = new Table();
-	table->setName( pNode->left->data.val_str );
+	table->setName( pNode->left->getData().val_str );
 	for( size_t idx = 0; idx < BaseDesc.Tables.size(); ++idx )
 		if( table->getName() == BaseDesc.Tables[idx]->getName() )
 			throw aq::generic_error(aq::generic_error::TABLE_ALREADY_EXISTS, "");
@@ -682,7 +682,7 @@ void SolveCreate(aq::tnode* pNode,
 	}
 	++ID;
 	table->ID = ID;
-	table->setName( pNode->left->data.val_str );
+	table->setName( pNode->left->getData().val_str );
 	BaseDesc.Tables.push_back( table );
 	//write to disk
 	BaseDesc.saveToRawFile( pSettings->szDBDescFN );

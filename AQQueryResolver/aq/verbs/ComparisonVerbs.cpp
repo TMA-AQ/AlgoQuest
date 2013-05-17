@@ -24,11 +24,11 @@ bool ComparisonVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 									VerbResult::Ptr resNext )
 {
 	assert( pNode );
-	assert( pNode->eNodeDataType != NODE_DATA_STRING );
+	assert( pNode->getDataType() != NODE_DATA_STRING );
 	int pErr = 0;
 	//the argument given to expression_transform will be destroyed if the function
 	//is successful
-	aq::tnode* pNodeClone = new_node( pNode->tag );
+	aq::tnode* pNodeClone = new aq::tnode( pNode->tag );
 	*pNodeClone = *pNode;
 	aq::tnode* newNode = pNodeClone;
 	if( this->Context == K_WHERE )
@@ -43,7 +43,7 @@ bool ComparisonVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 	
 	if( newNode == pNodeClone ) //expression not transformed
 	{
-		delete_node( pNodeClone );
+		delete pNodeClone ;
 		if( !pNode->left || !pNode->right )
 			throw verb_error(generic_error::GENERIC, this->getVerbType());
 		if( this->Context == K_WHERE &&
@@ -65,14 +65,14 @@ bool ComparisonVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 	if( !newNode || pErr != 0 ) //error
 	{
 		if( newNode )
-			delete_node( newNode );
-		delete_node( pNodeClone );
+			delete newNode ;
+		delete pNodeClone ;
 		throw verb_error(generic_error::GENERIC, this->getVerbType());
 	}
 	//pNodeClone already deleted by expression_transform
-	assert( newNode->eNodeDataType != NODE_DATA_STRING );
+	assert( newNode->getDataType() != NODE_DATA_STRING );
 	*pNode = *newNode;
-	delete_node( newNode );
+	delete newNode ;
 	return true;
 }
 

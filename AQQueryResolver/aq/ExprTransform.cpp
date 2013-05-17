@@ -76,8 +76,8 @@ int get_thesaurus_info_for_column_reference( aq::tnode *pNode, Base* baseDesc,
 		return -1;
 	}
 
-	if ( get_table_and_column_id_from_table_array(	baseDesc, pNode->left->data.val_str /*tbl_name*/,
-		pNode->right->data.val_str /*column_name*/, 
+	if ( get_table_and_column_id_from_table_array(	baseDesc, pNode->left->getData().val_str /*tbl_name*/,
+		pNode->right->getData().val_str /*column_name*/, 
 		pnTableId, pnColumnId, pnColumnSize,
 		peColumnType ) == -1 ) {
 			if ( pErr != NULL )
@@ -106,7 +106,7 @@ aq::tnode* create_in_subtree( unsigned int nLevel, Column& thesaurus ) {
 		pNodeRight = create_in_subtree( nLevel + 1, thesaurus );
 		if ( pNodeRight == NULL )
 			return NULL;
-		pNode = new_node( K_COMMA );
+		pNode = new aq::tnode( K_COMMA );
 		if ( pNode == NULL ) {
 			delete_subtree( pNodeRight );
 			return NULL;
@@ -114,26 +114,14 @@ aq::tnode* create_in_subtree( unsigned int nLevel, Column& thesaurus ) {
 
 		if ( thesaurus.Type == COL_TYPE_INT || thesaurus.Type == COL_TYPE_DATE1
 			 || thesaurus.Type == COL_TYPE_DATE2 || thesaurus.Type == COL_TYPE_DATE3 ) {
-			pNode->left = new_node( K_INTEGER );
-			if ( set_int_data( pNode->left, (llong) thesaurus.Items[ nLevel ]->numval ) == NULL ) {
-				delete_node( pNode->left );
-				delete_subtree( pNodeRight );
-				return NULL;
-			}
+			pNode->left = new aq::tnode( K_INTEGER );
+			pNode->left->set_int_data( (llong) thesaurus.Items[ nLevel ]->numval );
 		} else if ( thesaurus.Type == COL_TYPE_DOUBLE ) {
-			pNode->left = new_node( K_REAL );
-			if ( set_double_data( pNode->left, thesaurus.Items[ nLevel ]->numval ) == NULL ) {
-				delete_node( pNode->left );
-				delete_subtree( pNodeRight );
-				return NULL;
-			}
+			pNode->left = new aq::tnode( K_REAL );
+			pNode->left->set_double_data( thesaurus.Items[ nLevel ]->numval );
 		} else {	// if ( thesaurus.Type == COL_TYPE_VARCHAR )
-			pNode->left = new_node( K_STRING );
-			if ( set_string_data( pNode->left, thesaurus.Items[ nLevel ]->strval.c_str() ) == NULL ) {
-				delete_node( pNode->left );
-				delete_subtree( pNodeRight );
-				return NULL;
-			}
+			pNode->left = new aq::tnode( K_STRING );
+			pNode->left->set_string_data( thesaurus.Items[ nLevel ]->strval.c_str() );
 		}
 
 		pNode->right = pNodeRight;
@@ -143,31 +131,22 @@ aq::tnode* create_in_subtree( unsigned int nLevel, Column& thesaurus ) {
 		/* One element */
 		if ( thesaurus.Type == COL_TYPE_INT || thesaurus.Type == COL_TYPE_DATE1
 			|| thesaurus.Type == COL_TYPE_DATE2 || thesaurus.Type == COL_TYPE_DATE3) {
-			pNodeRight = new_node( K_INTEGER );
-			if ( set_int_data( pNodeRight, (llong) thesaurus.Items[ nLevel ]->numval ) == NULL ) {
-				delete_node( pNodeRight );
-				return NULL;
-			}
+			pNodeRight = new aq::tnode( K_INTEGER );
+			pNodeRight->set_int_data( (llong) thesaurus.Items[ nLevel ]->numval );
 		} else if ( thesaurus.Type == COL_TYPE_DOUBLE ) {
-			pNodeRight = new_node( K_REAL );
-			if ( set_double_data( pNodeRight, thesaurus.Items[ nLevel ]->numval ) == NULL ) {
-				delete_node( pNodeRight );
-				return NULL;
-			}
+			pNodeRight = new aq::tnode( K_REAL );
+			pNodeRight->set_double_data( thesaurus.Items[ nLevel ]->numval );
 		} else {	// if ( thesaurus.Type == COL_TYPE_VARCHAR )
-			pNodeRight = new_node( K_STRING );
-			if ( set_string_data( pNodeRight, thesaurus.Items[ nLevel ]->strval.c_str() ) == NULL ) {
-				delete_node( pNodeRight );
-				return NULL;
-			}
+			pNodeRight = new aq::tnode( K_STRING );
+			pNodeRight->set_string_data( thesaurus.Items[ nLevel ]->strval.c_str() );
 		}
 	}
 
 	if ( nLevel == 0 ) {
 		/* Add the K_IN node too ! */
-		pNode = new_node( K_IN );
+		pNode = new aq::tnode( K_IN );
 		if ( pNode == NULL ) {
-			delete_node( pNodeRight );
+			delete pNodeRight ;
 			return NULL;
 		}
 		pNode->right = pNodeRight;
@@ -181,16 +160,12 @@ aq::tnode* create_in_subtree( unsigned int nLevel, Column& thesaurus ) {
 aq::tnode* create_eq_subtree_string( const char* pszRightItem ) {
 	aq::tnode *pNode;
 
-	pNode = new_node( K_EQ );
+	pNode = new aq::tnode( K_EQ );
 	if ( pNode == NULL )
 		return NULL;
 
-	pNode->right = new_node( K_STRING );
-	if ( set_string_data( pNode->right, pszRightItem ) == NULL ) {
-		delete_subtree( pNode );
-		return NULL;
-	}
-
+	pNode->right = new aq::tnode( K_STRING );
+	pNode->right->set_string_data(pszRightItem);
 	return pNode;
 }
 
@@ -198,16 +173,12 @@ aq::tnode* create_eq_subtree_string( const char* pszRightItem ) {
 aq::tnode* create_eq_subtree_integer( llong nRightItem ) {
 	aq::tnode *pNode;
 
-	pNode = new_node( K_EQ );
+	pNode = new aq::tnode( K_EQ );
 	if ( pNode == NULL )
 		return NULL;
 
-	pNode->right = new_node( K_INTEGER );
-	if ( set_int_data( pNode->right, nRightItem ) == NULL ) {
-		delete_subtree( pNode );
-		return NULL;
-	}
-
+	pNode->right = new aq::tnode( K_INTEGER );
+	pNode->right->set_int_data(nRightItem);
 	return pNode;
 }
 
@@ -215,16 +186,12 @@ aq::tnode* create_eq_subtree_integer( llong nRightItem ) {
 aq::tnode* create_eq_subtree_double( double dRightItem ) {
 	aq::tnode *pNode;
 
-	pNode = new_node( K_EQ );
+	pNode = new aq::tnode( K_EQ );
 	if ( pNode == NULL )
 		return NULL;
 
-	pNode->right = new_node( K_REAL );
-	if ( set_double_data( pNode->right, dRightItem ) == NULL ) {
-		delete_subtree( pNode );
-		return NULL;
-	}
-
+	pNode->right = new aq::tnode( K_REAL );
+	pNode->right->set_double_data(dRightItem);
 	return pNode;
 }
 
@@ -363,13 +330,13 @@ aq::tnode* transform_between( aq::tnode* pNode, Base* baseDesc, char* pszPath, i
 				if ( thesaurus.Type == COL_TYPE_INT || thesaurus.Type == COL_TYPE_DOUBLE ||
 					(thesaurus.Type >= COL_TYPE_DATE1 && thesaurus.Type <= COL_TYPE_DATE4 )
 					) {
-					if ( pNodeStrBoundLeft->tag == K_REAL && thesaurus.Items[ i ]->numval >= pNodeStrBoundLeft->data.val_number
-						|| pNodeStrBoundLeft->tag == K_INTEGER && thesaurus.Items[ i ]->numval >= pNodeStrBoundLeft->data.val_int ){
+					if ( pNodeStrBoundLeft->tag == K_REAL && thesaurus.Items[ i ]->numval >= pNodeStrBoundLeft->getData().val_number
+						|| pNodeStrBoundLeft->tag == K_INTEGER && thesaurus.Items[ i ]->numval >= pNodeStrBoundLeft->getData().val_int ){
 						eState = BCS_Between_Left_and_Right_Bound;
 						bAddValue = ( bAddValue == 0 ) ? 1 : 0;
 					}
 				} else { // if ( thesaurus.Type == COL_TYPE_VARCHAR )
-					if ( strcmp( thesaurus.Items[ i ]->strval.c_str(), pNodeStrBoundLeft->data.val_str ) >= 0 ) {
+					if ( strcmp( thesaurus.Items[ i ]->strval.c_str(), pNodeStrBoundLeft->getData().val_str ) >= 0 ) {
 						eState = BCS_Between_Left_and_Right_Bound;
 						bAddValue = ( bAddValue == 0 ) ? 1 : 0;
 					}
@@ -381,13 +348,13 @@ aq::tnode* transform_between( aq::tnode* pNode, Base* baseDesc, char* pszPath, i
 				if ( thesaurus.Type == COL_TYPE_INT || thesaurus.Type == COL_TYPE_DOUBLE ||
 					(thesaurus.Type >= COL_TYPE_DATE1 && thesaurus.Type <= COL_TYPE_DATE4 )
 					) {
-					if ( pNodeStrBoundRight->tag == K_REAL && thesaurus.Items[ i ]->numval > pNodeStrBoundRight->data.val_number
-						|| pNodeStrBoundRight->tag == K_INTEGER && thesaurus.Items[ i ]->numval > pNodeStrBoundRight->data.val_int ){
+					if ( pNodeStrBoundRight->tag == K_REAL && thesaurus.Items[ i ]->numval > pNodeStrBoundRight->getData().val_number
+						|| pNodeStrBoundRight->tag == K_INTEGER && thesaurus.Items[ i ]->numval > pNodeStrBoundRight->getData().val_int ){
 						eState = BCS_After_Right_Bound;
 						bAddValue = ( bAddValue == 0 ) ? 1 : 0;
 					}
 				} else { // if ( thesaurus.Type == COL_TYPE_VARCHAR )
-					if ( strcmp( thesaurus.Items[ i ]->strval.c_str(), pNodeStrBoundRight->data.val_str ) > 0 ) {
+					if ( strcmp( thesaurus.Items[ i ]->strval.c_str(), pNodeStrBoundRight->getData().val_str ) > 0 ) {
 						eState = BCS_After_Right_Bound;
 						bAddValue = ( bAddValue == 0 ) ? 1 : 0;
 					}
@@ -406,7 +373,7 @@ aq::tnode* transform_between( aq::tnode* pNode, Base* baseDesc, char* pszPath, i
 
 	if ( thesaurusRes.Items.size() == 0 ) {
 		/* No Match -> Expression evaluates to FALSE ! */
-		pNodeRes = new_node( K_FALSE );
+		pNodeRes = new aq::tnode( K_FALSE );
 	} else if ( thesaurusRes.Items.size() == 1 ) {
 		/* Replace it with operator = */
 		if ( thesaurusRes.Type == COL_TYPE_INT ) {
@@ -520,8 +487,8 @@ aq::tnode* transform_like( aq::tnode* pNode, Base* baseDesc, char* pszPath, int 
 	pNodeStr		= pNodeTmp->right;
 
 	if ( pNodeStr != NULL && pNodeStr->tag == K_ESCAPE ) {
-		if ( pNodeStr->right != NULL && pNodeStr->right->data.val_str != NULL )
-			cEscape = pNodeStr->right->data.val_str[ 0 ];
+		if ( pNodeStr->right != NULL && pNodeStr->right->getData().val_str != NULL )
+			cEscape = pNodeStr->right->getData().val_str[ 0 ];
 		if ( cEscape == '\0' )
 			cEscape = NO_ESCAPE_CHAR;
 		pNodeStr = pNodeStr->left;
@@ -535,7 +502,7 @@ aq::tnode* transform_like( aq::tnode* pNode, Base* baseDesc, char* pszPath, int 
 	/* Prepare PatterMatching */
 	//!!!!	
 	/* USE cEscape ! */
-	if ( PatternMatchingCreate( pNodeStr->data.val_str, cEscape, &patternDesc ) == -1 ) {
+	if ( PatternMatchingCreate( pNodeStr->getData().val_str, cEscape, &patternDesc ) == -1 ) {
 		if ( pErr != NULL )
 			*pErr = EXPR_TR_ERR_PREPARING_PATTERN_MATCHING;
 		return pNode;
@@ -594,7 +561,7 @@ aq::tnode* transform_like( aq::tnode* pNode, Base* baseDesc, char* pszPath, int 
 
 	if ( thesaurusRes.Items.size() == 0 ) {
 		/* No Match -> Expression evaluates to FALSE ! */
-		pNodeRes = new_node( K_FALSE );
+		pNodeRes = new aq::tnode( K_FALSE );
 	} else if ( thesaurusRes.Items.size() == 1 ) {
 		/* Replace it with operator = */
 		if ( thesaurusRes.Type == COL_TYPE_INT ) {
@@ -752,20 +719,20 @@ aq::tnode* transform_cmp_op( aq::tnode* pNode, Base* baseDesc, char* pszPath, in
 					/* toggle state if >= */
 					if ( thesaurus.Type == COL_TYPE_INT || thesaurus.Type == COL_TYPE_DATE1
 						|| thesaurus.Type == COL_TYPE_DATE2 || thesaurus.Type == COL_TYPE_DATE3) {
-						if ( pNodeStr->tag == K_INTEGER && thesaurus.Items[ i ]->numval >= pNodeStr->data.val_int 
-							|| pNodeStr->tag == K_REAL && thesaurus.Items[ i ]->numval >= pNodeStr->data.val_number
+						if ( pNodeStr->tag == K_INTEGER && thesaurus.Items[ i ]->numval >= pNodeStr->getData().val_int 
+							|| pNodeStr->tag == K_REAL && thesaurus.Items[ i ]->numval >= pNodeStr->getData().val_number
 							) {
 							bCheck = 0;
 							bAddValue = ( bAddValue == 0 ) ? 1 : 0;
 						}
 					} else if ( thesaurus.Type == COL_TYPE_DOUBLE ) {
-						if ( pNodeStr->tag == K_REAL && thesaurus.Items[ i ]->numval >= pNodeStr->data.val_number
-							|| pNodeStr->tag == K_INTEGER && thesaurus.Items[ i ]->numval >= pNodeStr->data.val_int ) {
+						if ( pNodeStr->tag == K_REAL && thesaurus.Items[ i ]->numval >= pNodeStr->getData().val_number
+							|| pNodeStr->tag == K_INTEGER && thesaurus.Items[ i ]->numval >= pNodeStr->getData().val_int ) {
 							bCheck = 0;
 							bAddValue = ( bAddValue == 0 ) ? 1 : 0;
 						}
 					} else { // if ( thesaurus.Type == COL_TYPE_VARCHAR )
-						if ( strcmp( thesaurus.Items[ i ]->strval.c_str(), pNodeStr->data.val_str ) >= 0 ) {
+						if ( strcmp( thesaurus.Items[ i ]->strval.c_str(), pNodeStr->getData().val_str ) >= 0 ) {
 							bCheck = 0;
 							bAddValue = ( bAddValue == 0 ) ? 1 : 0;
 						}
@@ -774,17 +741,17 @@ aq::tnode* transform_cmp_op( aq::tnode* pNode, Base* baseDesc, char* pszPath, in
 					/* toggle state if > */
 					if ( thesaurus.Type == COL_TYPE_INT || thesaurus.Type == COL_TYPE_DATE1
 						|| thesaurus.Type == COL_TYPE_DATE2 || thesaurus.Type == COL_TYPE_DATE3) {
-						if ( thesaurus.Items[ i ]->numval > pNodeStr->data.val_int ) {
+						if ( thesaurus.Items[ i ]->numval > pNodeStr->getData().val_int ) {
 							bCheck = 0;
 							bAddValue = ( bAddValue == 0 ) ? 1 : 0;
 						}
 					} else if ( thesaurus.Type == COL_TYPE_DOUBLE ) {
-						if ( thesaurus.Items[ i ]->numval > pNodeStr->data.val_int ) {
+						if ( thesaurus.Items[ i ]->numval > pNodeStr->getData().val_int ) {
 							bCheck = 0;
 							bAddValue = ( bAddValue == 0 ) ? 1 : 0;
 						}
 					} else { // if ( thesaurus.Type == COL_TYPE_VARCHAR )
-						if ( strcmp( thesaurus.Items[ i ]->strval.c_str(), pNodeStr->data.val_str ) > 0 ) {
+						if ( strcmp( thesaurus.Items[ i ]->strval.c_str(), pNodeStr->getData().val_str ) > 0 ) {
 							bCheck = 0;
 							bAddValue = ( bAddValue == 0 ) ? 1 : 0;
 						}
@@ -807,7 +774,7 @@ aq::tnode* transform_cmp_op( aq::tnode* pNode, Base* baseDesc, char* pszPath, in
 
 	if ( thesaurusRes.Items.size() == 0 ) {
 		/* No Match -> Expression evaluates to FALSE ! */
-		pNodeRes = new_node( K_FALSE );
+		pNodeRes = new aq::tnode( K_FALSE );
 	} else if ( thesaurusRes.Items.size() == 1 ) {
 		/* Replace it with operator = */
 		if ( thesaurusRes.Type == COL_TYPE_INT || thesaurus.Type == COL_TYPE_DATE1

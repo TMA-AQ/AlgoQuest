@@ -107,7 +107,7 @@ void extractFrameTypeOffset(	aq::tnode* bound, TablePartition::FrameBoundType& t
 			type = TablePartition::AQ_UNBOUNDED; offset = 0; break;
 		case K_INTEGER: 
 			type = TablePartition::AQ_RELATIVE;
-			offset = (int) -bound->left->data.val_int; 
+			offset = (int) - bound->left->getData().val_int; 
 			break;
 		default: assert(0);
 		}
@@ -122,7 +122,7 @@ void extractFrameTypeOffset(	aq::tnode* bound, TablePartition::FrameBoundType& t
 			type = TablePartition::AQ_UNBOUNDED; offset = 0; break;
 		case K_INTEGER: 
 			type = TablePartition::AQ_RELATIVE;
-			offset = (int) bound->left->data.val_int; 
+			offset = (int) bound->left->getData().val_int; 
 			break;
 		default: assert(0);
 		}

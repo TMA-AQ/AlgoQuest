@@ -104,14 +104,26 @@ enum log_facilities {
 
 #else
 
-# define AQ_CRITICAL AQ_LOG_CRIT
-# define AQ_ERROR AQ_LOG_ERR
-# define AQ_WARNING AQ_LOG_WARNING
-# define AQ_NOTICE AQ_LOG_NOTICE
-# define AQ_INFO AQ_LOG_INFO
-# define AQ_DEBUG AQ_LOG_DEBUG
+# define AQ_CRITICAL __FILE__, __FUNCTION__, __LINE__, AQ_LOG_CRIT
+# define AQ_ERROR __FILE__, __FUNCTION__, __LINE__, AQ_LOG_ERR
+# define AQ_WARNING __FILE__, __FUNCTION__, __LINE__, AQ_LOG_WARNING
+# define AQ_NOTICE __FILE__, __FUNCTION__, __LINE__, AQ_LOG_NOTICE
+# define AQ_INFO __FILE__, __FUNCTION__, __LINE__, AQ_LOG_INFO
+# define AQ_DEBUG __FILE__, __FUNCTION__, __LINE__, AQ_LOG_DEBUG
 
-# define AQ_LOG_DEBUG(inst)
+# define AQ_LOG_DEBUG(args) \
+  do {                   \
+    aq::Logger::getInstance().log(AQ_DEBUG, args);                \
+  } while (false) ;
+
+//# define AQ_CRITICAL AQ_LOG_CRIT
+//# define AQ_ERROR AQ_LOG_ERR
+//# define AQ_WARNING AQ_LOG_WARNING
+//# define AQ_NOTICE AQ_LOG_NOTICE
+//# define AQ_INFO AQ_LOG_INFO
+//# define AQ_DEBUG AQ_LOG_DEBUG
+//
+//# define AQ_LOG_DEBUG(inst)
 
 #endif
 

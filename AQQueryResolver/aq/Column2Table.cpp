@@ -279,7 +279,7 @@ int add_tnode_tables( aq::tnode *pNode, Base* baseDesc, TColumn2TablesArray* par
 		if ( add_tnode_tables( pNode->right, baseDesc, parrC2T ) != 0 ) 
 			return -1;
 	} else if ( pNode->tag == K_IDENT ) {
-		if ( add_table_columns_to_column2tables_array( parrC2T, baseDesc, pNode->data.val_str ) == NULL ) {
+		if ( add_table_columns_to_column2tables_array( parrC2T, baseDesc, pNode->getData().val_str ) == NULL ) {
 #ifdef CREATE_LOG
 		Log( "add_aq::tnode_tables() : Function add_table_columns_to_column2tables_array() returned -1 (error)!\n" );
 #endif
@@ -373,42 +373,37 @@ void enforce_qualified_column_reference( aq::tnode *pNode, TColumn2TablesArray* 
 			continue;
 		//reached a K_COLUMN without a K_PERIOD parent
 		TColumn2Tables* pC2T;
-		pC2T = find_column_in_column2tables_array( parrC2T, pNode->data.val_str );
+		pC2T = find_column_in_column2tables_array( parrC2T, pNode->getData().val_str );
 		if ( pC2T != NULL ) {
 			if ( pC2T->m_nTableCount > 1 ) {
 				char szBuf[ 1000 ];
 				/* Error column name ambiguity ! */
-				sprintf( szBuf, "Column name ambiguity ! Multiple tables with same column name : <%s>", pNode->data.val_str );
+				sprintf( szBuf, "Column name ambiguity ! Multiple tables with same column name : <%s>", pNode->getData().val_str );
 				yyerror( szBuf );
 				*pErr = -1;
 			} else if ( pC2T->m_nTableCount == 0 ) {
 				char szBuf[ 1000 ];
 				/* Error no table with column name */
-				sprintf( szBuf, "No table with column name <%s> specified using FROM ... !", pNode->data.val_str );
+				sprintf( szBuf, "No table with column name <%s> specified using FROM ... !", pNode->getData().val_str );
 				yyerror( szBuf );
 				*pErr = -2;
 			} else {
 				aq::tnode *pNodeColumn, *pNodeTable;
-				pNodeColumn = new_node( pNode );
+				pNodeColumn = new aq::tnode( *pNode );
 				if ( pNodeColumn == NULL ) {
 					*pErr = -3;
 					return;
 				}
-				pNodeTable = new_node( K_IDENT );
+				pNodeTable = new aq::tnode( K_IDENT );
 				if ( pNodeTable == NULL ) {
-					delete_node( pNodeColumn );
+					delete pNodeColumn ;
 					*pErr = -4;
 					return;
 				}
-				if ( set_string_data( pNodeTable, pC2T->m_pparrTableNames[ 0 ] ) == NULL ) {
-					delete_node( pNodeColumn );
-					delete_node( pNodeTable );
-					*pErr = -5;
-					return;
-				}
+				pNodeTable->set_string_data( pC2T->m_pparrTableNames[ 0 ] );
 				pNode->tag = K_PERIOD;
-				free( pNode->data.val_str );
-				pNode->eNodeDataType = NODE_DATA_INT;
+				free( pNode->getData().val_str );
+				pNode->set_int_data(0);
 				pNode->left	= pNodeTable;
 				pNode->right = pNodeColumn;
 			}

@@ -1,5 +1,6 @@
 #include "SQLParser.h"
 #include <aq/DBTypes.h>
+#include <aq/Exceptions.h>
 #include "sql92_grm_tab.hpp"
 #include "ID2Str.h"
 
@@ -45,176 +46,295 @@ void report_error( char* pszMsg, int bExit ) {
 	}
 }
 
-//------------------------------------------------------------------------------
-tnode* new_node( short tag ) {
-	tnode* pNode;
-	
-	pNode = (tnode*)malloc( sizeof( tnode ) );
-	if ( pNode == NULL ) {
-		report_error( "Not enough memory", EXIT_ON_MEM_ERROR );
-		return NULL;
-	}
-	memset( pNode, 0, sizeof( tnode ) );
-	pNode->eNodeDataType = NODE_DATA_INT;
-	pNode->tag = tag;
-	return pNode;
+tnode::tnode(short _tag)
+  : 
+  left(NULL),
+  right(NULL),
+  next(NULL),
+  parent(NULL),
+  inf(0),
+  tag(_tag),
+  eNodeDataType(NODE_DATA_INT),
+  nStrBufCb(0)
+{
+  data.val_int = 0;
 }
 
-//------------------------------------------------------------------------------
-tnode* new_node( tnode* pNode )
+tnode::tnode(const tnode& source)
+  :
+  left(NULL),
+  right(NULL),
+  next(NULL),
+  parent(NULL),
+  inf(source.inf),
+  tag(source.tag),
+  eNodeDataType(NODE_DATA_INT),
+  nStrBufCb(0)
 {
-	if( !pNode )
-		return NULL;
-	tnode* pNew;
-
-	pNew = (tnode*)malloc( sizeof( tnode ) );
-	memset( pNew, 0, sizeof( tnode ) );
-	if ( pNew == NULL ) {
-		report_error( "Not enough memory", EXIT_ON_MEM_ERROR );
-		return NULL;
-	}
-	pNew->inf = pNode->inf;
-	pNew->tag = pNode->tag;
-	switch( pNode->eNodeDataType )
+	switch(source.eNodeDataType)
 	{
 	case NODE_DATA_STRING:
-		set_string_data( pNew, pNode->data.val_str );
+		set_string_data(source.data.val_str);
 		break;
 	case NODE_DATA_INT:
-		set_int_data( pNew, pNode->data.val_int );
+		set_int_data(source.data.val_int);
 		break;
 	case NODE_DATA_NUMBER:
-		set_double_data( pNew, pNode->data.val_number );
+		set_double_data(source.data.val_number);
 		break;
 	default:
 		assert( 0 );
 	}
-	return pNew;
+}
+
+tnode::~tnode()
+{
+}
+
+tnode& tnode::operator=(const tnode& source)
+{
+  if (this != &source)
+  {
+    this->inf = source.inf;
+    this->tag = source.tag;
+    switch(source.eNodeDataType)
+    {
+    case NODE_DATA_STRING:
+      set_string_data(source.data.val_str);
+      break;
+    case NODE_DATA_INT:
+      set_int_data(source.data.val_int);
+      break;
+    case NODE_DATA_NUMBER:
+      set_double_data(source.data.val_number);
+      break;
+    default:
+      assert( 0 );
+    }
+  }
+  return *this;
 }
 
 //------------------------------------------------------------------------------
-tnode* set_string_data( tnode* pNode, const char* pszStr ) {
-	if ( pNode != NULL ) {
-		size_t nLen;
+void tnode::set_string_data(const char* pszStr) 
+{
+  size_t nLen;
 
-		if ( pszStr == NULL ) {
-			/* Call free */
-			if (	pNode->eNodeDataType == NODE_DATA_STRING 
-					&& pNode->nStrBufCb != 0 
-					&& pNode->data.val_str != NULL ) {
-				free( pNode->data.val_str );
-				pNode->data.val_str = NULL;
-				pNode->nStrBufCb	= 0;
-			}
-			return pNode;
+  if ( pszStr == NULL ) 
+  {
+    /* Call free */
+    if ((this->eNodeDataType == NODE_DATA_STRING) && (this->nStrBufCb != 0) && (this->data.val_str != NULL)) 
+    {
+      free( this->data.val_str );
+      this->data.val_str = NULL;
+      this->nStrBufCb	= 0;
+    }
+  }
+  else
+  {
+    nLen = strlen( pszStr ) + 1;		/* Include terminating NULL char */
+
+    if ((this->eNodeDataType != NODE_DATA_STRING) || (this->nStrBufCb < nLen)) 
+    {
+      /* Need to allocate or reallocate the data buffer */
+
+      if (this->nStrBufCb > 0)
+        this->set_string_data(NULL); /* Free Old Buffer - avoid realloc */
+
+      /* Round up the size to 4096 multiple - avoid and on bits */
+      nLen = nLen + STR_BUF_SIZE_ROUND_UP - 1;
+      nLen = nLen - nLen % STR_BUF_SIZE_ROUND_UP;
+
+      this->data.val_str = (char*)malloc( sizeof( char ) * nLen );
+      if (this->data.val_str == NULL) 
+      {
+        report_error( "Not enough memory", EXIT_ON_MEM_ERROR );
+      }
+      this->nStrBufCb = nLen;				/* Set Buffer Len */
+      this->eNodeDataType	= NODE_DATA_STRING; /* Set Correct Data Type */
+    }
+
+    strcpy(this->data.val_str, pszStr);
+  }
+}
+
+//------------------------------------------------------------------------------
+void tnode::append_string_data(char* pszStr) 
+{
+  size_t nLen, nLen1;
+
+  if ((this->eNodeDataType != NODE_DATA_STRING) || (pszStr == NULL))
+  {
+    this->set_string_data(pszStr);
+    return;
+  }
+
+  nLen = strlen(this->data.val_str);	
+  if ( nLen == 0 )	/* Empty String */
+  {
+    this->set_string_data(pszStr);
+    return;
+  }
+
+  nLen1 = strlen( pszStr );
+  if ( nLen1 == 0 )	/* Empty String */
+    return;	/* Nothing to do ! */
+
+  nLen += nLen1 + 1;	/* Include terminating NULL char */
+
+  if (this->nStrBufCb < nLen) 
+  {
+    /* Need to allocate or reallocate the data buffer */
+    char *pszBuf;
+
+    /* Round up the size to 4096 multiple - avoid and on bits */
+    nLen = nLen + STR_BUF_SIZE_ROUND_UP - 1;
+    nLen = nLen - nLen % STR_BUF_SIZE_ROUND_UP;
+
+    pszBuf = (char*)malloc( sizeof( char ) * nLen );
+    if ( pszBuf == NULL ) {
+      report_error( "Not enough memory", EXIT_ON_MEM_ERROR );
+      return;
+    }
+
+    strcpy( pszBuf, this->data.val_str );	/* Keep the old string */
+    set_string_data( NULL );	/* Free Old Buffer - avoid realloc */
+    this->data.val_str = pszBuf;	/* Set the new buffer */
+
+    this->nStrBufCb		= nLen;				/* Set Buffer Len */
+    this->eNodeDataType	= NODE_DATA_STRING; /* Set Correct Data Type */
+  }
+
+  /* Append the new string */
+  strcat( this->data.val_str, pszStr );
+
+}
+
+//------------------------------------------------------------------------------
+void tnode::set_int_data( llong nVal ) 
+{
+  if ( this->eNodeDataType == NODE_DATA_STRING )
+			set_string_data( NULL );		/* Free the String Buffer */
+
+  this->data.val_int	 = nVal;
+  this->eNodeDataType = NODE_DATA_INT;
+}
+
+//------------------------------------------------------------------------------
+void tnode::set_double_data( double dVal ) 
+{
+  if ( this->eNodeDataType == NODE_DATA_STRING )
+    set_string_data( NULL );		/* Free the String Buffer */
+
+  this->data.val_number	= dVal;
+  this->eNodeDataType	= NODE_DATA_NUMBER;
+}
+
+//------------------------------------------------------------------------------
+tnode* get_leftmost_child( tnode *pNode ) {
+	if ( pNode == NULL )
+		return NULL;
+	if ( pNode->left != NULL )
+		return get_leftmost_child( pNode->left );
+	else if ( pNode->right != NULL )
+		return get_leftmost_child( pNode->right );
+	return pNode;
+}
+
+//------------------------------------------------------------------------------
+void tnode::set_data( const data_holder_t data, ColumnType type )
+{
+	switch (type)
+	{
+	case COL_TYPE_INT:
+	case COL_TYPE_BIG_INT:
+	case COL_TYPE_DATE1:
+	case COL_TYPE_DATE2:
+	case COL_TYPE_DATE3:
+	case COL_TYPE_DATE4:
+		this->tag = K_INTEGER;
+		this->set_int_data( (llong) data.val_int );
+		break;
+	case COL_TYPE_DOUBLE:
+		this->tag = K_REAL;
+		this->set_double_data( data.val_number );
+		break;
+	case COL_TYPE_VARCHAR:
+		this->tag = K_STRING;
+		this->set_string_data( data.val_str );
+		break;
+	default:
+		break;
+	}
+}
+
+//------------------------------------------------------------------------------
+std::string tnode::to_string() const
+{
+	char szBuffer[STR_BUF_SIZE]; // tma: FIXME
+	memset(szBuffer, 0, STR_BUF_SIZE);
+	switch( this->eNodeDataType )
+	{
+	case NODE_DATA_INT: 
+		sprintf(szBuffer, "%lld", this->data.val_int);
+		return szBuffer;
+		break;
+	case NODE_DATA_NUMBER: 
+		doubleToString( szBuffer, this->data.val_number );
+		return szBuffer;
+		break;
+	case NODE_DATA_STRING:
+		return this->data.val_str;
+		break;
+	default:
+		assert( 0 );
+	}
+	return "";
+}
+
+//------------------------------------------------------------------------------
+void tnode::to_upper()
+{
+  if (this->eNodeDataType == NODE_DATA_STRING) boost::to_upper(this->data.val_str);
+  if (this->left) this->left->to_upper();
+  if (this->right) this->right->to_upper();
+  if (this->next) this->next->to_upper();
+}
+
+//------------------------------------------------------------------------------
+tnode* clone_subtree(tnode* pNode)
+{
+	stack<tnode*> nodes;
+	nodes.push(pNode);
+	tnode* pClone = new tnode(*pNode);
+	stack<tnode*> clones;
+	clones.push( pClone );
+	while( !nodes.empty() )
+	{
+		tnode* nodeIdx = nodes.top();
+		tnode* cloneIdx = clones.top();
+		nodes.pop();
+		clones.pop();
+		if( nodeIdx->next )
+		{
+			cloneIdx->next = new tnode( *nodeIdx->next );
+			nodes.push( nodeIdx->next );
+			clones.push( cloneIdx->next );
 		}
-
-		nLen = strlen( pszStr ) + 1;		/* Include terminating NULL char */
-
-		if ( pNode->eNodeDataType != NODE_DATA_STRING || pNode->nStrBufCb < nLen ) {
-			/* Need to allocate or reallocate the data buffer */
-
-			if ( pNode->nStrBufCb > 0 )
-				set_string_data( pNode, NULL );	/* Free Old Buffer - avoid realloc */
-
-			/* Round up the size to 4096 multiple - avoid and on bits */
-			nLen = nLen + STR_BUF_SIZE_ROUND_UP - 1;
-			nLen = nLen - nLen % STR_BUF_SIZE_ROUND_UP;
-
-			pNode->data.val_str = (char*)malloc( sizeof( char ) * nLen );
-			if ( pNode->data.val_str == NULL ) {
-				report_error( "Not enough memory", EXIT_ON_MEM_ERROR );
-				return NULL;
-			}
-			pNode->nStrBufCb		= nLen;				/* Set Buffer Len */
-			pNode->eNodeDataType	= NODE_DATA_STRING; /* Set Correct Data Type */
+		if( nodeIdx->right )
+		{
+			cloneIdx->right = new tnode( *nodeIdx->right );
+			nodes.push( nodeIdx->right );
+			clones.push( cloneIdx->right );
 		}
-
-		strcpy( pNode->data.val_str, pszStr );
-	}
-
-	return pNode;
-}
-
-//------------------------------------------------------------------------------
-tnode* append_string_data( tnode* pNode, char* pszStr ) {
-	if ( pNode != NULL ) {
-		size_t nLen, nLen1;
-
-		if ( pNode->eNodeDataType != NODE_DATA_STRING || pszStr == NULL )
-			return set_string_data( pNode, pszStr );
-
-		nLen = strlen( pNode->data.val_str );	
-		if ( nLen == 0 )	/* Empty String */
-			return set_string_data( pNode, pszStr );
-
-		nLen1 = strlen( pszStr );
-		if ( nLen1 == 0 )	/* Empty String */
-			return pNode;	/* Nothing to do ! */
-	
-		nLen += nLen1 + 1;	/* Include terminating NULL char */
-
-		if ( pNode->nStrBufCb < nLen ) {
-			/* Need to allocate or reallocate the data buffer */
-			char *pszBuf;
-
-			/* Round up the size to 4096 multiple - avoid and on bits */
-			nLen = nLen + STR_BUF_SIZE_ROUND_UP - 1;
-			nLen = nLen - nLen % STR_BUF_SIZE_ROUND_UP;
-
-			pszBuf = (char*)malloc( sizeof( char ) * nLen );
-			if ( pszBuf == NULL ) {
-				report_error( "Not enough memory", EXIT_ON_MEM_ERROR );
-				return NULL;
-			}
-
-			strcpy( pszBuf, pNode->data.val_str );	/* Keep the old string */
-			set_string_data( pNode, NULL );	/* Free Old Buffer - avoid realloc */
-			pNode->data.val_str = pszBuf;	/* Set the new buffer */
-
-			pNode->nStrBufCb		= nLen;				/* Set Buffer Len */
-			pNode->eNodeDataType	= NODE_DATA_STRING; /* Set Correct Data Type */
+		if( nodeIdx->left )
+		{
+			cloneIdx->left = new tnode( *nodeIdx->left );
+			nodes.push( nodeIdx->left );
+			clones.push( cloneIdx->left );
 		}
-
-		/* Append the new string */
-		strcat( pNode->data.val_str, pszStr );
 	}
-
-	return pNode;
-}
-
-//------------------------------------------------------------------------------
-tnode* set_int_data( tnode* pNode, llong nVal ) {
-	if ( pNode != NULL ) {
-		if ( pNode->eNodeDataType == NODE_DATA_STRING )
-			set_string_data( pNode, NULL );		/* Free the String Buffer */
-
-		pNode->data.val_int	 = nVal;
-		pNode->eNodeDataType = NODE_DATA_INT;
-	}
-
-	return pNode;
-}
-
-//------------------------------------------------------------------------------
-tnode* set_double_data( tnode* pNode, double dVal ) {
-	if ( pNode != NULL ) {
-		if ( pNode->eNodeDataType == NODE_DATA_STRING )
-			set_string_data( pNode, NULL );		/* Free the String Buffer */
-
-		pNode->data.val_number	= dVal;
-		pNode->eNodeDataType	= NODE_DATA_NUMBER;
-	}
-
-	return pNode;
-}
-
-//------------------------------------------------------------------------------
-tnode* delete_node( tnode* pNode ) {
-	if ( pNode != NULL ) {
-		free( pNode );
-	}
-	return NULL;
+	return pClone;
 }
 
 //------------------------------------------------------------------------------
@@ -238,127 +358,15 @@ void delete_subtree( tnode* pNode ) {
 	}
 	for( idx = 0; idx < nodes.size(); ++idx )
 	{
-		set_string_data( nodes[idx], NULL );	/* Delete String Buffer if any */
-		delete_node( nodes[idx] );
+		nodes[idx]->set_string_data( NULL );	/* Delete String Buffer if any */
+		delete nodes[idx];
 	}
-}
-
-//------------------------------------------------------------------------------
-tnode* get_leftmost_child( tnode *pNode ) {
-	if ( pNode == NULL )
-		return NULL;
-	if ( pNode->left != NULL )
-		return get_leftmost_child( pNode->left );
-	else if ( pNode->right != NULL )
-		return get_leftmost_child( pNode->right );
-	return pNode;
-}
-
-//------------------------------------------------------------------------------
-tnode& set_data( tnode& pNode, data_holder_t data, ColumnType type )
-{
-	switch (type)
-	{
-	case COL_TYPE_INT:
-	case COL_TYPE_BIG_INT:
-	case COL_TYPE_DATE1:
-	case COL_TYPE_DATE2:
-	case COL_TYPE_DATE3:
-	case COL_TYPE_DATE4:
-		pNode.tag = K_INTEGER;
-		set_int_data( &pNode, (llong) data.val_int );
-		break;
-	case COL_TYPE_DOUBLE:
-		pNode.tag = K_REAL;
-		set_double_data( &pNode, data.val_number );
-		break;
-	case COL_TYPE_VARCHAR:
-		pNode.tag = K_STRING;
-		set_string_data( &pNode, data.val_str );
-		break;
-	default:
-		break;
-	}
-	return pNode;
-}
-
-//------------------------------------------------------------------------------
-std::string to_string(const tnode* const pNode )
-{
-	char szBuffer[STR_BUF_SIZE]; // tma: FIXME
-	memset(szBuffer, 0, STR_BUF_SIZE);
-	if( !pNode )
-		return "";
-	switch( pNode->eNodeDataType )
-	{
-	case NODE_DATA_INT: 
-		sprintf(szBuffer, "%lld", pNode->data.val_int);
-		return szBuffer;
-		break;
-	case NODE_DATA_NUMBER: 
-		doubleToString( szBuffer, pNode->data.val_number );
-		//sprintf(szBuffer, "%.2lf", pNode->data.val_number);
-		return szBuffer;
-		break;
-	case NODE_DATA_STRING:
-		return pNode->data.val_str;
-		break;
-	default:
-		assert( 0 );
-	}
-	return "";
-}
-
-//------------------------------------------------------------------------------
-tnode* clone_subtree( tnode* pNode )
-{
-	stack<tnode*> nodes;
-	nodes.push( pNode );
-	tnode* pClone = new_node( pNode );
-	stack<tnode*> clones;
-	clones.push( pClone );
-	while( !nodes.empty() )
-	{
-		tnode* nodeIdx = nodes.top();
-		tnode* cloneIdx = clones.top();
-		nodes.pop();
-		clones.pop();
-		if( nodeIdx->next )
-		{
-			cloneIdx->next = new_node( nodeIdx->next );
-			nodes.push( nodeIdx->next );
-			clones.push( cloneIdx->next );
-		}
-		if( nodeIdx->right )
-		{
-			cloneIdx->right = new_node( nodeIdx->right );
-			nodes.push( nodeIdx->right );
-			clones.push( cloneIdx->right );
-		}
-		if( nodeIdx->left )
-		{
-			cloneIdx->left = new_node( nodeIdx->left );
-			nodes.push( nodeIdx->left );
-			clones.push( cloneIdx->left );
-		}
-	}
-	return pClone;
-}
-
-//------------------------------------------------------------------------------
-void to_upper(tnode* pNode)
-{
-  if (pNode == NULL) return;
-  if (pNode->eNodeDataType == NODE_DATA_STRING) boost::to_upper(pNode->data.val_str);
-  to_upper(pNode->left);
-  to_upper(pNode->right);
-  to_upper(pNode->next);
 }
 
 //------------------------------------------------------------------------------
 void treeListToNodeArray( tnode* pNode, std::vector<tnode*>& nodes, int tag )
 {
-	if( pNode->tag == tag )
+	if( pNode->getTag() == tag )
 	{
 		// nodes.push_back( pNode->right );
 		treeListToNodeArray( pNode->right, nodes, tag );
@@ -376,11 +384,11 @@ tnode* nodeArrayToTreeList( const std::vector<tnode*>& nodes, int tag )
 	if( nodes.size() == 1 )
 		return nodes[0];
 
-	tnode* pNode = new_node( tag );
+	tnode* pNode = new tnode( tag );
 	tnode* pStart = pNode;
 	for( size_t idx = nodes.size() - 1; idx > 1; --idx )
 	{
-		pNode->left = new_node( tag );
+		pNode->left = new tnode( tag );
 		pNode->right = nodes[idx];
 		pNode = pNode->left;
 	}
@@ -413,7 +421,7 @@ tnode* find_main_node(tnode * pNode, int tag ) {
 
 	if ( pNode == NULL )
 		return NULL;
-	if ( pNode->tag == tag )
+	if ( pNode->getTag() == tag )
 		return pNode;
 	if ( ( pNodeFound = find_main_node( pNode->next, tag ) ) != NULL )
 		return pNodeFound;
@@ -440,7 +448,7 @@ tnode* find_deeper_node(tnode * pNode, int tag, bool with_next ) {
  	if ( ( pNodeFound = find_deeper_node( pNode->right, tag ) ) != NULL )
 		return pNodeFound;
 
-	if ( pNode->tag == tag )
+	if ( pNode->getTag() == tag )
 		return pNode;
 
 	return NULL;
@@ -455,8 +463,7 @@ void dump(const tnode * const pNode, std::ostream& os, std::string indent)
       return;
   }
 
-
-	os << indent << "'" << id_to_kstring(pNode->tag) << "' [" << pNode->tag << ", " << pNode->inf << "] : " << to_string(pNode) << " [address:" << pNode << "]" << std::endl;
+	os << indent << "'" << id_to_kstring(pNode->getTag()) << "' [" << pNode->getTag() << ", " << pNode->inf << "] : " << pNode->to_string() << " [address:" << pNode << "] " << std::endl;
 
   if ((pNode->left != NULL) || (pNode->right != NULL))
   {
@@ -489,16 +496,20 @@ void checkTree( tnode * tree, std::set<tnode*>& nodes)
 
   std::set<tnode*>::iterator it = nodes.find(tree);
   assert(it == nodes.end());
+  if (it != nodes.end())
+  {
+    throw aq::generic_error(aq::generic_error::INVALID_QUERY, "recurse in tnode structure is not allowed");
+  }
   nodes.insert(tree);
 
-  switch (tree->eNodeDataType)
+  switch (tree->getDataType())
   {
   case NODE_DATA_INT: break;
   case NODE_DATA_NUMBER: break;
   case NODE_DATA_STRING: 
-    assert(tree->data.val_str != NULL); 
-    assert((tree->nStrBufCb % STR_BUF_SIZE_ROUND_UP) == 0);
-    assert(tree->nStrBufCb >= strlen(tree->data.val_str));
+    //assert(tree->data.val_str != NULL); 
+    //assert((tree->nStrBufCb % STR_BUF_SIZE_ROUND_UP) == 0);
+    //assert(tree->nStrBufCb >= strlen(tree->data.val_str));
     break;
   }
 

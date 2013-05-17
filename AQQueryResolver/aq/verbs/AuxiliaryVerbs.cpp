@@ -26,10 +26,10 @@ bool ColumnVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 {
 	assert( pNode->left->tag == K_IDENT );
 	assert( pNode->right->tag == K_COLUMN );
-	this->TableName = pNode->left->data.val_str;
+	this->TableName = pNode->left->getData().val_str;
 	Column auxcol;
 	//auxcol.setName( string(pNode->left->data.val_str) + "." + string(pNode->right->data.val_str) );
-	auxcol.setName( pNode->right->data.val_str );
+	auxcol.setName( pNode->right->getData().val_str );
 	this->ColumnOnlyName = auxcol.getName();
 	//debug13 - select will have changed the column names in the result table
 	//to fully qualified names by the time Order::changeResult is called and
@@ -298,8 +298,8 @@ IntValueVerb::IntValueVerb()
 //------------------------------------------------------------------------------
 bool IntValueVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
-	assert( pNode->eNodeDataType == NODE_DATA_INT );
-	this->Result = new Scalar(COL_TYPE_INT, 4, ColumnItem((double)pNode->data.val_int));
+	assert( pNode->getDataType() == NODE_DATA_INT );
+	this->Result = new Scalar(COL_TYPE_INT, 4, ColumnItem((double)pNode->getData().val_int));
 	return false;
 }
 
@@ -319,8 +319,8 @@ DoubleValueVerb::DoubleValueVerb()
 //------------------------------------------------------------------------------
 bool DoubleValueVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
-	assert( pNode->eNodeDataType == NODE_DATA_NUMBER );
-	this->Result = new Scalar(COL_TYPE_DOUBLE, 8, ColumnItem(pNode->data.val_number));
+	assert( pNode->getDataType() == NODE_DATA_NUMBER );
+	this->Result = new Scalar(COL_TYPE_DOUBLE, 8, ColumnItem(pNode->getData().val_number));
 	return false;
 }
 
@@ -340,8 +340,8 @@ StringValueVerb::StringValueVerb()
 //------------------------------------------------------------------------------
 bool StringValueVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
-	assert( pNode->eNodeDataType == NODE_DATA_STRING );
-	this->Result = new Scalar(COL_TYPE_VARCHAR, 128, ColumnItem(pNode->data.val_str)); // FIXME
+	assert( pNode->getDataType() == NODE_DATA_STRING );
+	this->Result = new Scalar(COL_TYPE_VARCHAR, 128, ColumnItem(pNode->getData().val_str)); // FIXME
 	return false;
 }
 
@@ -363,8 +363,8 @@ void replaceTableIdent( aq::tnode* pNode, const char* oldIdent, const char* newI
 {
 	if( !pNode )
 		return;
-	if( pNode->tag == K_PERIOD && strcmp(oldIdent, pNode->left->data.val_str) == 0 )
-		set_string_data( pNode->left, newIdent );
+	if( pNode->tag == K_PERIOD && strcmp(oldIdent, pNode->left->getData().val_str) == 0 )
+		pNode->left->set_string_data( newIdent );
 
 	replaceTableIdent( pNode->left, oldIdent, newIdent );
 	replaceTableIdent( pNode->right, oldIdent, newIdent );
@@ -378,13 +378,13 @@ bool AsVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pS
 	{
 	case K_FROM:
 		assert( pNode && pNode->left );
-		replaceTableIdent( pStart, pNode->right->data.val_str, pNode->left->data.val_str );
-		delete_node( pNode->right );
+		replaceTableIdent( pStart, pNode->right->getData().val_str, pNode->left->getData().val_str );
+		delete pNode->right ;
 		*pNode = *pNode->left; //no memory leaks
 		return true;
 	case K_SELECT:
     assert(pNode->right);
-    this->ident = pNode->right->data.val_str;
+    this->ident = pNode->right->getData().val_str;
 		return false;
 	default:
 		throw verb_error(generic_error::INVALID_QUERY, this->getVerbType());

@@ -153,7 +153,7 @@ set_quantifier  : K_ALL
 				| /* Nothing - ALL is implicit */	{ $$ = NULL; }
 				;
 
-select_list		: K_MUL	/* Asterisk */				{ $$ = $1; $$->tag = K_STAR; }
+select_list		: K_MUL	/* Asterisk */				{ $$ = $1; $$->setTag(K_STAR); }
 				| select_sublist_rec
 				;
 
@@ -217,17 +217,16 @@ replace_clause : K_REPLACE K_LPAREN replace_clause K_COMMA K_STRING K_COMMA K_ST
 				;
 
 as_clause	: column_name							{
-														aq::tnode *pNode;
-														pNode = new_node( K_AS );
+														aq::tnode *pNode = new tnode( K_AS );
 														$$ = pNode;
 
 														/* Generate Qualified Column Reference */
 														#ifdef USE_TSELRESULT_FOR_GENERATED_TABLE
 														/* Use for the generated table : TSelResult */
-														pNode = new_node( K_PERIOD );
+														pNode = new tnode( K_PERIOD );
 														$$->left	 = pNode;
-														pNode->left  = new_node( K_IDENT );
-														set_string_data( pNode->left, "TSelResult" );
+														pNode->left  = new tnode( K_IDENT );
+														pNode->left->set_string_data( "TSelResult" );
 														pNode->right = $1;
 														#else
 														$$->right = $1;
@@ -243,10 +242,10 @@ as_clause	: column_name							{
 														/* Generate Qualified Column Reference */
 														#ifdef USE_TSELRESULT_FOR_GENERATED_TABLE
 														/* Use for the generated table : TSelResult */
-														pNode = new_node( K_PERIOD );
+														pNode = new tnode( K_PERIOD );
 														$$->left	 = pNode;
-														pNode->left  = new_node( K_IDENT );
-														set_string_data( pNode->left, "TSelResult" );
+														pNode->left  = new tnode( K_IDENT );
+														pNode->left->set_string_data( "TSelResult" );
 														pNode->right = $2;
 														#else
 														$1->right = $2;
@@ -386,7 +385,7 @@ table_reference	: table_name
 				| table_name correlation_name		{
 														aq::tnode *pNode;
 														/* Generate K_AS */
-														pNode = new_node( K_AS );
+														pNode = new tnode( K_AS );
 														pNode->left	 = $1;
 														pNode->right = $2;
 														$$ = pNode;
@@ -400,7 +399,7 @@ table_reference	: table_name
 				| derived_table correlation_name	{
 														aq::tnode *pNode;
 														/* Generate K_AS */
-														pNode = new_node( K_AS );
+														pNode = new tnode( K_AS );
 														pNode->left	 = $1;
 														pNode->right = $2;
 														$$ = pNode;
@@ -461,10 +460,10 @@ sort_key	: value_expression						{
 														/* Generate Qualified Column Reference */
 														#ifdef USE_TSELRESULT_FOR_GENERATED_TABLE
 														/* Use for the generated table : TSelResult */
-														pNode		 = new_node( K_PERIOD );
+														pNode		 = new tnode( K_PERIOD );
 														$$			 = pNode;
 														pNode->left  = new_node( K_IDENT );
-														set_string_data( pNode->left, "TSelResult" );
+														pNode->left->set_string_data( "TSelResult" );
 														pNode->right = $1;
 														#else
 														$$ = $1;
@@ -562,7 +561,7 @@ term	: factor
 
 factor	: numeric_primary
 		| sign numeric_primary						{	
-														$1->tag		= K_UMINUS;
+														$1->setTag(K_UMINUS);
 														$1->left	= $2;
 														$$			= $1;
 													}
@@ -605,11 +604,11 @@ value_expression_primary	: column_reference
 column_reference	: qualifier K_PERIOD column_name	{
 														$2->left	= $1;
 														$2->right	= $3;
-														$3->tag		= K_COLUMN;
+														$3->setTag(K_COLUMN);
 														$$			= $2;
 													}
 					| column_name					{
-														$1->tag		= K_COLUMN;
+														$1->setTag(K_COLUMN);
 														$$			= $1;
 													}
 					;
@@ -625,7 +624,7 @@ set_function_specification	: count_all
 
 count_all : K_COUNT K_LPAREN K_MUL K_RPAREN			{
 														$1->left	= $3;
-														$3->tag		= K_STAR;
+														$3->setTag(K_STAR);
 														$$			= $1;
 													}
 			| K_COUNT K_LPAREN set_quantifier value_expression K_RPAREN	{
@@ -873,30 +872,30 @@ comparison_predicate	: row_value_constructor comp_op row_value_constructor	{
 														/* Enforce K_JEQ instead of K_EQ ! */
 														/* Moved to convert_syntax_tree_to_prefix_form() */
 														
-														if ( $1->tag == K_IDENT || 
-															 $1->tag == K_COLUMN || 
-															( $1->tag == K_PERIOD && 
+														if ( $1->getTag() == K_IDENT || 
+															 $1->getTag() == K_COLUMN || 
+															( $1->getTag() == K_PERIOD && 
 															  $1->left != NULL &&
-															  $1->left->tag == K_IDENT &&
+															  $1->left->getTag() == K_IDENT &&
 															  $1->right != NULL &&
-															  ( $1->right->tag == K_IDENT || 
-															    $1->right->tag == K_COLUMN ) ) )
-															if ( $3->tag == K_IDENT || 
-																 $3->tag == K_COLUMN || 
-																( $3->tag == K_PERIOD && 
+															  ( $1->right->getTag() == K_IDENT || 
+															    $1->right->getTag() == K_COLUMN ) ) )
+															if ( $3->getTag() == K_IDENT || 
+																 $3->getTag() == K_COLUMN || 
+																( $3->getTag() == K_PERIOD && 
 																  $3->left != NULL &&
-																  $3->left->tag == K_IDENT &&
+																  $3->left->getTag() == K_IDENT &&
 																  $3->right != NULL &&
-																  ( $3->right->tag == K_IDENT ||
-																    $3->right->tag == K_COLUMN ) ) )
-																    switch( $2->tag )
+																  ( $3->right->getTag() == K_IDENT ||
+																    $3->right->getTag() == K_COLUMN ) ) )
+																    switch( $2->getTag() )
 																    {
-																    case K_EQ: $2->tag = K_JEQ; break;
-																    case K_LT: $2->tag = K_JINF; break;
-																    case K_LEQ: $2->tag = K_JIEQ; break;
-																    case K_GT: $2->tag = K_JSUP; break;
-																    case K_GEQ: $2->tag = K_JSEQ; break;
-																    case K_NEQ: $2->tag = K_JNEQ; break;
+																    case K_EQ: $2->setTag(K_JEQ); break;
+																    case K_LT: $2->setTag(K_JINF); break;
+																    case K_LEQ: $2->setTag(K_JIEQ); break;
+																    case K_GT: $2->setTag(K_JSUP) ; break;
+																    case K_GEQ: $2->setTag(K_JSEQ); break;
+																    case K_NEQ: $2->setTag(K_JNEQ); break;
 																    default:;
 																    };
 														
@@ -1119,7 +1118,7 @@ lead_or_lag_function	: lead_or_lag K_LPAREN lead_or_lag_extent offset_optional K
 														if( $3 != NULL )
 														{
 															aq::tnode *pNode;
-															pNode			= new_node( K_COMMA );
+															pNode			= new tnode( K_COMMA );
 															pNode->left		= $3;
 															pNode->right	= $4;
 															$1->left		= pNode;
@@ -1143,7 +1142,7 @@ offset_optional	: K_COMMA offset default_expression_optional {
 														if( $3 != NULL )
 														{
 															aq::tnode *pNode;
-															pNode			= new_node( K_COMMA );
+															pNode			= new tnode( K_COMMA );
 															pNode->left		= $2;
 															pNode->right	= $3;
 															$$				= pNode;
@@ -1256,7 +1255,7 @@ window_order_clause	: order_by_clause
 
 window_frame_clause	: window_frame_units window_frame_extent /*[ <window frame exclusion> ]*/ {
 														aq::tnode *pNode;
-														pNode			= new_node( K_FRAME );
+														pNode			= new tnode( K_FRAME );
 														pNode->left		= $1;
 														pNode->right	= $2;
 														$$				= pNode;
@@ -1367,7 +1366,7 @@ day_expresssion	: K_DAY K_LPAREN datetime_value_expression K_RPAREN {
 binary_substring_function	: K_SUBSTRING K_LPAREN binary_primary 
 							  K_COMMA start_position K_RPAREN {
 														aq::tnode *pNode;
-														pNode			= new_node( K_COMMA );
+														pNode			= new tnode( K_COMMA );
 														pNode->left		= $3;
 														pNode->right	= $5;
 														$1->left		= pNode;
@@ -1376,10 +1375,10 @@ binary_substring_function	: K_SUBSTRING K_LPAREN binary_primary
 							| K_SUBSTRING K_LPAREN binary_primary 
 							  K_COMMA start_position K_COMMA string_length K_RPAREN {
 														aq::tnode *pNode;
-														pNode			= new_node( K_COMMA );
+														pNode			= new tnode( K_COMMA );
 														pNode->left		= $3;
 														$1->left		= pNode;
-														pNode			= new_node( K_COMMA );
+														pNode			= new tnode( K_COMMA );
 														pNode->left		= $5;
 														pNode->right	= $7;
 														$1->left->left	= $3;
@@ -1413,7 +1412,7 @@ insert_stmt	: K_INSERT K_INTO table_name K_LPAREN column_name_list K_RPAREN
 			  K_VALUES K_LPAREN value_list K_RPAREN	{
 														$1->left		= $3;
 														aq::tnode *pNode;
-														pNode			= new_node( K_INSERT_ARGS );
+														pNode			= new tnode( K_INSERT_ARGS );
 														$1->right		= pNode;
 														pNode->left		= $5;
 														pNode->right	= $9;
@@ -1423,7 +1422,7 @@ insert_stmt	: K_INSERT K_INTO table_name K_LPAREN column_name_list K_RPAREN
 			  select_stmt							{
 														$1->left		= $3;
 														aq::tnode *pNode;
-														pNode			= new_node( K_INSERT_ARGS );
+														pNode			= new tnode( K_INSERT_ARGS );
 														$1->right		= pNode;
 														pNode->left		= $5;
 														pNode->right	= $7;
@@ -1451,7 +1450,7 @@ update_stmt	: K_UPDATE table_name
 			  K_WHERE column_value_list				{
 														$1->left		= $2;
 														aq::tnode *pNode;
-														pNode			= new_node( K_UPDATE_ARGS );
+														pNode			= new tnode( K_UPDATE_ARGS );
 														$1->right		= pNode;
 														pNode->left		= $4;
 														pNode->right	= $6;
@@ -1462,7 +1461,7 @@ update_stmt	: K_UPDATE table_name
 			  K_WHERE K_LPAREN column_name_list K_RPAREN K_IN subquery	{
 														$1->left		= $2;
 														aq::tnode *pNode;
-														pNode			= new_node( K_UPDATE_ARGS );
+														pNode			= new tnode( K_UPDATE_ARGS );
 														$1->right		= pNode;
 														pNode->left		= $4;
 														pNode->right	= $9;
@@ -1591,13 +1590,13 @@ merge_stmt	: K_MERGE optional_into table_reference K_USING table_reference
 			  K_ON search_condition
 			  when_matched when_not_matched when_not_matched_by_source	{
 														aq::tnode *pNode1;
-														pNode1			= new_node( K_MERGE_ARGS1 );
+														pNode1			= new tnode( K_MERGE_ARGS1 );
 														$1->left		= pNode1;
 														pNode1->left	= $3;
 														pNode1->right	= $5;
 														$1->right		= $7;
 														aq::tnode *pNode2;
-														pNode2			= new_node( K_MERGE_ARGS2 );
+														pNode2			= new tnode( K_MERGE_ARGS2 );
 														$1->next		= pNode2;
 														pNode2->left	= $8;
 														pNode2->right	= $9;

@@ -69,26 +69,26 @@ void show_node( aq::tnode *pNode, std::string& str, char* szTmpBuf, char* szBuff
 	pszToAdd = NULL;
 	switch ( pNode->tag ) {
 		case K_INTEGER:
-			sprintf( szTmpBuf, "K_VALUE %lld", pNode->data.val_int );
+			sprintf( szTmpBuf, "K_VALUE %lld", pNode->getData().val_int );
 			pszToAdd = szTmpBuf;
 			break;
 		case K_REAL:
-			doubleToString( szBuffer, pNode->data.val_number );
+			doubleToString( szBuffer, pNode->getData().val_number );
 			sprintf( szTmpBuf, "K_VALUE %s", szBuffer );
 			//sprintf( szTmpBuf, "K_VALUE %.2lf", pNode->data.val_number );
 			pszToAdd = szTmpBuf;
 			break;
 		case K_STRING:
-			sprintf( szTmpBuf, "K_VALUE '%s'", pNode->data.val_str );
+			sprintf( szTmpBuf, "K_VALUE '%s'", pNode->getData().val_str );
 			pszToAdd = szTmpBuf;
 			break;
 		case K_DATE_VALUE:
-			bigIntToDate( pNode->data.val_int, DDMMYYYY_HHMMSS, szTmpBuf );
+			bigIntToDate( pNode->getData().val_int, DDMMYYYY_HHMMSS, szTmpBuf );
 			pszToAdd = szTmpBuf;
 			break;
 		case K_IDENT:
 		case K_COLUMN:
-			pszToAdd = pNode->data.val_str;
+			pszToAdd = pNode->getData().val_str;
 			break;
 		default:
 			pszToAdd = id_to_string( pNode->tag );
@@ -136,15 +136,15 @@ void getTableAndColumnName(aq::tnode * n, std::string& table, std::string& colum
 	
 	if (n->tag == K_COLUMN)
 	{
-		column = n->data.val_str;
+		column = n->getData().val_str;
 	}
 	else if (( n->tag == K_PERIOD ) &&
 					 ( (n->left != NULL) && (n->right != NULL) ) &&
 					 ( n->left->tag == K_IDENT ) &&
 					 ( (n->right->tag == K_IDENT) || (n->right->tag == K_COLUMN) ) )
 	{
-		table = n->left->data.val_str;
-		column = n->right->data.val_str;
+		table = n->left->getData().val_str;
+		column = n->right->getData().val_str;
 	}
 }
 
@@ -169,7 +169,7 @@ void getTableAlias(aq::tnode *pNode, std::map<std::string, std::string>& tablesA
 				(pNode->left != NULL) && (pNode->left->tag == K_IDENT) &&
 				(pNode->right != NULL) && (pNode->right->tag == K_IDENT))
 		{
-			tablesAlias.insert(std::make_pair(pNode->right->data.val_str, pNode->left->data.val_str));
+			tablesAlias.insert(std::make_pair(pNode->right->getData().val_str, pNode->left->getData().val_str));
 		}
 		else
 		{
@@ -259,22 +259,22 @@ std::string& syntax_tree_to_sql_form(aq::tnode * pNode, std::string& query, unsi
 		std::ostringstream stmp;
 		switch ( pNode->tag ) {
 		case K_INTEGER:
-			stmp << pNode->data.val_int;
+			stmp << pNode->getData().val_int;
 			break;
 		case K_REAL:
-			stmp << pNode->data.val_number;
+			stmp << pNode->getData().val_number;
 			break;
 		case K_DATE_VALUE:
 		{
 			char tmp[128];
-			bigIntToDate( pNode->data.val_int, DDMMYYYY_HHMMSS, tmp );
+			bigIntToDate( pNode->getData().val_int, DDMMYYYY_HHMMSS, tmp );
 			stmp << tmp;
 		}
 			break;
 		case K_STRING:
 		case K_IDENT:
 		case K_COLUMN:
-			stmp << pNode->data.val_str;
+			stmp << pNode->getData().val_str;
 			break;
 		default:
 			stmp << id_to_sql_string( pNode->tag );

@@ -41,7 +41,7 @@ void solveAQMatrix(aq::AQMatrix& aqMatrix,
       for (std::vector<aq::tnode**>::const_iterator it = columnGroup.begin(); it != columnGroup.end(); ++it)
       {
         const aq::tnode * node = **it;
-        if ((strcmp(c->getTableName().c_str(), node->left->data.val_str) == 0) && (strcmp(c->getName().c_str(), node->right->data.val_str) == 0))
+        if ((strcmp(c->getTableName().c_str(), node->left->getData().val_str) == 0) && (strcmp(c->getName().c_str(), node->right->getData().val_str) == 0))
         {
           c->GroupBy = true;
           break;
@@ -73,7 +73,6 @@ void solveAQMatrix(aq::AQMatrix& aqMatrix,
     if (columns.size() == 0)
     {
       ColumnItem::Ptr item(new ColumnItem((double)aqMatrix.getTotalCount()));
-      // aq::RowProcess_Intf::row_t row(1, aq::RowProcess_Intf::row_item_t(item, COL_TYPE_INT, "", "Count"));
       aq::RowProcess_Intf::Row row;
       row.row.push_back(aq::RowProcess_Intf::row_item_t(item, COL_TYPE_INT, 4, "", "Count"));
       rowProcess->process(row);
@@ -115,11 +114,6 @@ void solveAQMatrix(aq::AQMatrix& aqMatrix,
 
       rowProcess->process(row);
 
-      if ((i % 10000) == 0)
-      {
-        std::cout << i << std::endl;
-      }
-
     }
     
     // the flush must be done only when an aggregate operation occur
@@ -128,17 +122,16 @@ void solveAQMatrix(aq::AQMatrix& aqMatrix,
 
   }
 
-  void solveAQMatrix(
-    aq::AQMatrix& aqMatrix, 
-    const std::vector<uint64_t>& tableIDs, 
-    const std::vector<Column::Ptr>& columnTypes, 
-    const TProjectSettings& settings, 
-    const aq::base_t& baseDesc, 
-    boost::shared_ptr<aq::RowProcess_Intf> rowProcess)
-  {
-    // TODO
-    assert(false);
-    throw aq::generic_error(aq::generic_error::NOT_IMPLEMENED, "__FUNCTION__");
-  }
+void solveAQMatrix(aq::AQMatrix& aqMatrix, 
+                   const std::vector<uint64_t>& tableIDs, 
+                   const std::vector<Column::Ptr>& columnTypes, 
+                   const TProjectSettings& settings, 
+                   const aq::base_t& baseDesc, 
+                   boost::shared_ptr<aq::RowProcess_Intf> rowProcess)
+{
+  // TODO
+  assert(false);
+  throw aq::generic_error(aq::generic_error::NOT_IMPLEMENED, "__FUNCTION__");
+}
 
 }

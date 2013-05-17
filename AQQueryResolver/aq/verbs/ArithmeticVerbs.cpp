@@ -117,7 +117,7 @@ bool BinaryVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 	this->Disabled = true;
 	delete_subtree( pNode->left );		pNode->left = NULL;
 	delete_subtree( pNode->right );		pNode->right = NULL;
-	set_data( *pNode, scalar->getValue(), scalar->Type );
+	pNode->set_data( scalar->getValue(), scalar->Type );
 	return true;
 }
 

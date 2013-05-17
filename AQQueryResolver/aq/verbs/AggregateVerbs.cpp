@@ -762,7 +762,7 @@ LagVerb::LagVerb(): Offset(0), Default(NULL)
 //------------------------------------------------------------------------------
 LagVerb::~LagVerb()
 {
-	delete_node( this->Default );
+	delete this->Default ;
 }
 
 //------------------------------------------------------------------------------
@@ -781,14 +781,14 @@ bool LagVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* p
 		{
 			aq::tnode* pAux = pNode->left->right;
 			assert( pAux->left && pAux->left->tag == K_INTEGER );
-			this->Offset = pAux->left->data.val_int;
+			this->Offset = pAux->left->getData().val_int;
 			assert( pAux->right );
-			this->Default = new_node( pAux->right );
+			this->Default = new aq::tnode( *pAux->right );
 		}
 		else
 		{
 			assert( pNode->left->right->tag == K_INTEGER );
-			this->Offset = pNode->left->right->data.val_int;
+			this->Offset = pNode->left->right->getData().val_int;
 		}
 	}
 	return false;
@@ -817,10 +817,10 @@ void LagVerb::changeResult(	Table::Ptr table,
 		case COL_TYPE_DATE2:
 		case COL_TYPE_DATE3:
 		case COL_TYPE_DOUBLE:
-			defaultValue = new ColumnItem(static_cast<double>(this->Default->data.val_int));
+			defaultValue = new ColumnItem(static_cast<double>(this->Default->getData().val_int));
 			break;
 		case COL_TYPE_VARCHAR:
-			defaultValue = new ColumnItem(this->Default->data.val_str);
+			defaultValue = new ColumnItem(this->Default->getData().val_str);
 			break;
 		}
 	}

@@ -20,36 +20,47 @@ typedef enum {
 } tnodeDataType;
 
 //------------------------------------------------------------------------------
-struct tnode 
+class tnode 
 {
+public:
+  tnode(short _tag);
+  tnode(const tnode& source);
+  ~tnode();
+  tnode& operator=(const tnode& source);
+
+	tnode * left;
+	tnode * right;
+	tnode * next;
+  tnode * parent;
+	int inf; /// used by Verbs to exchange information, TODO : use a callback interface
 	short tag;
+  
+  void setTag(short _tag) { this->tag = _tag; }
+  short getTag() const { return tag; }
+  tnodeDataType getDataType() const { return eNodeDataType; }
+  const data_holder_t& getData() const { return data; }
+  std::string to_string() const;
+ 
+  void set_string_data(const char* pszStr);
+  void append_string_data(char* pszStr);
+  void to_upper();
+  void set_int_data(llong nVal);
+  void set_double_data(double dVal);
+  void set_data(const data_holder_t data, ColumnType type);
+
+private:
 	tnodeDataType	eNodeDataType;
 	data_holder_t data;		 /// data of the node
 	size_t nStrBufCb;		/// String Buffer (data.val_str) allocated bytes
-	int inf; /// used by Verbs to exchange information, TODO : use a callback interface
 
-	struct tnode * left;
-	struct tnode * right;
-	struct tnode * next;
-  struct tnode * parent;
 
 } ;
 
 //------------------------------------------------------------------------------
 void report_error( char* pszMsg, int bExit );
-tnode* new_node( short tag );
-tnode* new_node( tnode* pNode );
-tnode* set_string_data( tnode* pNode, const char* pszStr );
-tnode* append_string_data( tnode* pNode, char* pszStr );
-tnode* set_int_data( tnode* pNode, llong nVal );
-tnode* set_double_data( tnode* pNode, double dVal );
-tnode* delete_node( tnode* pNode );
+tnode* clone_subtree( tnode* pNode );
 void delete_subtree( tnode* pNode );
 tnode* get_leftmost_child( tnode *pNode );
-tnode& set_data( tnode& pNode, const data_holder_t data, ColumnType type );
-std::string to_string(const tnode* const pNode );
-tnode* clone_subtree( tnode* pNode );
-void to_upper(tnode* pNode);
 
 //------------------------------------------------------------------------------
 void treeListToNodeArray( tnode* pNode, std::vector<tnode*>& nodes, int tag );

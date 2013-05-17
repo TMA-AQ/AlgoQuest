@@ -34,13 +34,13 @@ void getAllColumns( aq::tnode* pNode, vector<aq::tnode*>& columns )
 			if( !columns[idx] )
 				continue;
 
-			std::string table1(columns[idx]->left->data.val_str);
+			std::string table1(columns[idx]->left->getData().val_str);
 			strtoupr( table1 );
-			std::string table2(pNode->left->data.val_str);
+			std::string table2(pNode->left->getData().val_str);
 			strtoupr( table2 );
-			std::string col1(columns[idx]->right->data.val_str);
+			std::string col1(columns[idx]->right->getData().val_str);
 			strtoupr( col1 );
-			std::string col2(pNode->right->data.val_str);
+			std::string col2(pNode->right->getData().val_str);
 			strtoupr( col2 );
 
 			if( columns[idx]->tag == K_PERIOD &&
@@ -52,7 +52,7 @@ void getAllColumns( aq::tnode* pNode, vector<aq::tnode*>& columns )
 		}
 		if( !found )
 		{
-			columns.push_back( clone_subtree(pNode) );
+			columns.push_back( aq::clone_subtree(pNode) );
 			pNode = NULL;
 		}
 		return;
@@ -69,19 +69,19 @@ void extractName( aq::tnode* pNode, std::string& name )
 		return;
 	if( pNode->tag == K_AS )
 	{
-		name += pNode->right->data.val_str;
+		name += pNode->right->getData().val_str;
 	}
 	else if( pNode->tag == K_PERIOD )
 	{
 		if( name != "" )
 			name += " ";
-		name += pNode->left->data.val_str;
+		name += pNode->left->getData().val_str;
 		name += ".";
-		name += pNode->right->data.val_str;
+		name += pNode->right->getData().val_str;
 	}
 	else if( pNode->tag == K_COLUMN )
 	{
-		name += pNode->data.val_str;
+		name += pNode->getData().val_str;
 	}
 	else
 	{
@@ -133,17 +133,17 @@ bool SelectVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 		std::string name;
 		if( columns[idx]->tag == K_PERIOD )
 		{
-			name += columns[idx]->left->data.val_str;
+			name += columns[idx]->left->getData().val_str;
 			name += ".";
-			name += columns[idx]->right->data.val_str;
+			name += columns[idx]->right->getData().val_str;
 		}
 		else
 		{
 			if( columns[idx]->tag == K_AS && columns[idx]->left->tag == K_PERIOD )
 			{
-				name += columns[idx]->left->left->data.val_str;
+				name += columns[idx]->left->left->getData().val_str;
 				name += ".";
-				name += columns[idx]->left->right->data.val_str;
+				name += columns[idx]->left->right->getData().val_str;
 			}
 			columns[idx]->tag = K_DELETED;
 			columns[idx] = NULL;
@@ -166,13 +166,13 @@ bool SelectVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 	}
 	
 	aq::tnode* pAuxNode = pNode->left;
-	pNode->left = new_node( K_COMMA );
+	pNode->left = new aq::tnode( K_COMMA );
 	pNode = pNode->left;
 	pNode->right = pAuxNode;
 	
 	for( size_t idx = this->Columns.size(); idx < columns.size() - 1; ++idx )
 	{
-		pNode->left = new_node( K_COMMA );
+		pNode->left = new aq::tnode( K_COMMA );
 		pNode = pNode->left;
 		pNode->right = columns[idx];
 	}
@@ -308,7 +308,7 @@ void processNot( aq::tnode*& pNode, bool applyNot )
 			aq::tnode* auxNode = pNode;
 			pNode = pNode->left;
 			auxNode->left = NULL;
-			delete_node( auxNode );
+			delete auxNode ;
 			processNot( pNode, !applyNot );
 		}
 		break;
@@ -414,11 +414,11 @@ void processNot( aq::tnode*& pNode, bool applyNot )
 		{
 			aq::tnode* auxNode = pNode->right;
 			pNode->right = pNode->right->left;
-			delete_node( auxNode );
+			delete auxNode ;
 		}
 		else if( pNode->right->tag == K_NULL )
 		{
-			aq::tnode* auxNode = new_node( K_NOT );
+			aq::tnode* auxNode = new aq::tnode( K_NOT );
 			auxNode->left = pNode->right;
 			pNode->right = auxNode;
 		}
@@ -518,8 +518,8 @@ bool OrderVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode*
 			for( size_t idx2 = 0; idx2 < selectColumns.size(); ++idx2 )
 				if( selectColumns[idx2] &&
 					selectColumns[idx2]->tag == K_AS &&
-					strcmp( selectColumns[idx2]->right->data.val_str,
-						columns[idx]->data.val_str ) == 0
+					strcmp( selectColumns[idx2]->right->getData().val_str,
+						columns[idx]->getData().val_str ) == 0
 					)
 				{
 					colIdx = (int) idx2;
@@ -528,7 +528,7 @@ bool OrderVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode*
 			if( colIdx < 0 )
 				throw verb_error(generic_error::INVALID_QUERY, this->getVerbType());
 			columns[idx]->tag = K_INTEGER;
-			set_int_data( columns[idx], colIdx + 1 );
+			columns[idx]->set_int_data( colIdx + 1 );
 		}
 	return false;
 }

@@ -213,7 +213,7 @@ VerbNode::Ptr VerbNode::BuildVerbsTree( aq::tnode* pStart, const std::vector<uns
 	if( pStart->tag != K_SELECT )
 		throw 0; // TODO
 
-	aq::tnode* pStartOriginal = clone_subtree( pStart );
+	aq::tnode* pStartOriginal = aq::clone_subtree(pStart);
 	
 	VerbNode::Ptr spLast = NULL;
 	for( size_t idx = 0; idx < categories_order.size(); ++idx )

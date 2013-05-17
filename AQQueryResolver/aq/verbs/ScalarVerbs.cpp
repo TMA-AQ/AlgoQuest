@@ -85,7 +85,7 @@ bool ScalarVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 	this->Disabled = true;
 	delete_subtree( pNode->left );		pNode->left = NULL;
 	delete_subtree( pNode->right );		pNode->right = NULL;
-	set_data( *pNode, scalar->getValue(), scalar->Type );
+	pNode->set_data( scalar->getValue(), scalar->Type );
 	return true;
 }
 
@@ -213,14 +213,14 @@ bool SubstringVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tn
 	{
 		assert( pNode->left->right->left->tag == K_INTEGER );
 		assert( pNode->left->right->right->tag == K_INTEGER );
-		this->StartPos = pNode->left->right->left->data.val_int;
-		this->Size = pNode->left->right->right->data.val_int;
+		this->StartPos = pNode->left->right->left->getData().val_int;
+		this->Size = pNode->left->right->right->getData().val_int;
 		pNode->left->right->inf = 1;
 	}
 	else
 	{
 		assert( pNode->left->right->tag == K_INTEGER );
-		this->StartPos = pNode->left->right->data.val_int;
+		this->StartPos = pNode->left->right->getData().val_int;
 	}
 	if( this->StartPos == 0 )
 		this->StartPos = 1;
@@ -249,7 +249,7 @@ bool ToDateVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode
 	if( pNode->right )
 	{
 		assert( pNode->right->tag == K_STRING );
-		char *strval = pNode->right->data.val_str;
+		char *strval = pNode->right->getData().val_str;
 		if( strcmp( strval, "DD/MM/YYYY" ) == 0 )
 			this->OutputType = COL_TYPE_DATE2;
 		else if( strcmp( strval, "DD/MM/YY" ) == 0 )
