@@ -15,7 +15,7 @@ public:
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
-  virtual void addResult(	aq::RowProcess_Intf::Row& row, 
+  virtual void addResult(	aq::Row& row, 
     VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
 
 	std::string getTableName() const;
@@ -50,7 +50,7 @@ public:
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
-	virtual void addResult( aq::RowProcess_Intf::Row& row, 
+	virtual void addResult( aq::Row& row, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
   virtual void accept(VerbVisitor*);
 };
@@ -122,7 +122,7 @@ public:
 	virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
-  void addResult(aq::RowProcess_Intf::Row& row, 
+  void addResult(aq::Row& row, 
     VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
 	virtual void accept(VerbVisitor* visitor);
   const std::string& getIdent() const { return ident; }

@@ -330,6 +330,7 @@
     <ClInclude Include="aq\parser\SQLParser.h" />
     <ClInclude Include="aq\QueryAnalyzer.h" />
     <ClInclude Include="aq\QueryResolver.h" />
+    <ClInclude Include="aq\Row.h" />
     <ClInclude Include="aq\RowProcesses.h" />
     <ClInclude Include="aq\RowProcess_Intf.h" />
     <ClInclude Include="aq\RowTemporaryWritter.h" />

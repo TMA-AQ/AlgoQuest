@@ -104,7 +104,7 @@ public:
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
-	virtual void addResult( aq::RowProcess_Intf::Row& row, 
+	virtual void addResult( aq::Row& row, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
   void accept(VerbVisitor* visitor);
   virtual void setSettings(TProjectSettings* settings)
@@ -112,8 +112,8 @@ public:
     this->useRowResolver = settings->useRowResolver;
   }
 private:
-  aq::RowProcess_Intf::Row row_prv;
-  aq::RowProcess_Intf::Row row_acc;
+  aq::Row row_prv;
+  aq::Row row_acc;
   bool useRowResolver;
   // std::list<RowProcess_Intf::row_t> rows;
 };

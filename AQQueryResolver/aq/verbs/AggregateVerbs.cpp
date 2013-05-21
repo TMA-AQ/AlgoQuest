@@ -89,7 +89,7 @@ void AggregateVerb::changeResult(	Table::Ptr table,
 }
 
 //------------------------------------------------------------------------------
-void AggregateVerb::addResult(aq::RowProcess_Intf::Row& row, 
+void AggregateVerb::addResult(aq::Row& row, 
                         VerbResult::Ptr resLeft,
                         VerbResult::Ptr resRight, 
                         VerbResult::Ptr resNext )

@@ -223,6 +223,9 @@
     <ClInclude Include="aq\ColumnMapper_Intf.h">
       <Filter>Header Files\aq</Filter>
     </ClInclude>
+    <ClInclude Include="aq\Row.h">
+      <Filter>Header Files\aq\row_resolver</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="aq\verbs\AggregateVerbs.cpp">

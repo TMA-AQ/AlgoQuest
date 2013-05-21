@@ -73,20 +73,23 @@ void solveAQMatrix(aq::AQMatrix& aqMatrix,
     if (columns.size() == 0)
     {
       ColumnItem::Ptr item(new ColumnItem((double)aqMatrix.getTotalCount()));
-      aq::RowProcess_Intf::Row row;
-      row.row.push_back(aq::RowProcess_Intf::row_item_t(item, COL_TYPE_INT, 4, "", "Count"));
+      aq::Row row;
+      // TODO
+      // row.com.push_back(aq::Row_item_t(item, COL_TYPE_INT, 4, "", "Count"));
       rowProcess->process(row);
       return;
     }
 
-    size_t row_size = aqMatrix.hasCountColumn() ? columns.size() + 1 : columns.size();
+    size_t row_size = columns.size();
 
     // For each Row
+    aq::Row row;
+    row.initialRow.resize(row_size, aq::row_item_t(ColumnItem::Ptr(), COL_TYPE_BIG_INT, 8, "", ""));
     for (size_t i = 0; i < aqMatrix.getSize(); ++i)
     {
-
-      aq::RowProcess_Intf::Row row;
-      row.row.resize(row_size, RowProcess_Intf::row_item_t(ColumnItem::Ptr(), COL_TYPE_BIG_INT, 8, "", ""));
+      row.computedRow.clear();
+      row.completed = true;
+      row.flush = false;
       for (size_t j = 0; j < mapToUniqueIndex.size(); ++j) 
       {
         for (size_t c = 0; c < columns.size(); ++c)
@@ -94,22 +97,20 @@ void solveAQMatrix(aq::AQMatrix& aqMatrix,
           assert(mapToUniqueIndex[j][i] < uniqueIndex[j].size());
           if (columns[c]->TableID == tableIDs[j])
           {
-            row.row[c+1] = RowProcess_Intf::row_item_t(
+            row.initialRow[c] = aq::row_item_t(
               columnsMapper[c]->loadValue(uniqueIndex[j][mapToUniqueIndex[j][i]]), 
               columnTypes[c]->Type,
               columnTypes[c]->Size,
               columns[c]->getTableName(),
               columns[c]->getName());
-            row.row[c+1].grouped = columns[c]->GroupBy;
+            row.initialRow[c].grouped = columns[c]->GroupBy;
           }
         }
       }
 
       if (aqMatrix.hasCountColumn())
       {
-        ColumnItem::Ptr item(new ColumnItem((double)count[i]));
-        row.row[0] = RowProcess_Intf::row_item_t(item, COL_TYPE_BIG_INT, 8, "", "Count", true);
-        // row.row[0].displayed = true;
+        row.count = count[i];
       }
 
       rowProcess->process(row);

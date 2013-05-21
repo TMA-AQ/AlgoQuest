@@ -12,7 +12,8 @@ TemporaryColumnMapper::TemporaryColumnMapper(const char * _path, size_t _tableId
   columnId(_columnId),
   itemSize(_itemSize),
   itemType(_itemType),
-  packetSize(_packetSize)
+  packetSize(_packetSize),
+  currentPacket(0)
 {
   char prefix[ 25 ];
   char type_str[4];
@@ -30,7 +31,7 @@ TemporaryColumnMapper::TemporaryColumnMapper(const char * _path, size_t _tableId
   sprintf( prefix, "B001TMP%.4uC%.4u%s%.4uP", tableId, columnId, type_str, itemSize );
 	getFileNames(path.c_str(), this->temporaryFiles, prefix );
   assert(!this->temporaryFiles.empty());
-	this->tmpMapper.reset(new aq::FileMapper(this->temporaryFiles[0].c_str()));
+	this->tmpMapper.reset(new aq::FileMapper(this->temporaryFiles[this->currentPacket].c_str()));
 }
 
 TemporaryColumnMapper::~TemporaryColumnMapper()
@@ -39,6 +40,14 @@ TemporaryColumnMapper::~TemporaryColumnMapper()
 
 ColumnItem::Ptr TemporaryColumnMapper::loadValue(size_t offset)
 {
+  size_t packet = offset / packetSize;
+  offset = offset % packetSize;
+  if (packet != currentPacket)
+  {
+    currentPacket = packet;
+    this->tmpMapper.reset(new aq::FileMapper(this->temporaryFiles[this->currentPacket].c_str()));
+  }
+
 	ColumnItem::Ptr value(new ColumnItem);
   switch (itemType)
 	{

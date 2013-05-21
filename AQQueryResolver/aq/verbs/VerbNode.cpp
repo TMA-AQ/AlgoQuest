@@ -119,7 +119,7 @@ void VerbNode::changeResult( Table::Ptr table )
 }
 
 //------------------------------------------------------------------------------
-void VerbNode::addResult(aq::RowProcess_Intf::Row& row)
+void VerbNode::addResult(aq::Row& row)
 {
 	if( this->Brother )
 		this->Brother->addResult( row );
@@ -210,6 +210,7 @@ VerbNode::Ptr VerbNode::build( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* p
 //------------------------------------------------------------------------------
 VerbNode::Ptr VerbNode::BuildVerbsTree( aq::tnode* pStart, const std::vector<unsigned int>& categories_order, Base& baseDesc, TProjectSettings * settings )
 {
+  aq::Logger::getInstance().log(AQ_DEBUG, "build verb tree\n");
 	if( pStart->tag != K_SELECT )
 		throw 0; // TODO
 

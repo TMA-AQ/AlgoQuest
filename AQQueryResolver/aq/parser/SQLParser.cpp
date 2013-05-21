@@ -338,7 +338,7 @@ tnode* clone_subtree(tnode* pNode)
 }
 
 //------------------------------------------------------------------------------
-void delete_subtree( tnode* pNode ) {
+void delete_subtree( tnode*& pNode ) {
 	if( !pNode )
 		return;
 
@@ -361,6 +361,8 @@ void delete_subtree( tnode* pNode ) {
 		nodes[idx]->set_string_data( NULL );	/* Delete String Buffer if any */
 		delete nodes[idx];
 	}
+
+  pNode = NULL;
 }
 
 //------------------------------------------------------------------------------

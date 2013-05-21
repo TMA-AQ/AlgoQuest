@@ -68,7 +68,7 @@ public:
 
   /// Apply the verb on the row
   /// This method is called in bottom-up order in the verb tree
-  virtual void addResult ( aq::RowProcess_Intf::Row& row, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext ) = 0;
+  virtual void addResult ( aq::Row& row, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext ) = 0;
   //{
   //}
 

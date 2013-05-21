@@ -59,7 +59,7 @@ private:
 //------------------------------------------------------------------------------
 void report_error( char* pszMsg, int bExit );
 tnode* clone_subtree( tnode* pNode );
-void delete_subtree( tnode* pNode );
+void delete_subtree( tnode*& pNode );
 tnode* get_leftmost_child( tnode *pNode );
 
 //------------------------------------------------------------------------------

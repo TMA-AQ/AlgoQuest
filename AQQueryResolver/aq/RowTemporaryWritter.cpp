@@ -4,11 +4,12 @@
 namespace aq
 {
   
-  RowTemporaryWritter::RowTemporaryWritter(unsigned int _tableId, const char * _path)
+  RowTemporaryWritter::RowTemporaryWritter(unsigned int _tableId, const char * _path, unsigned int _packetSize)
     : 
     RowWritter(_path),
     tableId(_tableId),
-    path(_path)
+    path(_path),
+    packetSize(_packetSize)
   {
   }
   
@@ -25,7 +26,7 @@ namespace aq
     if (this->columns.size() == 0)
     {
       uint16_t columnId = 1;
-      for (row_t::const_reverse_iterator it = row.row.rbegin(); it != row.row.rend(); ++it)
+      for (Row::row_t::const_reverse_iterator it = row.computedRow.rbegin(); it != row.computedRow.rend(); ++it)
       {
         if (!(*it).displayed)
           continue;
@@ -58,9 +59,10 @@ namespace aq
     if (row.completed)
     {
       this->totalCount += 1;
+
       uint16_t c = 0;
-      uint64_t count = static_cast<uint64_t>((*row.row.begin()).item->numval);
-      for (row_t::const_reverse_iterator it = row.row.rbegin(); it != row.row.rend(); ++it)
+      uint64_t count = row.count;
+      for (Row::row_t::const_reverse_iterator it = row.computedRow.rbegin(); it != row.computedRow.rend(); ++it)
       {
         if (!(*it).displayed)
           continue;
@@ -99,6 +101,20 @@ namespace aq
             free(value);
           }
           break;
+        }
+        
+        if ((this->totalCount % this->packetSize) == 0)
+        {
+          unsigned int packet = this->totalCount / this->packetSize;
+          unsigned int ID = c + 1;
+          unsigned int size = (*it).size; 
+          aq::ColumnType type = (*it).type;
+          std::string type_str = columnTypeToStr(type);
+          boost::shared_ptr<ColumnTemporaryWritter> ctw = this->columnsWritter[c];
+          ctw->filename = getTemporaryFileName( tableId, ID, packet, type_str.c_str(), size);
+          ctw->filename = path + "/" + ctw->filename;
+          fclose(ctw->file);
+          ctw->file = fopen(ctw->filename.c_str(), "wb");
         }
 
         this->columnsWritter[c]->nbEl += 1;

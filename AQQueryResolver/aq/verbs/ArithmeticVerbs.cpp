@@ -134,7 +134,7 @@ void BinaryVerb::changeResult(	Table::Ptr table,
 }
 
 //------------------------------------------------------------------------------
-void BinaryVerb::addResult(	aq::RowProcess_Intf::Row& row, 
+void BinaryVerb::addResult(	aq::Row& row, 
 								VerbResult::Ptr resLeft, 
 								VerbResult::Ptr resRight, 
 								VerbResult::Ptr resNext )

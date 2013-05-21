@@ -84,6 +84,7 @@ Table::Ptr QueryResolver::solve()
 //-------------------------------------------------------------------------------
 Table::Ptr QueryResolver::SolveSelectRegular()
 {
+  aq::Logger::getInstance().log(AQ_DEBUG, "solve query\n");
 	Table::Ptr table;
 
   this->changeTemporaryTableName(this->sqlStatement);
@@ -96,13 +97,13 @@ Table::Ptr QueryResolver::SolveSelectRegular()
 	aq::MakeBackupFile( pSettings->szOutputFN, aq::backup_type_t::Before, this->level, this->id );
 #endif
 
-// #ifdef _DEBUG
+#ifdef _DEBUG
   std::ostringstream oss;
   oss << *this->sqlStatement << std::endl;
   std::cout << oss.str() << std::endl;
   std::string stmp1 = oss.str();
-// #endif
-
+#endif
+  
   //
   // processing order of main verb of the request depends of the resolution mode ('by row' or 'by column')
   std::vector<unsigned int> categories_order;
@@ -125,16 +126,13 @@ Table::Ptr QueryResolver::SolveSelectRegular()
     categories_order.push_back( K_ORDER );
   }
   
-
 	//
 	// Query Pre Processing (TODO : optimize tree by detecting identical subtrees)
 	timer.start();
 	aq::verb::VerbNode::Ptr spTree = aq::verb::VerbNode::BuildVerbsTree( this->sqlStatement, categories_order, this->BaseDesc, this->pSettings );
 	spTree->changeQuery();
   
-  aq::Logger::getInstance().log(AQ_INFO, "pouet 1\n");
-
-// #ifdef _DEBUG
+#ifdef _DEBUG
   {
     std::cout << *this->sqlStatement << std::endl;
     aq::verb::VerbNode::dump(std::cout, spTree);
@@ -142,17 +140,13 @@ Table::Ptr QueryResolver::SolveSelectRegular()
     spTree->accept(&printer);
     std::cout << std::endl << printer.getQuery() << std::endl;
   }
-// #endif
+#endif
   
-  aq::Logger::getInstance().log(AQ_INFO, "pouet 2\n");
-
   std::set<aq::tnode*> nodes;
   checkTree( this->sqlStatement, nodes);
 	aq::cleanQuery( this->sqlStatement );
 	aq::Logger::getInstance().log(AQ_INFO, "Query Preprocessing: Time elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
   
-  aq::Logger::getInstance().log(AQ_INFO, "pouet 3\n");
-
 	//
 	// Solve Optimal Min/Max : FIXME
 	//timer.start();
@@ -304,9 +298,10 @@ void QueryResolver::buildTemporaryTable(aq::tnode * pNode)
 
   // build table
   this->id_generator += 1;
-  boost::shared_ptr<QueryResolver> interiorQuery(new QueryResolver(pNode, pSettings, aq_engine, BaseDesc, this->id_generator, this->level + 1));
+  boost::shared_ptr<QueryResolver> interiorQuery(new QueryResolver(aq::clone_subtree(pNode), pSettings, aq_engine, BaseDesc, this->id_generator, this->level + 1));
   interiorQuery->solve();
   this->nestedTables.insert(std::make_pair(alias, interiorQuery));
+  aq::delete_subtree(pNode);
 
   // update node structure
   as->tag = K_IDENT;
@@ -461,7 +456,7 @@ void QueryResolver::solveAQMatriceByRows(aq::verb::VerbNode::Ptr spTree)
   if (this->nested)
   {
     std::string path = this->pSettings->szTempRootPath + "/" + this->pSettings->queryIdent;
-    rowWritter.reset(new aq::RowTemporaryWritter(BaseDesc.Tables.size() + 1, path.c_str()));
+    rowWritter.reset(new aq::RowTemporaryWritter(BaseDesc.Tables.size() + 1, path.c_str(), pSettings->packSize));
     processes->addProcess(rowWritter);
   }
   else

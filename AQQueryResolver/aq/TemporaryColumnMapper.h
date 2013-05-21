@@ -21,6 +21,7 @@ private:
   size_t itemSize;
   aq::ColumnType itemType;
   size_t packetSize;
+  size_t currentPacket;
 	boost::shared_ptr<aq::FileMapper> tmpMapper;
   std::vector<std::string> temporaryFiles;
 };

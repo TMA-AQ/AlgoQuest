@@ -100,12 +100,12 @@ void ColumnVerb::changeResult(	Table::Ptr table,
 }
 
 //------------------------------------------------------------------------------
-void ColumnVerb::addResult(aq::RowProcess_Intf::Row& row, 
+void ColumnVerb::addResult(aq::Row& row, 
                            VerbResult::Ptr resLeft,
                            VerbResult::Ptr resRight, 
                            VerbResult::Ptr resNext )
 {
-  for (aq::RowProcess_Intf::row_t::iterator it = row.row.begin(); it != row.row.end(); ++it)
+  for (aq::Row::row_t::iterator it = row.initialRow.begin(); it != row.initialRow.end(); ++it)
   {
     if ((*it).match(this->TableName, this->ColumnOnlyName))
     {
@@ -195,7 +195,7 @@ void CommaVerb::changeResult(	Table::Ptr table,
 }
 
 //------------------------------------------------------------------------------
-void CommaVerb::addResult( aq::RowProcess_Intf::Row& row, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext )
+void CommaVerb::addResult( aq::Row& row, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext )
 {
   this->changeResult(NULL, resLeft, resRight, resNext);
 }
@@ -402,7 +402,7 @@ void AsVerb::changeResult(	Table::Ptr table,
 }
 
 //------------------------------------------------------------------------------
-void AsVerb::addResult(aq::RowProcess_Intf::Row& row, 
+void AsVerb::addResult(aq::Row& row, 
                        VerbResult::Ptr resLeft,
                        VerbResult::Ptr resRight, 
                        VerbResult::Ptr resNext )
@@ -413,9 +413,9 @@ void AsVerb::addResult(aq::RowProcess_Intf::Row& row,
     if (scalar != 0)
     {
       ColumnItem::Ptr item(new ColumnItem(scalar->Item));
-      row.row.push_back(aq::RowProcess_Intf::row_item_t(item, scalar->Type, scalar->Size, "", this->ident, true));
-      (*row.row.rbegin()).aggFunc = scalar->aggFunc;
-      (*row.row.rbegin()).displayed = true;
+      row.computedRow.push_back(aq::row_item_t(item, scalar->Type, scalar->Size, "", this->ident, true));
+      (*row.computedRow.rbegin()).aggFunc = scalar->aggFunc;
+      (*row.computedRow.rbegin()).displayed = true;
     }
   }
 }

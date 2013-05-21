@@ -497,7 +497,7 @@ int MakeBackupFile( char *pszPath, backup_type_t type, int level, int id )
 {
 	char szBuffer[STR_BUF_SIZE];
 	memset(szBuffer, 0, STR_BUF_SIZE);
-	char		szDstPath[_MAX_PATH];
+	char szDstPath[_MAX_PATH];
 	size_t	len = 0;
 	strcpy( szBuffer, pszPath );
 	len = strlen(szBuffer);
@@ -507,7 +507,7 @@ int MakeBackupFile( char *pszPath, backup_type_t type, int level, int id )
 		return -1;
 	}
 	szBuffer[len - 4] = '\0';
-	char *typeChar = "";
+	std::string typeChar = "";
 	switch( type )
 	{
   case backup_type_t::Empty: break;
@@ -517,7 +517,7 @@ int MakeBackupFile( char *pszPath, backup_type_t type, int level, int id )
 	case backup_type_t::Exterior: typeChar = "_Exterior"; break;
 	default: ;
 	}
-	sprintf( szDstPath, "%s_%.2d_%.2d%s.%s", szBuffer, level, id, typeChar, &pszPath[len - 3] );
+	sprintf( szDstPath, "%s_%.2d_%.2d%s.%s", szBuffer, level, id, typeChar.c_str(), &pszPath[len - 3] );
 	if( FileRename( pszPath, szDstPath ) != 0 )
 	{
 		aq::Logger::getInstance().log(AQ_DEBUG, "MakeBackupFile : Error renaming file %s to %s !", pszPath, szDstPath );

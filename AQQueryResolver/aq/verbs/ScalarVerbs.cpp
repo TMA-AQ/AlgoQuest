@@ -102,7 +102,7 @@ void ScalarVerb::changeResult(	Table::Ptr table,
 }
 
 //------------------------------------------------------------------------------
-void ScalarVerb::addResult(	aq::RowProcess_Intf::Row& row, 
+void ScalarVerb::addResult(	aq::Row& row, 
 								VerbResult::Ptr resLeft, 
 								VerbResult::Ptr resRight, 
 								VerbResult::Ptr resNext )
@@ -114,7 +114,7 @@ void ScalarVerb::addResult(	aq::RowProcess_Intf::Row& row,
   if (scalar != 0)
   {
     ColumnItem::Ptr item(new ColumnItem(scalar->Item));
-    row.row.push_back(aq::RowProcess_Intf::row_item_t(item, scalar->Type, scalar->Size, "", ""));
+    row.computedRow.push_back(aq::row_item_t(item, scalar->Type, scalar->Size, "", ""));
   }
 }
 

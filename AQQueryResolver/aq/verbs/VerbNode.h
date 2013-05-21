@@ -7,6 +7,7 @@
 #include <aq/Settings.h>
 #include <aq/BaseDesc.h>
 #include <aq/Table.h>
+#include <aq/Row.h>
 #include <aq/RowProcess_Intf.h>
 #include <aq/parser/SQLParser.h>
 
@@ -27,7 +28,7 @@ public:
   virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal ) { return false; }
   virtual bool changeQuery( aq::tnode* pStart, aq::tnode* pNode, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext ) { return false; }
   virtual void changeResult( Table::Ptr table, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext ) {}
-  virtual void addResult ( aq::RowProcess_Intf::Row& row, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext ) {}
+  virtual void addResult ( aq::Row& row, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext ) {}
 
   virtual VerbNode* clone() const = 0;
 
@@ -38,7 +39,7 @@ public:
 	//true - executed and done (the node should be deleted)
 	void changeQuery();
 	void changeResult( Table::Ptr table );
-  void addResult(aq::RowProcess_Intf::Row& row);
+  void addResult(aq::Row& row);
 	
   virtual void accept(VerbVisitor*);
 	//void acceptTopLeftRight(VerbVisitor*);

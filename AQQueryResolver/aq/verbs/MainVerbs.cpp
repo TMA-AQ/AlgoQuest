@@ -824,14 +824,14 @@ void GroupVerb::changeResult(	Table::Ptr table,
 }
 
 //------------------------------------------------------------------------------
-void GroupVerb::addResult(aq::RowProcess_Intf::Row& row, 
+void GroupVerb::addResult(aq::Row& row, 
                           VerbResult::Ptr resLeft, 
                           VerbResult::Ptr resRight, 
                           VerbResult::Ptr resNext )
 {
-  assert((this->row_acc.row.size() == 0) || (row.flush) || (row.row.size() == this->row_acc.row.size()));
-  assert((this->row_prv.row.size() == 0) || (row.flush) || (row.row.size() == this->row_prv.row.size()));
-  assert(this->row_prv.row.size() == this->row_acc.row.size());
+  assert((this->row_acc.computedRow.size() == 0) || (row.flush) || (row.computedRow.size() == this->row_acc.computedRow.size()));
+  assert((this->row_prv.computedRow.size() == 0) || (row.flush) || (row.computedRow.size() == this->row_prv.computedRow.size()));
+  assert(this->row_prv.computedRow.size() == this->row_acc.computedRow.size());
   
   row.completed = false;
 
@@ -839,18 +839,18 @@ void GroupVerb::addResult(aq::RowProcess_Intf::Row& row,
   if (row.flush)
   {
     row.completed = true;
-    row.row.clear();
-    std::copy(this->row_acc.row.begin(), this->row_acc.row.end(), std::back_inserter<aq::RowProcess_Intf::row_t>(row.row));
+    row.computedRow.clear();
+    std::copy(this->row_acc.computedRow.begin(), this->row_acc.computedRow.end(), std::back_inserter<aq::Row::row_t>(row.computedRow));
     return;
   }
 
   // check if new group
   bool new_group = false;
-  if (row_prv.row.size() > 0)
+  if (row_prv.computedRow.size() > 0)
   {
-    for (size_t i = 0; i < row.row.size(); ++i)
+    for (size_t i = 0; i < row.computedRow.size(); ++i)
     {
-      if (row.row[i].grouped && !ColumnItem::equal(row_prv.row[i].item.get(), row.row[i].item.get(), row_prv.row[i].type))
+      if (row.computedRow[i].grouped && !ColumnItem::equal(row_prv.computedRow[i].item.get(), row.computedRow[i].item.get(), row_prv.computedRow[i].type))
       {
         new_group = true;
       }
@@ -859,36 +859,36 @@ void GroupVerb::addResult(aq::RowProcess_Intf::Row& row,
   row.completed = new_group;
 
   // store prv
-  if (this->row_prv.row.size() == 0)
+  if (this->row_prv.computedRow.size() == 0)
   {
     row.completed = false;
-    std::copy(row.row.begin(), row.row.end(), std::back_inserter<aq::RowProcess_Intf::row_t>(this->row_prv.row));
+    std::copy(row.computedRow.begin(), row.computedRow.end(), std::back_inserter<aq::Row::row_t>(this->row_prv.computedRow));
   }
 
-  row_prv.row.clear();
-  std::copy(row.row.begin(), row.row.end(), std::back_inserter<aq::RowProcess_Intf::row_t>(this->row_prv.row));
+  row_prv.computedRow.clear();
+  std::copy(row.computedRow.begin(), row.computedRow.end(), std::back_inserter<aq::Row::row_t>(this->row_prv.computedRow));
 
   if (new_group)
   {
-    row.row.clear();
-    std::copy(this->row_acc.row.begin(), this->row_acc.row.end(), std::back_inserter<aq::RowProcess_Intf::row_t>(row.row));
-    this->row_acc.row.clear();
+    row.computedRow.clear();
+    std::copy(this->row_acc.computedRow.begin(), this->row_acc.computedRow.end(), std::back_inserter<aq::Row::row_t>(row.computedRow));
+    this->row_acc.computedRow.clear();
   }
    
   // compute and store in row_acc
-  double count = this->row_prv.row[0].item->numval;
-  if (this->row_acc.row.empty())
+  double count = this->row_prv.computedRow[0].item->numval;
+  if (this->row_acc.computedRow.empty())
   {
-    std::copy(this->row_prv.row.begin(), this->row_prv.row.end(), std::back_inserter<aq::RowProcess_Intf::row_t>(this->row_acc.row));
-    for (size_t i = 1; i < row.row.size(); ++i)
+    std::copy(this->row_prv.computedRow.begin(), this->row_prv.computedRow.end(), std::back_inserter<aq::Row::row_t>(this->row_acc.computedRow));
+    for (size_t i = 1; i < row.computedRow.size(); ++i)
     {
-      if (row_acc.row[i].item == NULL)
+      if (row_acc.computedRow[i].item == NULL)
       {
-        row_acc.row[i].item = row_prv.row[i].item;
-        switch (row.row[i].aggFunc)
+        row_acc.computedRow[i].item = row_prv.computedRow[i].item;
+        switch (row.computedRow[i].aggFunc)
         {
         case SUM:
-          row_acc.row[i].item->numval *= count;
+          row_acc.computedRow[i].item->numval *= count;
           break;
         default:
           break;
@@ -898,27 +898,27 @@ void GroupVerb::addResult(aq::RowProcess_Intf::Row& row,
   }
   else
   {
-    for (size_t i = 1; i < row.row.size(); ++i)
+    for (size_t i = 1; i < row.computedRow.size(); ++i)
     {
-      switch (row.row[i].aggFunc)
+      switch (row.computedRow[i].aggFunc)
       {
       case MIN:
-        row_acc.row[i].item->numval = (std::min)(row_acc.row[i].item->numval, row_prv.row[i].item->numval);
+        row_acc.computedRow[i].item->numval = (std::min)(row_acc.computedRow[i].item->numval, row_prv.computedRow[i].item->numval);
         break;
       case MAX:
-        row_acc.row[i].item->numval = (std::max)(row_acc.row[i].item->numval, row_prv.row[i].item->numval);
+        row_acc.computedRow[i].item->numval = (std::max)(row_acc.computedRow[i].item->numval, row_prv.computedRow[i].item->numval);
         break;
       case SUM:
-        row_acc.row[i].item->numval += (count * row_prv.row[i].item->numval);
+        row_acc.computedRow[i].item->numval += (count * row_prv.computedRow[i].item->numval);
         break;
       case AVG:
-        row_acc.row[i].item->numval = ((row_acc.row[0].item->numval * row_acc.row[i].item->numval) + (count * row_prv.row[i].item->numval)) / (row_acc.row[0].item->numval + count);
+        row_acc.computedRow[i].item->numval = ((row_acc.computedRow[0].item->numval * row_acc.computedRow[i].item->numval) + (count * row_prv.computedRow[i].item->numval)) / (row_acc.computedRow[0].item->numval + count);
         break;
       case COUNT:
         break;
       }
     }
-    this->row_acc.row[0].item->numval += count;
+    this->row_acc.computedRow[0].item->numval += count;
   }
 
 }
