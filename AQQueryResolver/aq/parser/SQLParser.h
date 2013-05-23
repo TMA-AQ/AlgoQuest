@@ -48,13 +48,21 @@ public:
   void set_double_data(double dVal);
   void set_data(const data_holder_t data, ColumnType type);
 
+  bool cmp(const tnode * n2) const;
+
 private:
 	tnodeDataType	eNodeDataType;
 	data_holder_t data;		 /// data of the node
 	size_t nStrBufCb;		/// String Buffer (data.val_str) allocated bytes
-
-
 } ;
+
+struct node_cmp_t
+{
+  bool operator()(const tnode * n1, const tnode * n2)
+  {
+    return n1->cmp(n2);
+  }
+};
 
 //------------------------------------------------------------------------------
 void report_error( char* pszMsg, int bExit );
@@ -72,6 +80,7 @@ tnode* nodeArrayToAndList( const std::vector<tnode*>& nodes );
 
 //find FROM, WHERE, GROUP BY, HAVING, main ORDER BY
 tnode* find_main_node( tnode *pNode, int tag );
+tnode* find_first_node(tnode * pNode, int tag );
 tnode* find_deeper_node(tnode * pNode, int tag, bool with_next = false );
 
 // dump tnode from left to rigth

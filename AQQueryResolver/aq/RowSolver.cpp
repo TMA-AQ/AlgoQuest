@@ -35,8 +35,7 @@ void solveAQMatrix(aq::AQMatrix& aqMatrix,
     {
       Column::Ptr c(new Column(*columnTypes[i]));
 
-      size_t tableIdx = BaseDesc.getTableIdx(c->getTableName());
-      c->TableID = BaseDesc.Tables[tableIdx]->ID;
+      c->TableID = BaseDesc.getTable(c->getTableName())->ID;
 
       for (std::vector<aq::tnode**>::const_iterator it = columnGroup.begin(); it != columnGroup.end(); ++it)
       {
@@ -49,8 +48,7 @@ void solveAQMatrix(aq::AQMatrix& aqMatrix,
       }
       columns.push_back(c);
 
-      columnTypes[i]->TableID = BaseDesc.getTableIdx(columnTypes[i]->getTableName());
-      columnTypes[i]->TableID = BaseDesc.Tables[columnTypes[i]->TableID]->ID;
+      columnTypes[i]->TableID = BaseDesc.getTable(columnTypes[i]->getTableName())->ID;
       
       ColumnMapper_Intf::Ptr cm;
       if (columnTypes[i]->Temporary)
@@ -83,6 +81,7 @@ void solveAQMatrix(aq::AQMatrix& aqMatrix,
     size_t row_size = columns.size();
 
     // For each Row
+    timer.start();
     aq::Row row;
     row.initialRow.resize(row_size, aq::row_item_t(ColumnItem::Ptr(), COL_TYPE_BIG_INT, 8, "", ""));
     for (size_t i = 0; i < aqMatrix.getSize(); ++i)
@@ -100,7 +99,7 @@ void solveAQMatrix(aq::AQMatrix& aqMatrix,
             row.initialRow[c] = aq::row_item_t(
               columnsMapper[c]->loadValue(uniqueIndex[j][mapToUniqueIndex[j][i]]), 
               columnTypes[c]->Type,
-              columnTypes[c]->Size,
+              static_cast<unsigned>(columnTypes[c]->Size),
               columns[c]->getTableName(),
               columns[c]->getName());
             row.initialRow[c].grouped = columns[c]->GroupBy;
@@ -110,16 +109,23 @@ void solveAQMatrix(aq::AQMatrix& aqMatrix,
 
       if (aqMatrix.hasCountColumn())
       {
-        row.count = count[i];
+        row.count = static_cast<unsigned>(count[i]);
+      }
+
+      if ((i % 1000000) == 0)
+      {
+        aq::Logger::getInstance().log(AQ_DEBUG, "%u rows processed in %u ms\n", i, timer.getTimeElapsed().total_milliseconds());
+        timer.start();
       }
 
       rowProcess->process(row);
 
     }
     
+    // FIXME
     // the flush must be done only when an aggregate operation occur
-    if (!columnGroup.empty())
-      rowProcess->flush();
+    // if (!columnGroup.empty())
+    rowProcess->flush();
 
   }
 

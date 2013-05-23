@@ -127,6 +127,76 @@ void AQMatrix::simulate(size_t rows, size_t nbTables)
 	//this->count.resize(rows, 1);
 }
 
+void AQMatrix::clear()
+{
+  matrix.clear();
+	count.clear();
+  groupByIndex.clear();
+	totalCount = 0;
+	nbRows = 0;
+  size = 0;
+	hasCount = false;
+}
+
+void AQMatrix::write(const char * filePath)
+{
+  FILE * fd = fopen(filePath, "wb");
+  uint64_t value = this->matrix.size();
+  uint64_t size = count.size();
+  fwrite(&value, sizeof(uint64_t), 1, fd);
+  for (size_t i = 0; i < this->matrix.size(); ++i)
+  {
+    assert(size == this->matrix[i].indexes.size());
+    value = this->matrix[i].table_id;
+    fwrite(&value, sizeof(uint64_t), 1, fd);
+  }
+  
+  fwrite(&size, sizeof(uint64_t), 1, fd);
+  for (size_t i = 0; i < size; ++i)
+  {
+    for (size_t c = 0; c < this->matrix.size(); ++c)
+    {
+      value = this->matrix[c].indexes[i];
+      fwrite(&value, sizeof(uint64_t), 1, fd);
+    }
+    value = this->count[i];
+    fwrite(&value, sizeof(uint64_t), 1, fd);
+  }
+  fclose(fd);
+}
+
+void AQMatrix::load(const char * filePath, std::vector<long long>& tableIDs)
+{
+  FILE * fd = fopen(filePath, "rb");
+  uint64_t size;
+  fread(&size, sizeof(uint64_t), 1, fd);
+  for (uint64_t i = 0; i < size; ++i)
+  {
+    uint64_t table_id;
+    this->matrix.push_back(column_t());
+    fread(&table_id, sizeof(uint64_t), 1, fd);
+    this->matrix[this->matrix.size() - 1].table_id = table_id;
+    tableIDs.push_back(table_id);
+  }
+  fread(&size, sizeof(uint64_t), 1, fd);
+  for (uint64_t i = 0; i < size; ++i)
+  {
+    uint64_t value;
+    for (size_t c = 0; c < this->matrix.size(); ++c)
+    {
+      fread(&value, sizeof(uint64_t), 1, fd);
+      this->matrix[c].indexes.push_back(value);
+    }
+    fread(&value, sizeof(uint64_t), 1, fd);
+    this->count.push_back(value);
+  }
+  fclose(fd);
+  this->hasCount = true;
+  this->totalCount = this->count.size();
+	this->nbRows = this->count.size();
+  this->size = this->count.size();
+}
+
 void AQMatrix::load(const char * filePath, const char fieldSeparator, std::vector<long long>& tableIDs)
 {
 	char		*pszAnswer = NULL;
@@ -375,16 +445,16 @@ void AQMatrix::dump(std::ostream& os) const
   
   for (size_t c = 0; c < this->matrix.size(); ++c)
   {
-    std::cout << this->matrix[c].table_id << " ";
+    os << this->matrix[c].table_id << " ";
   }
-  std::cout << std::endl;
+  os << std::endl;
 
   for (size_t i = 0; i < size; ++i)
   {
     for (size_t c = 0; c < this->matrix.size(); ++c)
     {
-      std::cout << this->matrix[c].indexes[i] << " ";
+      os << this->matrix[c].indexes[i] << " ";
     }
-    std::cout << std::endl;
+    os << std::endl;
   }
 }

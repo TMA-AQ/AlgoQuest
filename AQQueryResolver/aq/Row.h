@@ -23,22 +23,14 @@ namespace aq
       unsigned int _size,
       std::string _tableName,
       std::string _columnName,
-      bool _computed = false)
-      : item(_item),
-      type(_type),
-      size(_size),
-      tableName(_tableName),
-      columnName(_columnName),
-      computed(_computed),
-      grouped(false),
-      displayed(false)
-    {
-    }
-    bool match(const std::string& _tableName, const std::string& _columnName)
-    {
-      return (this->tableName == _tableName) && (this->columnName == _columnName);
-    }
+      bool _computed = false);
+    row_item_t(const row_item_t& source);
+    ~row_item_t();
+    row_item_t& operator=(const row_item_t& source);
+    bool match(const std::string& _tableName, const std::string& _columnName);
   };
+  
+  //////////////////////////////////////////////////////////////////////////////////////
 
   class Row
   {
@@ -46,7 +38,10 @@ namespace aq
 
     typedef std::vector<row_item_t> row_t;
 
-    Row() : count(0), completed(true), flush(false) {}
+    Row();
+    Row(const Row& source);
+    ~Row();
+    Row& operator=(const Row& source);
 
     row_t initialRow;
     row_t computedRow;

@@ -42,10 +42,6 @@ void VerbNode::changeQuery()
 	if( pNode->inf == 1 )
 		return;
 	
-	//std::cout << "===" << std::endl << std::endl;
-	//std::cout << *this->pNode << std::endl << std::endl;
-	//std::cout << "---" << std::endl << std::endl;
-
 	VerbResult::Ptr param1 = this->Left ? this->Left->getResult() : NULL;
 	VerbResult::Ptr param2 = this->Right ? this->Right->getResult() : NULL;
 	VerbResult::Ptr param3 = this->Brother ? this->Brother->getResult() : NULL;
@@ -56,9 +52,6 @@ void VerbNode::changeQuery()
 		this->Disabled = true;
 	}
 	
-	//std::cout << *this->pNode << std::endl << std::endl;
-	//std::cout << "===" << std::endl << std::endl;
-
 }
 
 //------------------------------------------------------------------------------
@@ -202,6 +195,7 @@ VerbNode::Ptr VerbNode::build( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* p
     {
       verb->toSolve = true;
     }
+
   }
 
 	return verb;

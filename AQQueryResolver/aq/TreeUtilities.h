@@ -73,4 +73,12 @@ aq::tnode* Getnode( ColumnItem::Ptr item, ColumnType type );
 
 aq::tnode* GetTree( Table& table );
 
+void selectToList(tnode* pNode, std::list<tnode*>& columns);
+
+void findAggregateFunction(const std::list<tnode *>& columns, std::list<tnode *>& aggregateColumns);
+
+void addEmptyGroupBy(tnode * pNode);
+
+void addColumnsToGroupBy(tnode * pNode, const std::list<tnode *>& aggregateColumns);
+
 }

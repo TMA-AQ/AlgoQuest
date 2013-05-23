@@ -7,16 +7,15 @@ using namespace aq;
 using namespace std;
 
 //-------------------------------------------------------------------------------
-ColumnItem::Ptr getMinMaxFromThesaurus(	size_t tableIdx, size_t colIdx, size_t partIdx, bool min, Base& BaseDesc, TProjectSettings& Settings )
+ColumnItem::Ptr getMinMaxFromThesaurus(	size_t tableID, size_t colIdx, size_t partIdx, bool min, Base& BaseDesc, TProjectSettings& Settings )
 {
 	ColumnItem::Ptr minMax = NULL;
-	std::string fileName = getThesaurusFileName( Settings.szThesaurusPath, 
-		tableIdx + 1, colIdx + 1, partIdx );
+	std::string fileName = getThesaurusFileName( Settings.szThesaurusPath, tableID + 1, colIdx + 1, partIdx ); // FIXME : tableID is not the index of table
 	FILE* pFIn = fopen( fileName.c_str(), "rb" );
 	if ( pFIn == NULL )
 		return minMax;
 	FileCloser fileCloser(pFIn);
-	Column::Ptr column = BaseDesc.Tables[tableIdx]->Columns[colIdx];
+	Column::Ptr column = BaseDesc.getTable(tableID)->Columns[colIdx];
 
 	size_t binItemSize	= 0;
 	size_t tmpBufSize = 1000;
@@ -93,13 +92,21 @@ Table::Ptr solveOptimalMinMax(	aq::verb::VerbNode::Ptr spTree, Base& BaseDesc,
 								TProjectSettings& Settings )
 {
 	if( !spTree->getLeftChild() )
-		throw generic_error(generic_error::INVALID_QUERY, "");
-	aq::verb::Verb::Ptr verb1 = spTree->getLeftChild();
-	if( !verb1 || 
-		verb1->getVerbType() != K_MIN && 
-		verb1->getVerbType() != K_MAX )
-		return NULL;
-	aq::verb::Verb::Ptr verb2 = spTree->getLeftChild()->getLeftChild();
+  {
+    return NULL;
+		// throw generic_error(generic_error::INVALID_QUERY, "");
+  }
+	aq::verb::VerbNode::Ptr verb1 = spTree->getLeftChild();
+  aq::verb::VerbNode::Ptr verb2 = NULL;
+	if( !verb1 ) 
+    return NULL;
+  if ((verb1->getVerbType() == K_MIN) || (verb1->getVerbType() == K_MAX))
+    verb2 = verb1->getLeftChild();
+  else if ((verb1->getVerbType() == K_AS) && ((verb1->getLeftChild()->getVerbType() == K_MIN) || (verb1->getLeftChild()->getVerbType() == K_MAX)))
+    verb2 = verb1->getLeftChild()->getLeftChild();
+  else
+    return NULL;
+
 	if( verb2->getVerbType() != K_PERIOD )
 		return NULL;
 	if( spTree->getBrother() == NULL )
@@ -110,18 +117,17 @@ Table::Ptr solveOptimalMinMax(	aq::verb::VerbNode::Ptr spTree, Base& BaseDesc,
 		if( spNode->getVerbType() == K_WHERE )
 			return NULL;
 		spNode = spNode->getBrother();
-	}while( spNode->getBrother() );
+	} while( spNode->getBrother() );
 
 	aq::verb::ColumnVerb::Ptr columnVerb = dynamic_pointer_cast<aq::verb::ColumnVerb>( verb2 );
-	size_t tableIdx = BaseDesc.getTableIdx( columnVerb->getTableName() );
-	size_t colIdx = BaseDesc.Tables[tableIdx]->getColumnIdx( columnVerb->getColumnOnlyName() );
-	Column::Ptr column = BaseDesc.Tables[tableIdx]->Columns[colIdx];
+	Table::Ptr table = BaseDesc.getTable( columnVerb->getTableName() );
+	size_t colIdx = table->getColumnIdx( columnVerb->getColumnOnlyName() );
+	Column::Ptr column = table->Columns[colIdx];
 	ColumnItem::Ptr minMax = NULL;
 	bool min = verb1->getVerbType() == K_MIN;
 	for( int partIdx = 0; ; ++partIdx )
 	{
-		ColumnItem::Ptr item = getMinMaxFromThesaurus( tableIdx, 
-			colIdx, partIdx, min, BaseDesc, Settings );
+		ColumnItem::Ptr item = getMinMaxFromThesaurus( table->ID, colIdx, partIdx, min, BaseDesc, Settings );
 		if( !item )
 			break;
 		if( !minMax )
@@ -131,8 +137,8 @@ Table::Ptr solveOptimalMinMax(	aq::verb::VerbNode::Ptr spTree, Base& BaseDesc,
 				minMax = item;
 	}
 	
-	Table::Ptr table = new Table();
-	Column::Ptr newColumn = new Column(*column);
+	table.reset(new Table());
+	Column::Ptr newColumn(new Column(*column));
 	newColumn->Items.push_back( minMax );
 	table->Columns.push_back( newColumn );
 	table->TotalCount = 1;

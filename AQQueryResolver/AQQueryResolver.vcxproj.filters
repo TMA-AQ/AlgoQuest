@@ -357,5 +357,8 @@
     <ClCompile Include="aq\TemporaryColumnMapper.cpp">
       <Filter>Source Files\aq</Filter>
     </ClCompile>
+    <ClCompile Include="aq\Row.cpp">
+      <Filter>Source Files\aq\row_resolver</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

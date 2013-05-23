@@ -32,7 +32,7 @@ int get_column_id_from_table( Table& pTD, char* pszColumnName, unsigned int *pnC
 
 //------------------------------------------------------------------------------
 /* Return -1 on error, 0 on success */
-int get_table_and_column_id_from_table_array( Base* baseDesc, 
+int get_table_and_column_id_from_table_array( const Base* baseDesc, 
 													char *pszTableName,
 												  char *pszColumnName, 
 													unsigned int *pnTableId, 
@@ -40,12 +40,12 @@ int get_table_and_column_id_from_table_array( Base* baseDesc,
 												  unsigned int *pnColumnSize,
 												  ColumnType *peColumnType ) {
 	
-	size_t idx = baseDesc->getTableIdx( std::string(pszTableName) );
+	Table::Ptr table = baseDesc->getTable( std::string(pszTableName) );
 
 	if ( pnTableId != NULL )
-		*pnTableId = static_cast<unsigned int>(baseDesc->Tables[idx]->ID);
+		*pnTableId = static_cast<unsigned int>(table->ID);
 
-	if ( get_column_id_from_table( *baseDesc->Tables[idx], pszColumnName, pnColumnId, pnColumnSize, peColumnType ) != 0 ) {
+	if ( get_column_id_from_table( *table, pszColumnName, pnColumnId, pnColumnSize, peColumnType ) != 0 ) {
 #ifdef CREATE_LOG
 		Log( "get_table_and_column_id_from_table_array() : Function get_column_id_from_table( T:<%s>, C:<%s> ) returned NULL !\n", pszTableName, pszColumnName );
 #endif
@@ -242,8 +242,7 @@ TColumn2TablesArray* add_table_columns_to_column2tables_array(	TColumn2TablesArr
 	unsigned int iColumn;
 	TColumn2Tables *pC2T;
 	
-	size_t tableIdx = baseDesc->getTableIdx( std::string(pszTableName) );
-	Table& pTD = *baseDesc->Tables[tableIdx];
+	Table& pTD = *baseDesc->getTable(pszTableName);
 
 	for ( iColumn = 0; iColumn < pTD.Columns.size(); iColumn++ ) {
 		pC2T = find_column_in_column2tables_array( parrC2T, pTD.Columns[ iColumn ]->getName().c_str() );
@@ -402,7 +401,6 @@ void enforce_qualified_column_reference( aq::tnode *pNode, TColumn2TablesArray* 
 				}
 				pNodeTable->set_string_data( pC2T->m_pparrTableNames[ 0 ] );
 				pNode->tag = K_PERIOD;
-				free( pNode->getData().val_str );
 				pNode->set_int_data(0);
 				pNode->left	= pNodeTable;
 				pNode->right = pNodeColumn;

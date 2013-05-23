@@ -55,6 +55,7 @@ public:
 
 	int getColumnIdx( const std::string& name );
 	
+  void load();
 	void loadFromAnswerRaw(	const char *filePath, char fieldSeparator, std::vector<llong>& tableIDs, bool add = false );
 	void loadFromTableAnswerByColumn(aq::AQMatrix& aqMatrix, const std::vector<llong>& tableIDs, const std::vector<Column::Ptr>& columnTypes, const TProjectSettings& pSettings, const Base& BaseDesc);
   void loadColumn(Column::Ptr col, const std::vector<size_t>& uniqueIndex, const std::vector<size_t>& mapToUniqueIndex, const Column::Ptr columnType, const TProjectSettings& pSettings, const Base& BaseDesc);
@@ -101,10 +102,14 @@ class Base: public Object
 	OBJECT_DECLARE( Base );
 public:
 	typedef std::vector<Table::Ptr> tables_t;
-	tables_t Tables;
-	std::string Name;
 
-	size_t getTableIdx( const std::string& name ) const ;
+  tables_t& getTables() { return this->Tables; }
+  const std::string& getName() const { return this->Name; }
+  
+  Table::Ptr getTable(unsigned int id);
+	Table::Ptr getTable(const std::string& name) ;
+  const Table::Ptr getTable(unsigned int id) const;
+	const Table::Ptr getTable(const std::string& name) const;
 
 	/// The standard content of this file is defined below :
 	/// 
@@ -131,6 +136,10 @@ public:
 	void saveToRawFile( const char* pszDataBaseFile );
 	void dumpRaw( std::ostream& os );
 	void dumpXml( std::ostream& os );
+  
+private:
+	tables_t Tables;
+	std::string Name;
 };
 
 #endif

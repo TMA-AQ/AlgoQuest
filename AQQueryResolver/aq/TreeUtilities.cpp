@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <aq/Exceptions.h>
 #include <aq/Logger.h>
+#include <boost/bind.hpp>
 #include <boost/scoped_array.hpp>
 #include <boost/filesystem.hpp>
 
@@ -204,8 +205,7 @@ void solveSelectStar(	aq::tnode* pNode,
 	for( size_t idx = 0; idx < tables.size(); ++idx )
 	{
 		assert( tables[idx] && tables[idx]->tag == K_IDENT );
-		size_t tableIdx = BaseDesc.getTableIdx( tables[idx]->getData().val_str );
-		std::vector<Column::Ptr>& columns = BaseDesc.Tables[tableIdx]->Columns;
+		std::vector<Column::Ptr>& columns = BaseDesc.getTable( tables[idx]->getData().val_str )->Columns;
 		for( size_t idx2 = 0; idx2 < columns.size(); ++idx2 )
 		{
 			aq::tnode* colRef = new aq::tnode( K_PERIOD );
@@ -262,10 +262,9 @@ void solveOneTableInFrom( aq::tnode* pStart, Base& BaseDesc )
 	if( tables.size() != 1 || !tables[0] || tables[0]->tag != K_IDENT )
 		return;
 	char* tName = tables[0]->getData().val_str;
-	size_t tIdx = BaseDesc.getTableIdx( tName );
-	if( BaseDesc.Tables[tIdx]->Columns.size() == 0 )
+	if( BaseDesc.getTable( tName )->Columns.size() == 0 )
 		return;
-	Column::Ptr col = BaseDesc.Tables[tIdx]->Columns[0];
+	Column::Ptr col = BaseDesc.getTable( tName )->Columns[0];
 	if( !col )
 		return;
 	
@@ -675,11 +674,15 @@ void readPosFile( const char* filePath, std::vector<llong>& vals )
 }
 
 //------------------------------------------------------------------------------
+// DEPRECATED
 void SolveMinMaxGroupBy::modifyTmpFiles(	const char* tmpPath, 
 											int selectLevel,
 											Base& BaseDesc, 
 											TProjectSettings& Settings )
 {
+  assert(false);
+  throw aq::generic_error(aq::generic_error::NOT_IMPLEMENED, "DEPRECATED FEATURE (modifyTmpFiles)");
+
 	if( !this->pGroupBy )
 		return;
 
@@ -687,7 +690,8 @@ void SolveMinMaxGroupBy::modifyTmpFiles(	const char* tmpPath,
 	if( GetFiles( tmpPath, files ) != 0 )
 		throw generic_error(generic_error::INVALID_FILE, "");*/
 
-	size_t tIdx1 = BaseDesc.getTableIdx( this->tableName );
+	Table& templateTable = *BaseDesc.getTable( this->tableName );
+
 	/*std::vector<llong> rows;
 	/* read tmp file
 	for( size_t idx = 0; idx < files.size(); ++idx )
@@ -711,7 +715,6 @@ void SolveMinMaxGroupBy::modifyTmpFiles(	const char* tmpPath,
 		return; //nothing to modify
 	sort( rows.begin(), rows.end() );*/
 
-	Table& templateTable = *BaseDesc.Tables[tIdx1];
 	std::vector<int> colIds;
 	getColumnsIds( templateTable, this->columns, colIds );
 
@@ -807,10 +810,9 @@ void SolveMinMaxGroupBy::modifyTmpFiles(	const char* tmpPath,
 	{
 		char file[_MAX_PATH];
 		//BxxxTxxxxPxxxxxxxxxx
-		sprintf( file, "%s\\B001T%04dP%010d.tmp", path, 
-			selectLevel, tIdx1 + 1, idx + 1 );
-		writeTmpFile( file, finalRows, idx * Settings.packSize, 
-			(idx + 1) * Settings.packSize );
+    // FIXME
+		// sprintf( file, "%s\\B001T%04dP%010d.tmp", path, selectLevel, tIdx1 + 1, idx + 1 );
+		writeTmpFile( file, finalRows, idx * Settings.packSize, (idx + 1) * Settings.packSize );
 	}
 }
 
@@ -1012,9 +1014,7 @@ void getColumnTypes( aq::tnode* pNode, std::vector<Column::Ptr>& columnTypes, Ba
 		assert( colNode );
 		assert( colNode->left && colNode->left->tag == K_IDENT );
 		assert( colNode->right && colNode->right->tag == K_COLUMN );
-		size_t tableIdx = BaseDesc.getTableIdx( colNode->left->getData().val_str );
-		assert( tableIdx < BaseDesc.Tables.size() ); //debug13 possible wrong query formatting, should throw
-		Table& table = *BaseDesc.Tables[tableIdx];
+		Table& table = *BaseDesc.getTable( colNode->left->getData().val_str );
 		bool found = false;
 		Column auxCol;
 		auxCol.setName(colNode->right->getData().val_str);
@@ -1091,6 +1091,80 @@ aq::tnode* GetTree( Table& table )
 	pNode->right = Getnode(column.Items[size - 1], column.Type);
 	
 	return pStart;
+}
+
+void selectToList(tnode* pNode, std::list<tnode*>& columns)
+{	
+  if( !pNode || !pNode->left )
+		return;
+  if (pNode->left->tag == K_COMMA)
+  {
+    assert(pNode->left->right);
+    columns.push_back(pNode->left->right);
+    selectToList(pNode->left, columns);
+  }
+  else
+  {
+    columns.push_back(pNode->left);
+  }
+}
+
+void findAggregateFunction(const std::list<tnode *>& columns, std::list<tnode *>& aggregateColumns)
+{
+  for (std::list<tnode *>::const_iterator it = columns.begin(); it != columns.end(); ++it)
+  {
+    if ((*it)->tag == K_AS)
+    {
+      tnode * n = (*it)->left;
+      if ((n->tag == K_MAX) || (n->tag == K_MIN) || (n->tag == K_SUM) || (n->tag == K_AVG) || (n->tag == K_COUNT))
+      {
+        assert(n->left);
+        if (std::find_if(aggregateColumns.begin(), aggregateColumns.end(), boost::bind(&tnode::cmp, _1, n->left)) == aggregateColumns.end())
+        {
+          aggregateColumns.push_back(n->left);
+        }
+      }
+    }
+  }
+}
+
+void addEmptyGroupBy(tnode * pNode)
+{
+  tnode * from = find_main_node(pNode, K_FROM);
+  tnode * where = find_main_node(pNode, K_WHERE);
+  tnode * group = new aq::tnode(K_GROUP);
+  tnode * n = where ? where : from;
+  group->next = n->next;
+  n->next = group;
+}
+
+void addColumnsToGroupBy(tnode * pNode, const std::list<tnode *>& columns)
+{
+  tnode * from = find_main_node(pNode, K_FROM);
+  tnode * where = find_main_node(pNode, K_WHERE);
+  tnode * group = new aq::tnode(K_GROUP);
+
+  tnode * n = where ? where : from;
+  group->next = n->next;
+  n->next = group;
+
+  pNode = group;
+  for (std::list<tnode *>::const_iterator it = columns.begin(); it != columns.end();)
+  {
+    tnode * n = *it; // aq::find_first_node(*it, K_PERIOD);
+    ++it;
+    if (it == columns.end())
+    {
+      pNode->left = aq::clone_subtree(n);
+    }
+    else
+    {
+      pNode->left = new aq::tnode(K_COMMA);
+      pNode->right = aq::clone_subtree(n);
+      pNode = pNode->left;
+    }
+  }
+
 }
 
 }

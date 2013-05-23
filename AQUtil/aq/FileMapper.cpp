@@ -48,6 +48,12 @@ FileMapper::~FileMapper()
 
 int FileMapper::read(void * buffer, size_t offset, size_t len) 
 {
+
+  if (offset > cbFile)
+  {
+    return -1;
+  }
+
 	uint8_t * buf = static_cast<uint8_t*>(buffer);
 
 	if (hmap == NULL) 

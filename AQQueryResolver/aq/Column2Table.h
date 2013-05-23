@@ -10,7 +10,7 @@
 int loadFromBaseDesc( char* pszDataBaseDef, Base& baseDesc );
 
 /* Return -1 on error, 0 on success */
-int get_table_and_column_id_from_table_array( Base* baseDesc, char *pszTableName,
+int get_table_and_column_id_from_table_array( const Base* baseDesc, char *pszTableName,
 												  char *pszColumnName, unsigned int *pnTableId, 
 												  unsigned int *pnColumnId,
 												  unsigned int *pnColumnSize,

@@ -25,17 +25,17 @@ int RowWritter::process(Row& row)
 	if (this->firstRow)
 	{
 		//write column names
-		for(size_t idx = row.computedRow.size() - 1; idx > 0; --idx)
+    for (Row::row_t::const_reverse_iterator it = row.computedRow.rbegin(); it != row.computedRow.rend(); ++it)
     {
-      if (!row.computedRow[idx].displayed)
+      if (!(*it).displayed)
         continue;
       fputs(" ; ", pFOut);
-      if (row.computedRow[idx].tableName != "")
+      if ((*it).tableName != "")
       {
-        fputs(row.computedRow[idx].tableName.c_str(), pFOut);
+        fputs((*it).tableName.c_str(), pFOut);
         fputs(".", pFOut);
       }
-      fputs(row.computedRow[idx].columnName.c_str(), pFOut);
+      fputs((*it).columnName.c_str(), pFOut);
 		}
 		fputc('\n', pFOut);
 		this->firstRow = false;

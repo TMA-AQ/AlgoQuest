@@ -40,7 +40,10 @@ public:
 	// 
 	// testing purpose (to remove)
 	void simulate(size_t rows, size_t nbTables);
-
+  
+  void clear();
+  void write(const char * filePath);
+	void load(const char * filePath, std::vector<long long>& tableIDs);
 	void load(const char * filePath, const char fieldSeparator, std::vector<long long>& tableIDs);
   
 	/// Each column in the table holds a list of row indexes.

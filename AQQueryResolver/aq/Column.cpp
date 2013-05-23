@@ -423,6 +423,26 @@ int Column::loadFromThesaurus(	const char *pszFilePath, int nFileType,
 
 	return 0;
 }
+
+//------------------------------------------------------------------------------
+void Column::loadFromTmp(ColumnType eColumnType, aq::TemporaryColumnMapper::Ptr colMapper)
+{
+  this->Type = eColumnType;
+  this->Size = 0;
+
+  ColumnItem::Ptr item = 0;
+  do
+  {
+    item = colMapper->loadValue(this->Size++);
+    if (item != 0) 
+      this->Items.push_back(item);
+  } while (item != 0) ;
+  
+	inner_column_cmp_2_t cmp(*this);
+	sort( this->Items.begin(), this->Items.end(), cmp );
+
+}
+
 //------------------------------------------------------------------------------
 void Column::increase( size_t newSize )
 {

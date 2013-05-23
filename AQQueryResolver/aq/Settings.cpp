@@ -24,7 +24,8 @@ TProjectSettings::TProjectSettings()
   computeAnswer(true),
 	csvFormat(false),
 	executeNestedQuery(true),
-	useRowResolver(true)
+	useRowResolver(true),
+  useBinAQMatrix(false)
 {
   ::memset(szSQLReqFN, 0, _MAX_PATH);
   ::memset(szDBDescFN, 0, _MAX_PATH);
@@ -52,7 +53,8 @@ TProjectSettings::TProjectSettings(const TProjectSettings& obj)
 	maxRecordSize(obj.maxRecordSize),
 	computeAnswer(obj.computeAnswer),
 	executeNestedQuery(obj.executeNestedQuery),
-	useRowResolver(obj.useRowResolver)
+	useRowResolver(obj.useRowResolver),
+  useBinAQMatrix(obj.useBinAQMatrix)
 {
   ::strcpy(szSQLReqFN, obj.szSQLReqFN);
   ::strcpy(szDBDescFN, obj.szDBDescFN);
@@ -100,6 +102,7 @@ TProjectSettings& TProjectSettings::operator=(const TProjectSettings& obj)
 		computeAnswer = obj.computeAnswer;
 		executeNestedQuery = obj.executeNestedQuery;
 		useRowResolver = obj.useRowResolver;
+    useBinAQMatrix = obj.useBinAQMatrix;
 	}
 	return *this;
 }

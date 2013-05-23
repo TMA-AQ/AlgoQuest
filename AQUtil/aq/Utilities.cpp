@@ -211,7 +211,7 @@ void CleanFolder( const char * pszPath )
       }
       else
       {
-        aq::Logger::getInstance().log(AQ_ERROR, "delete path %s\n", (*file).path().string().c_str());
+        aq::Logger::getInstance().log(AQ_DEBUG, "delete path %s\n", (*file).path().string().c_str());
       }
     }
 	}

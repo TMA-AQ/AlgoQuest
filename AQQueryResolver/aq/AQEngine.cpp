@@ -23,7 +23,7 @@ AQEngine::~AQEngine(void)
 void AQEngine::call(aq::tnode *pNode, mode_t mode, int selectLevel)
 {
 	std::string query;
-	aq::syntax_tree_to_prefix_form( pNode, query );
+  aq::syntax_tree_to_prefix_form( pNode, query );
 
   // FIXME
   std::string::size_type pos = query.find("GROUP");
@@ -31,7 +31,8 @@ void AQEngine::call(aq::tnode *pNode, mode_t mode, int selectLevel)
   {
     std::string queryTmp = query.substr(0, pos);
     ParseJeq( queryTmp );
-    query = queryTmp + query.substr(pos);
+    if (query.substr(pos).size() > 5) // Group By can be empty
+      query = queryTmp + query.substr(pos);
   }
   else
   {
@@ -108,8 +109,20 @@ void AQEngine::call(aq::tnode *pNode, mode_t mode, int selectLevel)
     timer.start();
     tableIDs.clear();
     aqMatrix.reset(new aq::AQMatrix(settings));
-    aqMatrix->load(settings.szAnswerFN, settings.fieldSeparator, this->tableIDs);
-    aq::Logger::getInstance().log(AQ_INFO, "Load From AQ Matrix: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
+
+    if (settings.useBinAQMatrix)
+    {
+      //aqMatrix->write("aq-matrix.bin");
+      //aqMatrix->clear();
+      aqMatrix->load(settings.szAnswerFN, this->tableIDs);
+      aq::Logger::getInstance().log(AQ_NOTICE, "Load From Binary AQ Matrix: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
+    }
+    else
+    {
+      aqMatrix->load(settings.szAnswerFN, settings.fieldSeparator, this->tableIDs);
+      aq::Logger::getInstance().log(AQ_NOTICE, "Load From Text AQ Matrix: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
+    }
+
   }
   else if (mode == NESTED_2)
 	{
@@ -158,12 +171,11 @@ void AQEngine::call(aq::tnode *pNode, mode_t mode, int selectLevel)
 
 void AQEngine::generateAQMatrixFromPRM(const std::string tableName, aq::tnode * whereNode)
 {
-	size_t tableIdx = this->baseDesc.getTableIdx(tableName);
-	size_t nbRows = this->baseDesc.Tables[tableIdx]->TotalCount;
+	Table::Ptr table = this->baseDesc.getTable(tableName);
 	this->aqMatrix.reset(new aq::AQMatrix(this->settings));
-	this->aqMatrix->simulate(nbRows, 2);
+	this->aqMatrix->simulate(table->TotalCount, 2);
 	this->tableIDs.clear();
-	this->tableIDs.push_back(this->baseDesc.Tables[tableIdx]->ID);
+	this->tableIDs.push_back(table->ID);
 }
 
 // ------------------------------------------------------------------------------------------------

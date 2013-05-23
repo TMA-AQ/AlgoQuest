@@ -830,7 +830,7 @@ void GroupVerb::addResult(aq::Row& row,
                           VerbResult::Ptr resNext )
 {
   assert((this->row_acc.computedRow.size() == 0) || (row.flush) || (row.computedRow.size() == this->row_acc.computedRow.size()));
-  assert((this->row_prv.computedRow.size() == 0) || (row.flush) || (row.computedRow.size() == this->row_prv.computedRow.size()));
+  assert((this->row_prv.initialRow.size() == 0) || (row.flush) || (row.initialRow.size() == this->row_prv.initialRow.size()));
   assert(this->row_prv.computedRow.size() == this->row_acc.computedRow.size());
   
   row.completed = false;
@@ -848,9 +848,9 @@ void GroupVerb::addResult(aq::Row& row,
   bool new_group = false;
   if (row_prv.computedRow.size() > 0)
   {
-    for (size_t i = 0; i < row.computedRow.size(); ++i)
+    for (size_t i = 0; i < row.initialRow.size(); ++i)
     {
-      if (row.computedRow[i].grouped && !ColumnItem::equal(row_prv.computedRow[i].item.get(), row.computedRow[i].item.get(), row_prv.computedRow[i].type))
+      if (row.initialRow[i].grouped && !ColumnItem::equal(row_prv.initialRow[i].item.get(), row.initialRow[i].item.get(), row_prv.initialRow[i].type))
       {
         new_group = true;
       }
@@ -858,16 +858,10 @@ void GroupVerb::addResult(aq::Row& row,
   }
   row.completed = new_group;
 
-  // store prv
-  if (this->row_prv.computedRow.size() == 0)
-  {
-    row.completed = false;
-    std::copy(row.computedRow.begin(), row.computedRow.end(), std::back_inserter<aq::Row::row_t>(this->row_prv.computedRow));
-  }
+  // store previous
+  row_prv = row;
 
-  row_prv.computedRow.clear();
-  std::copy(row.computedRow.begin(), row.computedRow.end(), std::back_inserter<aq::Row::row_t>(this->row_prv.computedRow));
-
+  //
   if (new_group)
   {
     row.computedRow.clear();
@@ -876,29 +870,25 @@ void GroupVerb::addResult(aq::Row& row,
   }
    
   // compute and store in row_acc
-  double count = this->row_prv.computedRow[0].item->numval;
-  if (this->row_acc.computedRow.empty())
+  if (row_acc.computedRow.empty())
   {
-    std::copy(this->row_prv.computedRow.begin(), this->row_prv.computedRow.end(), std::back_inserter<aq::Row::row_t>(this->row_acc.computedRow));
-    for (size_t i = 1; i < row.computedRow.size(); ++i)
+    std::copy(row_prv.computedRow.begin(), row_prv.computedRow.end(), std::back_inserter<aq::Row::row_t>(row_acc.computedRow));
+    row_acc.count= row_prv.count;
+    for (size_t i = 0; i < row.computedRow.size(); ++i)
     {
-      if (row_acc.computedRow[i].item == NULL)
+      switch (row.computedRow[i].aggFunc)
       {
-        row_acc.computedRow[i].item = row_prv.computedRow[i].item;
-        switch (row.computedRow[i].aggFunc)
-        {
-        case SUM:
-          row_acc.computedRow[i].item->numval *= count;
-          break;
-        default:
-          break;
-        }
+      case SUM:
+        row_acc.computedRow[i].item->numval *= row_acc.count;
+        break;
+      default:
+        break;
       }
     }
   }
   else
   {
-    for (size_t i = 1; i < row.computedRow.size(); ++i)
+    for (size_t i = 0; i < row.computedRow.size(); ++i)
     {
       switch (row.computedRow[i].aggFunc)
       {
@@ -909,16 +899,17 @@ void GroupVerb::addResult(aq::Row& row,
         row_acc.computedRow[i].item->numval = (std::max)(row_acc.computedRow[i].item->numval, row_prv.computedRow[i].item->numval);
         break;
       case SUM:
-        row_acc.computedRow[i].item->numval += (count * row_prv.computedRow[i].item->numval);
+        row_acc.computedRow[i].item->numval += (row_prv.count * row_prv.computedRow[i].item->numval);
         break;
       case AVG:
-        row_acc.computedRow[i].item->numval = ((row_acc.computedRow[0].item->numval * row_acc.computedRow[i].item->numval) + (count * row_prv.computedRow[i].item->numval)) / (row_acc.computedRow[0].item->numval + count);
+        row_acc.computedRow[i].item->numval = ((row_acc.count * row_acc.computedRow[i].item->numval) + (row_prv.count * row_prv.computedRow[i].item->numval)) / (row_acc.count + row_prv.count);
         break;
       case COUNT:
+        throw aq::generic_error(aq::generic_error::NOT_IMPLEMENED, "aggregate count function is not implemented");
         break;
       }
     }
-    this->row_acc.computedRow[0].item->numval += count;
+    this->row_acc.count += this->row_prv.count;
   }
 
 }

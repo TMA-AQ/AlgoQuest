@@ -185,8 +185,6 @@ std::string& syntax_tree_to_prefix_form( aq::tnode *pNode, std::string& str )
 	if ( pNode == NULL )
 		return str;
 
-	std::map<std::string, std::string> tablesAlias;
-
 	str.clear();
 	char szTmpBuf[1000];
 	char szBuffer[STR_BUF_SIZE];

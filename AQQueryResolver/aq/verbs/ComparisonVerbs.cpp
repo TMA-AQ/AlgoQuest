@@ -28,13 +28,13 @@ bool ComparisonVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 	int pErr = 0;
 	//the argument given to expression_transform will be destroyed if the function
 	//is successful
-	aq::tnode* pNodeClone = new aq::tnode( pNode->tag );
-	*pNodeClone = *pNode;
+	aq::tnode* pNodeClone = aq::clone_subtree(pNode);
 	aq::tnode* newNode = pNodeClone;
 	if( this->Context == K_WHERE )
 	{
 		boost::posix_time::ptime begin(boost::posix_time::microsec_clock::local_time());
-		newNode = expression_transform( pNodeClone, this->m_baseDesc, this->m_settings->szThesaurusPath, &pErr );
+    aq::ExpressionTransform expTrans(*this->m_baseDesc, *this->m_settings);
+		newNode = expTrans.expression_transform( pNodeClone, &pErr );
 		boost::posix_time::ptime end(boost::posix_time::microsec_clock::local_time());
 		std::ostringstream oss;
 		oss << "expression_transform elapsed time: " << (end - begin) << " ms";
@@ -71,8 +71,10 @@ bool ComparisonVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 	}
 	//pNodeClone already deleted by expression_transform
 	assert( newNode->getDataType() != NODE_DATA_STRING );
-	*pNode = *newNode;
-	delete newNode ;
+	*pNode = *newNode; // FIXME
+  pNode->left = newNode->left;
+  pNode->right = newNode->right;
+  delete newNode;
 	return true;
 }
 

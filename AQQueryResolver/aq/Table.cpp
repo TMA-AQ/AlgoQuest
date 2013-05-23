@@ -101,6 +101,14 @@ void Table::computeUniqueRow(Table& aqMatrix, std::vector<std::vector<size_t> >&
 }
 
 //------------------------------------------------------------------------------
+void Table::load()
+{
+  // TODO
+  assert(false);
+  throw aq::generic_error(aq::generic_error::NOT_IMPLEMENED, "");
+}
+
+//------------------------------------------------------------------------------
 void Table::loadFromTableAnswerByColumn(aq::AQMatrix& table, const std::vector<llong>& tableIDs, const std::vector<Column::Ptr>& columnTypes, const TProjectSettings& pSettings, const Base& BaseDesc)
 {
 	aq::Timer timer;
@@ -132,8 +140,7 @@ void Table::loadFromTableAnswerByColumn(aq::AQMatrix& table, const std::vector<l
 		//get table idx for this column
 		size_t idxColumn = 0;
 		std::string tableName = columnTypes[idx]->getTableName();
-		size_t tableIdx = BaseDesc.getTableIdx( tableName );
-		size_t tableID = BaseDesc.Tables[tableIdx]->ID;
+		size_t tableID = BaseDesc.getTable(tableName)->ID;
 		for( size_t idx2 = 0; idx2 < tableIDs.size(); ++idx2 )
 			if( tableID == tableIDs[idx2] )
 			{
@@ -326,8 +333,7 @@ void Table::loadColumn(Column::Ptr col, const Table& aqMatrix, const std::vector
 void Table::loadColumn(Column::Ptr col, const std::vector<size_t>& uniqueIndex, const std::vector<size_t>& mapToUniqueIndex, const Column::Ptr columnType, const TProjectSettings& pSettings, const Base& BaseDesc)
 {		
 	std::string tableName = columnType->getTableName();
-	size_t tableIdx = BaseDesc.getTableIdx( tableName );
-	size_t tableID = BaseDesc.Tables[tableIdx]->ID;
+	size_t tableID = BaseDesc.getTable(tableName)->ID;
 
 	//load the required column values
 	llong currentNumPack = -1;
@@ -548,8 +554,14 @@ void Table::loadFromAnswerRaw(	const char *filePath, char fieldSeparator,
 			continue;
 		}
 		case 1: //second line is count(*)
-      try { this->TotalCount = boost::lexical_cast<uint64_t>(psz); }
-      catch (const boost::bad_lexical_cast& ex) {}
+      try 
+      { 
+        this->TotalCount = boost::lexical_cast<uint64_t>(psz); 
+      }
+      catch (const boost::bad_lexical_cast&) 
+      {
+        throw aq::generic_error(aq::generic_error::AQ_ENGINE, "invalid aq engine answer file");
+      }
 			if( this->TotalCount == 0 )
 				this->NoAnswer = true;
 			continue;
@@ -1001,15 +1013,36 @@ char* ExtractStringFromQuotes( char* pszStr, char* pszExtractedStr, unsigned int
 }
 
 //------------------------------------------------------------------------------
-size_t Base::getTableIdx( const std::string& name ) const
+Table::Ptr Base::getTable(unsigned int id)
+{
+	for( size_t i = 0; i < this->Tables.size(); ++i )
+		if( id == this->Tables[i]->ID )
+			return this->Tables[i];
+	throw generic_error(generic_error::INVALID_TABLE, "cannot find table %u", id);
+}
+
+//------------------------------------------------------------------------------
+const Table::Ptr Base::getTable(unsigned int id) const
+{
+	return const_cast<Base*>(this)->getTable(id);
+}
+
+//------------------------------------------------------------------------------
+Table::Ptr Base::getTable( const std::string& name )
 {
 	std::string auxName = name;
 	strtoupr( auxName );
 	aq::Trim( auxName );
 	for( size_t idx = 0; idx < this->Tables.size(); ++idx )
 		if( auxName == this->Tables[idx]->getName() )
-			return idx;
+			return this->Tables[idx];
 	throw generic_error(generic_error::INVALID_TABLE, "cannot find table %s", name.c_str());
+}
+
+//------------------------------------------------------------------------------
+const Table::Ptr Base::getTable( const std::string& name ) const
+{
+  return const_cast<Base*>(this)->getTable(name);
 }
 
 //------------------------------------------------------------------------------

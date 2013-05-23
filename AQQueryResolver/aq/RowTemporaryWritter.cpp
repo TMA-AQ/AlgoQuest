@@ -17,7 +17,10 @@ namespace aq
   {
     std::for_each(this->columnsWritter.begin(), this->columnsWritter.end(), [] (boost::shared_ptr<ColumnTemporaryWritter> ctw) {
       if (ctw->file)
+      {
         fclose(ctw->file); 
+        ctw->file = 0;
+      }
     });
   }
 

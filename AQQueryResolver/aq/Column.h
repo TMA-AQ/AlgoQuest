@@ -3,6 +3,7 @@
 
 #include "verbs/VerbResult.h"
 #include "Settings.h"
+#include "TemporaryColumnMapper.h"
 
 #include <aq/Object.h>
 #include <aq/DBTypes.h>
@@ -67,8 +68,8 @@ public:
 	void setTableName( const std::string& name );
 	std::string& getTableName();
 
-	int loadFromThesaurus( const char *pszFilePath, int nFileType, 
-		unsigned int nColumnSize, aq::ColumnType eColumnType, int *pErr );
+	int loadFromThesaurus( const char *pszFilePath, int nFileType, unsigned int nColumnSize, aq::ColumnType eColumnType, int *pErr );
+  void loadFromTmp(aq::ColumnType eColumnType, aq::TemporaryColumnMapper::Ptr colMapper);
 	void increase( size_t newSize );
 	void setCount( Column::Ptr count );
 	Column::Ptr getCount();

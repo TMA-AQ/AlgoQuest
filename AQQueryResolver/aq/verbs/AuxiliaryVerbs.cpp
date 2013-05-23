@@ -52,6 +52,7 @@ bool ColumnVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 		return false; //must perform the query before we know the values
 
 	return false; //debug13 temporary tryout because of a hunch: there is no
+
 	//case in which obtaining a column in the WHERE clause is necessary
 	//the only exceptions (I can think of now) would be:
 	// - aggregate functions (but they are not allowed in WHERE)
@@ -64,14 +65,16 @@ bool ColumnVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 	//TODO: only get a part at a time for a column
 
 	/* Loop on Thesaurus Parts (biggest nLoopCnt is 999, three digit !) */
-	int pErr;
-	Column::Ptr column = new Column();
-	column->setName( auxcol.getName() );
-	for ( int nLoopCnt = 0; nLoopCnt < 1000; nLoopCnt++ )
-		get_thesaurus_for_column_reference( *column, pNode, nLoopCnt, this->m_baseDesc, 
-			this->m_settings->szThesaurusPath, &pErr );
-	this->Result = column;
-	return false;
+
+	//int pErr;
+	//Column::Ptr column = new Column();
+	//column->setName( auxcol.getName() );
+	//for ( int nLoopCnt = 0; nLoopCnt < 1000; nLoopCnt++ )
+	//	get_thesaurus_for_column_reference( *column, pNode, nLoopCnt, this->m_baseDesc, 
+	//		this->m_settings->szThesaurusPath, &pErr );
+	//this->Result = column;
+	//return false;
+
 }
 
 //------------------------------------------------------------------------------
@@ -82,7 +85,9 @@ void ColumnVerb::changeResult(	Table::Ptr table,
 	if( this->Result )
 		return;
 	for( size_t idx = 0; idx < table->Columns.size(); ++idx )
-		if( table->Columns[idx]->getName() == this->ColumnName )
+  {
+    std::string name = table->Columns[idx]->getTableName() + "." + table->Columns[idx]->getName();
+		if( name == this->ColumnName )
 		{
 			Column::Ptr column = table->Columns[idx];
 			if( table->HasCount )
@@ -95,8 +100,8 @@ void ColumnVerb::changeResult(	Table::Ptr table,
 			}
 			return;
 		}
-	assert( (table->Columns.size() == 0) ||
-			(table->Columns.size() == 1) && table->HasCount );
+  }
+	// assert( (table->Columns.size() == 0) || (table->Columns.size() == 1) && table->HasCount ); // FIXME ??????
 }
 
 //------------------------------------------------------------------------------
@@ -380,6 +385,7 @@ bool AsVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pS
 		assert( pNode && pNode->left );
 		replaceTableIdent( pStart, pNode->right->getData().val_str, pNode->left->getData().val_str );
 		delete pNode->right ;
+    pNode->right = NULL;
 		*pNode = *pNode->left; //no memory leaks
 		return true;
 	case K_SELECT:

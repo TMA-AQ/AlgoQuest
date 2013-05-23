@@ -302,6 +302,25 @@ void tnode::to_upper()
 }
 
 //------------------------------------------------------------------------------
+bool tnode::cmp(const tnode * n2) const
+{
+  if (this == n2) return true;
+  if ((this->tag == n2->tag) && (this->eNodeDataType == n2->eNodeDataType))
+  {
+    switch (this->eNodeDataType)
+    {
+    case NODE_DATA_INT:
+      return this->data.val_int == n2->data.val_int;
+    case NODE_DATA_NUMBER:
+      return this->data.val_number == n2->data.val_number;
+    case NODE_DATA_STRING:
+      return strcmp(this->data.val_str, n2->data.val_str) == 0; 
+    }
+  }
+  return false;
+}
+
+//------------------------------------------------------------------------------
 tnode* clone_subtree(tnode* pNode)
 {
 	stack<tnode*> nodes;
@@ -431,6 +450,26 @@ tnode* find_main_node(tnode * pNode, int tag ) {
 // 		return pNodeFound;
 // 	if ( ( pNodeFound = find_main_node( pNode->right, tag ) ) != NULL )
 // 		return pNodeFound;
+	return NULL;
+}
+
+//------------------------------------------------------------------------------
+tnode* find_first_node(tnode * pNode, int tag )
+{	
+  tnode *pNodeFound;
+
+	if ( pNode == NULL )
+    return NULL;
+  
+	if ( pNode->getTag() == tag )
+		return pNode;
+
+ 	if ( ( pNodeFound = find_first_node( pNode->left, tag ) ) != NULL )
+ 		return pNodeFound;
+
+ 	if ( ( pNodeFound = find_first_node( pNode->right, tag ) ) != NULL )
+		return pNodeFound;
+
 	return NULL;
 }
 

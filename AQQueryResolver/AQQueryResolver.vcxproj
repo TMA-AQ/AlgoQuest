@@ -383,6 +383,7 @@
     <ClCompile Include="aq\parser\sql92_grm_tab.cpp" />
     <ClCompile Include="aq\parser\SQLParser.cpp" />
     <ClCompile Include="aq\QueryResolver.cpp" />
+    <ClCompile Include="aq\Row.cpp" />
     <ClCompile Include="aq\RowSolver.cpp" />
     <ClCompile Include="aq\RowTemporaryWritter.cpp" />
     <ClCompile Include="aq\RowVerbProcess.cpp" />
