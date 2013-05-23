@@ -10,7 +10,13 @@ using namespace std;
 ColumnItem::Ptr getMinMaxFromThesaurus(	size_t tableID, size_t colIdx, size_t partIdx, bool min, Base& BaseDesc, TProjectSettings& Settings )
 {
 	ColumnItem::Ptr minMax = NULL;
-	std::string fileName = getThesaurusFileName( Settings.szThesaurusPath, tableID + 1, colIdx + 1, partIdx ); // FIXME : tableID is not the index of table
+  size_t tableIdx = 0;
+  for (tableIdx = 0; tableIdx < BaseDesc.getTables().size(); ++tableIdx)
+  {
+    if (BaseDesc.getTables()[tableIdx]->ID == tableID)
+      break;
+  }
+	std::string fileName = getThesaurusFileName( Settings.szThesaurusPath, tableIdx + 1, colIdx + 1, partIdx ); // FIXME : tableID is not the index of table
 	FILE* pFIn = fopen( fileName.c_str(), "rb" );
 	if ( pFIn == NULL )
 		return minMax;

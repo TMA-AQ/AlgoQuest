@@ -69,12 +69,13 @@ Table::Ptr QueryResolver::solve()
 
 	assert( this->sqlStatement->tag == K_SELECT );
 	
+  bool hasWhere = find_main_node(this->sqlStatement, K_WHERE) != NULL;
 	this->hasGroupBy = find_main_node(this->sqlStatement, K_GROUP) != NULL;
 	this->hasOrderBy = find_main_node(this->sqlStatement, K_ORDER) != NULL;
 	this->hasPartitionBy = find_main_node(this->sqlStatement, K_OVER) != NULL;
   
   aq::addAlias(this->sqlStatement->left);
-  if (!this->hasGroupBy)
+  if (!this->hasGroupBy && hasWhere)
   {
     std::list<tnode*> columns, aggregateColumns;
     aq::selectToList(this->sqlStatement, columns);
