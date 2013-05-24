@@ -1,0 +1,15 @@
+AQManager/Debug/
+AQManager/build/
+AQODBC/build/
+AQQueryResolver/aq/parser/lex.yy.cpp
+AQQueryResolver/aq/parser/sql92_grm_tab.cpp
+AQQueryResolver/aq/parser/sql92_grm_tab.hpp
+AQQueryResolver/build/
+AQServer/build/
+AQSuite/AlgoQuestSuite.opensdf
+AQSuite/AlgoQuestSuite.sdf
+AQSuite/AlgoQuestSuite.v11.suo
+AQSuite/x64/
+AQTools/AQTools.vcxproj.user
+AQTools/build/
+AQUtil/build/
