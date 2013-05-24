@@ -3,8 +3,8 @@
 #include <aq/Exceptions.h>
 #include <boost/scoped_array.hpp>
 
-using namespace aq;
-using namespace std;
+namespace aq
+{
 
 //-------------------------------------------------------------------------------
 ColumnItem::Ptr getMinMaxFromThesaurus(	size_t tableID, size_t colIdx, size_t partIdx, bool min, Base& BaseDesc, TProjectSettings& Settings )
@@ -21,7 +21,7 @@ ColumnItem::Ptr getMinMaxFromThesaurus(	size_t tableID, size_t colIdx, size_t pa
 	if ( pFIn == NULL )
 		return minMax;
 	FileCloser fileCloser(pFIn);
-	Column::Ptr column = BaseDesc.getTable(tableID)->Columns[colIdx];
+	Column::Ptr column = BaseDesc.getTable(static_cast<unsigned int>(tableID))->Columns[colIdx];
 
 	size_t binItemSize	= 0;
 	size_t tmpBufSize = 1000;
@@ -125,7 +125,7 @@ Table::Ptr solveOptimalMinMax(	aq::verb::VerbNode::Ptr spTree, Base& BaseDesc,
 		spNode = spNode->getBrother();
 	} while( spNode->getBrother() );
 
-	aq::verb::ColumnVerb::Ptr columnVerb = dynamic_pointer_cast<aq::verb::ColumnVerb>( verb2 );
+	aq::verb::ColumnVerb::Ptr columnVerb = boost::dynamic_pointer_cast<aq::verb::ColumnVerb>( verb2 );
 	Table::Ptr table = BaseDesc.getTable( columnVerb->getTableName() );
 	size_t colIdx = table->getColumnIdx( columnVerb->getColumnOnlyName() );
 	Column::Ptr column = table->Columns[colIdx];
@@ -156,15 +156,17 @@ bool trivialSelectFromSelect( aq::tnode* pSelect )
 {
 	assert( pSelect && pSelect->tag == K_SELECT );
 	aq::tnode* pFrom = find_main_node( pSelect, K_FROM );
-	vector<aq::tnode*> tables;
+	std::vector<aq::tnode*> tables;
 	commaListToNodeArray( pFrom->left, tables );
 	if( tables.size() != 1 )
 		return false;
 	aq::tnode* pWhere = find_main_node( pSelect, K_WHERE );
-	vector<aq::tnode*> conds;
+	std::vector<aq::tnode*> conds;
 	andListToNodeArray( pWhere->left, conds );
 	if( conds.size() == 1 && conds[0]->tag == K_JNO )
 		return true;
 	else
 		return false;
+}
+
 }

@@ -2,6 +2,7 @@
 #include "SQLPrefix.h"
 #include "QueryAnalyzer.h"
 #include "parser/sql92_grm_tab.hpp"
+#include "Base.h"
 #include "Table.h"
 
 #include "RowProcesses.h"

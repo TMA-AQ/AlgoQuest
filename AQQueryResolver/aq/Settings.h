@@ -8,6 +8,9 @@
 
 #define STR_BUF_SIZE 4096
 
+namespace aq
+{
+
 struct TProjectSettings {
   typedef boost::shared_ptr<TProjectSettings> Ptr;
 
@@ -54,5 +57,7 @@ struct TProjectSettings {
   void dump(std::ostream& os) const;
   void writeAQEngineIni(std::ostream& os) const;
 };
+
+}
 
 #endif

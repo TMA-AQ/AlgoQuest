@@ -5,6 +5,9 @@
 #include <aq/DBTypes.h>
 #include <string>
 
+namespace aq
+{
+
 //------------------------------------------------------------------------------
 class ColumnItem: public Object
 {
@@ -45,5 +48,6 @@ struct column_cmp_t
 	}
 };
 
+}
 
 #endif

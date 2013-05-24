@@ -4,6 +4,9 @@
 #include "AQMatrix.h"
 #include "Settings.h"
 
+namespace aq
+{
+
 class AQEngineCallback_Intf
 {
 public:
@@ -29,3 +32,5 @@ public:
 
 	// virtual void run(Base& BaseDesc, const char * query, AQEngineCallback_Intf * callback);
 };
+
+}

@@ -9,6 +9,8 @@
 #include <aq/Timer.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
+namespace aq
+{
 
 AQEngine::AQEngine(Base& _baseDesc, TProjectSettings& _settings)
 	: baseDesc(_baseDesc), settings(_settings)
@@ -217,4 +219,6 @@ int AQEngineSystem::run(const char * prg, const char * args) const
 {
   aq::Logger::getInstance().log(AQ_NOTICE, "call: '%s %s'\n", prg, args);
   return system((std::string(prg) + " " + std::string(args)).c_str());
+}
+
 }

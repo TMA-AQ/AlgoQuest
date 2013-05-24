@@ -4,6 +4,9 @@
 #include <aq/Utilities.h>
 #include "Table.h"
 
+namespace aq
+{
+
 class AQEngine : public AQEngine_Intf
 {
 public:
@@ -38,3 +41,5 @@ public:
   AQEngineSystem(Base& _baseDesc, TProjectSettings& settings);
   int run(const char * prg, const char * args) const;
 };
+
+}

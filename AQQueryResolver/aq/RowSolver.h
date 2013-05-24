@@ -1,6 +1,7 @@
 #ifndef __ROW_SOLVER_H__
 #define __ROW_SOLVER_H__
 
+#include "Base.h"
 #include "Table.h"
 #include "Column.h"
 #include "AQMatrix.h"

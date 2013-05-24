@@ -3,7 +3,8 @@
 #include <aq/DateConversion.h>
 #include <aq/Exceptions.h>
 
-using namespace aq;
+namespace aq
+{
 
 //------------------------------------------------------------------------------
 ColumnItem::ColumnItem()
@@ -158,4 +159,6 @@ bool ColumnItem::equal( ColumnItem * first, ColumnItem * second, ColumnType type
 bool ColumnItem::equal( const ColumnItem& first, const ColumnItem& second )
 {	
 	return (first.numval == second.numval) && (first.strval == second.strval);
+}
+
 }

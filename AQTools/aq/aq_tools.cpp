@@ -43,10 +43,10 @@ size_t failedQueries = 0;
 boost::mutex parserMutex;
 
 // -------------------------------------------------------------------------------------------------
-class AQEngineSimulate : public AQEngine_Intf
+class AQEngineSimulate : public aq::AQEngine_Intf
 {
 public:
-	void call(aq::tnode * pNode, mode_t mode, int selectLevel) {
+	void call(aq::tnode * pNode, aq::AQEngine_Intf::mode_t mode, int selectLevel) {
 
 		//
 		// Get prefix form of query.
@@ -94,7 +94,7 @@ private:
 };
 
 // -------------------------------------------------------------------------------------------------
-int processAQMatrix(const std::string& query, const std::string& aqMatrixFileName, const std::string& answerFileName, TProjectSettings& settings, Base& baseDesc)
+int processAQMatrix(const std::string& query, const std::string& aqMatrixFileName, const std::string& answerFileName, aq::TProjectSettings& settings, aq::Base& baseDesc)
 {
 	aq::tnode	*pNode;
 	int	nRet;
@@ -165,7 +165,7 @@ int processAQMatrix(const std::string& query, const std::string& aqMatrixFileNam
 		queryResolver.solveAQMatriceByColumns(spTree);
 		
 
-	Table::Ptr result = queryResolver.getResult();
+	aq::Table::Ptr result = queryResolver.getResult();
 	if (result)
 	{
 		result->saveToAnswer(answerFileName.c_str(), settings.fieldSeparator);
@@ -175,7 +175,7 @@ int processAQMatrix(const std::string& query, const std::string& aqMatrixFileNam
 }
 
 // -------------------------------------------------------------------------------------------------
-int transformQuery(const std::string& query, TProjectSettings& settings, Base& baseDesc)
+int transformQuery(const std::string& query, aq::TProjectSettings& settings, aq::Base& baseDesc)
 {
 	aq::tnode	*pNode;
 	int	nRet;
@@ -233,7 +233,7 @@ int transformQuery(const std::string& query, TProjectSettings& settings, Base& b
 }
 
 // -------------------------------------------------------------------------------------------------
-int prepareQuery(const std::string& query, const TProjectSettings& settingsBase, Base& baseDesc, TProjectSettings& settings, std::string& displayFile, const std::string queryIdentStr, bool force)
+int prepareQuery(const std::string& query, const aq::TProjectSettings& settingsBase, aq::Base& baseDesc, aq::TProjectSettings& settings, std::string& displayFile, const std::string queryIdentStr, bool force)
 {		
 	//
 	// generate ident and ini file
@@ -300,7 +300,7 @@ int prepareQuery(const std::string& query, const TProjectSettings& settingsBase,
 }
 
 // -------------------------------------------------------------------------------------------------
-int processQuery(const std::string& query, TProjectSettings& settings, Base& baseDesc, AQEngine_Intf * aq_engine,
+int processQuery(const std::string& query, aq::TProjectSettings& settings, aq::Base& baseDesc, aq::AQEngine_Intf * aq_engine,
                  const std::string& answer, bool display, bool clean)
 {
 	try
@@ -343,7 +343,7 @@ int processQuery(const std::string& query, TProjectSettings& settings, Base& bas
 		// Transform SQL request in prefix form, 
     unsigned int id_generator = 1;
 		aq::QueryResolver queryResolver(pNode, &settings, aq_engine, baseDesc, id_generator);
-		Table::Ptr result = queryResolver.solve();
+		aq::Table::Ptr result = queryResolver.solve();
 		if (!settings.useRowResolver && result)
 		{
 			aq::Timer timer;
@@ -392,7 +392,7 @@ int processQuery(const std::string& query, TProjectSettings& settings, Base& bas
 
 // -------------------------------------------------------------------------------------------------
 int processSQLQueries(std::list<std::string>::const_iterator itBegin, std::list<std::string>::const_iterator itEnd, 
-                      const TProjectSettings& settingsBase, Base& baseDesc, bool simulateAQEngine,
+                      const aq::TProjectSettings& settingsBase, aq::Base& baseDesc, bool simulateAQEngine,
                       bool display, bool clean, const std::string queryIdent, bool force)
 {
 
@@ -406,11 +406,11 @@ int processSQLQueries(std::list<std::string>::const_iterator itBegin, std::list<
 
     //
     // Settings
-		TProjectSettings settings(settingsBase);
+		aq::TProjectSettings settings(settingsBase);
 
 		//
 		// Load AQ engine
-		AQEngine_Intf * aq_engine;
+		aq::AQEngine_Intf * aq_engine;
 		if (simulateAQEngine)
 		{
 			aq::Logger::getInstance().log(AQ_INFO, "Do not use aq engine\n");
@@ -419,7 +419,7 @@ int processSQLQueries(std::list<std::string>::const_iterator itBegin, std::list<
 		else
 		{
 			aq::Logger::getInstance().log(AQ_INFO, "Use aq engine: '%s'\n", settings.szEnginePath.c_str());
-			aq_engine = new AQEngineSystem(baseDesc, settings);
+			aq_engine = new aq::AQEngineSystem(baseDesc, settings);
 		}
     
 		//
@@ -463,7 +463,7 @@ int main(int argc, char**argv)
 	{
 
 		// Settings
-		TProjectSettings settings;
+		aq::TProjectSettings settings;
 
 		// log options
 		std::string mode;
@@ -608,7 +608,7 @@ int main(int argc, char**argv)
 
 		//
 		// Load DB Schema
-		Base baseDesc;
+		aq::Base baseDesc;
 		if (baseDescr == "")
 			baseDescr = settings.szDBDescFN;
 		aq::Logger::getInstance().log(AQ_INFO, "load base %s\n", baseDescr.c_str());
@@ -686,7 +686,7 @@ int main(int argc, char**argv)
 			//
 			// process
 			std::string answer;
-      AQEngine_Intf * aq_engine = new AQEngineSystem(baseDesc, settings);
+      aq::AQEngine_Intf * aq_engine = new aq::AQEngineSystem(baseDesc, settings);
 			processQuery(query, settings, baseDesc, aq_engine, answer, false, false);
 
 		}

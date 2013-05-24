@@ -3,7 +3,8 @@
 #include <aq/Exceptions.h>
 #include <aq/Utilities.h>
 
-using namespace aq;
+namespace aq
+{
 
 ColumnMapper::ColumnMapper(const char * _path, size_t _tableId, size_t _columnId, aq::ColumnType _type, size_t _size, size_t _packetSize)
 	: nbRemap(0),
@@ -121,4 +122,6 @@ const std::vector<size_t>& ColumnMapper::getSimilarIndex(size_t index) const
 		// todo : raise exception
 	}
 	return it2->second;
+}
+
 }

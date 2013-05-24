@@ -26,6 +26,9 @@
 #define EXPR_TR_ERR_PREPARING_PATTERN_MATCHING		-11
 #define EXPR_TR_ERR_PATTERN_MATCHING				-12
 
+namespace aq
+{
+
 //------------------------------------------------------------------------------
 class Column: public aq::verb::VerbResult 
 {
@@ -117,5 +120,7 @@ public:
   bool      Temporary;
 
 };
+
+}
 
 #endif

@@ -312,6 +312,7 @@
     <ClInclude Include="aq\AQEngine.h" />
     <ClInclude Include="aq\AQEngine_Intf.h" />
     <ClInclude Include="aq\AQMatrix.h" />
+    <ClInclude Include="aq\Base.h" />
     <ClInclude Include="aq\Column.h" />
     <ClInclude Include="aq\Column2Table.h" />
     <ClInclude Include="aq\ColumnItem.h" />
@@ -334,7 +335,6 @@
     <ClInclude Include="aq\RowProcesses.h" />
     <ClInclude Include="aq\RowProcess_Intf.h" />
     <ClInclude Include="aq\RowTemporaryWritter.h" />
-    <ClInclude Include="aq\SelectSolverVisitor.h" />
     <ClInclude Include="aq\RowSolver.h" />
     <ClInclude Include="aq\RowVerbProcess.h" />
     <ClInclude Include="aq\RowWritter.h" />
@@ -364,6 +364,7 @@
   <ItemGroup>
     <ClCompile Include="aq\AQEngine.cpp" />
     <ClCompile Include="aq\AQMatrix.cpp" />
+    <ClCompile Include="aq\Base.cpp" />
     <ClCompile Include="aq\Column.cpp" />
     <ClCompile Include="aq\Column2Table.cpp" />
     <ClCompile Include="aq\ColumnItem.cpp" />

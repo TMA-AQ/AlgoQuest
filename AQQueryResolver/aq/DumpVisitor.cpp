@@ -4,6 +4,9 @@
 
 using namespace aq::verb;
 
+namespace aq
+{
+
 // Aggregate Verbs
 void DumpVisitor::visit(AggregateVerb*)
 {
@@ -348,4 +351,6 @@ void DumpVisitor::visit(SubstringVerb* ssv)
   ssv->getLeftChild()->accept(this);
   ss << ", " << ssv->getStartPos() << ", " << ssv->getSize() << ")";
   this->query += ss.str();
+}
+
 }

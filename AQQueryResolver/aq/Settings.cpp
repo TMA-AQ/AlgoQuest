@@ -9,6 +9,9 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/filesystem.hpp>
 
+namespace aq
+{
+
 TProjectSettings::TProjectSettings()
   : 
 	iniFile(""),
@@ -255,4 +258,6 @@ void TProjectSettings::writeAQEngineIni(std::ostream& os) const
 	os << "step1.field.separator=" << fieldSeparator << std::endl;
   os << "k_rep_racine=" << szRootPath << std::endl;
 	os << "k_rep_racine_tmp=" << szRootPath << std::endl;
+}
+
 }

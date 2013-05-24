@@ -4,6 +4,9 @@
 #include "verbs/VerbVisitor.h"
 #include <aq/logger.h>
 
+namespace aq
+{
+
 class DumpVisitor : public aq::verb::VerbVisitor
 {
 public:
@@ -108,5 +111,7 @@ private:
 	std::string rightQuery;
 	std::string query;
 };
+
+}
 
 #endif

@@ -1,4 +1,5 @@
 #include "Column2Table.h"
+#include "Base.h"
 #include "parser/sql92_grm_tab.hpp"
 #include <stdio.h>
 #include <malloc.h>
@@ -6,11 +7,11 @@
 #include <stdlib.h>		// One of this required by "toupper()"
 #include <ctype.h>		// One of this required by "toupper()"
 
-using namespace aq;
-using namespace std;
-
 //------------------------------------------------------------------------------
 extern int yyerror ( const char *pszMsg );
+
+namespace aq
+{
 
 //------------------------------------------------------------------------------
 /* Return -1 on error or if not found, 0 on success */
@@ -352,7 +353,7 @@ void enforce_qualified_column_reference( aq::tnode *pNode, TColumn2TablesArray* 
 	if ( parrC2T == NULL )
 		return;
 
-	vector<aq::tnode*> nodes;
+	std::vector<aq::tnode*> nodes;
 	nodes.push_back( pNode );
 	size_t idx = 0;
 	while( idx < nodes.size() )
@@ -409,4 +410,4 @@ void enforce_qualified_column_reference( aq::tnode *pNode, TColumn2TablesArray* 
 	}
 }
 
-
+}

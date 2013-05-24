@@ -6,6 +6,9 @@
 
 #define EXIT_ON_MEM_ERROR	1
 
+namespace aq
+{
+
 //------------------------------------------------------------------------------
 int loadFromBaseDesc( char* pszDataBaseDef, Base& baseDesc );
 
@@ -36,5 +39,7 @@ void delete_column2tables_array( TColumn2TablesArray* parrC2T );
 
 //------------------------------------------------------------------------------
 void enforce_qualified_column_reference( aq::tnode *pNode, TColumn2TablesArray* parrC2T, int *pErr );
+
+}
 
 #endif /* __AQ_COLUMN2TABLE_H__ */

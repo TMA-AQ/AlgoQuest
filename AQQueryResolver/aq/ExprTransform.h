@@ -4,6 +4,7 @@
 
 #include "Settings.h"
 #include "Column2Table.h"
+#include "Base.h"
 #include "Table.h"
 
 namespace aq

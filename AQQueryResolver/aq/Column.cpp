@@ -3,8 +3,8 @@
 #include <aq/Exceptions.h>
 #include <boost/scoped_array.hpp>
 
-using namespace aq;
-using namespace std;
+namespace aq
+{
 
 //-----------------------------------------------------------------------------
 Column::inner_column_cmp_t::inner_column_cmp_t(Column& lessThanColumn)
@@ -749,7 +749,7 @@ void Column::dumpRaw( std::ostream& os )
 {
   std::string colName = this->getOriginalName();
   size_t pos = colName.find('.');
-  if( pos != string::npos )
+  if( pos != std::string::npos )
     colName = colName.substr( pos + 1 );
   os << colName << "\" " << this->ID << " " << this->Size << " ";
   switch( this->Type )
@@ -772,7 +772,7 @@ void Column::dumpXml( std::ostream& os )
 {
   std::string colName = this->getOriginalName();
   size_t pos = colName.find('.');
-  if( pos != string::npos )
+  if( pos != std::string::npos )
     colName = colName.substr( pos + 1 );
   os << "<Column Name=\"" << colName << "\" ID=\"" << this->ID << "\" Size=\"" << this->Size << "\" Type=\"";
   switch( this->Type )
@@ -788,4 +788,6 @@ void Column::dumpXml( std::ostream& os )
     throw generic_error(generic_error::NOT_IMPLEMENED, "");
   }
   os << "\"/>" << std::endl;
+}
+
 }

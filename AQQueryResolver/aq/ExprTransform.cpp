@@ -11,7 +11,8 @@
 #include <aq/Exceptions.h>
 #include <boost/bind.hpp>
 
-using namespace aq;
+namespace aq
+{
 
 //------------------------------------------------------------------------------
 // PRIVATE
@@ -891,4 +892,6 @@ aq::tnode* ExpressionTransform::expression_transform( aq::tnode *pNode, int *pEr
 	}
 
 	return pNode;
+}
+
 }
