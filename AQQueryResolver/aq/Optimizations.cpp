@@ -16,7 +16,7 @@ ColumnItem::Ptr getMinMaxFromThesaurus(	size_t tableID, size_t colIdx, size_t pa
     if (BaseDesc.getTables()[tableIdx]->ID == tableID)
       break;
   }
-	std::string fileName = getThesaurusFileName( Settings.szThesaurusPath, tableIdx + 1, colIdx + 1, partIdx ); // FIXME : tableID is not the index of table
+	std::string fileName = getThesaurusFileName( Settings.szThesaurusPath, tableIdx + 1, colIdx + 1, partIdx );
 	FILE* pFIn = fopen( fileName.c_str(), "rb" );
 	if ( pFIn == NULL )
 		return minMax;
