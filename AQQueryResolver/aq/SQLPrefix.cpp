@@ -1,4 +1,5 @@
 #include "SQLPrefix.h"
+#include "TreeUtilities.h"
 #include "parser/ID2Str.h"
 #include <cstdio>
 #include <cassert>
@@ -180,10 +181,13 @@ void getTableAlias(aq::tnode *pNode, std::map<std::string, std::string>& tablesA
 }
 
 //------------------------------------------------------------------------------
-std::string& syntax_tree_to_prefix_form( aq::tnode *pNode, std::string& str )
+std::string& syntax_tree_to_prefix_form( aq::tnode *sqlStatement, std::string& str )
 {
-	if ( pNode == NULL )
+	if ( sqlStatement == NULL )
 		return str;
+  
+  aq::tnode * pNode = aq::clone_subtree(sqlStatement);
+  aq::setOneColumnByTableOnSelect(pNode);
 
 	str.clear();
 	char szTmpBuf[1000];

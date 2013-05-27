@@ -13,7 +13,8 @@ void solveAQMatrix(aq::AQMatrix& aqMatrix,
                    const std::vector<aq::tnode**> columnGroup,
                    const TProjectSettings& settings, 
                    const Base& BaseDesc, 
-                   boost::shared_ptr<aq::RowProcess_Intf> rowProcess)
+                   boost::shared_ptr<aq::RowProcess_Intf> rowProcess,
+                   bool aggregate)
   {
     aq::Timer timer;
 
@@ -124,8 +125,8 @@ void solveAQMatrix(aq::AQMatrix& aqMatrix,
     
     // FIXME
     // the flush must be done only when an aggregate operation occur
-    // if (!columnGroup.empty())
-    rowProcess->flush();
+    if (aggregate)
+      rowProcess->flush();
 
   }
 

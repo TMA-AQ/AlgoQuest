@@ -82,4 +82,6 @@ void addEmptyGroupBy(tnode * pNode);
 
 void addColumnsToGroupBy(tnode * pNode, const std::list<tnode *>& aggregateColumns);
 
+void setOneColumnByTableOnSelect(tnode * pNode);
+
 }

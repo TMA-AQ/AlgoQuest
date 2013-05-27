@@ -18,7 +18,8 @@ void solveAQMatrix(aq::AQMatrix& aqMatrix,
                    const std::vector<aq::tnode**> columnGroup,
                    const TProjectSettings& settings, 
                    const Base& BaseDesc, 
-                   boost::shared_ptr<aq::RowProcess_Intf> rowProcess);
+                   boost::shared_ptr<aq::RowProcess_Intf> rowProcess,
+                   bool aggregate = false);
   
 void solveAQMatrix(aq::AQMatrix& aqMatrix, 
                    const std::vector<uint64_t>& tableIDs, 

@@ -871,11 +871,13 @@ void getColumnsList( aq::tnode* pNode,std::vector<aq::tnode*>& columns )
 	if( (pNode->tag == K_PERIOD) || (pNode->inf == 1) )
 	{
 		columns.push_back( pNode );
-	} else if( pNode->tag == K_COMMA )
+	} 
+  else if( pNode->tag == K_COMMA )
 	{
 		getColumnsList( pNode->left, columns );
 		getColumnsList( pNode->right, columns );
-	} else
+	} 
+  else
 	{
 		// 		pNode->tag = K_DELETED;
 		// 		columns.push_back( NULL );
@@ -1163,6 +1165,55 @@ void addColumnsToGroupBy(tnode * pNode, const std::list<tnode *>& columns)
       pNode->right = aq::clone_subtree(n);
       pNode = pNode->left;
     }
+  }
+
+}
+
+void setOneColumnByTableOnSelect(tnode * select)
+{
+  if (select->tag != K_SELECT)
+  {
+    aq::Logger::getInstance().log(AQ_ERROR, "cannot perform operation on select node");
+    return;
+  }
+
+
+  // fill columns list
+  std::vector<tnode**> columns;
+  std::vector<tnode*> uniqueColumnsTable;
+  getAllColumnNodes(select->left, columns);
+  for (std::vector<tnode**>::const_iterator it1 = columns.begin(); it1 != columns.end(); ++it1) 
+  {
+    tnode * n = **it1;
+    bool b = false;
+    for (std::vector<tnode*>::const_iterator it2 = uniqueColumnsTable.begin(); !b && (it2 != uniqueColumnsTable.end()); ++it2) 
+    {
+      if (strcmp(n->left->getData().val_str, (*it2)->left->getData().val_str) == 0)
+      {
+        b = true;
+      }
+    }
+    if (!b)
+      uniqueColumnsTable.push_back(aq::clone_subtree(n));
+  }
+
+  // replace select node
+  aq::delete_subtree(select->left);
+  tnode * n = select;
+  for (std::vector<tnode*>::const_iterator it = uniqueColumnsTable.begin(); it != uniqueColumnsTable.end();)
+  {
+    tnode * n1 = *it;
+     ++it;
+     if (it == uniqueColumnsTable.end())
+     {
+       n->left = n1;
+     }
+     else
+     {
+       n->right = n1;
+       n->left = new aq::tnode(K_COMMA);
+       n = n->left;
+     }
   }
 
 }

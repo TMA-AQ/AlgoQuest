@@ -494,7 +494,7 @@ void QueryResolver::solveAQMatriceByRows(aq::verb::VerbNode::Ptr spTree)
 
   // build result from aq matrix
 	timer.start();
-	aq::solveAQMatrix(*(aq_engine->getAQMatrix()), aq_engine->getTablesIDs(), columnTypes, columnNodes, *pSettings, BaseDesc, processes );
+	aq::solveAQMatrix(*(aq_engine->getAQMatrix()), aq_engine->getTablesIDs(), columnTypes, columnNodes, *pSettings, BaseDesc, processes, this->hasGroupBy );
 	aq::Logger::getInstance().log(AQ_INFO, "Load From Answer: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
   
   const std::vector<Column::Ptr>& columnsWritter = rowWritter->getColumns();

@@ -49,7 +49,7 @@ FileMapper::~FileMapper()
 int FileMapper::read(void * buffer, size_t offset, size_t len) 
 {
 
-  if (offset > cbFile)
+  if (offset >= cbFile)
   {
     return -1;
   }

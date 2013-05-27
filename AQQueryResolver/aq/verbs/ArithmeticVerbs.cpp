@@ -27,7 +27,7 @@ void BinaryVerb::computeResult( VerbResult::Ptr param1, VerbResult::Ptr param2 )
 		Scalar::Ptr scalar2 = static_pointer_cast<Scalar>( param2 );
 		
 		ColumnType type = this->outputType(scalar1->Type, scalar2->Type);
-		Scalar::Ptr result = new Scalar( type );
+		Scalar::Ptr result = new Scalar( type, scalar1->Size );
 		this->transformItem( scalar1->Item, scalar2->Item, type, result->Item );
 		this->Result = result;
 		return;

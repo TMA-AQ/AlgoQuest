@@ -15,8 +15,8 @@ TemporaryColumnMapper::TemporaryColumnMapper(const char * _path, size_t _tableId
   packetSize(_packetSize),
   currentPacket(0)
 {
-  char prefix[ 25 ];
-  char type_str[4];
+  char prefix[128];
+  char type_str[128];
   switch (itemType)
   {
   case COL_TYPE_VARCHAR: strcpy(type_str, "CHA"); break;
