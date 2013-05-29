@@ -248,12 +248,12 @@ void QueryResolver::SolveSelectRecursive(	aq::tnode*& pNode, unsigned int nSelec
     else // if ( inIn )
     {
       // Resolve SubQuery
-      bool resolverMode = this->pSettings->useRowResolver; // FIXME: pSettings should be clone
-      this->pSettings->useRowResolver = false;
+      // bool resolverMode = this->pSettings->useRowResolver; // FIXME: pSettings should be clone
+      // this->pSettings->useRowResolver = false;
       QueryResolver queryResolver(pNode, this->pSettings, this->aq_engine, this->BaseDesc, nSelectLevel, ++this->nestedId);
       queryResolver.solve();
       Table::Ptr table = queryResolver.getResult();
-      this->pSettings->useRowResolver = resolverMode;
+      // this->pSettings->useRowResolver = resolverMode;
 
       //delete old subtree and add new subtree containing answer
       delete_subtree( pNode );
@@ -264,6 +264,7 @@ void QueryResolver::SolveSelectRecursive(	aq::tnode*& pNode, unsigned int nSelec
       }
       else
       {
+        table->load(this->pSettings->szTempPath1, this->pSettings->packSize);
         pNode = aq::GetTree( *table );
         if (pNode == NULL)
         {

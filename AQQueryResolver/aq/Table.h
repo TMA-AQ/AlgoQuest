@@ -52,7 +52,7 @@ public:
 
 	int getColumnIdx( const std::string& name );
 	
-  void load();
+  void load(const char * path, uint64_t packetSize);
 	void loadFromAnswerRaw(	const char *filePath, char fieldSeparator, std::vector<llong>& tableIDs, bool add = false );
 	void loadFromTableAnswerByColumn(aq::AQMatrix& aqMatrix, const std::vector<llong>& tableIDs, const std::vector<Column::Ptr>& columnTypes, const TProjectSettings& pSettings, const Base& BaseDesc);
   void loadColumn(Column::Ptr col, const std::vector<size_t>& uniqueIndex, const std::vector<size_t>& mapToUniqueIndex, const Column::Ptr columnType, const TProjectSettings& pSettings, const Base& BaseDesc);

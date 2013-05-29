@@ -27,8 +27,15 @@ void AQEngine::call(aq::tnode *pNode, mode_t mode, int selectLevel)
 	std::string query;
   aq::syntax_tree_to_prefix_form( pNode, query );
 
+  // FIXME : change ORDER by GROUP => this is temporary
+  std::string::size_type pos = query.find("ORDER");
+  if (pos != std::string::npos)
+  {
+    query.replace(pos, 5, "GROUP");
+  }
+
   // FIXME
-  std::string::size_type pos = query.find("GROUP");
+  pos = query.find("GROUP");
   if (pos != std::string::npos)
   {
     std::string queryTmp = query.substr(0, pos);
@@ -45,10 +52,10 @@ void AQEngine::call(aq::tnode *pNode, mode_t mode, int selectLevel)
 		aq::Logger::getInstance().log(AQ_DEBUG, "\n%s\n", query.c_str());
 
 #if defined(_DEBUG)
-	std::cout << std::endl << query << std::endl << std::endl;
-	std::string queryStr; 
+	std::cout << std::endl << query.substr(0, 1024) << std::endl << std::endl;
+	// std::string queryStr; 
 	// syntax_tree_to_sql_form(pNode, queryStr);
-	std::cout << std::endl << queryStr << std::endl << std::endl;
+	// std::cout << std::endl << queryStr.substr(0, 1024) << std::endl << std::endl;
 #endif
 
 	//
@@ -87,7 +94,7 @@ void AQEngine::call(aq::tnode *pNode, mode_t mode, int selectLevel)
     {
 			aq::Logger::getInstance().log(AQ_ERROR, "call to %s %s failed [ExitCode:%d]\n", prg.c_str(), arg.c_str(), rc);
       if (query.size() < 2048) // fixme
-        aq::Logger::getInstance().log(AQ_ERROR, "%s\n", query.c_str());
+        aq::Logger::getInstance().log(AQ_ERROR, "\n\nAQEngine ERROR:\n%s\n", query.c_str());
 			throw aq::generic_error(aq::generic_error::AQ_ENGINE, "call to %s %s failed [ExitCode:%d]", prg.c_str(), arg.c_str(), rc);
 		}
 	}
@@ -111,11 +118,10 @@ void AQEngine::call(aq::tnode *pNode, mode_t mode, int selectLevel)
     timer.start();
     tableIDs.clear();
     aqMatrix.reset(new aq::AQMatrix(settings));
-
+    
+    //aqMatrix->clear();
     if (settings.useBinAQMatrix)
     {
-      //aqMatrix->write("aq-matrix.bin");
-      //aqMatrix->clear();
       aqMatrix->load(settings.szAnswerFN, this->tableIDs);
       aq::Logger::getInstance().log(AQ_NOTICE, "Load From Binary AQ Matrix: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
     }

@@ -29,7 +29,7 @@ namespace aq
     row_item_t& operator=(const row_item_t& source);
     bool match(const std::string& _tableName, const std::string& _columnName);
   };
-  
+   
   //////////////////////////////////////////////////////////////////////////////////////
 
   class Row

@@ -102,11 +102,19 @@ void Table::computeUniqueRow(Table& aqMatrix, std::vector<std::vector<size_t> >&
 }
 
 //------------------------------------------------------------------------------
-void Table::load()
+void Table::load(const char * path, uint64_t packetSize)
 {
-  // TODO
-  assert(false);
-  throw aq::generic_error(aq::generic_error::NOT_IMPLEMENED, "");
+  if (this->temporary)
+  {
+    std::for_each(this->Columns.begin(), this->Columns.end(), [&] (Column::Ptr c) {
+      aq::TemporaryColumnMapper::Ptr cm(new aq::TemporaryColumnMapper(path, this->ID, c->ID, c->Type, c->Size, packetSize));
+      c->loadFromTmp(c->Type, cm);
+    });
+  }
+  else
+  {
+    throw aq::generic_error(aq::generic_error::NOT_IMPLEMENED, "table load not implemented");
+  }
 }
 
 //------------------------------------------------------------------------------

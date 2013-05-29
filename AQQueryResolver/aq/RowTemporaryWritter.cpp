@@ -99,6 +99,7 @@ namespace aq
           {
             assert(strlen((*it).item->strval.c_str()) <= this->columnsWritter[c]->column->Size);
             char * value = new char[this->columnsWritter[c]->column->Size + 1];
+            memset(value, 0, this->columnsWritter[c]->column->Size + 1);
             strcpy(value, (*it).item->strval.c_str());
             fwrite(value, sizeof(char) * this->columnsWritter[c]->column->Size, 1, this->columnsWritter[c]->file);
             free(value);

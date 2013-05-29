@@ -104,7 +104,7 @@ void ColumnItem::toString( char* buffer, const ColumnType& type ) const
 }
 
 //------------------------------------------------------------------------------
-bool ColumnItem::lessThan( ColumnItem * first, ColumnItem * second, ColumnType type )
+bool ColumnItem::lessThan( const ColumnItem * first, const ColumnItem * second, ColumnType type )
 {
 	if( !first || !second )
 		return false;
@@ -133,7 +133,7 @@ bool ColumnItem::lessThan( const ColumnItem& first, const ColumnItem& second )
 }
 
 //------------------------------------------------------------------------------
-bool ColumnItem::equal( ColumnItem * first, ColumnItem * second, ColumnType type )
+bool ColumnItem::equal( const ColumnItem * first, const ColumnItem * second, ColumnType type )
 {
 	if( !first || !second )
 		return false;
@@ -159,6 +159,43 @@ bool ColumnItem::equal( ColumnItem * first, ColumnItem * second, ColumnType type
 bool ColumnItem::equal( const ColumnItem& first, const ColumnItem& second )
 {	
 	return (first.numval == second.numval) && (first.strval == second.strval);
+}
+
+//------------------------------------------------------------------------------
+void apply_aggregate(aggregate_function_t aggFunc, ColumnType type, ColumnItem& i1, uint64_t i1_count, const ColumnItem& i2, uint64_t i2_count)
+{
+  switch (aggFunc)
+  {
+  case MIN:
+    if (ColumnItem::lessThan(&i2, &i1, type))
+    {
+      i1 = i2;
+    }
+    break;
+  case MAX:
+    if (ColumnItem::lessThan(&i1, &i2, type))
+    {
+      i1 = i2;
+    }
+    break;
+  case SUM:
+    if (type == ColumnType::COL_TYPE_VARCHAR)
+    {
+      throw aq::generic_error(aq::generic_error::INVALID_QUERY, "cannot apply sum on char type");
+    }
+    i1.numval += (i2_count * i2.numval);
+    break;
+  case AVG:
+    if (type == ColumnType::COL_TYPE_VARCHAR)
+    {
+      throw aq::generic_error(aq::generic_error::INVALID_QUERY, "cannot apply avg on char type");
+    }
+    i1.numval = ((i1_count * i1.numval) + (i2_count * i2.numval)) / (i1_count + i2_count);
+    break;
+  case COUNT:
+    throw aq::generic_error(aq::generic_error::NOT_IMPLEMENED, "aggregate count function is not implemented");
+    break;
+  }
 }
 
 }

@@ -123,7 +123,6 @@ void solveAQMatrix(aq::AQMatrix& aqMatrix,
 
     }
     
-    // FIXME
     // the flush must be done only when an aggregate operation occur
     if (aggregate)
       rowProcess->flush();

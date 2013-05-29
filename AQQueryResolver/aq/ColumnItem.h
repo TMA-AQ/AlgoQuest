@@ -4,6 +4,7 @@
 #include <aq/Object.h>
 #include <aq/DBTypes.h>
 #include <string>
+#include <cstdint>
 
 namespace aq
 {
@@ -29,9 +30,11 @@ public:
 //private:	
 //	boost::variant<std::string, double> val;
 
-  static bool lessThan( ColumnItem * first, ColumnItem * second, aq::ColumnType type );
+  // static bool lessThan( ColumnItem * first, ColumnItem * second, aq::ColumnType type );
+  static bool lessThan( const ColumnItem * first, const ColumnItem * second, aq::ColumnType type );
   static bool lessThan( const ColumnItem& first, const ColumnItem& second );
-  static bool equal( ColumnItem * first, ColumnItem * second, aq::ColumnType type );
+  // static bool equal( ColumnItem * first, ColumnItem * second, aq::ColumnType type );
+  static bool equal( const ColumnItem * first, const ColumnItem * second, aq::ColumnType type );
   static bool equal( const ColumnItem& first, const ColumnItem& second );
 
 };
@@ -47,6 +50,8 @@ struct column_cmp_t
 		return ColumnItem::lessThan(*first.get(), *second.get());
 	}
 };
+    
+ void apply_aggregate(aggregate_function_t aggFunc, ColumnType type, ColumnItem& i1, uint64_t i1_count, const ColumnItem& i2, uint64_t i2_count);
 
 }
 
