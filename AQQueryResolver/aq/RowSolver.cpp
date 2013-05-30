@@ -64,6 +64,54 @@ void solveAQMatrix(aq::AQMatrix& aqMatrix,
     }
 
     //
+    // add group columns whose are not in select
+    for (std::vector<aq::tnode**>::const_iterator it = columnGroup.begin(); it != columnGroup.end(); ++it)
+    {
+      const aq::tnode * node = **it;
+      bool inSelect = false;
+      for (size_t i = 0; !inSelect && (i < columnTypes.size()); ++i)
+      {
+        if ((strcmp(columnTypes[i]->getTableName().c_str(), node->left->getData().val_str) == 0) && (strcmp(columnTypes[i]->getName().c_str(), node->right->getData().val_str) == 0))
+        {
+          inSelect = true;
+        }
+      }
+      if (!inSelect)
+      {
+        // add to columns
+        Table& table = *BaseDesc.getTable( node->left->getData().val_str );
+      
+        bool found = false;
+        Column auxCol;
+        auxCol.setName(node->right->getData().val_str);
+        for( size_t idx = 0; idx < table.Columns.size(); ++idx )
+        {
+          if( table.Columns[idx]->getName() == auxCol.getName() )
+          {
+            Column::Ptr column = new Column(*table.Columns[idx]);
+            column->setTableName(table.getName());
+            column->TableID = BaseDesc.getTable(column->getTableName())->ID;
+            column->GroupBy = true;
+            columns.push_back(column);
+            ColumnMapper_Intf::Ptr cm;
+            if (column->Temporary)
+            {
+              cm.reset(new aq::TemporaryColumnMapper(settings.szTempPath1, column->TableID, column->ID, column->Type, column->Size, settings.packSize));
+            }
+            else
+            {
+              cm.reset(new aq::ColumnMapper(settings.szThesaurusPath, column->TableID, column->ID, column->Type, column->Size, settings.packSize));
+            }
+            columnsMapper.push_back(cm);
+            found = true;
+            break;
+          }
+        }
+
+      }
+    }
+
+    //
     // Get the last column
     const std::vector<size_t>& count = aqMatrix.getCount();
 
@@ -99,8 +147,8 @@ void solveAQMatrix(aq::AQMatrix& aqMatrix,
           {
             row.initialRow[c] = aq::row_item_t(
               columnsMapper[c]->loadValue(uniqueIndex[j][mapToUniqueIndex[j][i]]), 
-              columnTypes[c]->Type,
-              static_cast<unsigned>(columnTypes[c]->Size),
+              columns[c]->Type,
+              static_cast<unsigned>(columns[c]->Size),
               columns[c]->getTableName(),
               columns[c]->getName());
             row.initialRow[c].grouped = columns[c]->GroupBy;
