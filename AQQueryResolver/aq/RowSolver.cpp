@@ -161,9 +161,9 @@ void solveAQMatrix(aq::AQMatrix& aqMatrix,
         row.count = static_cast<unsigned>(count[i]);
       }
 
-      if ((i % 1000000) == 0)
+      if (((i + 1) % 1000000) == 0)
       {
-        aq::Logger::getInstance().log(AQ_DEBUG, "%u rows processed in %u ms\n", i, timer.getTimeElapsed().total_milliseconds());
+        aq::Logger::getInstance().log(AQ_DEBUG, "%uM rows processed in %u ms\n", i / 1000000, timer.getTimeElapsed().total_milliseconds());
         timer.start();
       }
 
