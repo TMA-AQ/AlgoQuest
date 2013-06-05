@@ -220,6 +220,9 @@
     <ClInclude Include="aq\statement_resolver.h">
       <Filter>Header Files\aq</Filter>
     </ClInclude>
+    <ClInclude Include="aq\ApplyRowVisitor.h">
+      <Filter>Header Files\aq</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="aq\verbs\AggregateVerbs.cpp">
@@ -355,6 +358,9 @@
       <Filter>Source Files\aq</Filter>
     </ClCompile>
     <ClCompile Include="aq\statement_resolver.cpp">
+      <Filter>Source Files\aq</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\ApplyRowVisitor.cpp">
       <Filter>Source Files\aq</Filter>
     </ClCompile>
   </ItemGroup>

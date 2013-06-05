@@ -16,7 +16,8 @@ class RowTemporaryWritter : public aq::RowWritter
 public:
   RowTemporaryWritter(unsigned int _tableId, const char * _path, unsigned int _packetSize);
   ~RowTemporaryWritter();
-  virtual int process(Row& row);
+protected:
+  int process(Row& row);
 private:
   std::string path;
   unsigned int tableId;

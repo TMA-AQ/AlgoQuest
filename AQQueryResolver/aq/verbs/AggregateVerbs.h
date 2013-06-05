@@ -15,7 +15,7 @@ public:
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
-  virtual void addResult(aq::Row& row, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
+  virtual void addResult(aq::Row& row);
   virtual void accept(VerbVisitor* visitor);
 protected:
 	virtual Scalar::Ptr computeResultRegular(	Column::Ptr column, 
@@ -27,6 +27,10 @@ protected:
 													Table::Ptr table,
 													TablePartition::Ptr partition )
 	{ assert(0); return NULL; };
+private:
+  int index;
+  uint64_t count;
+  aq::ColumnItem item;
 };
 
 //------------------------------------------------------------------------------
@@ -43,7 +47,7 @@ protected:
 	virtual VerbResult::Ptr computeResultPartition(	Column::Ptr column, 
 													Table::Ptr table,
 													TablePartition::Ptr partition );
-  void accept(VerbVisitor* visitor);
+  // void accept(VerbVisitor* visitor);
 };
 
 //------------------------------------------------------------------------------
@@ -53,7 +57,7 @@ class CountVerb: public AggregateVerb
 public:
 	virtual int getVerbType() const { return K_COUNT; };
 	virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
-  void accept(VerbVisitor* visitor);
+  // void accept(VerbVisitor* visitor);
 protected:
 	virtual Scalar::Ptr computeResultRegular(	Column::Ptr column, 
 												Table::Ptr table,
@@ -70,7 +74,7 @@ class AvgVerb: public AggregateVerb
 	VERB_DECLARE( AvgVerb );
 public:
 	virtual int getVerbType() const { return K_AVG; };
-  void accept(VerbVisitor* visitor);
+  // void accept(VerbVisitor* visitor);
 protected:
 	virtual Scalar::Ptr computeResultRegular(	Column::Ptr column, 
 												Table::Ptr table,
@@ -87,7 +91,7 @@ class MinVerb: public AggregateVerb
 	VERB_DECLARE( MinVerb );
 public:
 	virtual int getVerbType() const { return K_MIN; };
-  void accept(VerbVisitor* visitor);
+  // void accept(VerbVisitor* visitor);
 protected:
 	virtual Scalar::Ptr computeResultRegular(	Column::Ptr column, 
 												Table::Ptr table,
@@ -104,7 +108,7 @@ class MaxVerb: public AggregateVerb
 	VERB_DECLARE( MaxVerb );
 public:
 	virtual int getVerbType() const { return K_MAX; };
-  void accept(VerbVisitor* visitor);
+  // void accept(VerbVisitor* visitor);
 protected:
 	virtual Scalar::Ptr computeResultRegular(	Column::Ptr column, 
 												Table::Ptr table,

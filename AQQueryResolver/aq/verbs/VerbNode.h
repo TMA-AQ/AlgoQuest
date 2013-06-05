@@ -28,7 +28,7 @@ public:
   virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal ) { return false; }
   virtual bool changeQuery( aq::tnode* pStart, aq::tnode* pNode, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext ) { return false; }
   virtual void changeResult( Table::Ptr table, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext ) {}
-  virtual void addResult ( aq::Row& row, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext ) {}
+  virtual void addResult ( aq::Row& row ) {}
 
   virtual VerbNode* clone() const = 0;
 
@@ -39,9 +39,10 @@ public:
 	//true - executed and done (the node should be deleted)
 	void changeQuery();
 	void changeResult( Table::Ptr table );
-  void addResult(aq::Row& row);
+  void addResultOnChild(aq::Row& row);
 	
   virtual void accept(VerbVisitor*);
+  void apply(VerbVisitor*);
 	//void acceptTopLeftRight(VerbVisitor*);
  // void acceptLeftTopRight(VerbVisitor* visitor);
 

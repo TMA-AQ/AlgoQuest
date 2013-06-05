@@ -17,6 +17,7 @@ VERB_IMPLEMENT( ColumnVerb );
 
 //------------------------------------------------------------------------------
 ColumnVerb::ColumnVerb()
+  : index(-1), computed_index(-1)
 {}
 
 //------------------------------------------------------------------------------
@@ -105,19 +106,53 @@ void ColumnVerb::changeResult(	Table::Ptr table,
 }
 
 //------------------------------------------------------------------------------
-void ColumnVerb::addResult(aq::Row& row, 
-                           VerbResult::Ptr resLeft,
-                           VerbResult::Ptr resRight, 
-                           VerbResult::Ptr resNext )
+void ColumnVerb::addResult(aq::Row& row)
 {
-  for (aq::Row::row_t::iterator it = row.initialRow.begin(); it != row.initialRow.end(); ++it)
+  if (this->Context != K_SELECT)
   {
-    if ((*it).match(this->TableName, this->ColumnOnlyName))
+    // TODO
+    return;
+  }
+
+  if (this->index == -1)
+  {
+    int i = 0;
+    for (aq::Row::row_t::iterator it = row.initialRow.begin(); it != row.initialRow.end(); ++it)
     {
-      this->Result.reset(new Scalar((*it).type, (*it).size, *(*it).item.get()));
-      break;
+      if ((*it).match(this->TableName, this->ColumnOnlyName))
+      {
+        index = i;
+      }
+      i++;
     }
   }
+  assert(this->index != -1);
+
+  if (row.flush)
+  {
+    // this is a flush
+    return;
+  }
+
+  aq::row_item_t& row_item = row.initialRow[this->index];
+
+  if (this->computed_index == -1)
+  {
+    row.computedRow.push_back(row_item);
+    (*row.computedRow.rbegin()).item.reset(new ColumnItem);
+    this->computed_index = row.computedRow.size() - 1;
+  }
+  
+  if (this->computed_index >= row.computedRow.size())
+  {
+    row.computedRow.push_back(row_item);
+    (*row.computedRow.rbegin()).item.reset(new ColumnItem);
+    assert(this->computed_index == (row.computedRow.size() - 1));
+  }
+
+  // this->Result.reset(new Scalar(row_item.type, row_item.size, *row_item.item.get()));
+  aq::row_item_t& row_computed_item = row.computedRow[this->computed_index];
+  *row_computed_item.item = *row_item.item; // perform copy
 }
 
 //------------------------------------------------------------------------------
@@ -200,9 +235,9 @@ void CommaVerb::changeResult(	Table::Ptr table,
 }
 
 //------------------------------------------------------------------------------
-void CommaVerb::addResult( aq::Row& row, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext )
+void CommaVerb::addResult( aq::Row& row )
 {
-  this->changeResult(NULL, resLeft, resRight, resNext);
+  // this->changeResult(NULL, resLeft, resRight, resNext);
 }
 
 //------------------------------------------------------------------------------
@@ -361,6 +396,7 @@ VERB_IMPLEMENT( AsVerb );
 
 //------------------------------------------------------------------------------
 AsVerb::AsVerb()
+  : index(-1)
 {}
 
 //------------------------------------------------------------------------------
@@ -408,21 +444,32 @@ void AsVerb::changeResult(	Table::Ptr table,
 }
 
 //------------------------------------------------------------------------------
-void AsVerb::addResult(aq::Row& row, 
-                       VerbResult::Ptr resLeft,
-                       VerbResult::Ptr resRight, 
-                       VerbResult::Ptr resNext )
+void AsVerb::addResult(aq::Row& row)
 {
   if (this->Context == K_SELECT)
   {
-    Scalar * scalar = dynamic_cast<Scalar*>(resLeft.get()); // FIXME : not optimal
-    if (scalar != 0)
+    //Scalar * scalar = dynamic_cast<Scalar*>(resLeft.get()); // FIXME : not optimal
+    //if (scalar != 0)
+    //{
+    //  ColumnItem::Ptr item(new ColumnItem(scalar->Item));
+    //  row.computedRow.push_back(aq::row_item_t(item, scalar->Type, scalar->Size, "", this->ident, true));
+    //  (*row.computedRow.rbegin()).aggFunc = scalar->aggFunc;
+    //  (*row.computedRow.rbegin()).displayed = true;
+    //}
+    if (this->index == -1)
     {
-      ColumnItem::Ptr item(new ColumnItem(scalar->Item));
-      row.computedRow.push_back(aq::row_item_t(item, scalar->Type, scalar->Size, "", this->ident, true));
-      (*row.computedRow.rbegin()).aggFunc = scalar->aggFunc;
-      (*row.computedRow.rbegin()).displayed = true;
+      this->index = row.computedRow.size() - 1;
+      row.computedRow[this->index].tableName = "";
+      row.computedRow[this->index].columnName = this->ident;
     }
+
+    if (row.flush)
+    {
+      return;
+    }
+
+    aq::row_item_t& row_item = row.computedRow[this->index];
+    row_item.displayed = true;
   }
 }
 

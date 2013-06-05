@@ -16,8 +16,7 @@ public:
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
-	virtual void addResult( aq::Row& row, 
-		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
+	virtual void addResult(aq::Row& row);
   virtual void accept(VerbVisitor* visitor);
 protected:
 	virtual void computeResult( VerbResult::Ptr param );

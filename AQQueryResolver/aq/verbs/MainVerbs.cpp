@@ -824,10 +824,7 @@ void GroupVerb::changeResult(	Table::Ptr table,
 }
 
 //------------------------------------------------------------------------------
-void GroupVerb::addResult(aq::Row& row, 
-                          VerbResult::Ptr resLeft, 
-                          VerbResult::Ptr resRight, 
-                          VerbResult::Ptr resNext )
+void GroupVerb::addResult(aq::Row& row)
 {
   assert((this->row_acc.computedRow.size() == 0) || (row.flush) || (row.computedRow.size() == this->row_acc.computedRow.size()));
   assert((this->row_prv.initialRow.size() == 0) || (row.flush) || (row.initialRow.size() == this->row_prv.initialRow.size()));
@@ -890,28 +887,7 @@ void GroupVerb::addResult(aq::Row& row,
   {
     for (size_t i = 0; i < row.computedRow.size(); ++i)
     {
-
-      //switch (row.computedRow[i].aggFunc)
-      //{
-      //case MIN:
-      //  row_acc.computedRow[i].item->numval = (std::min)(row_acc.computedRow[i].item->numval, row_prv.computedRow[i].item->numval);
-      //  break;
-      //case MAX:
-      //  row_acc.computedRow[i].item->numval = (std::max)(row_acc.computedRow[i].item->numval, row_prv.computedRow[i].item->numval);
-      //  break;
-      //case SUM:
-      //  row_acc.computedRow[i].item->numval += (row_prv.count * row_prv.computedRow[i].item->numval);
-      //  break;
-      //case AVG:
-      //  row_acc.computedRow[i].item->numval = ((row_acc.count * row_acc.computedRow[i].item->numval) + (row_prv.count * row_prv.computedRow[i].item->numval)) / (row_acc.count + row_prv.count);
-      //  break;
-      //case COUNT:
-      //  throw aq::generic_error(aq::generic_error::NOT_IMPLEMENED, "aggregate count function is not implemented");
-      //  break;
-      //}
-            
       aq::apply_aggregate(row.computedRow[i].aggFunc, row.computedRow[i].type, *row_acc.computedRow[i].item, row_acc.count, *row_prv.computedRow[i].item, row_prv.count);
-
     }
     this->row_acc.count += this->row_prv.count;
   }

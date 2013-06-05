@@ -15,8 +15,7 @@ public:
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
-  virtual void addResult(	aq::Row& row, 
-    VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
+  virtual void addResult(aq::Row& row);
 
 	std::string getTableName() const;
 	std::string getColumnName() const;
@@ -38,6 +37,8 @@ private:
 	std::string TableName, ColumnName, ColumnOnlyName;
   Base * m_baseDesc;
   TProjectSettings * m_settings;
+  int index;
+  int computed_index;
 };
 
 //------------------------------------------------------------------------------
@@ -50,8 +51,7 @@ public:
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
-	virtual void addResult( aq::Row& row, 
-		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
+	virtual void addResult(aq::Row& row);
   virtual void accept(VerbVisitor*);
 };
 
@@ -122,12 +122,12 @@ public:
 	virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
-  void addResult(aq::Row& row, 
-    VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
+  void addResult(aq::Row& row);
 	virtual void accept(VerbVisitor* visitor);
   const std::string& getIdent() const { return ident; }
 private:
   std::string ident;
+  int index;
 };
 
 //------------------------------------------------------------------------------

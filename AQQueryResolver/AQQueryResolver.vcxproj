@@ -309,6 +309,7 @@
     <ResourceCompile Include="AQQueryResolver.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="aq\ApplyRowVisitor.h" />
     <ClInclude Include="aq\AQEngine.h" />
     <ClInclude Include="aq\AQEngine_Intf.h" />
     <ClInclude Include="aq\AQMatrix.h" />
@@ -362,6 +363,7 @@
     <ClInclude Include="aq\verbs\VerbVisitor.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="aq\ApplyRowVisitor.cpp" />
     <ClCompile Include="aq\AQEngine.cpp" />
     <ClCompile Include="aq\AQMatrix.cpp" />
     <ClCompile Include="aq\Base.cpp" />

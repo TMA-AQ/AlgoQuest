@@ -151,7 +151,7 @@ Table::Ptr QueryResolver::SolveSelectRegular()
     std::cout << *this->sqlStatement << std::endl;
     aq::verb::VerbNode::dump(std::cout, spTree);
     DumpVisitor printer;
-    spTree->accept(&printer);
+    // spTree->apply(&printer);
     std::cout << std::endl << printer.getQuery() << std::endl;
   }
 #endif
@@ -325,6 +325,7 @@ void QueryResolver::buildTemporaryTable(aq::tnode * pNode)
   // build table
   this->id_generator += 1;
   boost::shared_ptr<QueryResolver> interiorQuery(new QueryResolver(aq::clone_subtree(pNode), pSettings, aq_engine, BaseDesc, this->id_generator, this->level + 1));
+  interiorQuery->setResultName(alias.c_str());
   interiorQuery->solve();
   this->nestedTables.insert(std::make_pair(alias, interiorQuery));
   
@@ -452,6 +453,32 @@ boost::shared_ptr<QueryResolver> QueryResolver::SolveSelectFromSelect(	aq::tnode
 }
 
 //------------------------------------------------------------------------------
+void getSelectVerbs(aq::verb::VerbNode::Ptr spTree, std::vector<aq::verb::VerbNode::Ptr>& selectVerbs)
+{
+  aq::verb::SelectVerb::Ptr select = boost::dynamic_pointer_cast<aq::verb::SelectVerb>(spTree);
+  while ((select == 0) && (spTree->getBrother()))
+  {
+    spTree = spTree->getBrother();
+    select = boost::dynamic_pointer_cast<aq::verb::SelectVerb>(spTree);
+  }
+  spTree = spTree->getLeftChild();
+  while (spTree)
+  {
+    if (boost::dynamic_pointer_cast<aq::verb::CommaVerb>(spTree) != 0)
+    {
+      selectVerbs.push_back(spTree->getRightChild());
+      spTree = spTree->getLeftChild();
+      assert(spTree);
+    }
+    else
+    {
+      selectVerbs.push_back(spTree);
+      spTree = 0;
+    }
+  }
+}
+
+//------------------------------------------------------------------------------
 void QueryResolver::solveAQMatriceByRows(aq::verb::VerbNode::Ptr spTree)
 {	
 	assert(pSettings->useRowResolver);
@@ -476,9 +503,16 @@ void QueryResolver::solveAQMatriceByRows(aq::verb::VerbNode::Ptr spTree)
 		aq::getAllColumnNodes(nodeGroup, columnNodes);
 	}
 
-  boost::shared_ptr<aq::RowVerbProcess> rowVerbProcess(new aq::RowVerbProcess(spTree));
+  //
+  // Verbs Processing
+  std::vector<aq::verb::VerbNode::Ptr> selectVerbs;
+  getSelectVerbs(spTree, selectVerbs);
+  boost::shared_ptr<aq::ApplyRowVisitor> applyRowVisitor(new aq::ApplyRowVisitor);
+  boost::shared_ptr<aq::RowVerbProcess> rowVerbProcess(new aq::RowVerbProcess(spTree, applyRowVisitor, selectVerbs));
 	processes->addProcess(rowVerbProcess);
 
+  ////
+  //// Output Processing
   boost::shared_ptr<aq::RowWritter> rowWritter;
   if (this->nested)
   {
@@ -493,15 +527,21 @@ void QueryResolver::solveAQMatriceByRows(aq::verb::VerbNode::Ptr spTree)
     processes->addProcess(rowWritter);
   }
 
+  //
   // build result from aq matrix
 	timer.start();
-	aq::solveAQMatrix(*(aq_engine->getAQMatrix()), aq_engine->getTablesIDs(), columnTypes, columnNodes, *pSettings, BaseDesc, processes, this->hasGroupBy );
-	aq::Logger::getInstance().log(AQ_INFO, "Load From Answer: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
+	aq::solveAQMatrix_V2(
+    *(aq_engine->getAQMatrix()), aq_engine->getTablesIDs(), columnTypes, columnNodes, 
+    *pSettings, BaseDesc, 
+    processes, applyRowVisitor->rows, 
+    this->hasGroupBy );
+	aq::Logger::getInstance().log(AQ_INFO, "build result from aq matrix: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
   
+  //
+  // build table result (need by nested query)
   const std::vector<Column::Ptr>& columnsWritter = rowWritter->getColumns();
   std::copy(columnsWritter.begin(), columnsWritter.end(), std::back_inserter(this->columns));
   
-  // build result : FIXME : shouldn't be done in solveRegular ??
   this->result.reset(new Table(this->resultName, static_cast<unsigned>(this->BaseDesc.getTables().size() + 1), true));
   for (std::vector<Column::Ptr>::const_iterator it = this->columns.begin(); it != this->columns.end(); ++it)
   {
@@ -510,6 +550,7 @@ void QueryResolver::solveAQMatriceByRows(aq::verb::VerbNode::Ptr spTree)
     this->result->Columns.push_back(column);
   }
   this->result->TotalCount = rowWritter->getTotalCount();
+
 }
 
 //------------------------------------------------------------------------------
@@ -582,6 +623,7 @@ void QueryResolver::changeTemporaryTableName(aq::tnode * pNode)
             char * buf = static_cast<char*>(malloc(128 * sizeof(char)));
             std::string type_str = columnTypeToStr((*itCol)->Type);
             sprintf(buf, "C%.4u%s%.4u", (*itCol)->ID, type_str.c_str(), (*itCol)->Size);
+            aq::Logger::getInstance().log(AQ_DEBUG, "change column name '%s' by '%s'\n", column->getData().val_str, buf);
             column->set_string_data(buf);
             free(buf);
           }
@@ -599,6 +641,7 @@ void QueryResolver::changeTemporaryTableName(aq::tnode * pNode)
       {
         char * buf = static_cast<char*>(malloc(128 * sizeof(char)));
         sprintf(buf, "TMP%.4uSIZE%.10u", it->second->getResult()->ID, it->second->getResult()->TotalCount);
+        aq::Logger::getInstance().log(AQ_DEBUG, "change table name '%s' by '%s'\n", pNode->getData().val_str, buf);
         pNode->set_string_data(buf);
         free(buf);
       }

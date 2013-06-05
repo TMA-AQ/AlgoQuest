@@ -12,12 +12,16 @@ namespace aq
   public:
     RowProcesses() {}
     void addProcess(boost::shared_ptr<aq::RowProcess_Intf> _process) { this->processes.push_back(_process); }
-    int process(Row& row) 
+    int process(std::vector<Row>& rows) 
     {
-      std::for_each(processes.begin(), processes.end(), [&] (boost::shared_ptr<aq::RowProcess_Intf> process) {
-        process->process(row);
-      });
-      return 0;
+      int rc = 0;
+      for (std::list<boost::shared_ptr<aq::RowProcess_Intf> >::iterator it = processes.begin(); it != processes.end(); ++it) 
+      {
+        rc = (*it)->process(rows);
+        if (rc == -1)
+          break;
+      }
+      return rc;
     }
   private:
     std::list<boost::shared_ptr<aq::RowProcess_Intf> > processes;

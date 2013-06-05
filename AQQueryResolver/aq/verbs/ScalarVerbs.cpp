@@ -102,20 +102,17 @@ void ScalarVerb::changeResult(	Table::Ptr table,
 }
 
 //------------------------------------------------------------------------------
-void ScalarVerb::addResult(	aq::Row& row, 
-								VerbResult::Ptr resLeft, 
-								VerbResult::Ptr resRight, 
-								VerbResult::Ptr resNext )
+void ScalarVerb::addResult(aq::Row& row)
 {
-	assert( resLeft );
-  this->computeResult( resLeft );
-  
-  Scalar * scalar = dynamic_cast<Scalar*>(this->Result.get());
-  if (scalar != 0)
-  {
-    ColumnItem::Ptr item(new ColumnItem(scalar->Item));
-    row.computedRow.push_back(aq::row_item_t(item, scalar->Type, scalar->Size, "", ""));
-  }
+	assert(false);
+  //this->computeResult( resLeft );
+  //
+  //Scalar * scalar = dynamic_cast<Scalar*>(this->Result.get());
+  //if (scalar != 0)
+  //{
+  //  ColumnItem::Ptr item(new ColumnItem(scalar->Item));
+  //  row.computedRow.push_back(aq::row_item_t(item, scalar->Type, scalar->Size, "", ""));
+  //}
 }
 
 //------------------------------------------------------------------------------

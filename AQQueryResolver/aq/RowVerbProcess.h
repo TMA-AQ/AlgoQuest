@@ -2,6 +2,7 @@
 #define __ROW_VERB_PROCESS_H__
 
 #include "RowProcess_Intf.h"
+#include "ApplyRowVisitor.h"
 #include "verbs/VerbNode.h"
 
 namespace aq
@@ -10,10 +11,14 @@ namespace aq
   class RowVerbProcess : public RowProcess_Intf
   {
   public:
-    RowVerbProcess(aq::verb::VerbNode::Ptr _spTree);
-    int process(Row& row);
+    RowVerbProcess(aq::verb::VerbNode::Ptr _spTree, 
+      boost::shared_ptr<aq::ApplyRowVisitor> _applyRowVisitor,
+      std::vector<aq::verb::VerbNode::Ptr>& _selectVerbs);
+    int process(std::vector<Row>& rows);
   private:
     aq::verb::VerbNode::Ptr spTree;
+    std::vector<aq::verb::VerbNode::Ptr> verbs;
+    boost::shared_ptr<aq::ApplyRowVisitor> applyRowVisitor;
   };
 
 }

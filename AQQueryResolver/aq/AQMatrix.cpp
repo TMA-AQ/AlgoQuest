@@ -167,34 +167,60 @@ void AQMatrix::write(const char * filePath)
 
 void AQMatrix::load(const char * filePath, std::vector<long long>& tableIDs)
 {
-  FILE * fd = fopen(filePath, "rb");
-  uint64_t size;
-  fread(&size, sizeof(uint64_t), 1, fd);
-  for (uint64_t i = 0; i < size; ++i)
+  std::string answertFile(filePath);
+  answertFile += "/answerFormat.a";
+  FILE * fd = fopen(answertFile.c_str(), "rb");
+
+  uint32_t nbTable;
+  fread(&nbTable, sizeof(uint32_t), 1, fd);
+  for (uint32_t i = 0; i < nbTable; ++i)
   {
-    uint64_t table_id;
+    uint32_t table_id;
     this->matrix.push_back(column_t());
-    fread(&table_id, sizeof(uint64_t), 1, fd);
+    fread(&table_id, sizeof(uint32_t), 1, fd);
     this->matrix[this->matrix.size() - 1].table_id = table_id;
     tableIDs.push_back(table_id);
   }
-  fread(&size, sizeof(uint64_t), 1, fd);
-  for (uint64_t i = 0; i < size; ++i)
+  
+  uint64_t count;
+  fread(&count, sizeof(uint64_t), 1, fd);
+
+  uint32_t nbRows, nbGroups;
+  fread(&nbRows, sizeof(uint32_t), 1, fd);
+  fread(&nbGroups, sizeof(uint32_t), 1, fd);
+  
+  uint64_t value;
+  uint64_t part = 0;
+  char filename[256];
+  for (uint32_t i = 0; i < nbGroups; ++i)
   {
-    uint64_t value;
-    for (size_t c = 0; c < this->matrix.size(); ++c)
+    assert(i < 1048576); // FIXME : manage multiple packet by group
+    sprintf(filename, "%s/AnswerG%.10uP%.12u.a", filePath, i, part);
+    fclose(fd);
+    fd = fopen(filename, "rb");
+    fread(&count, sizeof(uint64_t), 1, fd);
+    fread(&nbRows, sizeof(uint32_t), 1, fd);
+    aq::Logger::getInstance().log(AQ_DEBUG, "loading %u rows in %s\n", nbRows, filename);
+    for (uint32_t j = 0; j < nbRows; ++j)
     {
+      for (size_t c = 0; c < this->matrix.size(); ++c)
+      {
+        fread(&value, sizeof(uint64_t), 1, fd);
+        this->matrix[c].indexes.push_back(value);
+      }
       fread(&value, sizeof(uint64_t), 1, fd);
-      this->matrix[c].indexes.push_back(value);
+      this->count.push_back(value);
     }
-    fread(&value, sizeof(uint64_t), 1, fd);
-    this->count.push_back(value);
+    // this->groupByIndex.insert(std::make_pair(i, this->count.size()));
+    this->groupByIndex.push_back(count);
   }
+
   fclose(fd);
   this->hasCount = true;
   this->totalCount = this->count.size();
 	this->nbRows = this->count.size();
   this->size = this->count.size();
+
 }
 
 void AQMatrix::load(const char * filePath, const char fieldSeparator, std::vector<long long>& tableIDs)
@@ -432,8 +458,8 @@ void AQMatrix::groupBy(std::vector<aq::ColumnMapper::Ptr>& columnsMapper)
 	}
 
 	group_by_key_t gk = { 0, NULL } ;
-	for (std::set<index_holder_t, index_holder_cmp_t>::const_iterator it = indexes_to_sort.begin(); it != indexes_to_sort.end(); ++it)
-		this->groupByIndex[gk].push_back((*it).index);
+	//for (std::set<index_holder_t, index_holder_cmp_t>::const_iterator it = indexes_to_sort.begin(); it != indexes_to_sort.end(); ++it)
+	//	this->groupByIndex[gk].push_back((*it).index);
 		
 	aq::Logger::getInstance().log(AQ_DEBUG, "%u group\n", groupByIndex.size());
 }

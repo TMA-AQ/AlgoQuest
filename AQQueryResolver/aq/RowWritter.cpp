@@ -20,12 +20,18 @@ RowWritter::~RowWritter()
     fclose(pFOut);
 }
 
+int RowWritter::process(std::vector<Row>& rows)
+{
+  std::for_each(rows.begin(), rows.end(), [&] (Row& row) { this->process(row); });
+  return 0;
+}
+
 int RowWritter::process(Row& row)
 {
 	if (this->firstRow)
 	{
 		//write column names
-    for (Row::row_t::const_reverse_iterator it = row.computedRow.rbegin(); it != row.computedRow.rend(); ++it)
+    for (Row::row_t::const_iterator it = row.computedRow.begin(); it != row.computedRow.end(); ++it)
     {
       if (!(*it).displayed)
         continue;
@@ -44,7 +50,7 @@ int RowWritter::process(Row& row)
   if (row.completed)
   {
     this->totalCount += 1;
-    for (Row::row_t::const_reverse_iterator it = row.computedRow.rbegin(); it != row.computedRow.rend(); ++it)
+    for (Row::row_t::const_iterator it = row.computedRow.begin(); it != row.computedRow.end(); ++it)
     {
       if (!(*it).displayed)
         continue;

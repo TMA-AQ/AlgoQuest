@@ -17,10 +17,12 @@ public:
 
   virtual const std::vector<Column::Ptr>& getColumns() const { return this->columns; }
 	void setColumn(std::vector<Column::Ptr> _columns) { this->columns = _columns; }
-	virtual int process(Row& row);
+	virtual int process(std::vector<Row>& rows);
   unsigned int getTotalCount() const { return this->totalCount; }
 
 protected:
+  virtual int process(Row& row);
+
   aq::verb::VerbNode::Ptr spTree;
 	std::vector<Column::Ptr> columns;
   unsigned int totalCount;

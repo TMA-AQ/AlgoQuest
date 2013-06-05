@@ -7,6 +7,100 @@
 namespace aq 
 {
   
+void prepareColumnAndColumnMapper(const TProjectSettings& settings,
+                                  const Base& BaseDesc,
+                                  const std::vector<Column::Ptr>& columnTypes, 
+                                  const std::vector<aq::tnode**>& columnGroup,
+                                  std::vector<Column::Ptr>& columns,
+                                  std::vector<aq::ColumnMapper_Intf::Ptr>& columnsMapper)
+{ 
+  // order must be the same that columnsType
+  for (size_t i = 0; i < columnTypes.size(); ++i)
+  {
+    Column::Ptr c(new Column(*columnTypes[i]));
+
+    c->TableID = BaseDesc.getTable(c->getTableName())->ID;
+
+    for (std::vector<aq::tnode**>::const_iterator it = columnGroup.begin(); it != columnGroup.end(); ++it)
+    {
+      const aq::tnode * node = **it;
+      if ((strcmp(c->getTableName().c_str(), node->left->getData().val_str) == 0) && (strcmp(c->getName().c_str(), node->right->getData().val_str) == 0))
+      {
+        c->GroupBy = true;
+        break;
+      }
+    }
+    columns.push_back(c);
+
+    columnTypes[i]->TableID = BaseDesc.getTable(columnTypes[i]->getTableName())->ID;
+
+    ColumnMapper_Intf::Ptr cm;
+    if (columnTypes[i]->Temporary)
+    {
+      cm.reset(new aq::TemporaryColumnMapper(settings.szTempPath1, columnTypes[i]->TableID, columnTypes[i]->ID, columnTypes[i]->Type, columnTypes[i]->Size, settings.packSize));
+    }
+    else
+    {
+      cm.reset(new aq::ColumnMapper(settings.szThesaurusPath, columnTypes[i]->TableID, columnTypes[i]->ID, columnTypes[i]->Type, columnTypes[i]->Size, settings.packSize));
+    }
+    columnsMapper.push_back(cm);
+  }
+}
+
+void addGroupColumn(const TProjectSettings& settings,
+                    const Base& BaseDesc,
+                    const std::vector<Column::Ptr>& columnTypes, 
+                    const std::vector<aq::tnode**>& columnGroup,
+                    std::vector<Column::Ptr>& columns,
+                    std::vector<aq::ColumnMapper_Intf::Ptr>& columnsMapper)
+{  
+  for (std::vector<aq::tnode**>::const_iterator it = columnGroup.begin(); it != columnGroup.end(); ++it)
+  {
+    const aq::tnode * node = **it;
+    bool inSelect = false;
+    for (size_t i = 0; !inSelect && (i < columnTypes.size()); ++i)
+    {
+      if ((strcmp(columnTypes[i]->getTableName().c_str(), node->left->getData().val_str) == 0) && (strcmp(columnTypes[i]->getName().c_str(), node->right->getData().val_str) == 0))
+      {
+        inSelect = true;
+      }
+    }
+    if (!inSelect)
+    {
+      // add to columns
+      Table& table = *BaseDesc.getTable( node->left->getData().val_str );
+
+      bool found = false;
+      Column auxCol;
+      auxCol.setName(node->right->getData().val_str);
+      for( size_t idx = 0; idx < table.Columns.size(); ++idx )
+      {
+        if( table.Columns[idx]->getName() == auxCol.getName() )
+        {
+          Column::Ptr column = new Column(*table.Columns[idx]);
+          column->setTableName(table.getName());
+          column->TableID = BaseDesc.getTable(column->getTableName())->ID;
+          column->GroupBy = true;
+          columns.push_back(column);
+          ColumnMapper_Intf::Ptr cm;
+          if (column->Temporary)
+          {
+            cm.reset(new aq::TemporaryColumnMapper(settings.szTempPath1, column->TableID, column->ID, column->Type, column->Size, settings.packSize));
+          }
+          else
+          {
+            cm.reset(new aq::ColumnMapper(settings.szThesaurusPath, column->TableID, column->ID, column->Type, column->Size, settings.packSize));
+          }
+          columnsMapper.push_back(cm);
+          found = true;
+          break;
+        }
+      }
+
+    }
+  }
+}
+
 void solveAQMatrix(aq::AQMatrix& aqMatrix, 
                    const std::vector<llong>& tableIDs, 
                    const std::vector<Column::Ptr>& columnTypes, 
@@ -14,168 +108,233 @@ void solveAQMatrix(aq::AQMatrix& aqMatrix,
                    const TProjectSettings& settings, 
                    const Base& BaseDesc, 
                    boost::shared_ptr<aq::RowProcess_Intf> rowProcess,
+                   std::vector<aq::Row>& rows,
                    bool aggregate)
+{
+  aq::Timer timer;
+
+  if ((aqMatrix.getTotalCount() == 0) || (aqMatrix.getNbColumn() == 0))
+    return;
+
+  std::vector<std::vector<size_t> > mapToUniqueIndex;
+  std::vector<std::vector<size_t> > uniqueIndex;
+
+  timer.start();
+  aqMatrix.computeUniqueRow(mapToUniqueIndex, uniqueIndex);
+  aq::Logger::getInstance().log(AQ_INFO, "Sorted and Unique Index: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
+
+  //
+  // Prepare Columns and Column Mapper
+  std::vector<Column::Ptr> columns;
+  std::vector<aq::ColumnMapper_Intf::Ptr> columnsMapper; // order must be the same that columnsType
+  prepareColumnAndColumnMapper(settings, BaseDesc, columnTypes, columnGroup, columns, columnsMapper);
+
+  //
+  // add group columns whose are not in select
+  addGroupColumn(settings, BaseDesc, columnTypes, columnGroup, columns, columnsMapper);
+
+  //
+  // Get the last column
+  const std::vector<size_t>& count = aqMatrix.getCount();
+
+  //
+  // Special case for Count only
+  if (columns.size() == 0)
   {
-    aq::Timer timer;
+    ColumnItem::Ptr item(new ColumnItem((double)aqMatrix.getTotalCount()));
+    std::vector<aq::Row> rows;
+    // TODO
+    // row.com.push_back(aq::Row_item_t(item, COL_TYPE_INT, 4, "", "Count"));
+    rowProcess->process(rows);
+    return;
+  }
 
-    if ((aqMatrix.getTotalCount() == 0) || (aqMatrix.getNbColumn() == 0))
-      return;
+  size_t row_size = columns.size();
 
-    std::vector<std::vector<size_t> > mapToUniqueIndex;
-    std::vector<std::vector<size_t> > uniqueIndex;
-
-    timer.start();
-    aqMatrix.computeUniqueRow(mapToUniqueIndex, uniqueIndex);
-    aq::Logger::getInstance().log(AQ_INFO, "Sorted and Unique Index: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
-
-    //
-    // Prepare Columns and Column Mapper
-    std::vector<Column::Ptr> columns;
-    std::vector<aq::ColumnMapper_Intf::Ptr> columnsMapper; // order must be the same that columnsType
-    for (size_t i = 0; i < columnTypes.size(); ++i)
+  // For each Row
+  timer.start();
+  for (std::vector<aq::Row>::iterator it = rows.begin(); it != rows.end(); ++it)
+  {
+    aq::Row& row = *it;
+    row.initialRow.resize(row_size);
+    row.computedRow; // .resize((std::max)(row_size, (size_t)32)); // fixme
+  }
+  size_t nrow = 0;
+  for (size_t i = 0; i < aqMatrix.getSize(); ++i)
+  {
+    // row.computedRow.clear();
+    rows[nrow].completed = true;
+    rows[nrow].flush = false;
+    for (size_t j = 0; j < mapToUniqueIndex.size(); ++j) 
     {
-      Column::Ptr c(new Column(*columnTypes[i]));
-
-      c->TableID = BaseDesc.getTable(c->getTableName())->ID;
-
-      for (std::vector<aq::tnode**>::const_iterator it = columnGroup.begin(); it != columnGroup.end(); ++it)
+      for (size_t c = 0; c < columns.size(); ++c)
       {
-        const aq::tnode * node = **it;
-        if ((strcmp(c->getTableName().c_str(), node->left->getData().val_str) == 0) && (strcmp(c->getName().c_str(), node->right->getData().val_str) == 0))
+        assert(mapToUniqueIndex[j][i] < uniqueIndex[j].size());
+        if (columns[c]->TableID == tableIDs[j])
         {
-          c->GroupBy = true;
-          break;
-        }
-      }
-      columns.push_back(c);
 
-      columnTypes[i]->TableID = BaseDesc.getTable(columnTypes[i]->getTableName())->ID;
-      
-      ColumnMapper_Intf::Ptr cm;
-      if (columnTypes[i]->Temporary)
-      {
-        cm.reset(new aq::TemporaryColumnMapper(settings.szTempPath1, columnTypes[i]->TableID, columnTypes[i]->ID, columnTypes[i]->Type, columnTypes[i]->Size, settings.packSize));
-      }
-      else
-      {
-        cm.reset(new aq::ColumnMapper(settings.szThesaurusPath, columnTypes[i]->TableID, columnTypes[i]->ID, columnTypes[i]->Type, columnTypes[i]->Size, settings.packSize));
-      }
-      columnsMapper.push_back(cm);
-    }
-
-    //
-    // add group columns whose are not in select
-    for (std::vector<aq::tnode**>::const_iterator it = columnGroup.begin(); it != columnGroup.end(); ++it)
-    {
-      const aq::tnode * node = **it;
-      bool inSelect = false;
-      for (size_t i = 0; !inSelect && (i < columnTypes.size()); ++i)
-      {
-        if ((strcmp(columnTypes[i]->getTableName().c_str(), node->left->getData().val_str) == 0) && (strcmp(columnTypes[i]->getName().c_str(), node->right->getData().val_str) == 0))
-        {
-          inSelect = true;
-        }
-      }
-      if (!inSelect)
-      {
-        // add to columns
-        Table& table = *BaseDesc.getTable( node->left->getData().val_str );
-      
-        bool found = false;
-        Column auxCol;
-        auxCol.setName(node->right->getData().val_str);
-        for( size_t idx = 0; idx < table.Columns.size(); ++idx )
-        {
-          if( table.Columns[idx]->getName() == auxCol.getName() )
+          // initial row
+          aq::row_item_t& item_tmp = rows[nrow].initialRow[c];
+          item_tmp.item = columnsMapper[c]->loadValue(uniqueIndex[j][mapToUniqueIndex[j][i]]);
+          if (item_tmp.columnName == "")
           {
-            Column::Ptr column = new Column(*table.Columns[idx]);
-            column->setTableName(table.getName());
-            column->TableID = BaseDesc.getTable(column->getTableName())->ID;
-            column->GroupBy = true;
-            columns.push_back(column);
-            ColumnMapper_Intf::Ptr cm;
-            if (column->Temporary)
-            {
-              cm.reset(new aq::TemporaryColumnMapper(settings.szTempPath1, column->TableID, column->ID, column->Type, column->Size, settings.packSize));
-            }
-            else
-            {
-              cm.reset(new aq::ColumnMapper(settings.szThesaurusPath, column->TableID, column->ID, column->Type, column->Size, settings.packSize));
-            }
-            columnsMapper.push_back(cm);
-            found = true;
-            break;
+            item_tmp.type = columns[c]->Type;
+            item_tmp.size = static_cast<unsigned int>(columns[c]->Size);
+            item_tmp.tableName = columns[c]->getTableName();
+            item_tmp.columnName = columns[c]->getName();
+            item_tmp.grouped = columns[c]->GroupBy;
           }
-        }
 
+        }
       }
     }
 
-    //
-    // Get the last column
-    const std::vector<size_t>& count = aqMatrix.getCount();
-
-    //
-    // Special case for Count only
-    if (columns.size() == 0)
+    if (aqMatrix.hasCountColumn())
     {
-      ColumnItem::Ptr item(new ColumnItem((double)aqMatrix.getTotalCount()));
-      aq::Row row;
-      // TODO
-      // row.com.push_back(aq::Row_item_t(item, COL_TYPE_INT, 4, "", "Count"));
-      rowProcess->process(row);
-      return;
+      rows[nrow].count = static_cast<unsigned>(count[i]);
     }
 
-    size_t row_size = columns.size();
-
-    // For each Row
-    timer.start();
-    aq::Row row;
-    row.initialRow.resize(row_size, aq::row_item_t(ColumnItem::Ptr(), COL_TYPE_BIG_INT, 8, "", ""));
-    for (size_t i = 0; i < aqMatrix.getSize(); ++i)
+    if (((i + 1) % 1000000) == 0)
     {
-      row.computedRow.clear();
-      row.completed = true;
-      row.flush = false;
-      for (size_t j = 0; j < mapToUniqueIndex.size(); ++j) 
+      aq::Logger::getInstance().log(AQ_INFO, "%uM rows processed in %u ms\n", (i + 1) / 1000000, timer.getTimeElapsed().total_milliseconds());
+      timer.start();
+    }
+
+    if ((nrow + 1) == rows.size())
+    {
+      rowProcess->process(rows);
+      nrow = 0;
+    }
+    else
+    {
+      ++nrow;
+    }
+  }
+
+  // the flush must be done only when an aggregate operation occur
+  if (aggregate)
+    rowProcess->flush(rows);
+
+}
+    
+void solveAQMatrix_V2(aq::AQMatrix& aqMatrix, 
+                      const std::vector<llong>& tableIDs, 
+                      const std::vector<Column::Ptr>& columnTypes, 
+                      const std::vector<aq::tnode**> columnGroup,
+                      const TProjectSettings& settings, 
+                      const Base& BaseDesc, 
+                      boost::shared_ptr<aq::RowProcess_Intf> rowProcess,
+                      std::vector<aq::Row>& rows,
+                      bool aggregate)
+{
+  aq::Timer timer;
+
+  if ((aqMatrix.getTotalCount() == 0) || (aqMatrix.getNbColumn() == 0))
+    return;
+  
+  //
+  // Prepare Columns and Column Mapper
+  std::vector<Column::Ptr> columns;
+  std::vector<aq::ColumnMapper_Intf::Ptr> columnsMapper; // order must be the same that columnsType
+  prepareColumnAndColumnMapper(settings, BaseDesc, columnTypes, columnGroup, columns, columnsMapper);
+
+  //
+  // add group columns whose are not in select
+  addGroupColumn(settings, BaseDesc, columnTypes, columnGroup, columns, columnsMapper);
+
+  //
+  // Get the last column
+  const std::vector<size_t>& count = aqMatrix.getCount();
+
+  //
+  // Special case for Count only
+  if (columns.size() == 0)
+  {
+    ColumnItem::Ptr item(new ColumnItem((double)aqMatrix.getTotalCount()));
+    std::vector<aq::Row> rows;
+    // TODO
+    // row.com.push_back(aq::Row_item_t(item, COL_TYPE_INT, 4, "", "Count"));
+    rowProcess->process(rows);
+    return;
+  }
+
+  size_t row_size = columns.size();
+
+  // For each Row
+  timer.start();
+  for (std::vector<aq::Row>::iterator it = rows.begin(); it != rows.end(); ++it)
+  {
+    aq::Row& row = *it;
+    row.initialRow.resize(row_size);
+    row.computedRow;
+  }
+  size_t nrow = 0;
+  size_t groupByIndex = 0;
+  size_t groupByCount = 0;
+  for (size_t i = 0; i < aqMatrix.getSize(); ++i)
+  {
+    // row.computedRow.clear();
+    rows[nrow].completed = false;
+    rows[nrow].flush = false;
+    for (size_t j = 0; j < aqMatrix.getNbColumn(); ++j) 
+    {
+      for (size_t c = 0; c < columns.size(); ++c) // FIXME : optimisable
       {
-        for (size_t c = 0; c < columns.size(); ++c)
+        if (columns[c]->TableID == tableIDs[j])
         {
-          assert(mapToUniqueIndex[j][i] < uniqueIndex[j].size());
-          if (columns[c]->TableID == tableIDs[j])
+          // initial row
+          aq::row_item_t& item_tmp = rows[nrow].initialRow[c];
+          item_tmp.item = columnsMapper[c]->loadValue(aqMatrix.getColumn(j)[i]);
+          if (item_tmp.columnName == "")
           {
-            row.initialRow[c] = aq::row_item_t(
-              columnsMapper[c]->loadValue(uniqueIndex[j][mapToUniqueIndex[j][i]]), 
-              columns[c]->Type,
-              static_cast<unsigned>(columns[c]->Size),
-              columns[c]->getTableName(),
-              columns[c]->getName());
-            row.initialRow[c].grouped = columns[c]->GroupBy;
+            item_tmp.type = columns[c]->Type;
+            item_tmp.size = static_cast<unsigned int>(columns[c]->Size);
+            item_tmp.tableName = columns[c]->getTableName();
+            item_tmp.columnName = columns[c]->getName();
+            item_tmp.grouped = columns[c]->GroupBy;
           }
+
         }
       }
+    }
 
-      if (aqMatrix.hasCountColumn())
-      {
-        row.count = static_cast<unsigned>(count[i]);
-      }
+    if (aqMatrix.hasCountColumn())
+    {
+      rows[nrow].count = static_cast<unsigned>(count[i]);
+    }
 
-      if (((i + 1) % 1000000) == 0)
-      {
-        aq::Logger::getInstance().log(AQ_DEBUG, "%uM rows processed in %u ms\n", i / 1000000, timer.getTimeElapsed().total_milliseconds());
-        timer.start();
-      }
-
-      rowProcess->process(row);
-
+    if (((i + 1) % 1000000) == 0)
+    {
+      aq::Logger::getInstance().log(AQ_INFO, "%uM rows processed in %u ms\n", (i + 1) / 1000000, timer.getTimeElapsed().total_milliseconds());
+      timer.start();
     }
     
-    // the flush must be done only when an aggregate operation occur
-    if (aggregate)
-      rowProcess->flush();
+    ++groupByCount;
+    if (aqMatrix.getGroupBy()[groupByIndex] == groupByCount)
+    {
+      ++groupByIndex;
+      groupByCount = 0;
+      rows[0].completed = true;
+    }
+
+
+    if ((nrow + 1) == rows.size())
+    {
+      rowProcess->process(rows);
+      nrow = 0;
+    }
+    else
+    {
+      ++nrow;
+    }
 
   }
+
+  // the flush must be done only when an aggregate operation occur
+  if (aggregate)
+    rowProcess->flush(rows);
+
+}
 
 void solveAQMatrix(aq::AQMatrix& aqMatrix, 
                    const std::vector<uint64_t>& tableIDs, 

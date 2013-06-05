@@ -28,7 +28,7 @@ TProjectSettings::TProjectSettings()
 	csvFormat(false),
 	executeNestedQuery(true),
 	useRowResolver(true),
-  useBinAQMatrix(false)
+  useBinAQMatrix(true)
 {
   ::memset(szSQLReqFN, 0, _MAX_PATH);
   ::memset(szDBDescFN, 0, _MAX_PATH);
@@ -257,7 +257,16 @@ void TProjectSettings::writeAQEngineIni(std::ostream& os) const
 	os << "export.filename.final=" << szDBDescFN << std::endl;
 	os << "step1.field.separator=" << fieldSeparator << std::endl;
   os << "k_rep_racine=" << szRootPath << std::endl;
-	os << "k_rep_racine_tmp=" << szRootPath << std::endl;
+  // FIXME
+  std::string::size_type pos = szTempRootPath.find("data_orga/tmp/");
+  if (pos != std::string::npos)
+  {
+    os << "k_rep_racine_tmp=" << szTempRootPath.substr(0, pos) << std::endl;
+  }
+  else
+  {
+    os << "k_rep_racine_tmp=" << szTempRootPath << std::endl;
+  }
 }
 
 }

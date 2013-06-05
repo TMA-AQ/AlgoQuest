@@ -494,7 +494,7 @@ int main(int argc, char**argv)
 		bool loadDatabase = false;
     bool force = false;
     bool useColumnResolver = false;
-    bool useBinAQMatrix = false;
+    bool useTextAQMatrix = false;
 
 		// old args for backward compatibility
 		std::vector<std::string> oldArgs;
@@ -525,7 +525,7 @@ int main(int argc, char**argv)
 			("aq-matrix", po::value<std::string>(&aqMatrixFileName), "")
 			("answer-file", po::value<std::string>(&answerFileName)->default_value("answer.txt"), "")
 			("use-column-resolver", po::bool_switch(&useColumnResolver), "")
-      ("use-bin-aq-matrix", po::bool_switch(&useBinAQMatrix), "")
+      ("use-text-aq-matrix", po::bool_switch(&useTextAQMatrix), "")
 			("load-db", po::bool_switch(&loadDatabase), "")
       ("load-table", po::value<unsigned int>(&tableIdToLoad)->default_value(0), "")
 			("backward-compatibility", po::value< std::vector<std::string> >(&oldArgs), "old arguments")
@@ -567,7 +567,7 @@ int main(int argc, char**argv)
     
     //
     // Column Binary AQ Matrix (next feature to come)
-    if (useBinAQMatrix)
+    if (!useTextAQMatrix)
     {
       aq::Logger::getInstance().log(AQ_INFO, "use binary aq matrix\n");
       settings.useBinAQMatrix = true;

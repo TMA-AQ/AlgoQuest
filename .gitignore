@@ -1,3 +1,4 @@
+AQIHM/AlgoQuestEnterpriseManager/obj/
 AQManager/Debug/
 AQManager/build/
 AQODBC/build/
@@ -9,6 +10,7 @@ AQServer/build/
 AQSuite/AlgoQuestSuite.opensdf
 AQSuite/AlgoQuestSuite.sdf
 AQSuite/AlgoQuestSuite.v11.suo
+AQSuite/ipch/
 AQSuite/x64/
 AQTools/AQTools.vcxproj.user
 AQTools/build/

@@ -15,12 +15,11 @@ namespace aq
   public:
   public:
     virtual ~RowProcess_Intf() {}
-    virtual int process(Row& row) = 0;
-    int flush()
+    virtual int process(std::vector<Row>& rows) = 0;
+    int flush(std::vector<Row>& rows)
     {
-      aq::Row row;
-      row.flush = true;
-      this->process(row);
+      rows[0].flush = true;
+      this->process(rows);
       return 0;
     }
 

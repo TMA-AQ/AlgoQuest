@@ -18,6 +18,7 @@ namespace aq
     bool computed;
     bool grouped;
     bool displayed;
+    row_item_t();
     row_item_t(ColumnItem::Ptr _item,
       aq::ColumnType _type,
       unsigned int _size,

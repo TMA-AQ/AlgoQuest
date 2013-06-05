@@ -299,7 +299,7 @@ void DumpVisitor::visit(FromVerb* from)
     from->getBrother()->accept(this);
 }
 
-void DumpVisitor::visit(GroupVerb*)
+void DumpVisitor::visit(GroupVerb* gv)
 {
   this->groupStr = "GROUP BY " + this->query + "\n";
   this->query = "";

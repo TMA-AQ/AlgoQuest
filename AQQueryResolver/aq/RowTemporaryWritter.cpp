@@ -23,7 +23,7 @@ namespace aq
       }
     });
   }
-
+  
   int RowTemporaryWritter::process(Row& row)
   {
     if (this->columns.size() == 0)
@@ -37,7 +37,8 @@ namespace aq
         std::string name = (*it).columnName;
         if ((*it).tableName != "")
         {
-          name = (*it).tableName + "." + name;
+          // FIXME
+          // name = (*it).tableName + "." + name;
         }
         unsigned int ID = columnId;
         unsigned int size = (*it).size; 
@@ -46,6 +47,7 @@ namespace aq
 
         Column::Ptr column(new Column(name, ID, size, type));
         column->Temporary = true;
+        column->setTableName((*it).tableName);
         this->columns.push_back(column);
 
         boost::shared_ptr<ColumnTemporaryWritter> ctw(new ColumnTemporaryWritter);

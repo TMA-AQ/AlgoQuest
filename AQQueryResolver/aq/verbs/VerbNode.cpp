@@ -112,10 +112,10 @@ void VerbNode::changeResult( Table::Ptr table )
 }
 
 //------------------------------------------------------------------------------
-void VerbNode::addResult(aq::Row& row)
+void VerbNode::addResultOnChild(aq::Row& row)
 {
 	if( this->Brother )
-		this->Brother->addResult( row );
+		this->Brother->addResultOnChild( row );
 
 	if( this->Disabled )
 		return;
@@ -123,20 +123,25 @@ void VerbNode::addResult(aq::Row& row)
 	//right first because partition by modifies the column pointers in table
 	//and it should be executed before order by collects his list of column pointers
 	if( this->Right )
-		this->Right->addResult( row );
+		this->Right->addResultOnChild( row );
 	if( this->Left )
-		this->Left->addResult( row );
+		this->Left->addResultOnChild( row );
 
-	VerbResult::Ptr param1 = this->Left ? this->Left->getResult() : NULL;
-	VerbResult::Ptr param2 = this->Right ? this->Right->getResult() : NULL;
-	VerbResult::Ptr param3 = this->Brother ? this->Brother->getResult() : NULL;
-	this->addResult( row, param1, param2, param3 );
+	this->addResult( row );
   
 }
 
 void VerbNode::accept(VerbVisitor* visitor)
 {
   visitor->visit(this);
+}
+
+void VerbNode::apply(VerbVisitor* visitor)
+{
+  if (this->Brother) this->Brother->apply(visitor);
+  if (this->Left) this->Left->apply(visitor);
+  if (this->Right) this->Right->apply(visitor);
+  this->accept(visitor);
 }
 
 //------------------------------------------------------------------------------

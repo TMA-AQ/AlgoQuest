@@ -3,6 +3,19 @@
 namespace aq
 {
 
+row_item_t::row_item_t()
+  :
+  item(NULL),
+  type(COL_TYPE_BIG_INT),
+  size(0),
+  tableName(""),
+  columnName(""),
+  computed(false),
+  grouped(false),
+  displayed(false)
+{
+}
+
 row_item_t::row_item_t(ColumnItem::Ptr _item,
                        aq::ColumnType _type,
                        unsigned int _size,
@@ -21,15 +34,20 @@ row_item_t::row_item_t(ColumnItem::Ptr _item,
 }
 
 row_item_t::row_item_t(const row_item_t& source)
-  : item(source.item),
+  : 
   type(source.type),
   size(source.size),
   tableName(source.tableName),
   columnName(source.columnName),
+  aggFunc(source.aggFunc),
   computed(source.computed),
   grouped(source.grouped),
   displayed(source.displayed)
 {
+  if (source.item)
+  {
+    this->item.reset(new ColumnItem(*source.item.get()));
+  }
 }
 
 row_item_t::~row_item_t()
@@ -40,11 +58,15 @@ row_item_t& row_item_t::operator=(const row_item_t& source)
 {
   if (this != &source)
   {
-    item = source.item;
+    if (source.item)
+    {
+      item.reset(new ColumnItem(*source.item.get()));
+    }
     type = source.type;
     size = source.size;
     tableName = source.tableName;
     columnName = source.columnName;
+    aggFunc = source.aggFunc;
     computed = source.computed;
     grouped = source.grouped;
     displayed = source.displayed;

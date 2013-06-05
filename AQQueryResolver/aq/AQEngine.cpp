@@ -39,9 +39,11 @@ void AQEngine::call(aq::tnode *pNode, mode_t mode, int selectLevel)
   if (pos != std::string::npos)
   {
     std::string queryTmp = query.substr(0, pos);
+    std::string group = query.substr(pos);
     ParseJeq( queryTmp );
-    if (query.substr(pos).size() > 5) // Group By can be empty
-      query = queryTmp + query.substr(pos);
+    query = queryTmp;
+    if (group.size() > 5) // check if Group By is not empty
+      query += group;
   }
   else
   {
@@ -107,14 +109,6 @@ void AQEngine::call(aq::tnode *pNode, mode_t mode, int selectLevel)
 
 	if ((mode == REGULAR) || (mode == NESTED_1))
 	{
-    if (mode == REGULAR)
-    {
-      aq::DeleteFolder( settings.szTempPath2 );
-    }
-    else
-    {
-      aq::CleanFolder( settings.szTempPath1 );
-    }
     timer.start();
     tableIDs.clear();
     aqMatrix.reset(new aq::AQMatrix(settings));
@@ -122,13 +116,22 @@ void AQEngine::call(aq::tnode *pNode, mode_t mode, int selectLevel)
     //aqMatrix->clear();
     if (settings.useBinAQMatrix)
     {
-      aqMatrix->load(settings.szAnswerFN, this->tableIDs);
+      aqMatrix->load(settings.szTempPath2, this->tableIDs);
       aq::Logger::getInstance().log(AQ_NOTICE, "Load From Binary AQ Matrix: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
     }
     else
     {
       aqMatrix->load(settings.szAnswerFN, settings.fieldSeparator, this->tableIDs);
       aq::Logger::getInstance().log(AQ_NOTICE, "Load From Text AQ Matrix: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
+    }
+    
+    if (mode == REGULAR)
+    {
+      aq::DeleteFolder( settings.szTempPath2 );
+    }
+    else
+    {
+      aq::CleanFolder( settings.szTempPath1 );
     }
 
   }
