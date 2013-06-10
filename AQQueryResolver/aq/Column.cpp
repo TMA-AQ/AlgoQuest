@@ -36,14 +36,12 @@ Column::Column()
 	currentNumPack(-1),
 	packOffset(0),
 	nBinItemSize(0),
-	pTmpBuf(NULL),
 	Invisible(false), 
 	GroupBy(false), 
 	OrderBy(false),
   Temporary(false)
 {
 	this->setBinItemSize();
-	this->pTmpBuf = static_cast<char*>(malloc(128 * sizeof(char)));
 }
 
 //------------------------------------------------------------------------------
@@ -56,7 +54,6 @@ Column::Column(	const std::string& name, unsigned int ID, unsigned int size, Col
 	currentNumPack(-1),
 	packOffset(0),
 	nBinItemSize(0),
-	pTmpBuf(NULL), 
 	Invisible(false), 
 	GroupBy(false), 
 	OrderBy(false),
@@ -64,7 +61,6 @@ Column::Column(	const std::string& name, unsigned int ID, unsigned int size, Col
 {
 	this->setBinItemSize();
 	this->setName( name );
-	this->pTmpBuf = static_cast<char*>(malloc(128 * sizeof(char)));
 }
 
 //------------------------------------------------------------------------------
@@ -77,14 +73,12 @@ Column::Column( ColumnType type )
 	currentNumPack(-1),
 	packOffset(0),
 	nBinItemSize(0),
-	pTmpBuf(NULL), 
 	Invisible(false), 
 	GroupBy(false),
 	OrderBy(false),
   Temporary(false)
 {
 	this->setBinItemSize();
-	this->pTmpBuf = static_cast<char*>(malloc(128 * sizeof(char)));
 }
 
 //------------------------------------------------------------------------------
@@ -108,7 +102,11 @@ Column::Column( const Column& source )
 	nBinItemSize(source.nBinItemSize)
 {
 	this->setBinItemSize();
-	this->pTmpBuf = static_cast<char*>(malloc(128 * sizeof(char)));
+}
+
+//----------------------------------------------------------------------------
+Column::~Column() 
+{
 }
 
 //------------------------------------------------------------------------------
@@ -133,7 +131,6 @@ Column& Column::operator=(const Column& source)
 		this->packOffset = source.packOffset;
 		this->nBinItemSize = source.nBinItemSize;
 		this->setBinItemSize();
-		this->pTmpBuf = static_cast<char*>(malloc(128 * sizeof(char)));
 	}
 	return *this;
 }

@@ -60,6 +60,7 @@ public:
 	Column(	const std::string& name, unsigned int ID,
 			unsigned int size, aq::ColumnType type);
 	Column( const Column& source );
+  ~Column();
 	Column& operator=(const Column& source);
 
 	void setName( const std::string& name );
@@ -111,7 +112,6 @@ private:
 	size_t currentNumPack;
 	size_t packOffset;
 	size_t nBinItemSize;
-	char * pTmpBuf;
 
 public:
 	bool			Invisible;
