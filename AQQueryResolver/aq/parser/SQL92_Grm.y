@@ -1671,8 +1671,11 @@ column_column_pair	: column_reference K_EQ column_reference	{
 //------------------------------------------------------------------------------
 /* Returns 0 on success, 1 on error */
 int SQLParse( const char *pszStr, aq::tnode** ppNode ) {
+	int rc = 0;
 	yy_scan_string( pszStr );
-	return yyparse( (void*)ppNode );
+	rc = yyparse( (void*)ppNode );
+    yylex_destroy();
+	return rc;
 }
 
 //------------------------------------------------------------------------------
