@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <malloc.h>
 #include <string.h>
+#include <assert.h>
 
 // Forward Definitions
 int yyerror( const char *pszMsg );
@@ -683,7 +684,7 @@ case_specification	: simple_case
 		ELSE->left		= result(else);
 	*/
 simple_case	: K_CASE case_operand simple_when_clause_list else_clause K_END	{
-														$1->left	= $2;
+														$1->left		= $2;
 														$1->right	= $3;
 														if ( $4 != NULL ) {
 															aq::tnode *pNode;
@@ -692,6 +693,7 @@ simple_case	: K_CASE case_operand simple_when_clause_list else_clause K_END	{
 																pNode = pNode->next;
 															pNode->next = $4;
 														}
+														delete $5;
 														$$			= $1;
 													}
 			;
@@ -716,6 +718,7 @@ searched_case	: K_CASE searched_when_clause_list else_clause K_END {
 																pNode = pNode->next;
 															pNode->next = $3;
 														}
+														delete $4;
 														$$			= $1;
 													}
 				;
@@ -730,6 +733,7 @@ simple_when_clause_list : simple_when_clause
 simple_when_clause	: K_WHEN when_operand K_THEN result	{
 														$1->left	= $2;
 														$1->right	= $4;
+														delete $3;
 														$$			= $1;
 													}
 					;
@@ -1365,24 +1369,19 @@ day_expresssion	: K_DAY K_LPAREN datetime_value_expression K_RPAREN {
 //---------------------------------------------------
 binary_substring_function	: K_SUBSTRING K_LPAREN binary_primary 
 							  K_COMMA start_position K_RPAREN {
-														aq::tnode *pNode;
-														pNode			= new tnode( K_COMMA );
-														pNode->left		= $3;
-														pNode->right	= $5;
-														$1->left		= pNode;
-														$$				= $1;
+														$4->left		= $3;
+														$4->right	= $5;
+														$1->left		= $4;
+														$$			= $1;
 													}
 							| K_SUBSTRING K_LPAREN binary_primary 
 							  K_COMMA start_position K_COMMA string_length K_RPAREN {
-														aq::tnode *pNode;
-														pNode			= new tnode( K_COMMA );
-														pNode->left		= $3;
-														$1->left		= pNode;
-														pNode			= new tnode( K_COMMA );
-														pNode->left		= $5;
-														pNode->right	= $7;
+														$4->left			= $3;
+														$1->left			= $4;
+														$6->left			= $5;
+														$6->right		= $7;
 														$1->left->left	= $3;
-														$1->left->right	= pNode;
+														$1->left->right	= $6;
 														$$				= $1;
 													}
 
