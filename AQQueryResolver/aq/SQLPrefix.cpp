@@ -246,17 +246,27 @@ std::string& syntax_tree_to_sql_form(aq::tnode * pNode, std::string& query, unsi
 		return query;
 	}
 	
+  bool bill = false;
+
 	if (	pNode->tag == K_SELECT || pNode->tag == K_FROM 
 		 || pNode->tag == K_WHERE  || pNode->tag == K_GROUP
 		 || pNode->tag == K_HAVING || pNode->tag == K_ORDER )
 	{
+    if ( pNode->tag == K_SELECT && pNode->parent )
+      query += " ( ";
 		query += " " + std::string(id_to_string(pNode->tag)) + " ";
 		aq::syntax_tree_to_sql_form(pNode->left, query, ++level);
 		aq::syntax_tree_to_sql_form(pNode->right, query, ++level);
+	  aq::syntax_tree_to_sql_form(pNode->next, query, ++level);
+    if ( pNode->tag == K_SELECT && pNode->parent )
+      query += " ) ";
 	}
 	else
 	{
-		aq::syntax_tree_to_sql_form(pNode->left, query, ++level);
+    if ( pNode->right )
+		  aq::syntax_tree_to_sql_form(pNode->left, query, ++level);
+    else
+      bill = true;
 
 		std::ostringstream stmp;
 		switch ( pNode->tag ) {
@@ -282,11 +292,21 @@ std::string& syntax_tree_to_sql_form(aq::tnode * pNode, std::string& query, unsi
 			stmp << id_to_sql_string( pNode->tag );
 			break;
 		}
-
 		query += " " + stmp.str() + " ";
+    if ( bill == true && pNode->tag != K_IDENT && pNode->tag != K_STRING && pNode->tag != K_COLUMN
+      && pNode->tag != K_REAL && pNode->tag != K_INTEGER && pNode->tag != K_DATE_VALUE )
+    {
+      query += " ( ";
+      aq::syntax_tree_to_sql_form(pNode->left, query, ++level);
+      query += " ) ";
+    }
+    else if ( bill == true )
+      aq::syntax_tree_to_sql_form(pNode->left, query, ++level);
+    bill = false;
+
 		aq::syntax_tree_to_sql_form(pNode->right, query, ++level);
+	  aq::syntax_tree_to_sql_form(pNode->next, query, ++level); 
 	}
-	aq::syntax_tree_to_sql_form(pNode->next, query, ++level);
   return query;
 }
 //------------------------------------------------------------------------------
