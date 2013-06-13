@@ -289,5 +289,57 @@ std::string& syntax_tree_to_sql_form(aq::tnode * pNode, std::string& query, unsi
 	aq::syntax_tree_to_sql_form(pNode->next, query, ++level);
   return query;
 }
+//------------------------------------------------------------------------------
+std::string& syntax_tree_to_sql_form_nonext(aq::tnode * pNode, std::string& query, unsigned int level)
+{
+	if (pNode == NULL) return query;
 
+	if (level > 100) 
+	{
+		query += " ... ";
+		return query;
+	}
+	
+	if (	pNode->tag == K_SELECT || pNode->tag == K_FROM 
+		 || pNode->tag == K_WHERE  || pNode->tag == K_GROUP
+		 || pNode->tag == K_HAVING || pNode->tag == K_ORDER )
+	{
+		query += " " + std::string(id_to_string(pNode->tag)) + " ";
+		aq::syntax_tree_to_sql_form_nonext(pNode->left, query, ++level);
+		aq::syntax_tree_to_sql_form_nonext(pNode->right, query, ++level);
+	}
+	else
+	{
+		aq::syntax_tree_to_sql_form_nonext(pNode->left, query, ++level);
+
+		std::ostringstream stmp;
+		switch ( pNode->tag ) {
+		case K_INTEGER:
+			stmp << pNode->getData().val_int;
+			break;
+		case K_REAL:
+			stmp << pNode->getData().val_number;
+			break;
+		case K_DATE_VALUE:
+		{
+			char tmp[128];
+			bigIntToDate( pNode->getData().val_int, DDMMYYYY_HHMMSS, tmp );
+			stmp << tmp;
+		}
+			break;
+		case K_STRING:
+		case K_IDENT:
+		case K_COLUMN:
+			stmp << pNode->getData().val_str;
+			break;
+		default:
+			stmp << id_to_sql_string( pNode->tag );
+			break;
+		}
+
+		query += " " + stmp.str() + " ";
+		aq::syntax_tree_to_sql_form_nonext(pNode->right, query, ++level);
+	}
+  return query;
+}
 }

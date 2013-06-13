@@ -397,6 +397,18 @@ void treeListToNodeArray( tnode* pNode, std::vector<tnode*>& nodes, int tag )
 		nodes.push_back( pNode );
 }
 
+void treeListToNodeArraySecond( tnode* pNode, std::vector<tnode*>& nodes, int tag )
+{
+	if( pNode->getTag() == tag )
+	{
+		// nodes.push_back( pNode->right );
+		treeListToNodeArraySecond( pNode->right, nodes, tag );
+		treeListToNodeArraySecond( pNode->left, nodes, tag );
+    delete pNode;
+	}
+	else
+		nodes.push_back( pNode );
+}
 //------------------------------------------------------------------------------
 tnode* nodeArrayToTreeList( const std::vector<tnode*>& nodes, int tag )
 {
@@ -422,6 +434,10 @@ tnode* nodeArrayToTreeList( const std::vector<tnode*>& nodes, int tag )
 void commaListToNodeArray( tnode* pNode, std::vector<tnode*>& nodes )
 {
 	treeListToNodeArray( pNode, nodes, K_COMMA );
+}
+void commaListToNodeArraySecond( tnode* pNode, std::vector<tnode*>& nodes )
+{
+	treeListToNodeArraySecond( pNode, nodes, K_COMMA );
 }
 tnode* nodeArrayToCommaList( const std::vector<tnode*>& nodes )
 {
@@ -472,7 +488,44 @@ tnode* find_first_node(tnode * pNode, int tag )
 
 	return NULL;
 }
+//------------------------------------------------------------------------------
+tnode* findOut_IDENT(tnode * pNode, std::string name )
+{	
+  tnode *pNodeFound;
 
+	if ( pNode == NULL )
+    return NULL;
+  
+	if ( ( pNode->getTag() == K_COLUMN || pNode->getTag() == K_IDENT ) && pNode->getData().val_str == name )
+		return pNode;
+
+ 	if ( ( pNodeFound = findOut_IDENT( pNode->left, name ) ) != NULL )
+ 		return pNodeFound;
+
+ 	if ( ( pNodeFound = findOut_IDENT( pNode->right, name ) ) != NULL )
+		return pNodeFound;
+
+	return NULL;
+}
+//------------------------------------------------------------------------------
+tnode* find_first_node_diffTag(tnode * pNode, int tag, int diffTag )
+{	
+  tnode *pNodeFound;
+
+	if ( pNode == NULL )
+    return NULL;
+  
+  if ( pNode->getTag() == tag && pNode->parent && pNode->parent->getTag() != diffTag )
+		return pNode;
+
+ 	if ( ( pNodeFound = find_first_node_diffTag( pNode->left, tag, diffTag ) ) != NULL )
+ 		return pNodeFound;
+
+ 	if ( ( pNodeFound = find_first_node_diffTag( pNode->right, tag, diffTag ) ) != NULL )
+		return pNodeFound;
+
+	return NULL;
+}
 //------------------------------------------------------------------------------
 tnode* find_deeper_node(tnode * pNode, int tag, bool with_next ) {
 	tnode *pNodeFound;

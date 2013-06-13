@@ -193,37 +193,245 @@ void solveSelectStar(	aq::tnode* pNode,
 						std::vector<std::string>& columnNames,
 						std::vector<std::string>& columnDisplayNames )
 {
-	assert( pNode->tag == K_SELECT && pNode->left );
-	if( pNode->left->tag != K_STAR )
-		return;
-	//get all columns from all tables and return
-	//the other verbs will have the columns they need
-	aq::tnode* fromNode = find_main_node( pNode, K_FROM );
-	std::vector<aq::tnode*> tables;
-	commaListToNodeArray( fromNode->left, tables );
-	std::vector<aq::tnode*> colRefs;
-	for( size_t idx = 0; idx < tables.size(); ++idx )
-	{
-		assert( tables[idx] && tables[idx]->tag == K_IDENT );
-		std::vector<Column::Ptr>& columns = BaseDesc.getTable( tables[idx]->getData().val_str )->Columns;
-		for( size_t idx2 = 0; idx2 < columns.size(); ++idx2 )
-		{
-			aq::tnode* colRef = new aq::tnode( K_PERIOD );
-			colRef->left = new aq::tnode( K_IDENT );
-			char* tableName = tables[idx]->getData().val_str;
-			colRef->left->set_string_data( tableName );
-			colRef->right = new aq::tnode( K_COLUMN );
-			colRef->right->set_string_data( columns[idx2]->getName().c_str() );
-			colRefs.push_back( colRef );
-			columnNames.push_back( std::string(tableName) + "." + columns[idx2]->getName() );
-			columnDisplayNames.push_back( std::string(tableName) + "." + columns[idx2]->getOriginalName() );
-		}
-	}
-	delete_subtree( pNode->left );
-	pNode->left = nodeArrayToCommaList( colRefs );
+  if ( !pNode || ( pNode->tag == K_SELECT && !pNode->left ) )
+    throw aq::parsException( "pNode->left is empty in { void solveSelectStar }, this exception should be throw in { int SQLParse }" );
+  if( pNode->left->tag != K_STAR )
+    return;
+  //get all columns from all tables and return
+  //the other verbs will have the columns they need
+  aq::tnode* fromNode = find_main_node( pNode, K_FROM );
+  std::vector<aq::tnode*> tables;
+  commaListToNodeArray( fromNode->left, tables );
+  std::vector<aq::tnode*> colRefs;
+  aq::tnode *column;
+  aq::tnode *nextFrom;
+  for( size_t idx = 0; idx < tables.size(); ++idx )
+  {
+    if ( ( column = find_first_node( tables[idx], K_SELECT ) ) == NULL
+      || ( nextFrom = find_main_node( column, K_FROM ) ) == NULL )
+      nextFrom = tables[idx];
+    if ( !tables[idx] || ( tables[idx]->getTag() == K_SELECT && ( column = find_first_node( tables[idx], K_AS ) ) == NULL )
+      || !( column = find_first_node( nextFrom, K_IDENT ) ) )
+      throw aq::parsException( "STAR failed, no AS found", pNode );
+    std::vector<Column::Ptr>& columns = BaseDesc.getTable( column->getData().val_str )->Columns;
+    for( size_t idx2 = 0; idx2 < columns.size(); ++idx2 )
+    {
+      aq::tnode *alias;
+      aq::tnode* colRef;
+      if ( ( alias = find_first_node( tables[idx], K_AS ) ) != NULL &&
+        alias->right && alias->right->getTag() == K_IDENT )
+        colRef = createPeriodColumn( columns[idx2]->getName().c_str(), alias->right->getData().val_str );
+      else
+        colRef = createPeriodColumn( columns[idx2]->getName().c_str(), column->getData().val_str );
+      colRefs.push_back( colRef );
+      columnNames.push_back( std::string(column->getData().val_str) + "." + columns[idx2]->getName() );
+      columnDisplayNames.push_back( std::string(column->getData().val_str) + "." + columns[idx2]->getOriginalName() );
+    }
+  }
+  pNode->left = assignSafe( nodeArrayToCommaList( colRefs ), pNode->left );
 }
 
 //------------------------------------------------------------------------------
+
+void solveIdentRequest( aq::tnode* pNode, Base& BaseDesc )
+{
+  try
+  {
+    if ( !pNode || ( pNode->tag == K_SELECT && !pNode->left ) )
+      throw aq::parsException( "SELECT EMPTY", pNode, true );
+    generate_parent(pNode, NULL);
+    aq::tnode*  fromNode = find_main_node( pNode, K_FROM );
+    if ( !fromNode )
+      throw aq::parsException( "NO FROM FOUND", pNode, true );
+    std::vector<aq::tnode*> tables;
+    commaListToNodeArray( fromNode->left, tables );
+    std::reverse(tables.begin(), tables.end());
+    aq::tnode*  found;
+    for ( size_t idx = 0; idx < tables.size(); ++idx )
+    {
+      if ( ( found = find_first_node( tables[idx], K_SELECT ) ) )
+        solveIdentRequest( found, BaseDesc );
+    }
+    bool fake = true;
+    if ( pNode->left->tag == K_STAR )
+    {
+      fake = false;
+      solveSelectStar( pNode, BaseDesc ); // a refaire le solveSelectStar + les exceptions!
+    }
+
+    aq::tnode*  assign = NULL;
+    if ( fake != false )
+    {
+      if ( ( assign = find_first_node( pNode, K_WHEN ) ) )
+        while ( assign )
+        {
+          assignIdentRequest( assign, tables, BaseDesc );
+          assign = assign->next;
+        }
+      assignIdentRequest( pNode, tables, BaseDesc );
+    }
+    if ( ( assign = find_main_node( pNode, K_WHERE ) ) )
+    {
+      aq::tnode*  assign2;
+      if ( ( assign2 = find_first_node( assign, K_SELECT ) ) )
+        solveIdentRequest( assign2, BaseDesc );
+      else
+        assignIdentRequest( assign, tables, BaseDesc );
+    }
+    if ( ( assign = find_main_node( pNode, K_GROUP ) ) )
+      assignIdentRequest( assign, tables, BaseDesc );
+    if ( ( assign = find_main_node( pNode, K_ORDER ) ) )
+      assignIdentRequest( assign, tables, BaseDesc );
+  }
+  catch ( const std::exception & )
+  {
+    throw;
+  }
+}
+
+void  assignIdentRequest( aq::tnode* pNode, std::vector<aq::tnode*> tables, Base& BaseDesc )
+{
+  if ( !pNode )
+    throw aq::parsException( "pNode is empty in { void assignIdentRequest }, this exception shouldn't be normal" );
+  std::vector<aq::tnode*> leftTab;
+  aq::tnode*  nNode = aq::clone_subtree( pNode );
+  generate_parent( nNode, NULL );
+  if ( nNode->getTag() != K_WHEN )
+    commaListToNodeArraySecond( nNode->left, leftTab );
+  else
+    commaListToNodeArraySecond( nNode->right, leftTab );
+  if ( nNode->next )
+    delete_subtree( nNode->next );
+  if ( nNode->getTag() != K_WHEN )
+    delete_subtree( nNode->right );
+  else
+    delete_subtree( nNode->left );
+  delete nNode;
+  aq::tnode*  column;
+  std::string ident;
+  for ( size_t idx = 0; idx < leftTab.size(); ++idx )
+  {
+    while ( ( column = find_first_node_diffTag( leftTab[idx], K_COLUMN, K_PERIOD ) ) )
+    {
+      aq::tnode*  colRef;
+      try
+      {
+        ident = checkAndName( column->getData().val_str, tables, BaseDesc );
+      }
+      catch ( const std::exception & )
+      {
+        colRef = nodeArrayToCommaList( leftTab );
+        delete_subtree( colRef );
+        throw;
+      }
+      colRef = createPeriodColumn( column->getData().val_str, ident );
+      if ( column->parent && column != leftTab[idx] )
+      {
+        column = column->parent;
+        if ( column->left && column->left->getTag() == K_COLUMN )
+          column->left = assignSafe( colRef, column->left );
+        else
+          column->right = assignSafe( colRef, column->right );
+      }
+      else
+        leftTab[idx] = assignSafe( colRef, column );
+      generate_parent( leftTab[idx], NULL );
+    }
+  }
+  std::reverse( leftTab.begin(), leftTab.end() );
+  if ( pNode->getTag() != K_WHEN )
+    pNode->left = assignSafe( nodeArrayToCommaList( leftTab ), pNode->left );
+  else
+    pNode->right = assignSafe( nodeArrayToCommaList( leftTab ), pNode->right );
+}
+
+aq::tnode*  assignSafe( aq::tnode* colRef, aq::tnode* clean )
+{
+  delete_subtree( clean );
+  return colRef;
+}
+
+std::string checkAndName( std::string colName, std::vector<aq::tnode*> tables, Base& BaseDesc )
+{
+  aq::tnode* column;
+  bool fake = false;
+  std::vector<std::string>  list;
+  std::string name;
+  boost::to_upper( colName );
+  for ( size_t idx = 0; idx < tables.size(); ++idx )
+  {
+    // rajouter une méthode pour trouver le IDENT le plus profond si il y a un AS
+    if ( ( column = find_first_node( tables[idx], K_SELECT ) ) )
+    {
+      if ( findOut_IDENT( column, colName ) )
+        fake = assignFake( name, tables[idx], NULL );
+    }
+    else
+    {
+      if ( !tables[idx] || !( column = find_first_node( tables[idx], K_IDENT ) ) )
+        throw aq::parsException( "False FROM: There are no IDENT in this FROM: ", tables[idx] );
+      if ( list.size() == 0 || std::find( list.begin(), list.end(), column->getData().val_str ) == list.end() )
+      {
+        try
+        {
+          list.push_back( column->getData().val_str );
+          std::vector<Column::Ptr>& columns = BaseDesc.getTable( column->getData().val_str )->Columns;
+          for( size_t idx2 = 0; idx2 < columns.size(); ++idx2 )
+            if ( columns[idx2]->getName().c_str() == colName )
+              if ( fake == true )
+                throw aq::parsException( "Ambigue", list, colName );
+              else
+                fake = assignFake( name, tables[idx], column );
+        }
+        catch ( const std::exception & )
+        {
+          throw;
+        }
+      }
+    }
+  }
+  try
+  {
+    if ( fake == false )
+    {
+      std::string error = "Existance: this COLUMN: " + colName + " doesn't exist";
+      throw parsException( error.c_str() );
+    }
+  }
+  catch ( const std::exception & )
+  {
+    throw;
+  }
+  return name;
+}
+
+//------------------------------------------------------------------------------
+
+bool  assignFake( std::string& name, aq::tnode* table, aq::tnode* column )
+{
+  if ( table->getTag() == K_AS && table->right && table->right->getTag() == K_IDENT )
+    name = table->right->getData().val_str;
+  else if ( column == NULL )
+    throw parsException( "SELECT WITHOUT ALIAS: ", table );
+  else
+    name = column->getData().val_str;
+  return true;
+}
+
+//------------------------------------------------------------------------------
+
+aq::tnode *createPeriodColumn( std::string column, std::string ident )
+{
+  aq::tnode *colRef = new aq::tnode( K_PERIOD );
+	colRef->right = new aq::tnode( K_COLUMN );
+	colRef->right->set_string_data( column.c_str() );
+	colRef->left = new aq::tnode( K_IDENT );
+  colRef->left->set_string_data( ident.c_str() );
+  return colRef;
+}
+
+//------------------------------------------------------------------------------
+
 void solveSelectStarExterior( aq::tnode* pInterior, aq::tnode* pExterior )
 {
 	assert( pInterior && pExterior && pExterior->left );

@@ -80,8 +80,13 @@ tnode* nodeArrayToAndList( const std::vector<tnode*>& nodes );
 
 //find FROM, WHERE, GROUP BY, HAVING, main ORDER BY
 tnode* find_main_node( tnode *pNode, int tag );
-tnode* find_first_node(tnode * pNode, int tag );
+tnode* find_first_node( tnode * pNode, int tag );
+tnode* findOut_IDENT( tnode * pNode, std::string name );
 tnode* find_deeper_node(tnode * pNode, int tag, bool with_next = false );
+tnode* find_first_node_diffTag(tnode * pNode, int tag, int diffTag ); // find out the pNode TAG (COLUMN) with no PERIOD's parent
+
+void treeListToNodeArraySecond( tnode* pNode, std::vector<tnode*>& nodes, int tag );
+void commaListToNodeArraySecond( tnode* pNode, std::vector<tnode*>& nodes );
 
 // dump tnode from left to rigth
 // debug purpose

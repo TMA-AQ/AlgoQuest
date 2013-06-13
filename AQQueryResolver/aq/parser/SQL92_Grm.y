@@ -1090,6 +1090,7 @@ aggregate_function	: set_function_specification //[ <filter clause> ]
 								
 //---------------------------------------------------
 window_function	: window_function_type K_OVER window_name_or_specification {
+														delete $2;
 														$1->right	= $3;
 														$$			= $1;
 													}

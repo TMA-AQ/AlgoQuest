@@ -6,6 +6,12 @@
 #include "Table.h"
 #include <vector>
 #include <list>
+#include <exception>
+#include <boost/algorithm/string.hpp>
+#include <string>
+#include <algorithm>
+#include <aq/ParsException.h>
+#include <aq/SQLPrefix.h> //  a delete
 
 extern const int nrJoinTypes;
 extern const int joinTypes[];
@@ -22,6 +28,14 @@ void solveSelectStar(	aq::tnode* pNode,
             Base& BaseDesc,
 						std::vector<std::string>& columnNames = std::vector<std::string>(),
 						std::vector<std::string>& columnDisplayNames = std::vector<std::string>() );
+
+void  solveIdentRequest( aq::tnode* pNode, Base& BaseDesc ); ///< create trees of select
+void  assignIdentRequest( aq::tnode* pNode, std::vector<aq::tnode*> tables, Base& BaseDesc ); //  used in solveBaseName
+std::string checkAndName( std::string colName, std::vector<aq::tnode*> tables, Base& BaseDesc ); // check if the COLUMN exist in the IDENT COLUMN and chose the IDENT
+aq::tnode*  assignSafe( aq::tnode* colRef, aq::tnode* clean ); // cut code
+aq::tnode*  createPeriodColumn( std::string column, std::string period ); //  create a little tree of a period/column/ident
+bool  assignFake( std::string& name, aq::tnode* table, aq::tnode* column );
+
 void solveSelectStarExterior( aq::tnode* pInterior, aq::tnode* pExterior );
 void solveOneTableInFrom( aq::tnode* pStart, Base& BaseDesc );
 void moveFromJoinToWhere( aq::tnode* pStart, Base& BaseDesc );
