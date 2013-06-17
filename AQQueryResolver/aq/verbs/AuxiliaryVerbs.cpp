@@ -28,6 +28,10 @@ bool ColumnVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 	assert( pNode->left->tag == K_IDENT );
 	assert( pNode->right->tag == K_COLUMN );
 	this->TableName = pNode->left->getData().val_str;
+
+  Table::Ptr table = this->m_baseDesc->getTable(this->TableName);
+  this->TableName = table->getName();
+
 	Column auxcol;
 	//auxcol.setName( string(pNode->left->data.val_str) + "." + string(pNode->right->data.val_str) );
 	auxcol.setName( pNode->right->getData().val_str );

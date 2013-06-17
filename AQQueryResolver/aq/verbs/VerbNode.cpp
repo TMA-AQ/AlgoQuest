@@ -162,11 +162,13 @@ struct tnodeVerbNode
 //------------------------------------------------------------------------------
 VerbNode::Ptr VerbNode::build( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal, int context, Base& BaseDesc, TProjectSettings& settings )
 {
+  aq::Logger::getInstance().log(AQ_DEBUG, "build verb '%s'\n", id_to_string(pNode->tag));
 	VerbNode::Ptr verb = VerbFactory::GetInstance().getVerb( pNode->tag );
   
 	if( !verb )
   {
 		// throw aq::generic_error(aq::generic_error::NOT_IMPLEMENED, "Verb Not implemented");
+    aq::Logger::getInstance().log(AQ_DEBUG, "Verb '%s' Not implemented\n");
     return verb;
   }
 

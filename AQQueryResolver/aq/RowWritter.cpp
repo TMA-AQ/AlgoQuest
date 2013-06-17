@@ -31,7 +31,7 @@ int RowWritter::process(Row& row)
 	if (this->firstRow)
 	{
 		//write column names
-    for (Row::row_t::const_iterator it = row.computedRow.begin(); it != row.computedRow.end(); ++it)
+    for (Row::row_t::const_reverse_iterator it = row.computedRow.rbegin(); it != row.computedRow.rend(); ++it)
     {
       if (!(*it).displayed)
         continue;
@@ -50,7 +50,7 @@ int RowWritter::process(Row& row)
   if (row.completed)
   {
     this->totalCount += 1;
-    for (Row::row_t::const_iterator it = row.computedRow.begin(); it != row.computedRow.end(); ++it)
+    for (Row::row_t::const_reverse_iterator it = row.computedRow.rbegin(); it != row.computedRow.rend(); ++it)
     {
       if (!(*it).displayed)
         continue;
@@ -59,6 +59,9 @@ int RowWritter::process(Row& row)
       fputs(" ; ", pFOut);
       fputs(value, pFOut);
     }
+    fputs(" => ", pFOut);
+    sprintf(value, "%u", row.count);
+    fputs(value, pFOut);
     fputc('\n', pFOut);
   }
 	return 0;

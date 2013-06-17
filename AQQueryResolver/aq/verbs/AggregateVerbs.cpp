@@ -115,9 +115,16 @@ void AggregateVerb::addResult(aq::Row& row)
       break;
     }
   }
-  
+
   aq::row_item_t& row_item = row.computedRow[this->index];
-  aq::apply_aggregate(row_item.aggFunc, row_item.type, this->item, this->count, *row_item.item, row.count);
+  if (this->count == 0)
+  {
+    this->item = *row_item.item;
+  }
+  else
+  {
+    aq::apply_aggregate(row_item.aggFunc, row_item.type, this->item, this->count, *row_item.item, row.count);
+  }
   this->count += row.count;
  
   if (row.completed)

@@ -8,6 +8,8 @@ namespace analyze {
 
   enum type_t
   {
+    REGULAR,
+    TEMPORARY_COLUMN,
     TEMPORARY_TABLE,
     FOLD_UP_QUERY,
   };

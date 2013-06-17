@@ -12,35 +12,60 @@
 
 namespace aq
 {
-
+  
+/// Solve Select Statement	
 class QueryResolver
 {
 public:
 	QueryResolver(aq::tnode * _sqlStatement, TProjectSettings * _pSettings, AQEngine_Intf * _aq_engine, Base& _baseDesc, unsigned int& _id, unsigned int _level = 1);
 	~QueryResolver();
 
+  /// main entry
 	Table::Ptr solve();
 
+  /// \{
+  /// Once aq engine has been called, aq engine matrix must be solve
+  /// There is three case:
+
+  /// 1: parse the full aq matrix and apply some verb
 	void solveAQMatriceByRows(aq::verb::VerbNode::Ptr spTree);
+
+  /// 2: apply some rules on the result and generate a TEMPORARY table based on REGULAR/BASE table
+  void generateTemporaryTable();
+
+  /// 3: just rename .t and .s files
+  void renameResultTable();
+
+  /// \}
+
+  /// deprecated
 	Table::Ptr solveAQMatriceByColumns(aq::verb::VerbNode::Ptr spTree);
 
 	Table::Ptr getResult() { return this->result; }
   const std::vector<Column::Ptr> getColumns() const { return this->columns; }
   const ColumnItem& getValue(size_t row, size_t column) const;
 
-  void setResultName(const char * value) { this->resultName = value; }
-  const char * getResultName() const { return this->resultName.c_str(); }
+  void setResultName(const char * value) { 
+    this->resultTables.clear();
+    this->resultTables.push_back(value); 
+  }
+  const char * getResultName() const { 
+    return this->resultTables[0].c_str(); 
+  }
 
-  //const char * getTableName() const;
-  //size_t getNbRows() const;
+  const std::vector<std::string>& getBaseTables() const {return this->baseTables; }
 
 private:
-	/// Solve Select Statement	
-	Table::Ptr SolveSelectRegular();
-	void SolveSelectRecursive(	aq::tnode*& pNode, unsigned int nSelectLevel, aq::tnode* pLastSelect, bool inFrom, bool inIn  );
-	boost::shared_ptr<QueryResolver> SolveSelectFromSelect(	aq::tnode* pInteriorSelect, aq::tnode* pExteriorSelect, int nSelectLevel );
-  void buildTemporaryTable(aq::tnode * pInteriorSelect);
+  /// solve all selects found in the main select
+	void solveNested(aq::tnode*& pNode, unsigned int nSelectLevel, aq::tnode* pLastSelect, bool inFrom, bool inIn);
   void changeTemporaryTableName(aq::tnode * pNode);
+  bool isCompressable();
+  boost::optional<bool> isCompressable() const { return this->compressable; }
+  std::string getOriginalColumn(const std::string& alias) const;
+  void executeNested(aq::tnode * pInteriorSelect);
+
+  /// deprecated
+	boost::shared_ptr<QueryResolver> SolveSelectFromSelect(	aq::tnode* pInteriorSelect, aq::tnode* pExteriorSelect, int nSelectLevel );
 
   ////////////////////////////////////////////////////////////////////////////
 	// Variables Members
@@ -55,9 +80,14 @@ private:
 	char szBuffer[STR_BUF_SIZE];
 
   // query
-	aq::tnode *sqlStatement;
+	aq::tnode * sqlStatement;
+	aq::tnode * originalSqlStatement;
   std::vector<Column::Ptr> columns;
-  std::string resultName;
+  std::map<std::string, tnode*> aliases;
+  //std::string baseTable;
+  //std::string resultName;
+  std::vector<std::string> baseTables;
+  std::vector<std::string> resultTables;
 	Table::Ptr result;
   std::map<size_t, aq::tnode*> values;
   std::map<std::string, boost::shared_ptr<QueryResolver> > nestedTables;
@@ -69,6 +99,7 @@ private:
 	bool hasGroupBy;
 	bool hasOrderBy;
 	bool hasPartitionBy;
+  boost::optional<bool> compressable;
 };
 
 }

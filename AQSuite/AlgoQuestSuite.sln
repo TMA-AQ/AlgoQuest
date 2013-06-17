@@ -15,6 +15,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AQTools", "..\AQTools\AQToo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlgoQuestEnterpriseManager", "..\AQIHM\AlgoQuestEnterpriseManager\AlgoQuestEnterpriseManager.csproj", "{A8B523EB-C198-41E1-83A6-ACD7C42021F5}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AQUnitTests", "..\AQUnitTests\AQUnitTest.vcxproj", "{CD93F1CB-A928-43D6-8DA6-3A25FC1180AB}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestAQEngine", "C:\Users\AlgoQuest\Documents\Visual Studio 2012\Projects\TestAQEngine\TestAQEngine\TestAQEngine.vcxproj", "{AEF01BF3-3E36-4D80-97C5-850489FC9483}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C29821BB-E679-400F-8F68-20934A012A85} = {C29821BB-E679-400F-8F68-20934A012A85}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -157,6 +164,42 @@ Global
 		{A8B523EB-C198-41E1-83A6-ACD7C42021F5}.Release|x64.Build.0 = Release|x64
 		{A8B523EB-C198-41E1-83A6-ACD7C42021F5}.Release|x86.ActiveCfg = Release|x86
 		{A8B523EB-C198-41E1-83A6-ACD7C42021F5}.Release|x86.Build.0 = Release|x86
+		{CD93F1CB-A928-43D6-8DA6-3A25FC1180AB}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{CD93F1CB-A928-43D6-8DA6-3A25FC1180AB}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{CD93F1CB-A928-43D6-8DA6-3A25FC1180AB}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{CD93F1CB-A928-43D6-8DA6-3A25FC1180AB}.Debug|Win32.ActiveCfg = Debug|Win32
+		{CD93F1CB-A928-43D6-8DA6-3A25FC1180AB}.Debug|Win32.Build.0 = Debug|Win32
+		{CD93F1CB-A928-43D6-8DA6-3A25FC1180AB}.Debug|x64.ActiveCfg = Debug|x64
+		{CD93F1CB-A928-43D6-8DA6-3A25FC1180AB}.Debug|x64.Build.0 = Debug|x64
+		{CD93F1CB-A928-43D6-8DA6-3A25FC1180AB}.Debug|x86.ActiveCfg = Debug|Win32
+		{CD93F1CB-A928-43D6-8DA6-3A25FC1180AB}.Debug|x86.Build.0 = Debug|Win32
+		{CD93F1CB-A928-43D6-8DA6-3A25FC1180AB}.Release|Any CPU.ActiveCfg = Release|Win32
+		{CD93F1CB-A928-43D6-8DA6-3A25FC1180AB}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{CD93F1CB-A928-43D6-8DA6-3A25FC1180AB}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{CD93F1CB-A928-43D6-8DA6-3A25FC1180AB}.Release|Win32.ActiveCfg = Release|Win32
+		{CD93F1CB-A928-43D6-8DA6-3A25FC1180AB}.Release|Win32.Build.0 = Release|Win32
+		{CD93F1CB-A928-43D6-8DA6-3A25FC1180AB}.Release|x64.ActiveCfg = Release|x64
+		{CD93F1CB-A928-43D6-8DA6-3A25FC1180AB}.Release|x64.Build.0 = Release|x64
+		{CD93F1CB-A928-43D6-8DA6-3A25FC1180AB}.Release|x86.ActiveCfg = Release|Win32
+		{CD93F1CB-A928-43D6-8DA6-3A25FC1180AB}.Release|x86.Build.0 = Release|Win32
+		{AEF01BF3-3E36-4D80-97C5-850489FC9483}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{AEF01BF3-3E36-4D80-97C5-850489FC9483}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{AEF01BF3-3E36-4D80-97C5-850489FC9483}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{AEF01BF3-3E36-4D80-97C5-850489FC9483}.Debug|Win32.ActiveCfg = Debug|Win32
+		{AEF01BF3-3E36-4D80-97C5-850489FC9483}.Debug|Win32.Build.0 = Debug|Win32
+		{AEF01BF3-3E36-4D80-97C5-850489FC9483}.Debug|x64.ActiveCfg = Debug|x64
+		{AEF01BF3-3E36-4D80-97C5-850489FC9483}.Debug|x64.Build.0 = Debug|x64
+		{AEF01BF3-3E36-4D80-97C5-850489FC9483}.Debug|x86.ActiveCfg = Debug|Win32
+		{AEF01BF3-3E36-4D80-97C5-850489FC9483}.Debug|x86.Build.0 = Debug|Win32
+		{AEF01BF3-3E36-4D80-97C5-850489FC9483}.Release|Any CPU.ActiveCfg = Release|Win32
+		{AEF01BF3-3E36-4D80-97C5-850489FC9483}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{AEF01BF3-3E36-4D80-97C5-850489FC9483}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{AEF01BF3-3E36-4D80-97C5-850489FC9483}.Release|Win32.ActiveCfg = Release|Win32
+		{AEF01BF3-3E36-4D80-97C5-850489FC9483}.Release|Win32.Build.0 = Release|Win32
+		{AEF01BF3-3E36-4D80-97C5-850489FC9483}.Release|x64.ActiveCfg = Release|x64
+		{AEF01BF3-3E36-4D80-97C5-850489FC9483}.Release|x64.Build.0 = Release|x64
+		{AEF01BF3-3E36-4D80-97C5-850489FC9483}.Release|x86.ActiveCfg = Release|Win32
+		{AEF01BF3-3E36-4D80-97C5-850489FC9483}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

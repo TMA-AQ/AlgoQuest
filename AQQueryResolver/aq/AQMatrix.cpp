@@ -1,4 +1,5 @@
 #include "AQMatrix.h"
+#include "Base.h"
 #include <aq/Logger.h>
 #include <aq/Utilities.h>
 #include <aq/Exceptions.h>
@@ -16,6 +17,7 @@ using namespace aq;
 
 namespace
 {
+  
 	struct inner_column_cmp_t
 	{
 	public:
@@ -46,8 +48,8 @@ namespace
 			size_t pos = 0;
 			ColumnItem item;
 			std::for_each(columnMapper.begin(), columnMapper.end(), [&] (ColumnMapper::Ptr& c) {
-				row1[pos] = c->loadValue(idx1);
-				row2[pos] = c->loadValue(idx2);
+				c->loadValue(idx1, *row1[pos]);
+				c->loadValue(idx2, *row2[pos]);
 				++pos;
 			});
 			// and compare
@@ -80,16 +82,21 @@ namespace
 
 }
 
-AQMatrix::AQMatrix(const TProjectSettings& _settings)
+uint64_t AQMatrix::uid_generator = 0;
+
+AQMatrix::AQMatrix(const TProjectSettings& _settings, const Base& _baseDesc)
 	: settings(_settings),
+    baseDesc(_baseDesc),
 		totalCount(0),
 		nbRows(0),
 		hasCount(false)
 {
+  uid = ++AQMatrix::uid_generator;
 }
 
 AQMatrix::AQMatrix(const AQMatrix& source)
 	: settings(source.settings),
+    baseDesc(source.baseDesc),
 		totalCount(source.totalCount),
 		nbRows(source.nbRows),
 		hasCount(source.hasCount)
@@ -167,41 +174,64 @@ void AQMatrix::write(const char * filePath)
 
 void AQMatrix::load(const char * filePath, std::vector<long long>& tableIDs)
 {
-  std::string answertFile(filePath);
-  answertFile += "/answerFormat.a";
-  FILE * fd = fopen(answertFile.c_str(), "rb");
+  std::string answertHeader(filePath);
+  answertHeader += "/AnswerHeader00000.a";
+  FILE * fd = fopen(answertHeader.c_str(), "rb");
+  if (fd == NULL)
+  {
+    throw aq::generic_error(aq::generic_error::AQ_ENGINE, "cannot find aq matrix header file");
+  }
 
-  uint32_t nbTable;
-  fread(&nbTable, sizeof(uint32_t), 1, fd);
+  uint64_t nbTable, tableId, count, nbRows, nbGroups;
+  fread(&nbTable, sizeof(uint64_t), 1, fd);
   for (uint32_t i = 0; i < nbTable; ++i)
   {
-    uint32_t table_id;
     this->matrix.push_back(column_t());
-    fread(&table_id, sizeof(uint32_t), 1, fd);
-    this->matrix[this->matrix.size() - 1].table_id = table_id;
-    tableIDs.push_back(table_id);
+    fread(&tableId, sizeof(uint64_t), 1, fd);
+    this->matrix[this->matrix.size() - 1].table_id = tableId;
+    tableIDs.push_back(tableId);
   }
   
-  uint64_t count;
   fread(&count, sizeof(uint64_t), 1, fd);
+  fread(&nbRows, sizeof(uint64_t), 1, fd);
+  fread(&nbGroups, sizeof(uint64_t), 1, fd);
 
-  uint32_t nbRows, nbGroups;
-  fread(&nbRows, sizeof(uint32_t), 1, fd);
-  fread(&nbGroups, sizeof(uint32_t), 1, fd);
-  
-  uint64_t value;
-  uint64_t part = 0;
-  char filename[256];
-  for (uint32_t i = 0; i < nbGroups; ++i)
+  uint64_t countCheck = 0;
+  uint64_t rowCheck = 0;
+  uint64_t grpCount, grpRows;
+  for (uint64_t i = 0; i < nbGroups; ++i)
   {
-    assert(i < 1048576); // FIXME : manage multiple packet by group
-    sprintf(filename, "%s/AnswerG%.10uP%.12u.a", filePath, i, part);
-    fclose(fd);
-    fd = fopen(filename, "rb");
-    fread(&count, sizeof(uint64_t), 1, fd);
-    fread(&nbRows, sizeof(uint32_t), 1, fd);
-    aq::Logger::getInstance().log(AQ_DEBUG, "loading %u rows in %s\n", nbRows, filename);
-    for (uint32_t j = 0; j < nbRows; ++j)
+    fread(&grpCount, sizeof(uint64_t), 1, fd);
+    fread(&grpRows, sizeof(uint64_t), 1, fd);
+    
+    // FIXME !!!!!
+    if (grpCount == 0)
+      grpCount = count - countCheck;
+    if (grpRows == 0)
+      grpRows = nbRows - rowCheck;
+
+    this->groupByIndex.push_back(std::make_pair(grpCount, grpRows));
+    countCheck += grpCount;
+    rowCheck += grpRows;
+    assert(grpCount);
+    assert(grpRows);
+  }
+  assert(count == countCheck);
+  assert(nbRows == rowCheck);
+
+  fclose(fd);
+  
+  std::string answerData(filePath);
+  answerData += "/AnswerData00000.a";
+  fd = fopen(answerData.c_str(), "rb");
+  if (fd == NULL)
+  {
+    throw aq::generic_error(aq::generic_error::AQ_ENGINE, "cannot find aq matrix data file");
+  }
+  uint64_t value;
+  for (uint64_t i = 0; i < nbGroups; ++i)
+  {
+    for (uint64_t j = 0; j < this->groupByIndex[i].second; ++j)
     {
       for (size_t c = 0; c < this->matrix.size(); ++c)
       {
@@ -211,16 +241,16 @@ void AQMatrix::load(const char * filePath, std::vector<long long>& tableIDs)
       fread(&value, sizeof(uint64_t), 1, fd);
       this->count.push_back(value);
     }
-    // this->groupByIndex.insert(std::make_pair(i, this->count.size()));
-    this->groupByIndex.push_back(count);
   }
 
-  fclose(fd);
+  if (fd != NULL)
+    fclose(fd);
   this->hasCount = true;
   this->totalCount = this->count.size();
 	this->nbRows = this->count.size();
   this->size = this->count.size();
 
+  aq::Logger::getInstance().log(AQ_INFO, "%u rows to proceed (count:%u;group:%u)\n", this->nbRows, count, nbGroups);
 }
 
 void AQMatrix::load(const char * filePath, const char fieldSeparator, std::vector<long long>& tableIDs)
@@ -464,6 +494,90 @@ void AQMatrix::groupBy(std::vector<aq::ColumnMapper::Ptr>& columnsMapper)
 	aq::Logger::getInstance().log(AQ_DEBUG, "%u group\n", groupByIndex.size());
 }
 
+void AQMatrix::compress()
+{
+  size_t p = 0;
+  size_t index = 0;
+  for (auto it = this->groupByIndex.begin(); it != this->groupByIndex.end(); ++it, ++index)
+  {
+    this->count[index] = 1;
+    for (size_t c = 0; c < this->matrix.size(); ++c)
+    {
+      assert(p < this->matrix[c].indexes.size());
+      this->matrix[c].indexes[index] = this->matrix[c].indexes[p];
+      p += (*it).second;
+    }
+  }
+
+  for (size_t c = 0; c < this->matrix.size(); ++c)
+  {
+    this->matrix[c].indexes.resize(index);
+  }
+  this->count.resize(index);
+}
+
+void AQMatrix::writeTemporaryTable()
+{
+  uint64_t packet = 0;
+  char filename[1024];
+  FILE * fd;
+  std::vector<std::map<uint64_t, FILE*> > fds(this->matrix.size());
+  uint32_t status = 11;
+  uint64_t invalid = 0;
+  uint64_t pos = 0;
+  uint64_t grpIndex = 1;
+  uint64_t size = (*this->matrix.begin()).indexes.size();
+  for (uint64_t i = 0; i < size; ++i, ++grpIndex)
+  {
+    for (size_t c = 0; c < this->matrix.size(); ++c)
+    {
+      pos = static_cast<uint32_t>(this->matrix[c].indexes[i]);
+      packet = pos / settings.packSize;
+      pos = (pos - 1) % settings.packSize;
+      auto it = fds[c].find(packet);
+      if (it == fds[c].end())
+      {
+        sprintf(filename, "%s/B001REG%.4uTMP%.4uP%.12u.TMP", this->settings.szTempPath1, this->matrix[c].table_id, this->uid, packet);
+        fd = fopen(filename, "wb");
+        if (fd == NULL)
+        {
+          throw aq::generic_error(aq::generic_error::COULD_NOT_OPEN_FILE, "cannot create temporary table file '%s'", filename);
+        }
+        if (!fds[c].insert(std::make_pair(packet, fd)).second)
+        {
+          throw aq::generic_error(aq::generic_error::GENERIC, "MEMORY ERROR");
+        }
+        fwrite(&status, sizeof(uint32_t), 1, fd);
+      }
+      else
+      {
+        fd = it->second;
+      }
+      
+      fwrite(&grpIndex, sizeof(uint64_t), 1, fd);
+      fwrite(&invalid, sizeof(uint64_t), 1, fd);
+      fwrite(&pos, sizeof(uint64_t), 1, fd);
+    }
+  }
+  
+  for (size_t c = 0; c < this->matrix.size(); ++c)
+  {
+    std::for_each(fds[c].begin(), fds[c].end(), [] (std::pair<uint64_t, FILE*> v) { fclose(v.second); });
+  }
+
+  // FIXME : generate empty file => this is temporary
+  for (auto it = this->matrix.begin(); it != this->matrix.end(); ++it)
+  {
+    Table::Ptr table = this->baseDesc.getTable((*it).table_id);
+    uint64_t n = table->TotalCount / this->settings.packSize;
+    for (uint64_t i = 0; i <= n; ++i)
+    {
+      sprintf(filename, "%s/B001REG%.4uTMP%.4uP%.12u.TMP", this->settings.szTempPath1, (*it).table_id, this->uid, i);
+      FILE * fd = fopen(filename, "ab");
+      fclose(fd);
+    }
+  }
+}
 
 void AQMatrix::dump(std::ostream& os) const
 {

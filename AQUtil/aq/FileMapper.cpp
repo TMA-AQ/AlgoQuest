@@ -17,7 +17,7 @@ FileMapper::FileMapper(const char * _filename)
 	unsigned nb =  0;
   SYSTEM_INFO sysinfo = {0};
   ::GetSystemInfo(&sysinfo);
-  this->cbView = sysinfo.dwAllocationGranularity * 100;
+  this->cbView = sysinfo.dwAllocationGranularity * 10000; // FIXME
 	this->windowOffset = 0;
 
   this->hfile = ::CreateFile(_filename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);

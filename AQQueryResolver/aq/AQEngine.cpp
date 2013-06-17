@@ -28,10 +28,10 @@ void AQEngine::call(aq::tnode *pNode, mode_t mode, int selectLevel)
   aq::syntax_tree_to_prefix_form( pNode, query );
 
   // FIXME : change ORDER by GROUP => this is temporary
-  std::string::size_type pos = query.find("ORDER");
+  std::string::size_type pos = query.find("GROUP");
   if (pos != std::string::npos)
   {
-    query.replace(pos, 5, "GROUP");
+    query.replace(pos, 5, "ORDER");
   }
 
   // FIXME
@@ -111,7 +111,7 @@ void AQEngine::call(aq::tnode *pNode, mode_t mode, int selectLevel)
 	{
     timer.start();
     tableIDs.clear();
-    aqMatrix.reset(new aq::AQMatrix(settings));
+    aqMatrix.reset(new aq::AQMatrix(settings, baseDesc));
     
     //aqMatrix->clear();
     if (settings.useBinAQMatrix)
@@ -137,41 +137,41 @@ void AQEngine::call(aq::tnode *pNode, mode_t mode, int selectLevel)
   }
   else if (mode == NESTED_2)
 	{
-    std::vector<std::string> files;
-		if( aq::GetFiles( settings.szTempPath1, files ) != 0 )
-			throw aq::generic_error(aq::generic_error::COULD_NOT_OPEN_FILE, "");
-		--selectLevel;
-		char path[_MAX_PATH];
-		sprintf( path, "%s_%d", settings.szTempPath1, selectLevel );
-		//sprintf( path, "%s", settings.szTempPath1 );
-		mkdir( path );
-		for( size_t idx = 0; idx < files.size(); ++idx )
-    {
-      //BxxxTxxxxTPNxxxxPxxxxxxxxxx.s
-      if( files[idx].length() == 32
-        && files[idx][0] == 'B'
-        && files[idx][4] == 'T'
-        && files[idx][9] == 'T'
-        && files[idx][10] == 'P'
-        && files[idx][11] == 'N'
-        && files[idx][17] == 'P'
-        && files[idx][30] == '.'
-        && (files[idx][31] == 's'
-        || files[idx][31] == 't') )
-			{
-				char oldFile[_MAX_PATH];
-				sprintf( oldFile, "%s/%s", settings.szTempPath1, files[idx].c_str() );
-				
-				char newFile[_MAX_PATH];
-				std::string substr1 = files[idx].substr(0, 9).c_str();
-				std::string substr2 = files[idx].substr(17, 13);
-				sprintf( newFile, "%s/%s%s.tmp", path, substr1.c_str(), substr2.c_str() );
-				
-				remove( newFile );
-				rename( oldFile, newFile );
-			}
-    }
-		aq::DeleteFolder( settings.szTempPath1 );
+  //  std::vector<std::string> files;
+		//if( aq::GetFiles( settings.szTempPath1, files ) != 0 )
+		//	throw aq::generic_error(aq::generic_error::COULD_NOT_OPEN_FILE, "");
+		//--selectLevel;
+		//char path[_MAX_PATH];
+		//sprintf( path, "%s_%d", settings.szTempPath1, selectLevel );
+		////sprintf( path, "%s", settings.szTempPath1 );
+		//mkdir( path );
+		//for( size_t idx = 0; idx < files.size(); ++idx )
+  //  {
+  //    //BxxxTxxxxTPNxxxxPxxxxxxxxxx.s
+  //    if( files[idx].length() == 32
+  //      && files[idx][0] == 'B'
+  //      && files[idx][4] == 'T'
+  //      && files[idx][9] == 'T'
+  //      && files[idx][10] == 'P'
+  //      && files[idx][11] == 'N'
+  //      && files[idx][17] == 'P'
+  //      && files[idx][30] == '.'
+  //      && (files[idx][31] == 's'
+  //      || files[idx][31] == 't') )
+		//	{
+		//		char oldFile[_MAX_PATH];
+		//		sprintf( oldFile, "%s/%s", settings.szTempPath1, files[idx].c_str() );
+		//		
+		//		char newFile[_MAX_PATH];
+		//		std::string substr1 = files[idx].substr(0, 9).c_str();
+		//		std::string substr2 = files[idx].substr(17, 13);
+		//		sprintf( newFile, "%s/%s%s.tmp", path, substr1.c_str(), substr2.c_str() );
+		//		
+		//		remove( newFile );
+		//		rename( oldFile, newFile );
+		//	}
+  //  }
+		//aq::DeleteFolder( settings.szTempPath1 );
 	}
   else
   {
@@ -183,7 +183,7 @@ void AQEngine::call(aq::tnode *pNode, mode_t mode, int selectLevel)
 void AQEngine::generateAQMatrixFromPRM(const std::string tableName, aq::tnode * whereNode)
 {
 	Table::Ptr table = this->baseDesc.getTable(tableName);
-	this->aqMatrix.reset(new aq::AQMatrix(this->settings));
+	this->aqMatrix.reset(new aq::AQMatrix(this->settings, this->baseDesc));
 	this->aqMatrix->simulate(table->TotalCount, 2);
 	this->tableIDs.clear();
 	this->tableIDs.push_back(table->ID);

@@ -1,4 +1,5 @@
 #include "VerbFactory.h"
+#include <aq/Logger.h>
 
 namespace aq {
 namespace verb {
@@ -20,9 +21,13 @@ void VerbFactory::addVerb( VerbNode::Ptr verb )
 //------------------------------------------------------------------------------
 VerbNode::Ptr VerbFactory::getVerb( int verbType ) const
 {
-	for( size_t idx = 0; idx < this->Verbs.size(); ++idx )
-		if( this->Verbs[idx]->getVerbType() == verbType )
-			return this->Verbs[idx]->clone();
+	for (auto it = this->Verbs.begin(); it != this->Verbs.end(); ++it)
+  {
+		if ((*it)->getVerbType() == verbType)
+    {
+			return (*it)->clone();
+    }
+  }
 	return NULL;
 }
 

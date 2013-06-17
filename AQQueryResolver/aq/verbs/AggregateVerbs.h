@@ -34,7 +34,17 @@ private:
 };
 
 //------------------------------------------------------------------------------
-class SumVerb: public AggregateVerb
+template <class V>
+struct Visitable
+{
+  virtual void accept(V * v)
+  {
+    v->visit(this);
+  }
+};
+
+//------------------------------------------------------------------------------
+class SumVerb: public AggregateVerb // , protected Visitable<VerbVisitor>
 {
 	VERB_DECLARE( SumVerb );
 public:

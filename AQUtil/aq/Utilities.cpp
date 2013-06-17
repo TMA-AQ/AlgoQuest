@@ -520,7 +520,7 @@ int MakeBackupFile( char *pszPath, backup_type_t type, int level, int id )
 	sprintf( szDstPath, "%s_%.2d_%.2d%s.%s", szBuffer, level, id, typeChar.c_str(), &pszPath[len - 3] );
 	if( FileRename( pszPath, szDstPath ) != 0 )
 	{
-		aq::Logger::getInstance().log(AQ_DEBUG, "MakeBackupFile : Error renaming file %s to %s !", pszPath, szDstPath );
+		aq::Logger::getInstance().log(AQ_DEBUG, "MakeBackupFile : Error renaming file %s to %s !\n", pszPath, szDstPath );
 		return -1;
 	}
 	return 0;

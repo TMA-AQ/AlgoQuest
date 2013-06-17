@@ -8,9 +8,8 @@ namespace aq
 {
 
 // Aggregate Verbs
-void DumpVisitor::visit(AggregateVerb*)
+void DumpVisitor::visit(AggregateVerb* v)
 {
-	assert(false);
 }
 
 void DumpVisitor::visit(AvgVerb*)

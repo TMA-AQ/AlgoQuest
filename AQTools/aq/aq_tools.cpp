@@ -138,7 +138,7 @@ int processAQMatrix(const std::string& query, const std::string& aqMatrixFileNam
 
 	strcpy(settings.szAnswerFN, aqMatrixFileName.c_str());
 
-	boost::shared_ptr<aq::AQMatrix> aqMatrix(new aq::AQMatrix(settings));
+	boost::shared_ptr<aq::AQMatrix> aqMatrix(new aq::AQMatrix(settings, baseDesc));
 	std::vector<llong> tableIDs;
 	
 	aq::Timer timer;
@@ -329,16 +329,6 @@ int processQuery(const std::string& query, aq::TProjectSettings& settings, aq::B
 
 		}
 
-    //aq::tnode * tree = aq::clone_subtree(pNode);
-    //std::cout << "=============" << std::endl;
-    //std::cout << *pNode << std::endl;
-    //std::cout << "=============" << std::endl;
-    //std::cout << *tree << std::endl;
-    //std::cout << "=============" << std::endl;
-    //aq::delete_subtree(pNode);
-    //aq::delete_subtree(tree);
-    //exit(0);
-
 		//
 		// Transform SQL request in prefix form, 
     unsigned int id_generator = 1;
@@ -440,9 +430,9 @@ int processSQLQueries(std::list<std::string>::const_iterator itBegin, std::list<
 
 	if (queriesKO.size())
 	{
-		aq::Logger::getInstance().log(AQ_ERROR, "BAD QUERIES:\n");
+		aq::Logger::getInstance().log(AQ_DEBUG, "BAD QUERIES:\n");
 		std::for_each(queriesKO.begin(), queriesKO.end(), [] (const std::string& q) {
-			aq::Logger::getInstance().log(AQ_ERROR, "%s\n", q.c_str());
+			aq::Logger::getInstance().log(AQ_DEBUG, "%s\n", q.c_str());
 		});
     failedQueries += queriesKO.size();
   }
@@ -454,10 +444,45 @@ int processSQLQueries(std::list<std::string>::const_iterator itBegin, std::list<
 int main(int argc, char**argv)
 {
 
-  //aq::tnode * node = aq::new_node(K_IDENT);
-  //aq::set_string_data(node, "Thomas Martinez");
-  //std::cout << *node << std::endl;
-  //exit(EXIT_SUCCESS);
+  //size_t tableId = 1; 
+  //size_t columnId = 1; 
+  //aq::ColumnType itemType = aq::ColumnType::COL_TYPE_VARCHAR;
+  //size_t itemSize = 26;
+  //size_t packetSize = 1000000;
+  //size_t size = 2;
+
+  //// generate a random temporary File of char[26]
+  //char filename[128];
+  //for (uint64_t p = 0; p < size; ++p)
+  //{
+  //  char value[26];
+  //  sprintf( filename, "./test/B001TMP%.4uC%.4uCHA%.4uP%.12u.TMP", tableId, columnId, itemSize, p );
+  //  std::cout << filename << std::endl;
+  //  FILE * fd = fopen(filename, "wb");
+  //  for (uint64_t i = 0; i < packetSize; ++i)
+  //  {
+  //    for (uint64_t j = 0; j < 25; ++j)
+  //    {
+  //      value[j] = 32 + (::rand() % (127 - 32));
+  //    }
+  //    value[25] = 0;
+  //    fwrite(value, sizeof(char), 26, fd);
+  //  }
+  //  fclose(fd);
+  //}
+  //
+  //aq::Timer time;
+  //FILE * fd = fopen("./test/res.tmp", "wb");
+  //aq::ColumnItem item;
+  //aq::TemporaryColumnMapper mapper("./test/", tableId, columnId, itemType, itemSize, packetSize);
+  //for (uint64_t i = 0; i < size * packetSize; ++i)
+  //{
+  //  mapper.loadValue(i, item);
+  //  fwrite(item.strval.c_str(), sizeof(char), 26, fd);
+  //}
+  //fclose(fd);
+  //std::cout << aq::Timer::getString(time.getTimeElapsed()) << std::endl;
+  //return EXIT_SUCCESS;
 
 	try
 	{

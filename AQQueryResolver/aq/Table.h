@@ -79,6 +79,9 @@ public:
   bool isTemporary() const { return temporary; }
   const char * getTemporaryName() const { return temporaryName.c_str(); }
 
+  void setReferenceTable(const std::string& _referenceTable) { this->referenceTable = _referenceTable; }
+  std::string getReferenceTable() const { return this->referenceTable; }
+
 	void dumpRaw( std::ostream& os );
 	void dumpXml( std::ostream& os );
 
@@ -88,6 +91,7 @@ private:
 	std::string		Name;
 	std::string		OriginalName;
   std::string   temporaryName;
+  std::string   referenceTable;
 	std::vector<size_t> Index;
 	char szBuffer[STR_BUF_SIZE];
   bool temporary;

@@ -11,7 +11,8 @@ class ColumnMapper_Intf
 {
 public:
 	typedef boost::shared_ptr<ColumnMapper_Intf> Ptr;
-	virtual ColumnItem::Ptr loadValue(size_t index) = 0;
+	virtual int loadValue(size_t index, ColumnItem& value) = 0;
+  virtual const aq::ColumnType getType() const = 0;
 };
 
 }

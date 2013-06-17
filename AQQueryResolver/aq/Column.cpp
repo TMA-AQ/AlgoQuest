@@ -427,13 +427,13 @@ void Column::loadFromTmp(ColumnType eColumnType, aq::TemporaryColumnMapper::Ptr 
   this->Type = eColumnType;
   this->Size = 0;
 
-  ColumnItem::Ptr item = 0;
+  int rc = -1;
   do
   {
-    item = colMapper->loadValue(this->Size++);
-    if (item != 0) 
+    ColumnItem::Ptr item(new ColumnItem);
+    if ((rc = colMapper->loadValue(this->Size++, *item)) == 0)
       this->Items.push_back(item);
-  } while (item != 0) ;
+  } while (rc == 0);
   
 	inner_column_cmp_2_t cmp(*this);
 	sort( this->Items.begin(), this->Items.end(), cmp );

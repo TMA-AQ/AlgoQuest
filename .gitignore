@@ -6,6 +6,7 @@ AQQueryResolver/aq/parser/lex.yy.cpp
 AQQueryResolver/aq/parser/sql92_grm_tab.cpp
 AQQueryResolver/aq/parser/sql92_grm_tab.hpp
 AQQueryResolver/build/
+AQUnitTest/build/
 AQServer/build/
 AQSuite/AlgoQuestSuite.opensdf
 AQSuite/AlgoQuestSuite.sdf

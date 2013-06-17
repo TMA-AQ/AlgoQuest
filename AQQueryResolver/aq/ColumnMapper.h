@@ -16,7 +16,7 @@ class ColumnMapper : public ColumnMapper_Intf
 public:
 	ColumnMapper(const char * path, size_t tableId, size_t columnId, aq::ColumnType type, size_t _size, size_t _packetSize);
 	~ColumnMapper();
-	ColumnItem::Ptr loadValue(size_t index);
+	int loadValue(size_t index, ColumnItem& value);
 	const std::vector<size_t>& getSimilarIndex(size_t index) const;
 	const aq::ColumnType getType() const { return this->type; }
 private:

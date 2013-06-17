@@ -21,7 +21,7 @@ void prepareColumnAndColumnMapper(const TProjectSettings& settings,
 
     c->TableID = BaseDesc.getTable(c->getTableName())->ID;
 
-    for (std::vector<aq::tnode**>::const_iterator it = columnGroup.begin(); it != columnGroup.end(); ++it)
+    for (auto it = columnGroup.begin(); it != columnGroup.end(); ++it)
     {
       const aq::tnode * node = **it;
       if ((strcmp(c->getTableName().c_str(), node->left->getData().val_str) == 0) && (strcmp(c->getName().c_str(), node->right->getData().val_str) == 0))
@@ -30,6 +30,7 @@ void prepareColumnAndColumnMapper(const TProjectSettings& settings,
         break;
       }
     }
+
     columns.push_back(c);
 
     columnTypes[i]->TableID = BaseDesc.getTable(columnTypes[i]->getTableName())->ID;
@@ -54,7 +55,7 @@ void addGroupColumn(const TProjectSettings& settings,
                     std::vector<Column::Ptr>& columns,
                     std::vector<aq::ColumnMapper_Intf::Ptr>& columnsMapper)
 {  
-  for (std::vector<aq::tnode**>::const_iterator it = columnGroup.begin(); it != columnGroup.end(); ++it)
+  for (auto it = columnGroup.begin(); it != columnGroup.end(); ++it)
   {
     const aq::tnode * node = **it;
     bool inSelect = false;
@@ -153,7 +154,7 @@ void solveAQMatrix(aq::AQMatrix& aqMatrix,
 
   // For each Row
   timer.start();
-  for (std::vector<aq::Row>::iterator it = rows.begin(); it != rows.end(); ++it)
+  for (auto it = rows.begin(); it != rows.end(); ++it)
   {
     aq::Row& row = *it;
     row.initialRow.resize(row_size);
@@ -175,7 +176,7 @@ void solveAQMatrix(aq::AQMatrix& aqMatrix,
 
           // initial row
           aq::row_item_t& item_tmp = rows[nrow].initialRow[c];
-          item_tmp.item = columnsMapper[c]->loadValue(uniqueIndex[j][mapToUniqueIndex[j][i]]);
+          columnsMapper[c]->loadValue(uniqueIndex[j][mapToUniqueIndex[j][i]], *item_tmp.item);
           if (item_tmp.columnName == "")
           {
             item_tmp.type = columns[c]->Type;
@@ -196,7 +197,7 @@ void solveAQMatrix(aq::AQMatrix& aqMatrix,
 
     if (((i + 1) % 1000000) == 0)
     {
-      aq::Logger::getInstance().log(AQ_INFO, "%uM rows processed in %u ms\n", (i + 1) / 1000000, timer.getTimeElapsed().total_milliseconds());
+      aq::Logger::getInstance().log(AQ_INFO, "%uM rows proceed in %u\n", (i + 1) / 1000000, aq::Timer::getString(timer.getTimeElapsed()).c_str());
       timer.start();
     }
 
@@ -260,9 +261,21 @@ void solveAQMatrix_V2(aq::AQMatrix& aqMatrix,
 
   size_t row_size = columns.size();
 
+  // compute match between column and column table in aq matrix
+  std::vector<size_t> columnToAQMatrixColumn;
+  std::for_each(columns.begin(), columns.end(), [&] (Column::Ptr c) {
+    for (size_t j = 0; j < aqMatrix.getNbColumn(); ++j) 
+    {
+      if (c->TableID == tableIDs[j])
+      {
+        columnToAQMatrixColumn.push_back(j);
+      }
+    }
+  });
+
   // For each Row
   timer.start();
-  for (std::vector<aq::Row>::iterator it = rows.begin(); it != rows.end(); ++it)
+  for (auto it = rows.begin(); it != rows.end(); ++it)
   {
     aq::Row& row = *it;
     row.initialRow.resize(row_size);
@@ -271,30 +284,45 @@ void solveAQMatrix_V2(aq::AQMatrix& aqMatrix,
   size_t nrow = 0;
   size_t groupByIndex = 0;
   size_t groupByCount = 0;
+
+  // NOTE : EACH GROUP CAN BE PROCESS INDEPENDENTLY (THEREFORE MULTITHREAD CAN BE USED)
+  std::vector<bool> isGroupedColumn;
+  for (size_t c = 0; c < columns.size(); ++c)
+  {
+    bool isGrouped = false;
+    for (auto it = columnGroup.begin(); !isGrouped && (it != columnGroup.end()); ++it)
+    {
+      const aq::tnode * node = **it;
+      if ((strcmp(columns[c]->getTableName().c_str(), node->left->getData().val_str) == 0) && 
+        (strcmp(columns[c]->getName().c_str(), node->right->getData().val_str) == 0))
+      {
+        isGrouped = true;
+      }
+    }
+    isGroupedColumn.push_back(isGrouped);
+  }
+
   for (size_t i = 0; i < aqMatrix.getSize(); ++i)
   {
     // row.computedRow.clear();
-    rows[nrow].completed = false;
+    rows[nrow].completed = !aggregate;
     rows[nrow].flush = false;
-    for (size_t j = 0; j < aqMatrix.getNbColumn(); ++j) 
-    {
-      for (size_t c = 0; c < columns.size(); ++c) // FIXME : optimisable
-      {
-        if (columns[c]->TableID == tableIDs[j])
-        {
-          // initial row
-          aq::row_item_t& item_tmp = rows[nrow].initialRow[c];
-          item_tmp.item = columnsMapper[c]->loadValue(aqMatrix.getColumn(j)[i]);
-          if (item_tmp.columnName == "")
-          {
-            item_tmp.type = columns[c]->Type;
-            item_tmp.size = static_cast<unsigned int>(columns[c]->Size);
-            item_tmp.tableName = columns[c]->getTableName();
-            item_tmp.columnName = columns[c]->getName();
-            item_tmp.grouped = columns[c]->GroupBy;
-          }
 
-        }
+    for (size_t c = 0; c < columns.size(); ++c) // FIXME : optimisable
+    {
+
+      if ((groupByCount > 0) && isGroupedColumn[c]) continue;
+
+      // initial row
+      aq::row_item_t& item_tmp = rows[nrow].initialRow[c];
+      columnsMapper[c]->loadValue(aqMatrix.getColumn(columnToAQMatrixColumn[c])[i], *item_tmp.item);
+      if (item_tmp.columnName == "")
+      {
+        item_tmp.type = columns[c]->Type;
+        item_tmp.size = static_cast<unsigned int>(columns[c]->Size);
+        item_tmp.tableName = columns[c]->getTableName();
+        item_tmp.columnName = columns[c]->getName();
+        item_tmp.grouped = columns[c]->GroupBy;
       }
     }
 
@@ -305,12 +333,12 @@ void solveAQMatrix_V2(aq::AQMatrix& aqMatrix,
 
     if (((i + 1) % 1000000) == 0)
     {
-      aq::Logger::getInstance().log(AQ_INFO, "%uM rows processed in %u ms\n", (i + 1) / 1000000, timer.getTimeElapsed().total_milliseconds());
+      aq::Logger::getInstance().log(AQ_INFO, "%uM rows proceed in %s\n", (i + 1) / 1000000, aq::Timer::getString(timer.getTimeElapsed()).c_str());
       timer.start();
     }
     
     ++groupByCount;
-    if (aqMatrix.getGroupBy()[groupByIndex] == groupByCount)
+    if (aqMatrix.getGroupBy()[groupByIndex].second == groupByCount)
     {
       ++groupByIndex;
       groupByCount = 0;
@@ -331,8 +359,8 @@ void solveAQMatrix_V2(aq::AQMatrix& aqMatrix,
   }
 
   // the flush must be done only when an aggregate operation occur
-  if (aggregate)
-    rowProcess->flush(rows);
+  //if (aggregate)
+  //  rowProcess->flush(rows);
 
 }
 

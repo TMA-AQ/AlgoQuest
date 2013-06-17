@@ -83,8 +83,19 @@ Table::Ptr Base::getTable( const std::string& name )
 	strtoupr( auxName );
 	aq::Trim( auxName );
 	for( size_t idx = 0; idx < this->Tables.size(); ++idx )
+  {
 		if( auxName == this->Tables[idx]->getName() )
-			return this->Tables[idx];
+    {
+      if (this->Tables[idx]->getReferenceTable() != "")
+      {
+        return this->getTable(this->Tables[idx]->getReferenceTable());
+      }
+      else
+      {
+        return this->Tables[idx];
+      }
+    }
+  }
 	throw generic_error(generic_error::INVALID_TABLE, "cannot find table %s", name.c_str());
 }
 

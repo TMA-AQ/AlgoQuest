@@ -727,7 +727,8 @@ aq::tnode * getJoin(aq::tnode* pNode)
       pNode = right;
     }
   }
-  else if (!((pNode->tag == K_JEQ) || (pNode->tag == K_JAUTO)))
+  else if (!((pNode->tag == K_JEQ) || (pNode->tag == K_JAUTO) || 
+    (pNode->tag == K_JIEQ) || (pNode->tag == K_JSEQ))) // TODO : some join type are missing
   {
     delete pNode;
     pNode = NULL;
@@ -961,7 +962,7 @@ void SolveMinMaxGroupBy::modifyTmpFiles(	const char* tmpPath,
   std::vector<std::string> answerFiles;
   answerFiles.push_back(Settings.szAnswerFN);
 
-	aq::AQMatrix aqMatrix(Settings);
+	aq::AQMatrix aqMatrix(Settings, BaseDesc);
 	std::vector<llong> tableIDs;
 	for (std::vector<std::string>::const_iterator it = answerFiles.begin(); it != answerFiles.end(); ++it)
 	{

@@ -113,6 +113,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <AdditionalIncludeDirectories>..\AQUtil;$(ProjectDir);C:\Boost\install\include\boost-1_50;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -156,10 +157,12 @@
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>..\AQUtil;$(ProjectDir);C:\Boost\install\include\boost-1_50;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\AQUtil;$(ProjectDir);$(BOOST_INSTALL_INCLUDE);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>false</TreatWarningAsError>
       <UndefinePreprocessorDefinitions>
       </UndefinePreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -204,6 +207,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <AdditionalIncludeDirectories>..\AQUtil;$(ProjectDir);C:\Boost\install\include\boost-1_50;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -256,7 +260,8 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>..\AQUtil;$(ProjectDir);C:\Boost\install\include\boost-1_50;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\AQUtil;$(ProjectDir);$(BOOST_INSTALL_INCLUDE);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -330,9 +335,11 @@
     <ClInclude Include="aq\parser\JeqParser.h" />
     <ClInclude Include="aq\parser\sql92_grm_tab.hpp" />
     <ClInclude Include="aq\parser\SQLParser.h" />
+    <ClInclude Include="aq\ParsException.h" />
     <ClInclude Include="aq\QueryAnalyzer.h" />
     <ClInclude Include="aq\QueryResolver.h" />
     <ClInclude Include="aq\Row.h" />
+    <ClInclude Include="aq\RowBinaryWritter.h" />
     <ClInclude Include="aq\RowProcesses.h" />
     <ClInclude Include="aq\RowProcess_Intf.h" />
     <ClInclude Include="aq\RowTemporaryWritter.h" />
@@ -385,8 +392,10 @@
     </ClCompile>
     <ClCompile Include="aq\parser\sql92_grm_tab.cpp" />
     <ClCompile Include="aq\parser\SQLParser.cpp" />
+    <ClCompile Include="aq\ParsException.cpp" />
     <ClCompile Include="aq\QueryResolver.cpp" />
     <ClCompile Include="aq\Row.cpp" />
+    <ClCompile Include="aq\RowBinaryWritter.cpp" />
     <ClCompile Include="aq\RowSolver.cpp" />
     <ClCompile Include="aq\RowTemporaryWritter.cpp" />
     <ClCompile Include="aq\RowVerbProcess.cpp" />
