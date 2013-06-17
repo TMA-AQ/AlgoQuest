@@ -238,9 +238,9 @@ std::string& syntax_tree_to_prefix_form( aq::tnode *sqlStatement, std::string& s
 //------------------------------------------------------------------------------
 std::string& syntax_tree_to_sql_form(aq::tnode * pNode, std::string& query, unsigned int level)
 {
-	if (pNode == NULL) return query;
+	if ( pNode == NULL ) return query;
 
-	if (level > 100) 
+	if ( level > 100 )
 	{
 		query += " ... ";
 		return query;
@@ -253,13 +253,15 @@ std::string& syntax_tree_to_sql_form(aq::tnode * pNode, std::string& query, unsi
 		 || pNode->tag == K_HAVING || pNode->tag == K_ORDER )
 	{
     if ( pNode->tag == K_SELECT && pNode->parent )
-      query += " ( ";
-		query += " " + std::string(id_to_string(pNode->tag)) + " ";
+      query += " (";
+    if ( pNode->tag == K_SELECT && pNode->parent || pNode->tag != K_SELECT )
+		  query += " ";
+    query += std::string(id_to_string(pNode->tag));
 		aq::syntax_tree_to_sql_form(pNode->left, query, ++level);
 		aq::syntax_tree_to_sql_form(pNode->right, query, ++level);
 	  aq::syntax_tree_to_sql_form(pNode->next, query, ++level);
     if ( pNode->tag == K_SELECT && pNode->parent )
-      query += " ) ";
+      query += " )";
 	}
 	else
 	{
@@ -292,13 +294,13 @@ std::string& syntax_tree_to_sql_form(aq::tnode * pNode, std::string& query, unsi
 			stmp << id_to_sql_string( pNode->tag );
 			break;
 		}
-		query += " " + stmp.str() + " ";
+		query += " " + stmp.str();
     if ( bill == true && pNode->tag != K_IDENT && pNode->tag != K_STRING && pNode->tag != K_COLUMN
       && pNode->tag != K_REAL && pNode->tag != K_INTEGER && pNode->tag != K_DATE_VALUE )
     {
-      query += " ( ";
+      query += " (";
       aq::syntax_tree_to_sql_form(pNode->left, query, ++level);
-      query += " ) ";
+      query += " )";
     }
     else if ( bill == true )
       aq::syntax_tree_to_sql_form(pNode->left, query, ++level);

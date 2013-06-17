@@ -111,20 +111,27 @@ AQMatrix& AQMatrix::operator=(const AQMatrix& source)
 	return *this;
 }
 
-void AQMatrix::simulate(size_t rows, size_t nbTables)
+void AQMatrix::simulate(size_t rows, const std::vector<long long>& tableIDs)
 {
-	//this->hasCount = true;
-	//this->totalCount = rows;
-	//this->nbRows = rows;
-	//this->matrix.resize(nbTables);
-	//for (size_t i = 0; i < rows; ++i)
-	//{
-	//	std::for_each(this->matrix.begin(), this->matrix.end() - 1 , [&] (column_t& c) {
-	//		c.indexes.push_back(i);
-	//		c.grpKey.push_back(i % (rows / 100));
-	//	});
-	//}
-	//this->count.resize(rows, 1);
+	this->hasCount = true;
+	this->totalCount = rows;
+	this->nbRows = rows;
+	this->matrix.resize(tableIDs.size());
+
+  for ( size_t idx = 0; idx < tableIDs.size(); ++idx )
+    this->matrix[idx].table_id = static_cast<size_t>( tableIDs[idx] );
+
+  //std::for_each(this->matrix.begin(), this->matrix.end(), [&] (column_t& c) {
+  //  c.table_id = 1;
+  //});
+
+	for (size_t i = 0; i < rows; ++i)
+	{
+		std::for_each(this->matrix.begin(), this->matrix.end(), [&] (column_t& c) {
+			c.indexes.push_back( rand() % 1000 );
+		});
+	}
+	this->count.resize(rows, 1);
 }
 
 void AQMatrix::clear()

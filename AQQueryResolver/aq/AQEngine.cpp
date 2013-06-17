@@ -184,7 +184,7 @@ void AQEngine::generateAQMatrixFromPRM(const std::string tableName, aq::tnode * 
 {
 	Table::Ptr table = this->baseDesc.getTable(tableName);
 	this->aqMatrix.reset(new aq::AQMatrix(this->settings));
-	this->aqMatrix->simulate(table->TotalCount, 2);
+//	this->aqMatrix->simulate(table->TotalCount, 2);
 	this->tableIDs.clear();
 	this->tableIDs.push_back(table->ID);
 }

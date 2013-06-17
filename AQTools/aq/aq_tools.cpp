@@ -9,6 +9,7 @@
 #include <aq/TreeUtilities.h>
 #include <aq/db_loader/DatabaseLoader.h>
 #include <aq/Logger.h>
+#include "AQEngineSimulate.h"
 #include <iostream>
 #include <list>
 #include <fstream>
@@ -43,55 +44,8 @@ size_t failedQueries = 0;
 boost::mutex parserMutex;
 
 // -------------------------------------------------------------------------------------------------
-class AQEngineSimulate : public aq::AQEngine_Intf
-{
-public:
-	void call(aq::tnode * pNode, aq::AQEngine_Intf::mode_t mode, int selectLevel) {
 
-		//
-		// Get prefix form of query.
-		std::string str;
-		aq::syntax_tree_to_prefix_form(pNode, str);
-
-		aq::Logger::getInstance().log(AQ_INFO, "---\n");
-		aq::Logger::getInstance().log(AQ_INFO, "Get prefix form of query\n");
-		aq::Logger::getInstance().log(AQ_INFO, "%s\n", str.c_str());
-
-		//
-		// Process with parse jeq
-		ParseJeq(str);
-
-		aq::Logger::getInstance().log(AQ_INFO, "---\n");
-		aq::Logger::getInstance().log(AQ_INFO, "Get prefix form of query after jeq parser\n");
-		aq::Logger::getInstance().log(AQ_INFO, "%s\n", str.c_str());
-
-	}
-	
-	void setAQMatrix(boost::shared_ptr<aq::AQMatrix> _aqMatrix)
-	{
-		aqMatrix = _aqMatrix;
-	}
-	
-	void setTablesIDs(std::vector<llong>& _tableIDs)
-	{
-		tableIDs.resize(_tableIDs.size());
-		std::copy(_tableIDs.begin(), _tableIDs.end(), tableIDs.begin());
-	}
-
-	boost::shared_ptr<aq::AQMatrix> getAQMatrix()
-	{
-		return aqMatrix;
-	}
-
-	const std::vector<llong>& getTablesIDs() const
-	{
-		return tableIDs;
-	}
-
-private:
-	boost::shared_ptr<aq::AQMatrix> aqMatrix;
-	std::vector<llong> tableIDs;
-};
+// TADA
 
 // -------------------------------------------------------------------------------------------------
 int processAQMatrix(const std::string& query, const std::string& aqMatrixFileName, const std::string& answerFileName, aq::TProjectSettings& settings, aq::Base& baseDesc)
@@ -153,7 +107,7 @@ int processAQMatrix(const std::string& query, const std::string& aqMatrixFileNam
 	// tableIDs.push_back(8);
 	aq::Logger::getInstance().log(AQ_INFO, "Load AQ Matrix: Elapsed Time = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
 
-	AQEngineSimulate aqEngine;
+	aq::AQEngineSimulate aqEngine(baseDesc, settings);
 	aqEngine.setAQMatrix(aqMatrix);
 	aqEngine.setTablesIDs(tableIDs);
   
@@ -414,7 +368,7 @@ int processSQLQueries(std::list<std::string>::const_iterator itBegin, std::list<
 		if (simulateAQEngine)
 		{
 			aq::Logger::getInstance().log(AQ_INFO, "Do not use aq engine\n");
-			aq_engine = new AQEngineSimulate();
+			aq_engine = new aq::AQEngineSimulate(baseDesc, settings);
 		}
 		else
 		{
@@ -494,7 +448,7 @@ int main(int argc, char**argv)
 		bool loadDatabase = false;
     bool force = false;
     bool useColumnResolver = false;
-    bool useTextAQMatrix = false;
+    bool useBinAQMatrix = false;
 
 		// old args for backward compatibility
 		std::vector<std::string> oldArgs;
@@ -525,7 +479,7 @@ int main(int argc, char**argv)
 			("aq-matrix", po::value<std::string>(&aqMatrixFileName), "")
 			("answer-file", po::value<std::string>(&answerFileName)->default_value("answer.txt"), "")
 			("use-column-resolver", po::bool_switch(&useColumnResolver), "")
-      ("use-text-aq-matrix", po::bool_switch(&useTextAQMatrix), "")
+      ("use-bin-aq-matrix", po::bool_switch(&useBinAQMatrix), "")
 			("load-db", po::bool_switch(&loadDatabase), "")
       ("load-table", po::value<unsigned int>(&tableIdToLoad)->default_value(0), "")
 			("backward-compatibility", po::value< std::vector<std::string> >(&oldArgs), "old arguments")
@@ -567,7 +521,7 @@ int main(int argc, char**argv)
     
     //
     // Column Binary AQ Matrix (next feature to come)
-    if (!useTextAQMatrix)
+    if (useBinAQMatrix)
     {
       aq::Logger::getInstance().log(AQ_INFO, "use binary aq matrix\n");
       settings.useBinAQMatrix = true;

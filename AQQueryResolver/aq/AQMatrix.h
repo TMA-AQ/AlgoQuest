@@ -39,7 +39,7 @@ public:
 
 	// 
 	// testing purpose (to remove)
-	void simulate(size_t rows, size_t nbTables);
+	void simulate(size_t rows, const std::vector<long long>& tableIDs);
   
   void clear();
   void write(const char * filePath);
