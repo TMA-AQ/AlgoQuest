@@ -94,7 +94,8 @@ void AggregateVerb::addResult(aq::Row& row)
 {
   if (this->index == -1)
   {
-    this->index = row.computedRow.size() - 1;
+    assert(row.computedRow.size() <= std::numeric_limits<int>::max());
+    this->index = static_cast<int>(row.computedRow.size()) - 1;
     aq::row_item_t& row_item = row.computedRow[this->index];
     switch (this->getVerbType())
     {

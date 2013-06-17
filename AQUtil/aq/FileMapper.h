@@ -4,6 +4,13 @@
 #include <windows.h>
 #include <string>
 
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+
 namespace aq
 {
 

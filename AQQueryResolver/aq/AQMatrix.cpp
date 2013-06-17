@@ -564,8 +564,9 @@ void AQMatrix::writeTemporaryTable()
   {
     std::for_each(fds[c].begin(), fds[c].end(), [] (std::pair<uint64_t, FILE*> v) { fclose(v.second); });
   }
-
+  
   // FIXME : generate empty file => this is temporary
+  char tableName[128];
   for (auto it = this->matrix.begin(); it != this->matrix.end(); ++it)
   {
     Table::Ptr table = this->baseDesc.getTable((*it).table_id);
@@ -576,6 +577,9 @@ void AQMatrix::writeTemporaryTable()
       FILE * fd = fopen(filename, "ab");
       fclose(fd);
     }
+    sprintf(tableName, "B001REG%.4uTMP%.4uP%.12u", (*it).table_id, this->uid, n + 1);
+    (*it).tableName = tableName;
+    (*it).baseTableName = table->getName();
   }
 }
 

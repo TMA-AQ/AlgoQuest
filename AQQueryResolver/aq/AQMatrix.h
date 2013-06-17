@@ -31,6 +31,18 @@ public:
 			return (k1.len == k2.len) && (memcmp(k1.value, k2.value, k1.len) < 0);
 		}
 	};
+  
+	struct column_t
+	{
+		size_t table_id;
+		std::vector<size_t> indexes;
+		std::vector<size_t> grpKey;
+		std::vector<size_t> orderKey;
+    std::string tableName;
+    std::string baseTableName;
+	};
+
+	typedef std::vector<column_t> matrix_t;
 
 	// typedef std::map<group_by_key_t, std::vector<size_t>, struct group_by_key_cmp_t > group_by_t;
 
@@ -65,6 +77,7 @@ public:
   ///
   void writeTemporaryTable();
 
+  const matrix_t getMatrix() const { return this->matrix; }
   const size_t getTableId(size_t c) const { return this->matrix[c].table_id; }
 	const std::vector<size_t>& getColumn(size_t c) const { return this->matrix[c].indexes; }
 	const std::vector<size_t>& getCount() const { return this->count; }
@@ -78,16 +91,6 @@ public:
   void dump(std::ostream& os) const;
 
 private:
-
-	struct column_t
-	{
-		size_t table_id;
-		std::vector<size_t> indexes;
-		std::vector<size_t> grpKey;
-		std::vector<size_t> orderKey;
-	};
-
-	typedef std::vector<column_t> matrix_t;
 
   static uint64_t uid_generator;
   uint64_t uid;

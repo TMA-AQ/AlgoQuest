@@ -860,8 +860,8 @@ void writeTmpFile(	const char* filePath, const std::vector<llong>& vals,
 	int intval = 0;
 	fwrite( &intval, sizeof(int), 1, pFOut );
 	llong auxval = 0;
-	startIdx = max( startIdx, (size_t) 0 );
-	endIdx = min( endIdx, vals.size() );
+	startIdx = std::max( startIdx, (size_t) 0 );
+	endIdx = std::min( endIdx, vals.size() );
 	for( size_t idx = startIdx; idx < endIdx; ++idx )
 	{	
 		fwrite( &auxval, sizeof(llong), 1, pFOut );

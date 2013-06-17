@@ -45,20 +45,18 @@ public:
   const std::vector<Column::Ptr> getColumns() const { return this->columns; }
   const ColumnItem& getValue(size_t row, size_t column) const;
 
-  void setResultName(const char * value) { 
+  void setResultName(const char * value, const char * base) { 
     this->resultTables.clear();
-    this->resultTables.push_back(value); 
-  }
-  const char * getResultName() const { 
-    return this->resultTables[0].c_str(); 
+    this->resultTables.push_back(std::make_pair(value, base)); 
   }
 
-  const std::vector<std::string>& getBaseTables() const {return this->baseTables; }
+  const std::vector<std::pair<std::string, std::string> >& getResultTables() const {return this->resultTables; }
 
 private:
   /// solve all selects found in the main select
 	void solveNested(aq::tnode*& pNode, unsigned int nSelectLevel, aq::tnode* pLastSelect, bool inFrom, bool inIn);
   void changeTemporaryTableName(aq::tnode * pNode);
+  void changeTemporaryTableName(std::list<aq::tnode*>& column);
   bool isCompressable();
   boost::optional<bool> isCompressable() const { return this->compressable; }
   std::string getOriginalColumn(const std::string& alias) const;
@@ -84,10 +82,7 @@ private:
 	aq::tnode * originalSqlStatement;
   std::vector<Column::Ptr> columns;
   std::map<std::string, tnode*> aliases;
-  //std::string baseTable;
-  //std::string resultName;
-  std::vector<std::string> baseTables;
-  std::vector<std::string> resultTables;
+  std::vector<std::pair<std::string, std::string> > resultTables;
 	Table::Ptr result;
   std::map<size_t, aq::tnode*> values;
   std::map<std::string, boost::shared_ptr<QueryResolver> > nestedTables;
