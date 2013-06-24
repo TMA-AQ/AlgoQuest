@@ -4,7 +4,7 @@
 // int wordCount = 0;
 #define YY_NO_UNISTD_H
 
-#ifdef _MSVC_
+#ifdef WIN32
 #include <io.h>
 #else
 #include <stdio.h>

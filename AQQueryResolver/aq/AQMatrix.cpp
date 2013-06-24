@@ -204,11 +204,14 @@ void AQMatrix::load(const char * filePath, std::vector<long long>& tableIDs)
     fread(&grpCount, sizeof(uint64_t), 1, fd);
     fread(&grpRows, sizeof(uint64_t), 1, fd);
     
-    // FIXME !!!!!
+    // FIXME
     if (grpCount == 0)
       grpCount = count - countCheck;
     if (grpRows == 0)
       grpRows = nbRows - rowCheck;
+
+    if ((grpCount == 0) || (grpRows == 0))
+      throw aq::generic_error(aq::generic_error::AQ_ENGINE, "bad value in result");
 
     this->groupByIndex.push_back(std::make_pair(grpCount, grpRows));
     countCheck += grpCount;
@@ -216,8 +219,8 @@ void AQMatrix::load(const char * filePath, std::vector<long long>& tableIDs)
     assert(grpCount);
     assert(grpRows);
   }
-  assert(count == countCheck);
-  assert(nbRows == rowCheck);
+  if ((count != countCheck) || (nbRows != rowCheck))
+    throw aq::generic_error(aq::generic_error::AQ_ENGINE, "mismatch values in result");
 
   fclose(fd);
   

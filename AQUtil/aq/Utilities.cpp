@@ -7,7 +7,7 @@
 #include <cstring>
 #include <boost/filesystem.hpp>
 
-#ifdef _MSVC_
+#ifdef WIN32
 #include <Windows.h>
 #endif
 
@@ -342,7 +342,7 @@ char* strtoupr( char* pszStr ) {
 //------------------------------------------------------------------------------
 std::wstring string2Wstring(const std::string& s)
 {
-#ifdef _MSVC_
+#ifdef WIN32
   int len;
   int slength = (int)s.length() + 1;
   len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0); 

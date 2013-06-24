@@ -2,7 +2,7 @@
 #define __CONFIGURATION_H__
 
 #include <aq/Utilities.h>
-#include <aq/Table.h>
+#include <aq/Base.h>
 #include <aq/AQEngine_Intf.h>
 
 #include <map>

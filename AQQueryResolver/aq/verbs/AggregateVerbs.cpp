@@ -128,7 +128,15 @@ void AggregateVerb::addResult(aq::Row& row)
   }
   this->count += row.count;
  
-  if (row.completed)
+  if (this->getRightChild() != NULL)
+  {
+    // FIXME : manage partition and Frame
+    *row_item.item = this->item;
+    // this->count = 0;
+    // this->item.numval = 0;
+    // this->item.strval = "";
+  }
+  else if (row.completed)
   {
     *row_item.item = this->item;
     this->count = 0;

@@ -78,7 +78,9 @@ tnode* nodeArrayToCommaList( const std::vector<tnode*>& nodes );
 void andListToNodeArray( tnode* pNode, std::vector<tnode*>& nodes );
 tnode* nodeArrayToAndList( const std::vector<tnode*>& nodes );
 
-//find FROM, WHERE, GROUP BY, HAVING, main ORDER BY
+//------------------------------------------------------------------------------
+void find_nodes(tnode * pNode, int tag, std::vector<tnode*>& nodes);
+/// find FROM, WHERE, GROUP BY, HAVING, main ORDER BY
 tnode* find_main_node( tnode *pNode, int tag );
 tnode* find_first_node( tnode * pNode, int tag );
 tnode* findOut_IDENT( tnode * pNode, std::string name );

@@ -5,7 +5,7 @@
 
 using namespace aq;
 
-#ifdef _MSVC_
+#ifdef WIN32
 
 FileMapper::FileMapper(const char * _filename)
 	: filename(_filename),

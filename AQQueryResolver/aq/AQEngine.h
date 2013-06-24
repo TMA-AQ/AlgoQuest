@@ -12,7 +12,8 @@ class AQEngine : public AQEngine_Intf
 public:
 	AQEngine(Base& _baseDesc, TProjectSettings& _settings);
 	~AQEngine();
-
+  
+  void call(const std::string& query, mode_t mode);
 	void call(aq::tnode *pNode, mode_t mode, int selectLevel);
   virtual int run(const char * prg, const char * args) const = 0;
 
@@ -28,7 +29,7 @@ private:
 	std::vector<llong> tableIDs;
 };
 
-#ifdef _MSVC_
+#ifdef WIN32
 
 class AQEngineWindows : public AQEngine
 {

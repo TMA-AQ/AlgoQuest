@@ -2,6 +2,7 @@
 #include <aq/SQLPrefix.h>
 #include <aq/Column2Table.h>
 #include <aq/QueryResolver.h>
+#include <aq/parser/ID2Str.h>
 #include <aq/parser/SQLParser.h>
 #include <aq/parser/JeqParser.h>
 #include <aq/Exceptions.h>
@@ -13,7 +14,6 @@
 #include <list>
 #include <fstream>
 #include <string>
-#include <codecvt>
 #include <boost/thread.hpp>
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
@@ -46,6 +46,10 @@ boost::mutex parserMutex;
 class AQEngineSimulate : public aq::AQEngine_Intf
 {
 public:
+  void call(const std::string& query, aq::AQEngine_Intf::mode_t mode)
+  {
+  }
+
 	void call(aq::tnode * pNode, aq::AQEngine_Intf::mode_t mode, int selectLevel) {
 
 		//
@@ -59,7 +63,7 @@ public:
 
 		//
 		// Process with parse jeq
-		ParseJeq(str);
+    aq::ParseJeq(str);
 
 		aq::Logger::getInstance().log(AQ_INFO, "---\n");
 		aq::Logger::getInstance().log(AQ_INFO, "Get prefix form of query after jeq parser\n");
@@ -225,7 +229,7 @@ int transformQuery(const std::string& query, aq::TProjectSettings& settings, aq:
 	
 	std::string str;
 	aq::syntax_tree_to_prefix_form(pNode, str);
-	ParseJeq( str );
+  aq::ParseJeq( str );
 
 	std::cout << str << std::endl << std::endl;
 

@@ -1,7 +1,7 @@
 #ifndef __FILE_MAPPER_H__
 #define __FILE_MAPPER_H__
 
-#ifdef _MSVC_
+#ifdef WIN32
 #include <windows.h>
 #else
 #include <sys/mman.h>
@@ -36,7 +36,7 @@ private:
 
 	const std::string filename;
 
-#ifdef _MSVC_
+#ifdef WIN32
 	DWORD cbView;
   HANDLE hfile;
 	HANDLE hmap;

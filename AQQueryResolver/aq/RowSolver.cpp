@@ -10,7 +10,7 @@ namespace aq
 void prepareColumnAndColumnMapper(const TProjectSettings& settings,
                                   const Base& BaseDesc,
                                   const std::vector<Column::Ptr>& columnTypes, 
-                                  const std::vector<aq::tnode**>& columnGroup,
+                                  const std::vector<aq::tnode*>& columnGroup,
                                   std::vector<Column::Ptr>& columns,
                                   std::vector<aq::ColumnMapper_Intf::Ptr>& columnsMapper)
 { 
@@ -23,7 +23,7 @@ void prepareColumnAndColumnMapper(const TProjectSettings& settings,
 
     for (auto it = columnGroup.begin(); it != columnGroup.end(); ++it)
     {
-      const aq::tnode * node = **it;
+      const aq::tnode * node = *it;
       if ((strcmp(c->getTableName().c_str(), node->left->getData().val_str) == 0) && (strcmp(c->getName().c_str(), node->right->getData().val_str) == 0))
       {
         c->GroupBy = true;
@@ -51,13 +51,13 @@ void prepareColumnAndColumnMapper(const TProjectSettings& settings,
 void addGroupColumn(const TProjectSettings& settings,
                     const Base& BaseDesc,
                     const std::vector<Column::Ptr>& columnTypes, 
-                    const std::vector<aq::tnode**>& columnGroup,
+                    const std::vector<aq::tnode*>& columnGroup,
                     std::vector<Column::Ptr>& columns,
                     std::vector<aq::ColumnMapper_Intf::Ptr>& columnsMapper)
 {  
   for (auto it = columnGroup.begin(); it != columnGroup.end(); ++it)
   {
-    const aq::tnode * node = **it;
+    const aq::tnode * node = *it;
     bool inSelect = false;
     for (size_t i = 0; !inSelect && (i < columnTypes.size()); ++i)
     {
@@ -105,7 +105,7 @@ void addGroupColumn(const TProjectSettings& settings,
 void solveAQMatrix(aq::AQMatrix& aqMatrix, 
                    const std::vector<llong>& tableIDs, 
                    const std::vector<Column::Ptr>& columnTypes, 
-                   const std::vector<aq::tnode**> columnGroup,
+                   const std::vector<aq::tnode*> columnGroup,
                    const TProjectSettings& settings, 
                    const Base& BaseDesc, 
                    boost::shared_ptr<aq::RowProcess_Intf> rowProcess,
@@ -221,7 +221,7 @@ void solveAQMatrix(aq::AQMatrix& aqMatrix,
 void solveAQMatrix_V2(aq::AQMatrix& aqMatrix, 
                       const std::vector<llong>& tableIDs, 
                       const std::vector<Column::Ptr>& columnTypes, 
-                      const std::vector<aq::tnode**> columnGroup,
+                      const std::vector<aq::tnode*> columnGroup,
                       const TProjectSettings& settings, 
                       const Base& BaseDesc, 
                       boost::shared_ptr<aq::RowProcess_Intf> rowProcess,
@@ -292,7 +292,7 @@ void solveAQMatrix_V2(aq::AQMatrix& aqMatrix,
     bool isGrouped = false;
     for (auto it = columnGroup.begin(); !isGrouped && (it != columnGroup.end()); ++it)
     {
-      const aq::tnode * node = **it;
+      const aq::tnode * node = *it;
       if ((strcmp(columns[c]->getTableName().c_str(), node->left->getData().val_str) == 0) && 
         (strcmp(columns[c]->getName().c_str(), node->right->getData().val_str) == 0))
       {

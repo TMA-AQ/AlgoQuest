@@ -59,10 +59,11 @@ int RowWritter::process(Row& row)
       fputs(" ; ", pFOut);
       fputs(value, pFOut);
     }
-    fputs(" => ", pFOut);
-    sprintf(value, "%u", row.count);
-    fputs(value, pFOut);
+    //fputs(" ; ", pFOut);
+    //sprintf(value, "%u", row.count);
+    //fputs(value, pFOut);
     fputc('\n', pFOut);
+    fflush(pFOut);
   }
 	return 0;
 }

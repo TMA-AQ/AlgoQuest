@@ -69,6 +69,7 @@ int ColumnMapper::loadValue(size_t index, ColumnItem& value)
 		{ 
 			char val[128];
 			this->thesaurusMapper->read(val, offset * size, size);
+      val[127] = 0;
 			value.strval = val;
 		}
 		break;

@@ -52,11 +52,12 @@ public:
 
   const std::vector<std::pair<std::string, std::string> >& getResultTables() const {return this->resultTables; }
 
+  void setOuterSelect(tnode * select) { this->outerSelect = select; }
+
 private:
   /// solve all selects found in the main select
 	void solveNested(aq::tnode*& pNode, unsigned int nSelectLevel, aq::tnode* pLastSelect, bool inFrom, bool inIn);
   void changeTemporaryTableName(aq::tnode * pNode);
-  void changeTemporaryTableName(std::list<aq::tnode*>& column);
   bool isCompressable();
   boost::optional<bool> isCompressable() const { return this->compressable; }
   std::string getOriginalColumn(const std::string& alias) const;
@@ -80,7 +81,10 @@ private:
   // query
 	aq::tnode * sqlStatement;
 	aq::tnode * originalSqlStatement;
+	aq::tnode * outerSelect;
   std::vector<Column::Ptr> columns;
+  std::vector<std::vector<tnode*> > partitions;
+  std::vector<tnode*> groupBy;
   std::map<std::string, tnode*> aliases;
   std::vector<std::pair<std::string, std::string> > resultTables;
 	Table::Ptr result;
