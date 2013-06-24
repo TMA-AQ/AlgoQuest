@@ -8,7 +8,6 @@ AQQueryResolver/aq/parser/sql92_grm_tab.hpp
 AQQueryResolver/build/
 AQQueryResolver/CMakeCache.txt
 AQQueryResolver/CMakeFiles/
-AQQueryResolver/CMakeLists.txt
 AQQueryResolver/Makefile
 AQQueryResolver/bin/
 AQQueryResolver/cmake_install.cmake
@@ -30,14 +29,12 @@ AQTools/bin/
 AQTools/cmake_install.cmake
 AQUnitTests/CMakeCache.txt
 AQUnitTests/CMakeFiles/
-AQUnitTests/CMakeLists.txt
 AQUnitTests/Makefile
 AQUnitTests/bin/
 AQUnitTests/cmake_install.cmake
 AQUtil/build/
 AQUtil/CMakeCache.txt
 AQUtil/CMakeFiles/
-AQUtil/CMakeLists.txt
 AQUtil/Makefile
 AQUtil/bin/
 AQUtil/cmake_install.cmake
