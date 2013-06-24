@@ -1,7 +1,7 @@
 #ifndef __AQ_BASE_DESC_H__
 #define __AQ_BASE_DESC_H__
 
-#include "symbole.h"
+#include "Symbole.h"
 #include <cstdio>
 #include <vector>
 #include <sstream>

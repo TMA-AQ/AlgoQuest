@@ -6,6 +6,7 @@
 
 #include <aq/DBTypes.h>
 
+#include <string.h>
 #include <map>
 #include <vector>
 #include <cstdint>

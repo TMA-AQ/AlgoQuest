@@ -115,12 +115,12 @@ Table::Ptr QueryResolver::solve()
   std::cout << sql_query << std::endl;
 #endif
 
-#ifdef OUTPUT_NESTED_QUERIES
+// #ifdef OUTPUT_NESTED_QUERIES
 	std::string str;
 	aq::syntax_tree_to_prefix_form( this->sqlStatement, str );
 	aq::SaveFile( pSettings->szOutputFN, str.c_str() );
 	aq::MakeBackupFile( pSettings->szOutputFN, aq::backup_type_t::Before, this->level, this->id );
-#endif
+// #endif
 
 #ifdef _DEBUG
   std::ostringstream oss;
@@ -215,17 +215,17 @@ Table::Ptr QueryResolver::solve()
       case analyze::type_t::REGULAR:
       case analyze::type_t::TEMPORARY_COLUMN:
         this->solveAQMatriceByRows(spTree);
-        aq::Logger::getInstance().log(AQ_INFO, "solve aq matrice in %s", aq::Timer::getString(timer.getTimeElapsed()));
+        aq::Logger::getInstance().log(AQ_INFO, "solve aq matrice in %s", aq::Timer::getString(timer.getTimeElapsed()).c_str());
         break;
       case analyze::type_t::FOLD_UP_QUERY:
         this->resultTables.clear();
         this->renameResultTable();
-        aq::Logger::getInstance().log(AQ_INFO, "result table renamed in %s", aq::Timer::getString(timer.getTimeElapsed()));
+        aq::Logger::getInstance().log(AQ_INFO, "result table renamed in %s", aq::Timer::getString(timer.getTimeElapsed()).c_str());
         break;
       case analyze::type_t::TEMPORARY_TABLE:
         this->resultTables.clear();
         this->generateTemporaryTable();
-        aq::Logger::getInstance().log(AQ_INFO, "generate temporary table in %s", aq::Timer::getString(timer.getTimeElapsed()));
+        aq::Logger::getInstance().log(AQ_INFO, "generate temporary table in %s", aq::Timer::getString(timer.getTimeElapsed()).c_str());
         break;
       }
       spTree = NULL; //debug13 - force delete to see if it causes an error
@@ -398,10 +398,10 @@ void QueryResolver::solveAQMatriceByRows(aq::verb::VerbNode::Ptr spTree)
 	std::vector<Column::Ptr> columnTypes;
 	aq::getColumnTypes( this->sqlStatement, columnTypes, this->BaseDesc );
 	
-#ifdef OUTPUT_NESTED_QUERIES
+// #ifdef OUTPUT_NESTED_QUERIES
 	aq::MakeBackupFile( pSettings->szOutputFN, aq::backup_type_t::Empty, this->level, this->id );
 	aq::MakeBackupFile( pSettings->szAnswerFN, aq::backup_type_t::Before, this->level, this->id );
-#endif
+// #endif
 
   // build process to apply on each row
   boost::shared_ptr<aq::RowProcesses> processes(new aq::RowProcesses);
@@ -772,14 +772,14 @@ boost::shared_ptr<QueryResolver> QueryResolver::SolveSelectFromSelect(	aq::tnode
   std::cout << *pInteriorSelect << std::endl;
 #endif
 
-#ifdef OUTPUT_NESTED_QUERIES
-	std::string str;
-	aq::syntax_tree_to_prefix_form( pExteriorSelect, str );
-	aq::SaveFile( pSettings->szOutputFN, str.c_str() );
+  std::string str;
+  aq::syntax_tree_to_prefix_form( pExteriorSelect, str );
+  aq::SaveFile( pSettings->szOutputFN, str.c_str() );
   aq::MakeBackupFile( pSettings->szOutputFN, aq::backup_type_t::Exterior_Before, this->level, this->id );
-#endif
 
-	aq::solveSelectStar( pInteriorSelect, BaseDesc );
+  std::vector<std::string> dummy1;
+  std::vector<std::string> dummy2;
+  aq::solveSelectStar( pInteriorSelect, BaseDesc, dummy1, dummy2 );
 	aq::solveOneTableInFrom( pInteriorSelect, BaseDesc );
 
 	aq::tnode* pIntSelectAs = aq::getLastTag( pExteriorSelect, NULL, pInteriorSelect, K_AS );
@@ -816,11 +816,11 @@ boost::shared_ptr<QueryResolver> QueryResolver::SolveSelectFromSelect(	aq::tnode
 	}
 	aq::addInnerOuterNodes( intWhereNode->left, K_INNER, K_INNER );
 
-#ifdef OUTPUT_NESTED_QUERIES
+// #ifdef OUTPUT_NESTED_QUERIES
 	aq::syntax_tree_to_prefix_form( pExteriorSelect, str );
 	aq::SaveFile( pSettings->szOutputFN, str.c_str() );
 	aq::MakeBackupFile( pSettings->szOutputFN, aq::backup_type_t::Exterior, this->level, this->id );
-#endif
+// #endif
   
 #if _DEBUG
   std::string queryInterior;
@@ -858,9 +858,9 @@ boost::shared_ptr<QueryResolver> QueryResolver::SolveSelectFromSelect(	aq::tnode
 	// aq_engine->call(	pInteriorSelect, minMaxGroupBy ? 0 : 1, nSelectLevel );
 	// solveMinMaxGroupBy.modifyTmpFiles( pSettings->szTempPath2, nSelectLevel, BaseDesc, *pSettings );
 
-#ifdef OUTPUT_NESTED_QUERIES
+// #ifdef OUTPUT_NESTED_QUERIES
 	aq::MakeBackupFile( pSettings->szOutputFN, aq::backup_type_t::Empty, this->level, this->id );
-#endif
+// #endif
 	
 	aq::mark_as_deleted( pIntSelectAs );
   
@@ -884,10 +884,10 @@ Table::Ptr QueryResolver::solveAQMatriceByColumns(aq::verb::VerbNode::Ptr spTree
 	table->loadFromTableAnswerByColumn(*(aq_engine->getAQMatrix()), aq_engine->getTablesIDs(), columnTypes, *pSettings, BaseDesc );
 	aq::Logger::getInstance().log(AQ_INFO, "Load From Answer: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
 
-#ifdef OUTPUT_NESTED_QUERIES
+// #ifdef OUTPUT_NESTED_QUERIES
 	aq::MakeBackupFile( pSettings->szOutputFN, aq::backup_type_t::Empty, this->level, this->id );
 	aq::MakeBackupFile( pSettings->szAnswerFN, aq::backup_type_t::Before, this->level, this->id );
-#endif
+// #endif
 
 	if( !table->NoAnswer )
 	{

@@ -4,9 +4,10 @@
 #include "ColumnMapper_Intf.h"
 #include <aq/FileMapper.h>
 #include <aq/DBTypes.h>
-#include <set>
+// #include <set>
 #include <map>
 #include <vector>
+#include <boost/shared_ptr.hpp>
 
 namespace aq
 {
@@ -33,7 +34,7 @@ private:
 	std::map<size_t, boost::shared_ptr<aq::FileMapper> > prmMappers;
 	std::map<size_t, boost::shared_ptr<aq::FileMapper> > thesaurusMappers;
 	std::map<size_t, ColumnItem::Ptr> prm;
-	std::map<ColumnItem::Ptr, std::vector<size_t>, struct column_cmp_t > thesaurus;
+  // std::map<ColumnItem::Ptr, std::vector<size_t>, struct column_cmp_t > thesaurus;
 };
 
 }

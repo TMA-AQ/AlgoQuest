@@ -5,6 +5,8 @@
 
 using namespace aq;
 
+#ifdef _MSVC_
+
 FileMapper::FileMapper(const char * _filename)
 	: filename(_filename),
 		pView(NULL),
@@ -115,3 +117,33 @@ void FileMapper::remap(size_t offset)
 	this->pView = static_cast<char const *>(::MapViewOfFile(hmap, FILE_MAP_READ, high, low, new_cbView));
 	this->windowOffset = offset;
 }
+
+#else
+
+FileMapper::FileMapper(const char * _filename)
+	: filename(_filename),
+          nbRemap(0)
+{
+  // TODO
+}
+
+FileMapper::~FileMapper()
+{
+  // TODO
+}
+
+int FileMapper::read(void * buffer, size_t offset, size_t len) 
+{
+  // TODO
+  (void)buffer;
+  (void)offset;
+  (void)len;
+}
+
+void FileMapper::remap(size_t offset)
+{
+  // TODO
+  (void)offset;
+}
+
+#endif

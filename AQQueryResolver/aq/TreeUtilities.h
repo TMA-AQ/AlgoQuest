@@ -24,10 +24,10 @@ void addAlias( aq::tnode* pNode );
 void addConditionsToWhere( aq::tnode* pCond, aq::tnode* pStart );
 void addInnerOuterNodes( aq::tnode* pNode, int leftTag, int rightTag );
 void mark_as_deleted( aq::tnode* pNode );
-void solveSelectStar(	aq::tnode* pNode, 
-            Base& BaseDesc,
-						std::vector<std::string>& columnNames = std::vector<std::string>(),
-						std::vector<std::string>& columnDisplayNames = std::vector<std::string>() );
+void solveSelectStar(aq::tnode* pNode, 
+                     Base& BaseDesc,
+                     std::vector<std::string>& columnNames,
+                     std::vector<std::string>& columnDisplayNames);
 
 void  solveIdentRequest( aq::tnode* pNode, Base& BaseDesc ); ///< create trees of select
 void  assignIdentRequest( aq::tnode* pNode, std::vector<aq::tnode*> tables, Base& BaseDesc ); //  used in solveBaseName

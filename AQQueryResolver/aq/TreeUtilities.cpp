@@ -188,10 +188,10 @@ void mark_as_deleted( aq::tnode* pNode )
 }
 
 //------------------------------------------------------------------------------
-void solveSelectStar(	aq::tnode* pNode,
-            Base& BaseDesc,
-						std::vector<std::string>& columnNames,
-						std::vector<std::string>& columnDisplayNames )
+void solveSelectStar(aq::tnode* pNode,
+                     Base& BaseDesc,
+                     std::vector<std::string>& columnNames,
+                     std::vector<std::string>& columnDisplayNames )
 {
   if ( !pNode || ( pNode->tag == K_SELECT && !pNode->left ) )
     throw aq::parsException( "pNode->left is empty in { void solveSelectStar }, this exception should be throw in { int SQLParse }" );
@@ -256,7 +256,9 @@ void solveIdentRequest( aq::tnode* pNode, Base& BaseDesc )
     if ( pNode->left->tag == K_STAR )
     {
       fake = false;
-      solveSelectStar( pNode, BaseDesc ); // a refaire le solveSelectStar + les exceptions!
+      std::vector<std::string> dummy1;
+      std::vector<std::string> dummy2;
+      solveSelectStar( pNode, BaseDesc, dummy1, dummy2 ); // a refaire le solveSelectStar + les exceptions!
     }
 
     aq::tnode*  assign = NULL;

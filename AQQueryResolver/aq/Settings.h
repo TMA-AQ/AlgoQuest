@@ -8,6 +8,10 @@
 
 #define STR_BUF_SIZE 4096
 
+#ifndef _MAX_PATH
+#define _MAX_PATH 1024
+#endif
+
 namespace aq
 {
 

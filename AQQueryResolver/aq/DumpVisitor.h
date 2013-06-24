@@ -2,7 +2,7 @@
 #define __DUMP_VISITOR_H__
 
 #include "verbs/VerbVisitor.h"
-#include <aq/logger.h>
+#include <aq/Logger.h>
 
 namespace aq
 {

@@ -5,8 +5,8 @@
 
 struct TID2String 
 {
-	unsigned int	m_nID;
-	char			   *pszStr;
+	unsigned int  m_nID;
+	const char   *pszStr;
 };
 
 //------------------------------------------------------------------------------
@@ -312,7 +312,7 @@ TID2String g_id2kstr[] = {
 #define SIZE_OF( tab ) ( sizeof( tab ) / sizeof( tab[ 0 ] ) )
 
 //------------------------------------------------------------------------------
-char* id_to_string( unsigned int nID ) {
+const char* id_to_string( unsigned int nID ) {
 	unsigned int i;
 	for ( i = 0; i < SIZE_OF( g_id2str ); i++ ) {
 		if ( g_id2str[ i ].m_nID == nID ) {
@@ -325,7 +325,7 @@ char* id_to_string( unsigned int nID ) {
 }
 
 //------------------------------------------------------------------------------
-char* id_to_kstring( unsigned int nID ) {
+const char* id_to_kstring( unsigned int nID ) {
 	unsigned int i;
 	for ( i = 0; i < SIZE_OF( g_id2kstr ); i++ ) {
 		if ( g_id2kstr[ i ].m_nID == nID ) {
@@ -336,7 +336,7 @@ char* id_to_kstring( unsigned int nID ) {
 }
 
 //------------------------------------------------------------------------------
-char* id_to_sql_string( unsigned int nID )
+const char* id_to_sql_string( unsigned int nID )
 {
 
 	switch (nID)

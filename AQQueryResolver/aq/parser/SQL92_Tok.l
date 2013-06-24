@@ -3,7 +3,14 @@
 //#include "sql92_grm_tab.h"
 // int wordCount = 0;
 #define YY_NO_UNISTD_H
+
+#ifdef _MSVC_
 #include <io.h>
+#else
+#include <stdio.h>
+#include <unistd.h>
+#endif
+
 %}
 
 %{

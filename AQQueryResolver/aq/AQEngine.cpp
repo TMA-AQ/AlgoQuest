@@ -4,10 +4,13 @@
 #include "SQLPrefix.h"
 #include "TreeUtilities.h"
 #include <string>
-#include <direct.h>
 #include <aq/Logger.h>
 #include <aq/Timer.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
+
+#ifdef _MSVC_
+#include <direct.h>
+#endif
 
 namespace aq
 {
@@ -80,10 +83,12 @@ void AQEngine::call(aq::tnode *pNode, mode_t mode, int selectLevel)
 	//	return;
 	//} 
 
+#ifdef _MSVC_
 	//
 	// create folders for the engine
 	// mkdir( settings.szTempPath1 );
 	mkdir( settings.szTempPath2 );
+#endif
 
 	aq::Timer timer;
 	if ((mode == 0) || (settings.executeNestedQuery))
@@ -152,6 +157,8 @@ void AQEngine::generateAQMatrixFromPRM(const std::string tableName, aq::tnode * 
 	this->tableIDs.push_back(table->ID);
 }
 
+#ifdef _MSVC_
+
 // ------------------------------------------------------------------------------------------------
 AQEngineWindows::AQEngineWindows(Base& _baseDesc, TProjectSettings& _settings)
   : AQEngine(_baseDesc, _settings)
@@ -180,6 +187,8 @@ int AQEngineWindows::run(const char * prg, const char * args) const
   }
   return rc;
 }
+
+#endif
 
 // ------------------------------------------------------------------------------------------------
 AQEngineSystem::AQEngineSystem(Base& _baseDesc, TProjectSettings& _settings)

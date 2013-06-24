@@ -14,7 +14,7 @@
 #include "ScalarVerbs.h"
 
 #include <aq/parser/ID2Str.h>
-#include <aq/logger.h>
+#include <aq/Logger.h>
 
 namespace aq {
 namespace verb {

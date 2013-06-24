@@ -1,7 +1,12 @@
 #ifndef __FILE_MAPPER_H__
 #define __FILE_MAPPER_H__
 
+#ifdef _MSVC_
 #include <windows.h>
+#else
+#include <sys/mman.h>
+#endif
+
 #include <string>
 
 #ifdef min
@@ -31,10 +36,13 @@ private:
 
 	const std::string filename;
 
+#ifdef _MSVC_
 	DWORD cbView;
   HANDLE hfile;
 	HANDLE hmap;
 	char const * pView;
+#else
+#endif
 
 	unsigned long long cbFile;
 	unsigned long long windowOffset;

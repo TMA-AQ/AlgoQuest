@@ -65,7 +65,7 @@ struct node_cmp_t
 };
 
 //------------------------------------------------------------------------------
-void report_error( char* pszMsg, int bExit );
+void report_error( const char* pszMsg, int bExit );
 tnode* clone_subtree( tnode* pNode );
 void delete_subtree( tnode*& pNode );
 tnode* get_leftmost_child( tnode *pNode );

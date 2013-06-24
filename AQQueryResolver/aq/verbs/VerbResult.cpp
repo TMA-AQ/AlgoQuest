@@ -1,4 +1,5 @@
 #include "VerbResult.h"
+#include <string.h>
 
 namespace aq {
 namespace verb {

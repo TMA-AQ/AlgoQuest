@@ -24,7 +24,7 @@ namespace aq
 
 //------------------------------------------------------------------------------
 /* bExit == 1 - exit the app. - ex. for memmory allocation failed */
-void report_error( char* pszMsg, int bExit ) {
+void report_error( const char* pszMsg, int bExit ) {
 	int errnum;
 	char szBuf[ 1000 ];
 

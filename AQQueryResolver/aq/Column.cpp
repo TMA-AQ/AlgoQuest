@@ -1,4 +1,5 @@
 #include "Column.h"
+#include <cstring>
 #include <aq/Utilities.h>
 #include <aq/Exceptions.h>
 #include <boost/scoped_array.hpp>

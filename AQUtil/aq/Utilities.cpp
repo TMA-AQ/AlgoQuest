@@ -7,7 +7,13 @@
 #include <cstring>
 #include <boost/filesystem.hpp>
 
+#ifdef _MSVC_
 #include <Windows.h>
+#endif
+
+#ifndef _MAX_PATH
+#define _MAX_PATH 1024
+#endif
 
 namespace aq
 {
@@ -240,7 +246,7 @@ void DeleteFolder( const char * pszPath )
 }
 
 //------------------------------------------------------------------------------
-FILE* fopenUTF8( const char* pszFlename, char* pszMode )
+FILE* fopenUTF8( const char* pszFlename, const char* pszMode )
 {
 	FILE	*fp = NULL;
 	unsigned char bom[3];
@@ -336,6 +342,7 @@ char* strtoupr( char* pszStr ) {
 //------------------------------------------------------------------------------
 std::wstring string2Wstring(const std::string& s)
 {
+#ifdef _MSVC_
   int len;
   int slength = (int)s.length() + 1;
   len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0); 
@@ -344,6 +351,10 @@ std::wstring string2Wstring(const std::string& s)
   std::wstring r(buf);
   delete[] buf;
   return r;
+#else
+  assert(false);
+  (void)s;
+#endif
 }
 
 //------------------------------------------------------------------------------

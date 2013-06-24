@@ -47,7 +47,7 @@ void DeleteFolder( const char* pszPath );
 
 //------------------------------------------------------------------------------
 /* Should be used when reading UTF8 files */
-FILE* fopenUTF8( const char* pszFlename, char* pszMode );
+FILE* fopenUTF8( const char* pszFlename, const char* pszMode );
 
 //------------------------------------------------------------------------------
 /* Set errno if the string contains anything else but the number */

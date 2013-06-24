@@ -31,8 +31,8 @@ public:
 	}
 };
 //------------------------------------------------------------------------------
-namespace boost
-{
+//namespace boost
+//{
 	inline void	intrusive_ptr_add_ref( Object* pObj )
 	{
 		if( pObj ) 
@@ -43,7 +43,8 @@ namespace boost
 		if( pObj )
 			pObj->releaseRef();
 	}
-}//namespace boost
+//}//namespace boost
+
 //------------------------------------------------------------------------------
 //macro
 #define OBJECT_DECLARE( class_name )\

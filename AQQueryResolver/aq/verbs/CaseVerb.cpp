@@ -1,5 +1,3 @@
-#pragma once
-
 #include "CaseVerb.h"
 #include "VerbVisitor.h"
 #include <aq/Exceptions.h>

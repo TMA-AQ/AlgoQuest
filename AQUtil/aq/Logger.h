@@ -43,7 +43,7 @@ namespace aq
     void setLevel(int _level)         { this->level = _level; }
     void setIdent(const char *_ident) { 
       ::memset(this->ident, 0, sizeof(ident)); 
-      ::strncpy_s(this->ident, _ident, sizeof(this->ident)); 
+      ::strncpy(this->ident, _ident, sizeof(this->ident)); 
     }
 
     char getMode() const { return this->mode; }

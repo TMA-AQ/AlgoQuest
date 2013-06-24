@@ -115,12 +115,15 @@ const std::vector<size_t>& ColumnMapper::getSimilarIndex(size_t index) const
 	{
 		// todo : raise exception
 	}
-	std::map<ColumnItem::Ptr, std::vector<size_t>, struct column_cmp_t >::const_iterator it2 = this->thesaurus.find(it->second);
-	if (it2 == this->thesaurus.end())
-	{
-		// todo : raise exception
-	}
-	return it2->second;
+	// std::map<ColumnItem::Ptr, std::vector<size_t>, struct column_cmp_t >::const_iterator it2 = this->thesaurus.find(it->second);
+	// if (it2 == this->thesaurus.end())
+	// {
+	// 	// todo : raise exception
+	// }
+	// return it2->second;
+        assert(false);
+        static std::vector<size_t> dummy;
+        return dummy;
 }
 
 }

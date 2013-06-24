@@ -28,12 +28,16 @@ private:
 	std::vector<llong> tableIDs;
 };
 
+#ifdef _MSVC_
+
 class AQEngineWindows : public AQEngine
 {
 public:
   AQEngineWindows(Base& _baseDesc, TProjectSettings& settings);
   int run(const char * prg, const char * args) const;
 };
+
+#endif
 
 class AQEngineSystem : public AQEngine
 {
