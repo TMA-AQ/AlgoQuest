@@ -69,7 +69,7 @@ void getColumnsIds(	const Table& table, std::vector<aq::tnode*>& columns, std::v
 
 void eliminateAliases( aq::tnode* pSelect );
 
-void getAllColumnNodes( aq::tnode*& pNode, std::vector<aq::tnode**>& columnNodes );
+void getAllColumnNodes( aq::tnode*& pNode, std::vector<aq::tnode*>& columnNodes );
 
 void getColumnsList( aq::tnode* pNode, std::vector<aq::tnode*>& columns );
 
@@ -78,7 +78,7 @@ void getTablesList( aq::tnode* pNode, std::list<std::string>& tables );
 /// search a subtree for a node and return the last node that had a certain tag
 aq::tnode* getLastTag( aq::tnode*& pNode, aq::tnode* pLastTag, aq::tnode* pCheckNode, int tag );
 
-void generate_parent(aq::tnode* pNode, aq::tnode* parent);
+void generate_parent(aq::tnode* pNode, aq::tnode* parent = NULL);
 
 void getColumnTypes( aq::tnode* pNode, std::vector<Column::Ptr>& columnTypes, Base& baseDesc );
 
@@ -97,5 +97,7 @@ void addEmptyGroupBy(tnode * pNode);
 void addColumnsToGroupBy(tnode * pNode, const std::list<tnode *>& aggregateColumns);
 
 void setOneColumnByTableOnSelect(tnode * pNode);
+
+void removePartitionBy(tnode *& pNode);
 
 }

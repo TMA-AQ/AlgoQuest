@@ -551,13 +551,13 @@ void moveFromJoinToWhere( aq::tnode* pStart, Base& BaseDesc )
 }
 
 //------------------------------------------------------------------------------
-void getAllColumnNodes( aq::tnode*& pNode, std::vector<aq::tnode**>& columnNodes )
+void getAllColumnNodes( aq::tnode*& pNode, std::vector<aq::tnode*>& columnNodes )
 {
 	if( !pNode )
 		return;
 	if( pNode->tag == K_COLUMN || pNode->tag == K_PERIOD )
 	{
-		columnNodes.push_back( &pNode );
+		columnNodes.push_back(pNode);
 		return;
 	}
 	getAllColumnNodes( pNode->left, columnNodes );
@@ -653,15 +653,15 @@ void changeColumnNames(	aq::tnode* pIntSelectAs, aq::tnode* pInteriorSelect, aq:
 {
 	std::string tableName = pIntSelectAs->right->getData().val_str;
 
-	std::vector<aq::tnode**> exteriorColumns;
+	std::vector<aq::tnode*> exteriorColumns;
 	getAllColumnNodes( pExteriorSelect, exteriorColumns );
 	std::vector<aq::tnode*> interiorColumns;
 	getColumnsList( pInteriorSelect->left, interiorColumns );
 	for( size_t idx = 0; idx < exteriorColumns.size(); ++idx )
 	{
-		if( !exteriorColumns[idx] || !*exteriorColumns[idx] )
+		if( !exteriorColumns[idx] || !exteriorColumns[idx] )
 			continue;
-		aq::tnode*& extCol = *exteriorColumns[idx];
+		aq::tnode*& extCol = exteriorColumns[idx];
 		switch( extCol->tag )
 		{
 		case K_PERIOD:
@@ -1388,14 +1388,14 @@ void setOneColumnByTableOnSelect(tnode * select)
 
 
   // fill columns list
-  std::vector<tnode**> columns;
+  std::vector<tnode*> columns;
   std::vector<tnode*> uniqueColumnsTable;
   getAllColumnNodes(select->left, columns);
-  for (std::vector<tnode**>::const_iterator it1 = columns.begin(); it1 != columns.end(); ++it1) 
+  for (auto it1 = columns.begin(); it1 != columns.end(); ++it1) 
   {
-    tnode * n = **it1;
+    tnode *& n = *it1;
     bool b = false;
-    for (std::vector<tnode*>::const_iterator it2 = uniqueColumnsTable.begin(); !b && (it2 != uniqueColumnsTable.end()); ++it2) 
+    for (auto it2 = uniqueColumnsTable.begin(); !b && (it2 != uniqueColumnsTable.end()); ++it2) 
     {
       if (strcmp(n->left->getData().val_str, (*it2)->left->getData().val_str) == 0)
       {
@@ -1409,9 +1409,9 @@ void setOneColumnByTableOnSelect(tnode * select)
   // replace select node
   aq::delete_subtree(select->left);
   tnode * n = select;
-  for (std::vector<tnode*>::const_iterator it = uniqueColumnsTable.begin(); it != uniqueColumnsTable.end();)
+  for (auto it = uniqueColumnsTable.begin(); it != uniqueColumnsTable.end();)
   {
-    tnode * n1 = *it;
+    tnode *& n1 = *it;
      ++it;
      if (it == uniqueColumnsTable.end())
      {
@@ -1425,6 +1425,37 @@ void setOneColumnByTableOnSelect(tnode * select)
      }
   }
 
+}
+
+void removePartitionByFromSelect(tnode *& pNode)
+{
+  if (pNode != NULL)
+  {
+    if (pNode->tag == K_ORDER)
+    {
+      tnode * n = find_deeper_node(pNode, K_FRAME);
+      n = aq::clone_subtree(n);
+      aq::delete_subtree(pNode);
+      pNode = n;
+    }
+    else
+    {
+      removePartitionByFromSelect(pNode->left);
+      removePartitionByFromSelect(pNode->right);
+    }
+  }
+}
+
+void removePartitionBy(tnode *& pNode)
+{
+  if (pNode->tag == K_SELECT)
+  {
+    removePartitionByFromSelect(pNode->left);
+  }
+  else
+  {
+    aq::Logger::getInstance().log(AQ_WARNING, "cannot remove partition by on a no SELECT node");
+  }
 }
 
 }

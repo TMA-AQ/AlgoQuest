@@ -62,7 +62,7 @@ char* ExtractStringFromQuotes( char* pszStr, char* pszExtractedStr, unsigned int
 }
 
 //------------------------------------------------------------------------------
-Table::Ptr Base::getTable(unsigned int id)
+Table::Ptr Base::getTable(size_t id)
 {
 	for( size_t i = 0; i < this->Tables.size(); ++i )
 		if( id == this->Tables[i]->ID )
@@ -71,7 +71,7 @@ Table::Ptr Base::getTable(unsigned int id)
 }
 
 //------------------------------------------------------------------------------
-const Table::Ptr Base::getTable(unsigned int id) const
+const Table::Ptr Base::getTable(size_t id) const
 {
 	return const_cast<Base*>(this)->getTable(id);
 }

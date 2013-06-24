@@ -177,6 +177,7 @@
   <ItemGroup>
     <ClCompile Include="AQMatrixTest.cpp" />
     <ClCompile Include="BaseDescTest.cpp" />
+    <ClCompile Include="JeqParserTest.cpp" />
     <ClCompile Include="src\AQUnitTests.cpp" />
     <ClCompile Include="src\ParserTest.cpp" />
   </ItemGroup>

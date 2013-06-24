@@ -22,63 +22,14 @@ AQEngine::~AQEngine(void)
 {
 }
 
-void AQEngine::call(aq::tnode *pNode, mode_t mode, int selectLevel)
+void AQEngine::call(const std::string& query, mode_t mode)
 {
-	std::string query;
-  aq::syntax_tree_to_prefix_form( pNode, query );
-
-  // a group is an order in aq engine => change ORDER by GROUP
-  std::string::size_type pos = query.find("GROUP");
-  if (pos != std::string::npos)
-  {
-    query.replace(pos, 5, "ORDER");
-  }
-
-  pos = query.find("ORDER");
-  if (pos != std::string::npos)
-  {
-    std::string queryTmp = query.substr(0, pos);
-    std::string group = query.substr(pos);
-    ParseJeq( queryTmp );
-    query = queryTmp;
-    if (group.size() > 5) // check if Group By is not empty
-      query += group;
-  }
-  else
-  {
-    ParseJeq( query );
-  }
-	
 	if (query.size() < 2048) // fixme
 		aq::Logger::getInstance().log(AQ_DEBUG, "\n%s\n", query.c_str());
-
-#if defined(_DEBUG)
-	std::cout << std::endl << query.substr(0, 1024) << std::endl << std::endl;
-	// std::string queryStr; 
-	// syntax_tree_to_sql_form(pNode, queryStr);
-	// std::cout << std::endl << queryStr.substr(0, 1024) << std::endl << std::endl;
-#endif
 
 	//
 	//
 	aq::SaveFile( settings.szOutputFN, query.c_str() );
-
-	//
-	// get temporary files created by previous calls
-	//aq::DeleteFolder( settings.szTempPath1 );
-	//char path[_MAX_PATH];
-	//sprintf( path, "%s_%d", settings.szTempPath1, selectLevel );
-	//rename( path, settings.szTempPath1 );
-
-	//
-	// If mono table query, read PRM or TMP files to get the rows indexes
-	//std::string tableName;
-	//aq::tnode * constraint = find_main_node(pNode, K_WHERE);
-	//if (isMonoTable(pNode, tableName) && (constraint == NULL))
-	//{
-	//	this->generateAQMatrixFromPRM(tableName, constraint);
-	//	return;
-	//} 
 
 	//
 	// create folders for the engine
@@ -141,6 +92,36 @@ void AQEngine::call(aq::tnode *pNode, mode_t mode, int selectLevel)
 		throw aq::generic_error(aq::generic_error::NOT_IMPLEMENED, "");
 	}
 
+}
+
+void AQEngine::call(aq::tnode *pNode, mode_t mode, int selectLevel)
+{
+	std::string query;
+  aq::syntax_tree_to_prefix_form( pNode, query );
+
+  // a group is an order in aq engine => change ORDER by GROUP
+  std::string::size_type pos = query.find("GROUP");
+  if (pos != std::string::npos)
+  {
+    query.replace(pos, 5, "ORDER");
+  }
+
+  pos = query.find("ORDER");
+  if (pos != std::string::npos)
+  {
+    std::string queryTmp = query.substr(0, pos);
+    std::string group = query.substr(pos);
+    ParseJeq( queryTmp );
+    query = queryTmp;
+    if (group.size() > 5) // check if Group By is not empty
+      query += group;
+  }
+  else
+  {
+    ParseJeq( query );
+  }
+	
+  this->call(query, mode);
 }
 
 void AQEngine::generateAQMatrixFromPRM(const std::string tableName, aq::tnode * whereNode)

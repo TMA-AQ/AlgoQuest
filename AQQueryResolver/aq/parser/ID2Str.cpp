@@ -3,6 +3,9 @@
 #include <cstdio>
 #include <sstream>
 
+namespace aq
+{
+
 struct TID2String 
 {
 	unsigned int	m_nID;
@@ -358,4 +361,6 @@ char* id_to_sql_string( unsigned int nID )
 	}
 
 	return "K_UNKNOW";
+}
+
 }
