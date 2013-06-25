@@ -155,20 +155,22 @@ set_quantifier  : K_ALL
 				;
 
 select_list		: K_MUL	/* Asterisk */				{ $$ = $1; $$->setTag(K_STAR); }
-				| select_sublist_rec
+				| select_sublist_rec				// { $$ = $1; }
 				;
 
 select_sublist_rec	: select_sublist				
 					| select_sublist_rec K_COMMA select_sublist	{
-														$2->left	= $1;
+														$2->left		= $1;
 														$2->right	= $3;
 														$$			= $2;
+														// $1->list.push_back($3);
+														// $$ = $1;
 													}
 					;
 
 select_sublist	: derived_column
 				| qualifier K_PERIOD K_MUL			{
-														$2->left	= $1;
+														$2->left		= $1;
 														$2->right	= $3;
 														$$			= $2;
 													}

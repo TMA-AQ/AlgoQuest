@@ -24,7 +24,8 @@ public:
   };
 
 	virtual ~AQEngine_Intf() {}
-
+  
+  virtual void call(const std::string& query, mode_t mode) = 0;
 	virtual void call(aq::tnode *pNode, mode_t mode, int selectLevel) = 0;
 
 	virtual boost::shared_ptr<aq::AQMatrix> getAQMatrix() = 0;

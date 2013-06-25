@@ -1,8 +1,8 @@
 #include "stdafx.h"
 
 #include <aq/Exceptions.h>
-#include <aq/BaseDesc.h>
 #include <aq/Logger.h>
+#include <aq/Base.h>
 #include <aq/AQEngine.h>
 #include <aq/SQLPrefix.h>
 #include <aq/Column2Table.h>
@@ -44,7 +44,7 @@ size_t failedQueries = 0;
 boost::mutex parserMutex;
 
 // -------------------------------------------------------------------------------------------------
-int prepareQuery(const std::string& query, const TProjectSettings& settingsBase, Base& baseDesc, TProjectSettings& settings, 
+int prepareQuery(const std::string& query, const aq::TProjectSettings& settingsBase, aq::Base& baseDesc, aq::TProjectSettings& settings, 
                  std::string& displayFile, const std::string queryIdentStr, bool force)
 {		
 	//
@@ -111,7 +111,7 @@ int prepareQuery(const std::string& query, const TProjectSettings& settingsBase,
 }
 
 // -------------------------------------------------------------------------------------------------
-int processQuery(const std::string& query, TProjectSettings& settings, Base& baseDesc, AQEngine_Intf * aq_engine,
+int processQuery(const std::string& query, aq::TProjectSettings& settings, aq::Base& baseDesc, aq::AQEngine_Intf * aq_engine,
                  const std::string& answer, bool clean)
 {
 	try
@@ -143,10 +143,10 @@ int processQuery(const std::string& query, TProjectSettings& settings, Base& bas
 		//
 		// Transform SQL request in prefix form, 
     unsigned int id = 1;
-		QueryResolver queryResolver(pNode, &settings, aq_engine, baseDesc, id);
+		aq::QueryResolver queryResolver(pNode, &settings, aq_engine, baseDesc, id);
     queryResolver.solve();
 
-		Table::Ptr result = queryResolver.getResult();
+		aq::Table::Ptr result = queryResolver.getResult();
 		if (!settings.useRowResolver && result)
 		{
 			aq::Timer timer;
@@ -184,7 +184,7 @@ int processQuery(const std::string& query, TProjectSettings& settings, Base& bas
 
 // -------------------------------------------------------------------------------------------------
 int processSQLQueries(const std::string query, 
-                      const TProjectSettings& settingsBase, Base& baseDesc,
+                      const aq::TProjectSettings& settingsBase, aq::Base& baseDesc,
                       const std::string queryIdent, bool clean, bool force)
 {
 
@@ -194,11 +194,11 @@ int processSQLQueries(const std::string query,
   //
   // prepare and process query
   std::string answer;
-  TProjectSettings settings(settingsBase);
+  aq::TProjectSettings settings(settingsBase);
 
   //
   // Load AQ engine
-  AQEngine_Intf * aq_engine = new AQEngineSystem(baseDesc, settings);
+  aq::AQEngine_Intf * aq_engine = new aq::AQEngineSystem(baseDesc, settings);
     
   if (!((prepareQuery(query, settingsBase, baseDesc, settings, answer, queryIdent, force) == EXIT_SUCCESS) &&
     (processQuery(query, settings, baseDesc, aq_engine, answer, clean) == EXIT_SUCCESS)))
@@ -235,7 +235,7 @@ int solve_query(const char * _query, const char * _iniFilename, const char * _wo
     std::string logMode(_logMode); 
 
 		// Settings
-		TProjectSettings settings;
+		aq::TProjectSettings settings;
 
 		// log options
 		bool lock_mode = false;
@@ -272,7 +272,7 @@ int solve_query(const char * _query, const char * _iniFilename, const char * _wo
 
 		//
 		// Load DB Schema
-		Base baseDesc;
+		aq::Base baseDesc;
 		aq::Logger::getInstance().log(AQ_INFO, "load base %s\n", settings.szDBDescFN);
     aq::base_t baseDescHolder;
     if (strncmp(settings.szDBDescFN + strlen(settings.szDBDescFN) - 4, ".xml", 4) == 0)
@@ -317,7 +317,7 @@ int load_db(const char * propertiesFile, unsigned int tableId)
   
   //
   // read ini file
-  TProjectSettings settings;
+  aq::TProjectSettings settings;
   if (propertiesFile != "")
   {
     aq::Logger::getInstance().log(AQ_INFO, "read %s\n", propertiesFile);
@@ -326,7 +326,7 @@ int load_db(const char * propertiesFile, unsigned int tableId)
 
   //
   // Load DB Schema
-  Base baseDesc;
+  aq::Base baseDesc;
   std::string baseDescr_filename = settings.szDBDescFN;
   aq::Logger::getInstance().log(AQ_INFO, "load base %s\n", baseDescr_filename.c_str());
   std::fstream bdFile(baseDescr_filename.c_str());
@@ -343,13 +343,13 @@ int load_db(const char * propertiesFile, unsigned int tableId)
 
   //
   // load base
-  for (size_t t = 0; t < baseDesc.Tables.size(); ++t)
+  for (size_t t = 0; t < baseDesc.getTables().size(); ++t)
   {
-    if ((tableId != 0) && (tableId != baseDesc.Tables[t]->ID))
+    if ((tableId != 0) && (tableId != baseDesc.getTables()[t]->ID))
     {
       continue;
     }
-    for (size_t c = 0; c < baseDesc.Tables[t]->Columns.size(); ++c)
+    for (size_t c = 0; c < baseDesc.getTables()[t]->Columns.size(); ++c)
     {
       aq::Logger::getInstance().log(AQ_INFO, "loading column %d of table %d\n", c + 1, t + 1);
       cut_in_col(propertiesFile, t + 1, c + 1);

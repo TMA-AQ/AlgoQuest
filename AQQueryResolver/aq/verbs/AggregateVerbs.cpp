@@ -94,7 +94,8 @@ void AggregateVerb::addResult(aq::Row& row)
 {
   if (this->index == -1)
   {
-    this->index = row.computedRow.size() - 1;
+    assert(row.computedRow.size() <= std::numeric_limits<int>::max());
+    this->index = static_cast<int>(row.computedRow.size()) - 1;
     aq::row_item_t& row_item = row.computedRow[this->index];
     switch (this->getVerbType())
     {
@@ -115,12 +116,27 @@ void AggregateVerb::addResult(aq::Row& row)
       break;
     }
   }
-  
+
   aq::row_item_t& row_item = row.computedRow[this->index];
-  aq::apply_aggregate(row_item.aggFunc, row_item.type, this->item, this->count, *row_item.item, row.count);
+  if (this->count == 0)
+  {
+    this->item = *row_item.item;
+  }
+  else
+  {
+    aq::apply_aggregate(row_item.aggFunc, row_item.type, this->item, this->count, *row_item.item, row.count);
+  }
   this->count += row.count;
  
-  if (row.completed)
+  if (this->getRightChild() != NULL)
+  {
+    // FIXME : manage partition and Frame
+    *row_item.item = this->item;
+    // this->count = 0;
+    // this->item.numval = 0;
+    // this->item.strval = "";
+  }
+  else if (row.completed)
   {
     *row_item.item = this->item;
     this->count = 0;

@@ -28,6 +28,10 @@ bool ColumnVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 	assert( pNode->left->tag == K_IDENT );
 	assert( pNode->right->tag == K_COLUMN );
 	this->TableName = pNode->left->getData().val_str;
+
+  Table::Ptr table = this->m_baseDesc->getTable(this->TableName);
+  this->TableName = table->getName();
+
 	Column auxcol;
 	//auxcol.setName( string(pNode->left->data.val_str) + "." + string(pNode->right->data.val_str) );
 	auxcol.setName( pNode->right->getData().val_str );
@@ -140,7 +144,8 @@ void ColumnVerb::addResult(aq::Row& row)
   {
     row.computedRow.push_back(row_item);
     (*row.computedRow.rbegin()).item.reset(new ColumnItem);
-    this->computed_index = row.computedRow.size() - 1;
+    assert(row.computedRow.size() <= std::numeric_limits<int>::max());
+    this->computed_index = static_cast<int>(row.computedRow.size()) - 1;
   }
   
   if (this->computed_index >= row.computedRow.size())
@@ -458,7 +463,8 @@ void AsVerb::addResult(aq::Row& row)
     //}
     if (this->index == -1)
     {
-      this->index = row.computedRow.size() - 1;
+      assert(row.computedRow.size() <= std::numeric_limits<int>::max());
+      this->index = static_cast<int>(row.computedRow.size()) - 1;
       row.computedRow[this->index].tableName = "";
       row.computedRow[this->index].columnName = this->ident;
     }

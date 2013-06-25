@@ -223,6 +223,12 @@
     <ClInclude Include="aq\ApplyRowVisitor.h">
       <Filter>Header Files\aq</Filter>
     </ClInclude>
+    <ClInclude Include="aq\RowBinaryWritter.h">
+      <Filter>Header Files\aq\row_solver</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\ParsException.h">
+      <Filter>Header Files\aq</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="aq\verbs\AggregateVerbs.cpp">
@@ -361,6 +367,12 @@
       <Filter>Source Files\aq</Filter>
     </ClCompile>
     <ClCompile Include="aq\ApplyRowVisitor.cpp">
+      <Filter>Source Files\aq</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\RowBinaryWritter.cpp">
+      <Filter>Source Files\aq\row_solver</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\ParsException.cpp">
       <Filter>Source Files\aq</Filter>
     </ClCompile>
   </ItemGroup>

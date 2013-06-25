@@ -63,7 +63,7 @@ char* realloc_string_buffer( char* pszStr, unsigned int *pncbBuf, unsigned int n
 // Returns NULL on error !
 void show_node( aq::tnode *pNode, std::string& str, char* szTmpBuf, char* szBuffer )
 {
-	char *pszToAdd;
+	const char * pszToAdd;
 	
 	memset(szBuffer, 0, STR_BUF_SIZE);
 
@@ -189,7 +189,7 @@ std::string& syntax_tree_to_prefix_form( aq::tnode *sqlStatement, std::string& s
   aq::tnode * pNode = aq::clone_subtree(sqlStatement);
   aq::setOneColumnByTableOnSelect(pNode);
 
-	str.clear();
+	// str.clear();
 	char szTmpBuf[1000];
 	char szBuffer[STR_BUF_SIZE];
 	stack<aq::tnode*> nodes;
@@ -311,6 +311,7 @@ std::string& syntax_tree_to_sql_form(aq::tnode * pNode, std::string& query, unsi
 	}
   return query;
 }
+
 //------------------------------------------------------------------------------
 std::string& syntax_tree_to_sql_form_nonext(aq::tnode * pNode, std::string& query, unsigned int level)
 {
@@ -364,4 +365,29 @@ std::string& syntax_tree_to_sql_form_nonext(aq::tnode * pNode, std::string& quer
 	}
   return query;
 }
+
+std::string& multiline_query(std::string& query)
+{
+  std::string::size_type pos = std::string::npos;
+  pos = query.find("FROM");
+  if (pos != std::string::npos)
+    query.insert(pos, "\n");
+  pos = query.find("WHERE");
+  if (pos != std::string::npos)
+    query.insert(pos, "\n");
+  std::string::size_type prvAnd = 0;
+  while ((pos = query.find("AND", prvAnd)) != std::string::npos)
+  {
+    query.insert(pos, "\n  ");
+    prvAnd = pos + 6;
+  }
+  pos = query.find("GROUP");
+  if (pos != std::string::npos)
+    query.insert(pos, "\n");
+  pos = query.find("ORDER");
+  if (pos != std::string::npos)
+    query.insert(pos, "\n");
+  return query;
+}
+
 }

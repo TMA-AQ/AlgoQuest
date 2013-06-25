@@ -24,7 +24,7 @@ namespace aq
 
 //------------------------------------------------------------------------------
 /* bExit == 1 - exit the app. - ex. for memmory allocation failed */
-void report_error( char* pszMsg, int bExit ) {
+void report_error( const char* pszMsg, int bExit ) {
 	int errnum;
 	char szBuf[ 1000 ];
 
@@ -450,6 +450,19 @@ void andListToNodeArray( tnode* pNode, std::vector<tnode*>& nodes )
 tnode* nodeArrayToAndList( const std::vector<tnode*>& nodes )
 {
 	return nodeArrayToTreeList( nodes, K_AND );
+}
+
+//------------------------------------------------------------------------------
+void find_nodes(tnode * pNode, int tag, std::vector<tnode*>& l)
+{
+	if (pNode != NULL)
+  {
+    if (pNode->getTag() == tag)
+      l.push_back(pNode);
+    find_nodes(pNode->left, tag, l);
+    find_nodes(pNode->right, tag, l);
+    find_nodes(pNode->next, tag, l);
+  }
 }
 
 //------------------------------------------------------------------------------

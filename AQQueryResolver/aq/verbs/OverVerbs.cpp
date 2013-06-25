@@ -1,4 +1,5 @@
 #include "OverVerbs.h"
+#include "VerbVisitor.h"
 #include <algorithm>
 #include <aq/Exceptions.h>
 
@@ -80,6 +81,7 @@ void PartitionVerb::addResult( aq::Row& row, VerbResult::Ptr resLeft, VerbResult
 //------------------------------------------------------------------------------
 void PartitionVerb::accept(VerbVisitor* visitor)
 {
+  visitor->visit(this);
 }
 
 //------------------------------------------------------------------------------
@@ -183,6 +185,7 @@ bool FrameVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode*
 //------------------------------------------------------------------------------
 void FrameVerb::accept(VerbVisitor* visitor)
 {
+  visitor->visit(this);
 }
 
 }

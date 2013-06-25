@@ -7,6 +7,7 @@ namespace aq
 
 TemporaryColumnMapper::TemporaryColumnMapper(const char * _path, size_t _tableId, size_t _columnId, aq::ColumnType _itemType, size_t _itemSize, size_t _packetSize)
   : 
+  nbRemap(0),
   path(_path),
   tableId(_tableId),
   columnId(_columnId),
@@ -32,43 +33,57 @@ TemporaryColumnMapper::TemporaryColumnMapper(const char * _path, size_t _tableId
 	getFileNames(path.c_str(), this->temporaryFiles, prefix );
   assert(!this->temporaryFiles.empty());
 	this->tmpMapper.reset(new aq::FileMapper(this->temporaryFiles[this->currentPacket].c_str()));
+  tmpMappers.resize(temporaryFiles.size());
 }
 
 TemporaryColumnMapper::~TemporaryColumnMapper()
 {
 }
 
-ColumnItem::Ptr TemporaryColumnMapper::loadValue(size_t offset)
+int TemporaryColumnMapper::loadValue(size_t offset, ColumnItem& value)
 {
   size_t packet = offset / packetSize;
   offset = offset % packetSize;
   if (packet != currentPacket)
   {
+    ++nbRemap;
     currentPacket = packet;
-    this->tmpMapper.reset(new aq::FileMapper(this->temporaryFiles[this->currentPacket].c_str()));
+    if (tmpMappers[currentPacket])
+    {
+      this->tmpMapper = tmpMappers[currentPacket];
+    }
+    else
+    {
+      boost::shared_ptr<aq::FileMapper> mapper(new aq::FileMapper(this->temporaryFiles[this->currentPacket].c_str()));
+      tmpMappers[currentPacket] = this->tmpMapper;
+      this->tmpMapper = mapper;
+    }
   }
 
   int rc = 0;
-	ColumnItem::Ptr value(new ColumnItem);
   switch (itemType)
 	{
 	case aq::COL_TYPE_VARCHAR:
 		{ 
-			char val[128];
-			rc = this->tmpMapper->read(val, offset * itemSize, itemSize);
-			value->strval = val;
+			char val[128]; // FIXME
+			if ((rc = this->tmpMapper->read(val, offset * itemSize, itemSize)) == 0)
+      {
+        value.strval = val;
+      }
 		}
 		break;
 	case aq::COL_TYPE_DOUBLE:
 		{
-			rc = this->tmpMapper->read(&value->numval, offset * sizeof(double), sizeof(double));
+			rc = this->tmpMapper->read(&value.numval, offset * sizeof(double), sizeof(double));
 		}
 		break;
 	case aq::COL_TYPE_INT:
 		{
 			int32_t val;
-			rc = this->tmpMapper->read(&val, offset * sizeof(int32_t), sizeof(int32_t));
-			value->numval = static_cast<double>(val);
+			if ((rc = this->tmpMapper->read(&val, offset * sizeof(int32_t), sizeof(int32_t))) == 0)
+      {
+        value.numval = static_cast<double>(val);
+      }
 		}
 		break;
 	case aq::COL_TYPE_BIG_INT:
@@ -78,20 +93,18 @@ ColumnItem::Ptr TemporaryColumnMapper::loadValue(size_t offset)
 	case aq::COL_TYPE_DATE4:
 		{
 			int64_t val;
-			rc = this->tmpMapper->read(&val, offset * sizeof(int64_t), sizeof(int64_t));
-			value->numval = static_cast<double>(val);
+			if ((rc = this->tmpMapper->read(&val, offset * sizeof(int64_t), sizeof(int64_t))) == 0)
+      {
+        value.numval = static_cast<double>(val);
+        //value.value = ::malloc(sizeof(int64_t));
+        //memcpy(value.value, &val, sizeof(int64_t));
+      }
 		}
 		break;
 	default:
 		break;
 	}
-
-  if (rc == -1)
-  {
-    value = NULL;
-  }
-
-  return value;
+  return rc;
 }
 
 }

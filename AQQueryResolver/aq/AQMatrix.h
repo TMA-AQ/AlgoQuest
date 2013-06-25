@@ -6,12 +6,15 @@
 
 #include <aq/DBTypes.h>
 
+#include <string.h>
 #include <map>
 #include <vector>
 #include <cstdint>
 
 namespace aq
 {
+
+class Base;
 
 class AQMatrix
 {
@@ -29,10 +32,22 @@ public:
 			return (k1.len == k2.len) && (memcmp(k1.value, k2.value, k1.len) < 0);
 		}
 	};
+  
+	struct column_t
+	{
+		size_t table_id;
+		std::vector<size_t> indexes;
+		std::vector<size_t> grpKey;
+		std::vector<size_t> orderKey;
+    std::string tableName;
+    std::string baseTableName;
+	};
+
+	typedef std::vector<column_t> matrix_t;
 
 	// typedef std::map<group_by_key_t, std::vector<size_t>, struct group_by_key_cmp_t > group_by_t;
 
-	AQMatrix(const TProjectSettings& settings);
+	AQMatrix(const TProjectSettings& settings, const Base& baseDesc);
 	AQMatrix(const AQMatrix& source);
 	~AQMatrix();
 	AQMatrix& operator=(const AQMatrix& source);
@@ -52,11 +67,19 @@ public:
 	void computeUniqueRow(std::vector<std::vector<size_t> >& mapToUniqueIndex, std::vector<std::vector<size_t> >& uniqueIndex) const;
 
 	// const group_by_t getGroupBy() const { return this->groupByIndex; }
-	const std::vector<size_t>& getGroupBy() const { return this->groupByIndex; }
+	const std::vector<std::pair<uint64_t, uint64_t> >& getGroupBy() const { return this->groupByIndex; }
 
 	// void groupBy(const std::map<size_t, std::vector<std::pair<size_t, aq::ColumnType> > >& columnsByTableId);
 	void groupBy(std::vector<aq::ColumnMapper::Ptr>& columnsMappers);
 
+  ///
+  void compress();
+
+  ///
+  void writeTemporaryTable();
+
+  const matrix_t getMatrix() const { return this->matrix; }
+  const size_t getTableId(size_t c) const { return this->matrix[c].table_id; }
 	const std::vector<size_t>& getColumn(size_t c) const { return this->matrix[c].indexes; }
 	const std::vector<size_t>& getCount() const { return this->count; }
 	size_t getNbColumn() const { return this->matrix.size(); }
@@ -70,21 +93,14 @@ public:
 
 private:
 
-	struct column_t
-	{
-		size_t table_id;
-		std::vector<size_t> indexes;
-		std::vector<size_t> grpKey;
-		std::vector<size_t> orderKey;
-	};
-
-	typedef std::vector<column_t> matrix_t;
-
+  static uint64_t uid_generator;
+  uint64_t uid;
 	const TProjectSettings& settings;
+  const Base& baseDesc;
 	matrix_t matrix;
 	std::vector<size_t> count;
 	// group_by_t groupByIndex;
-  std::vector<size_t> groupByIndex;
+  std::vector<std::pair<uint64_t, uint64_t> > groupByIndex;
 	uint64_t totalCount;
 	uint64_t nbRows;
   size_t size;

@@ -7,7 +7,13 @@
 #include <cstring>
 #include <boost/filesystem.hpp>
 
+#ifdef WIN32
 #include <Windows.h>
+#endif
+
+#ifndef _MAX_PATH
+#define _MAX_PATH 1024
+#endif
 
 namespace aq
 {
@@ -240,7 +246,7 @@ void DeleteFolder( const char * pszPath )
 }
 
 //------------------------------------------------------------------------------
-FILE* fopenUTF8( const char* pszFlename, char* pszMode )
+FILE* fopenUTF8( const char* pszFlename, const char* pszMode )
 {
 	FILE	*fp = NULL;
 	unsigned char bom[3];
@@ -336,6 +342,7 @@ char* strtoupr( char* pszStr ) {
 //------------------------------------------------------------------------------
 std::wstring string2Wstring(const std::string& s)
 {
+#ifdef WIN32
   int len;
   int slength = (int)s.length() + 1;
   len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0); 
@@ -344,6 +351,10 @@ std::wstring string2Wstring(const std::string& s)
   std::wstring r(buf);
   delete[] buf;
   return r;
+#else
+  assert(false);
+  (void)s;
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -520,7 +531,7 @@ int MakeBackupFile( char *pszPath, backup_type_t type, int level, int id )
 	sprintf( szDstPath, "%s_%.2d_%.2d%s.%s", szBuffer, level, id, typeChar.c_str(), &pszPath[len - 3] );
 	if( FileRename( pszPath, szDstPath ) != 0 )
 	{
-		aq::Logger::getInstance().log(AQ_DEBUG, "MakeBackupFile : Error renaming file %s to %s !", pszPath, szDstPath );
+		aq::Logger::getInstance().log(AQ_DEBUG, "MakeBackupFile : Error renaming file %s to %s !\n", pszPath, szDstPath );
 		return -1;
 	}
 	return 0;

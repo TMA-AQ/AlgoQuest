@@ -30,9 +30,9 @@ public:
   tables_t& getTables() { return this->Tables; }
   const std::string& getName() const { return this->Name; }
   
-  Table::Ptr getTable(unsigned int id);
+  Table::Ptr getTable(size_t id);
 	Table::Ptr getTable(const std::string& name) ;
-  const Table::Ptr getTable(unsigned int id) const;
+  const Table::Ptr getTable(size_t id) const;
 	const Table::Ptr getTable(const std::string& name) const;
 
 	/// The standard content of this file is defined below :

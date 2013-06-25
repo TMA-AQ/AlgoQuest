@@ -1,8 +1,20 @@
 #ifndef __FILE_MAPPER_H__
 #define __FILE_MAPPER_H__
 
+#ifdef WIN32
 #include <windows.h>
+#else
+#include <sys/mman.h>
+#endif
+
 #include <string>
+
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
 
 namespace aq
 {
@@ -24,10 +36,13 @@ private:
 
 	const std::string filename;
 
+#ifdef WIN32
 	DWORD cbView;
   HANDLE hfile;
 	HANDLE hmap;
 	char const * pView;
+#else
+#endif
 
 	unsigned long long cbFile;
 	unsigned long long windowOffset;

@@ -4,9 +4,10 @@
 #include "ColumnMapper_Intf.h"
 #include <aq/FileMapper.h>
 #include <aq/DBTypes.h>
-#include <set>
+// #include <set>
 #include <map>
 #include <vector>
+#include <boost/shared_ptr.hpp>
 
 namespace aq
 {
@@ -16,7 +17,7 @@ class ColumnMapper : public ColumnMapper_Intf
 public:
 	ColumnMapper(const char * path, size_t tableId, size_t columnId, aq::ColumnType type, size_t _size, size_t _packetSize);
 	~ColumnMapper();
-	ColumnItem::Ptr loadValue(size_t index);
+	int loadValue(size_t index, ColumnItem& value);
 	const std::vector<size_t>& getSimilarIndex(size_t index) const;
 	const aq::ColumnType getType() const { return this->type; }
 private:
@@ -33,7 +34,7 @@ private:
 	std::map<size_t, boost::shared_ptr<aq::FileMapper> > prmMappers;
 	std::map<size_t, boost::shared_ptr<aq::FileMapper> > thesaurusMappers;
 	std::map<size_t, ColumnItem::Ptr> prm;
-	std::map<ColumnItem::Ptr, std::vector<size_t>, struct column_cmp_t > thesaurus;
+  // std::map<ColumnItem::Ptr, std::vector<size_t>, struct column_cmp_t > thesaurus;
 };
 
 }

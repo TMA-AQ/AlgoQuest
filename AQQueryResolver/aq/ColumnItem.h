@@ -17,6 +17,7 @@ public:
 	// data_holder_t data;
 	double numval;
 	std::string strval;
+  // void * value;
 
 	ColumnItem();
 	ColumnItem( const ColumnItem& source);

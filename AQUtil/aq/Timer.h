@@ -15,7 +15,7 @@ public:
 
 	void start();
 	void stop();
-	boost::posix_time::time_duration Timer::getTimeElapsed() const;
+	boost::posix_time::time_duration getTimeElapsed() const;
 	static const std::string getString(boost::posix_time::time_duration);
 
 private:

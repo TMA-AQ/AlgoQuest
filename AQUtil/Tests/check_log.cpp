@@ -7,15 +7,17 @@ namespace po = boost::program_options;
 
 void process(int x)
 {
-  aq::Logger::getInstance().log(AQ_INFO, "%u check every %d milliseconds\n", boost::this_thread::get_id(), x * 10);
+  std::ostringstream id;
+  id << boost::this_thread::get_id();
+  aq::Logger::getInstance().log(AQ_INFO, "%s check every %d milliseconds\n", id.str().c_str(), x * 10);
   for (unsigned int i = 0; i < 10; i++)
   {
-    aq::Logger::getInstance().log(AQ_CRITICAL, "%u\n", boost::this_thread::get_id());
-    aq::Logger::getInstance().log(AQ_ERROR, "%d\n", boost::this_thread::get_id());
-    aq::Logger::getInstance().log(AQ_WARNING, "%u\n", boost::this_thread::get_id());
-    aq::Logger::getInstance().log(AQ_NOTICE, "%u\n", boost::this_thread::get_id());
-    aq::Logger::getInstance().log(AQ_INFO, "%u\n", boost::this_thread::get_id());
-    aq::Logger::getInstance().log(AQ_DEBUG, "%u\n", boost::this_thread::get_id());
+    aq::Logger::getInstance().log(AQ_CRITICAL, "%s\n", id.str().c_str());
+    aq::Logger::getInstance().log(AQ_ERROR, "%s\n", id.str().c_str());
+    aq::Logger::getInstance().log(AQ_WARNING, "%s\n", id.str().c_str());
+    aq::Logger::getInstance().log(AQ_NOTICE, "%s\n", id.str().c_str());
+    aq::Logger::getInstance().log(AQ_INFO, "%s\n", id.str().c_str());
+    aq::Logger::getInstance().log(AQ_DEBUG, "%s\n", id.str().c_str());
     boost::this_thread::sleep(boost::posix_time::milliseconds(x * 10));
   }
 }
@@ -24,7 +26,7 @@ int main(int argc, char ** argv)
 {
   std::string mode;
   std::string ident;
-  unsigned int level = LOG_DEBUG;
+  unsigned int level = AQ_LOG_DEBUG;
   bool lock_mode = false;
   bool date_mode = false;
   bool pid_mode = false;

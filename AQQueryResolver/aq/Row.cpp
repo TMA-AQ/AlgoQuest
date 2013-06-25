@@ -5,7 +5,7 @@ namespace aq
 
 row_item_t::row_item_t()
   :
-  item(NULL),
+  item(new aq::ColumnItem),
   type(COL_TYPE_BIG_INT),
   size(0),
   tableName(""),

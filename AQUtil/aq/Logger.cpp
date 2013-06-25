@@ -144,7 +144,9 @@ void Logger::log(int facility, const char * format, ...) const
 
   if (this->pidMode)
   {
-    pos = ::snprintf(buf1, LOGBUFFER, "[%d] - ", boost::this_thread::get_id());
+    std::ostringstream id;
+    id << boost::this_thread::get_id();
+    pos = ::snprintf(buf1, LOGBUFFER, "[%s] - ", id.str().c_str());
     if (pos < 0)
     {
       std::cerr << "ERROR: cannot log" << std::endl;

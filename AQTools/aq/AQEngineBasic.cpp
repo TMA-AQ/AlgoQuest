@@ -2,9 +2,13 @@
 
 using namespace aq;
 
+void AQEngineBasic::call(const std::string&, aq::AQEngine_Intf::mode_t)
+{
+}
+
 void AQEngineBasic::call(TProjectSettings& settings, 
 												 tnode *pNode, 
-												 int mode, 
+												 aq::AQEngine_Intf::mode_t mode, 
 												 int selectLevel)
 {
 }

@@ -15,6 +15,7 @@ namespace aq
   {
   public:
     AQEngineSimulate(Base& _baseDesc, TProjectSettings& settings);
+    void call(const std::string& query, aq::AQEngine_Intf::mode_t mode); 
     void call(aq::tnode * pNode, aq::AQEngine_Intf::mode_t mode, int selectLevel);
 
     void setAQMatrix(boost::shared_ptr<aq::AQMatrix> _aqMatrix);

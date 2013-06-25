@@ -11,6 +11,9 @@ namespace aq
     srand( static_cast<unsigned int>( time( NULL ) ) ); //temporaire
   }
 
+  void AQEngineSimulate::call(const std::string& query, aq::AQEngine_Intf::mode_t mode)
+  {
+  }
 
   void AQEngineSimulate::call(aq::tnode * pNode, aq::AQEngine_Intf::mode_t mode, int selectLevel)
   {
@@ -33,7 +36,7 @@ namespace aq
     aq::Logger::getInstance().log(AQ_INFO, "Get prefix form of query after jeq parser\n");
     aq::Logger::getInstance().log(AQ_INFO, "%s\n", str.c_str());
 
-    this->aqMatrix.reset(new aq::AQMatrix(this->settings));
+    this->aqMatrix.reset(new aq::AQMatrix(this->settings, this->baseDesc));
 
     this->createTableIDs( pNode );
 

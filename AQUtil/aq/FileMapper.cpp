@@ -5,6 +5,8 @@
 
 using namespace aq;
 
+#ifdef WIN32
+
 FileMapper::FileMapper(const char * _filename)
 	: filename(_filename),
 		pView(NULL),
@@ -17,7 +19,7 @@ FileMapper::FileMapper(const char * _filename)
 	unsigned nb =  0;
   SYSTEM_INFO sysinfo = {0};
   ::GetSystemInfo(&sysinfo);
-  this->cbView = sysinfo.dwAllocationGranularity * 100;
+  this->cbView = sysinfo.dwAllocationGranularity * 10000; // FIXME
 	this->windowOffset = 0;
 
   this->hfile = ::CreateFile(_filename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
@@ -115,3 +117,33 @@ void FileMapper::remap(size_t offset)
 	this->pView = static_cast<char const *>(::MapViewOfFile(hmap, FILE_MAP_READ, high, low, new_cbView));
 	this->windowOffset = offset;
 }
+
+#else
+
+FileMapper::FileMapper(const char * _filename)
+	: filename(_filename),
+          nbRemap(0)
+{
+  // TODO
+}
+
+FileMapper::~FileMapper()
+{
+  // TODO
+}
+
+int FileMapper::read(void * buffer, size_t offset, size_t len) 
+{
+  // TODO
+  (void)buffer;
+  (void)offset;
+  (void)len;
+}
+
+void FileMapper::remap(size_t offset)
+{
+  // TODO
+  (void)offset;
+}
+
+#endif

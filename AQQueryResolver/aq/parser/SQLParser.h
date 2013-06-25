@@ -65,7 +65,7 @@ struct node_cmp_t
 };
 
 //------------------------------------------------------------------------------
-void report_error( char* pszMsg, int bExit );
+void report_error( const char* pszMsg, int bExit );
 tnode* clone_subtree( tnode* pNode );
 void delete_subtree( tnode*& pNode );
 tnode* get_leftmost_child( tnode *pNode );
@@ -78,7 +78,9 @@ tnode* nodeArrayToCommaList( const std::vector<tnode*>& nodes );
 void andListToNodeArray( tnode* pNode, std::vector<tnode*>& nodes );
 tnode* nodeArrayToAndList( const std::vector<tnode*>& nodes );
 
-//find FROM, WHERE, GROUP BY, HAVING, main ORDER BY
+//------------------------------------------------------------------------------
+void find_nodes(tnode * pNode, int tag, std::vector<tnode*>& nodes);
+/// find FROM, WHERE, GROUP BY, HAVING, main ORDER BY
 tnode* find_main_node( tnode *pNode, int tag );
 tnode* find_first_node( tnode * pNode, int tag );
 tnode* findOut_IDENT( tnode * pNode, std::string name );

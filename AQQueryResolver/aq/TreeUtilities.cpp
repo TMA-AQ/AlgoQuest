@@ -188,10 +188,10 @@ void mark_as_deleted( aq::tnode* pNode )
 }
 
 //------------------------------------------------------------------------------
-void solveSelectStar(	aq::tnode* pNode,
-            Base& BaseDesc,
-						std::vector<std::string>& columnNames,
-						std::vector<std::string>& columnDisplayNames )
+void solveSelectStar(aq::tnode* pNode,
+                     Base& BaseDesc,
+                     std::vector<std::string>& columnNames,
+                     std::vector<std::string>& columnDisplayNames )
 {
   if ( !pNode || ( pNode->tag == K_SELECT && !pNode->left ) )
     throw aq::parsException( "pNode->left is empty in { void solveSelectStar }, this exception should be throw in { int SQLParse }" );
@@ -256,7 +256,9 @@ void solveIdentRequest( aq::tnode* pNode, Base& BaseDesc )
     if ( pNode->left->tag == K_STAR )
     {
       fake = false;
-      solveSelectStar( pNode, BaseDesc ); // a refaire le solveSelectStar + les exceptions!
+      std::vector<std::string> dummy1;
+      std::vector<std::string> dummy2;
+      solveSelectStar( pNode, BaseDesc, dummy1, dummy2 ); // a refaire le solveSelectStar + les exceptions!
     }
 
     aq::tnode*  assign = NULL;
@@ -551,13 +553,13 @@ void moveFromJoinToWhere( aq::tnode* pStart, Base& BaseDesc )
 }
 
 //------------------------------------------------------------------------------
-void getAllColumnNodes( aq::tnode*& pNode, std::vector<aq::tnode**>& columnNodes )
+void getAllColumnNodes( aq::tnode*& pNode, std::vector<aq::tnode*>& columnNodes )
 {
 	if( !pNode )
 		return;
 	if( pNode->tag == K_COLUMN || pNode->tag == K_PERIOD )
 	{
-		columnNodes.push_back( &pNode );
+		columnNodes.push_back(pNode);
 		return;
 	}
 	getAllColumnNodes( pNode->left, columnNodes );
@@ -653,15 +655,15 @@ void changeColumnNames(	aq::tnode* pIntSelectAs, aq::tnode* pInteriorSelect, aq:
 {
 	std::string tableName = pIntSelectAs->right->getData().val_str;
 
-	std::vector<aq::tnode**> exteriorColumns;
+	std::vector<aq::tnode*> exteriorColumns;
 	getAllColumnNodes( pExteriorSelect, exteriorColumns );
 	std::vector<aq::tnode*> interiorColumns;
 	getColumnsList( pInteriorSelect->left, interiorColumns );
 	for( size_t idx = 0; idx < exteriorColumns.size(); ++idx )
 	{
-		if( !exteriorColumns[idx] || !*exteriorColumns[idx] )
+		if( !exteriorColumns[idx] || !exteriorColumns[idx] )
 			continue;
-		aq::tnode*& extCol = *exteriorColumns[idx];
+		aq::tnode*& extCol = exteriorColumns[idx];
 		switch( extCol->tag )
 		{
 		case K_PERIOD:
@@ -727,7 +729,8 @@ aq::tnode * getJoin(aq::tnode* pNode)
       pNode = right;
     }
   }
-  else if (!((pNode->tag == K_JEQ) || (pNode->tag == K_JAUTO)))
+  else if (!((pNode->tag == K_JEQ) || (pNode->tag == K_JAUTO) || 
+    (pNode->tag == K_JIEQ) || (pNode->tag == K_JSEQ))) // TODO : some join type are missing
   {
     delete pNode;
     pNode = NULL;
@@ -859,8 +862,8 @@ void writeTmpFile(	const char* filePath, const std::vector<llong>& vals,
 	int intval = 0;
 	fwrite( &intval, sizeof(int), 1, pFOut );
 	llong auxval = 0;
-	startIdx = max( startIdx, (size_t) 0 );
-	endIdx = min( endIdx, vals.size() );
+	startIdx = std::max( startIdx, (size_t) 0 );
+	endIdx = std::min( endIdx, vals.size() );
 	for( size_t idx = startIdx; idx < endIdx; ++idx )
 	{	
 		fwrite( &auxval, sizeof(llong), 1, pFOut );
@@ -961,7 +964,7 @@ void SolveMinMaxGroupBy::modifyTmpFiles(	const char* tmpPath,
   std::vector<std::string> answerFiles;
   answerFiles.push_back(Settings.szAnswerFN);
 
-	aq::AQMatrix aqMatrix(Settings);
+	aq::AQMatrix aqMatrix(Settings, BaseDesc);
 	std::vector<llong> tableIDs;
 	for (std::vector<std::string>::const_iterator it = answerFiles.begin(); it != answerFiles.end(); ++it)
 	{
@@ -1387,14 +1390,14 @@ void setOneColumnByTableOnSelect(tnode * select)
 
 
   // fill columns list
-  std::vector<tnode**> columns;
+  std::vector<tnode*> columns;
   std::vector<tnode*> uniqueColumnsTable;
   getAllColumnNodes(select->left, columns);
-  for (std::vector<tnode**>::const_iterator it1 = columns.begin(); it1 != columns.end(); ++it1) 
+  for (auto it1 = columns.begin(); it1 != columns.end(); ++it1) 
   {
-    tnode * n = **it1;
+    tnode *& n = *it1;
     bool b = false;
-    for (std::vector<tnode*>::const_iterator it2 = uniqueColumnsTable.begin(); !b && (it2 != uniqueColumnsTable.end()); ++it2) 
+    for (auto it2 = uniqueColumnsTable.begin(); !b && (it2 != uniqueColumnsTable.end()); ++it2) 
     {
       if (strcmp(n->left->getData().val_str, (*it2)->left->getData().val_str) == 0)
       {
@@ -1408,9 +1411,9 @@ void setOneColumnByTableOnSelect(tnode * select)
   // replace select node
   aq::delete_subtree(select->left);
   tnode * n = select;
-  for (std::vector<tnode*>::const_iterator it = uniqueColumnsTable.begin(); it != uniqueColumnsTable.end();)
+  for (auto it = uniqueColumnsTable.begin(); it != uniqueColumnsTable.end();)
   {
-    tnode * n1 = *it;
+    tnode *& n1 = *it;
      ++it;
      if (it == uniqueColumnsTable.end())
      {
@@ -1424,6 +1427,37 @@ void setOneColumnByTableOnSelect(tnode * select)
      }
   }
 
+}
+
+void removePartitionByFromSelect(tnode *& pNode)
+{
+  if (pNode != NULL)
+  {
+    if (pNode->tag == K_ORDER)
+    {
+      tnode * n = find_deeper_node(pNode, K_FRAME);
+      n = aq::clone_subtree(n);
+      aq::delete_subtree(pNode);
+      pNode = n;
+    }
+    else
+    {
+      removePartitionByFromSelect(pNode->left);
+      removePartitionByFromSelect(pNode->right);
+    }
+  }
+}
+
+void removePartitionBy(tnode *& pNode)
+{
+  if (pNode->tag == K_SELECT)
+  {
+    removePartitionByFromSelect(pNode->left);
+  }
+  else
+  {
+    aq::Logger::getInstance().log(AQ_WARNING, "cannot remove partition by on a no SELECT node");
+  }
 }
 
 }

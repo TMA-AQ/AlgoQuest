@@ -30,6 +30,7 @@ public:
 	};
 	generic_error( EType type, const std::string& msg );
 	generic_error( EType type, const char * format, ...);
+  virtual ~generic_error() throw () {}
 	virtual const char* what() const throw() { return this->Message.c_str(); };
 	EType getType() const { return type; }
 	static std::string typeToString(EType type);
