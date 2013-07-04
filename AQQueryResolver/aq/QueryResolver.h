@@ -9,6 +9,7 @@
 #include <aq/Timer.h>
 #include <vector>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/logic/tribool.hpp>
 
 namespace aq
 {
@@ -54,6 +55,10 @@ public:
 
   void setOuterSelect(tnode * select) { this->outerSelect = select; }
 
+  void setInWereClause() { this->inWhereClause = true; }
+
+  void addInnerQuery(const char * id, boost::shared_ptr<QueryResolver> qr);
+
 private:
   /// solve all selects found in the main select
 	void solveNested(aq::tnode*& pNode, unsigned int nSelectLevel, aq::tnode* pLastSelect, bool inFrom, bool inIn);
@@ -85,6 +90,7 @@ private:
   std::vector<Column::Ptr> columns;
   std::vector<std::vector<tnode*> > partitions;
   std::vector<tnode*> groupBy;
+  std::vector<tnode*> orderBy;
   std::map<std::string, tnode*> aliases;
   std::vector<std::pair<std::string, std::string> > resultTables;
 	Table::Ptr result;
@@ -95,10 +101,11 @@ private:
   unsigned int nestedId;
   unsigned int level;
 	bool nested;
+  bool inWhereClause;
 	bool hasGroupBy;
 	bool hasOrderBy;
 	bool hasPartitionBy;
-  boost::optional<bool> compressable;
+  boost::tribool compressable;
 };
 
 }

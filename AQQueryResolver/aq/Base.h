@@ -28,6 +28,7 @@ public:
 	typedef std::vector<Table::Ptr> tables_t;
 
   tables_t& getTables() { return this->Tables; }
+  const tables_t& getTables() const { return this->Tables; }
   const std::string& getName() const { return this->Name; }
   
   Table::Ptr getTable(size_t id);

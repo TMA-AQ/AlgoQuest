@@ -70,7 +70,7 @@ public:
 	const std::vector<std::pair<uint64_t, uint64_t> >& getGroupBy() const { return this->groupByIndex; }
 
 	// void groupBy(const std::map<size_t, std::vector<std::pair<size_t, aq::ColumnType> > >& columnsByTableId);
-	void groupBy(std::vector<aq::ColumnMapper::Ptr>& columnsMappers);
+	// void groupBy(std::vector<aq::ColumnMapper_Intf::Ptr>& columnsMappers);
 
   ///
   void compress();

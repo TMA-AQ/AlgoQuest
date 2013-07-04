@@ -9,6 +9,8 @@
 namespace aq
 {
 
+static const unsigned int packet_size = 1048576;
+
 // Les structures de description de la base
 // ------------------------------------------------------------------------------
 typedef struct s_col_double 

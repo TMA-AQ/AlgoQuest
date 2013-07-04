@@ -30,6 +30,7 @@ bool Column::inner_column_cmp_2_t::operator()(ColumnItem::Ptr item1, ColumnItem:
 //------------------------------------------------------------------------------
 Column::Column()
 	:	
+  TableID(0),
 	ID(0), 
 	Size(0), 
 	Type(COL_TYPE_INT), 
@@ -48,6 +49,7 @@ Column::Column()
 //------------------------------------------------------------------------------
 Column::Column(	const std::string& name, unsigned int ID, unsigned int size, ColumnType type)
 	: 
+  TableID(0),
 	ID(ID), 
 	Size(size), 
 	Type(type),
@@ -67,6 +69,7 @@ Column::Column(	const std::string& name, unsigned int ID, unsigned int size, Col
 //------------------------------------------------------------------------------
 Column::Column( ColumnType type )
 	: 
+  TableID(0),
 	ID(0),
 	Size(0),
 	Type(type),
@@ -85,6 +88,7 @@ Column::Column( ColumnType type )
 //------------------------------------------------------------------------------
 Column::Column( const Column& source )
 	:
+  TableID(source.TableID),
 	ID(source.ID),
 	Size(source.Size),
 	Type(source.Type),
@@ -115,6 +119,7 @@ Column& Column::operator=(const Column& source)
 {
 	if (this != &source)
 	{
+    this->TableID = source.TableID;
 		this->ID = source.ID;
 		this->Size = source.Size;
 		this->Type = source.Type;

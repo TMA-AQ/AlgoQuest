@@ -118,8 +118,9 @@ void AggregateVerb::addResult(aq::Row& row)
   }
 
   aq::row_item_t& row_item = row.computedRow[this->index];
-  if (this->count == 0)
+  if ((this->count == 0) || (row.reinit))
   {
+    this->count = 0;
     this->item = *row_item.item;
   }
   else
@@ -132,6 +133,7 @@ void AggregateVerb::addResult(aq::Row& row)
   {
     // FIXME : manage partition and Frame
     *row_item.item = this->item;
+    row.completed = true;
     // this->count = 0;
     // this->item.numval = 0;
     // this->item.strval = "";

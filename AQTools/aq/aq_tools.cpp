@@ -26,6 +26,7 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
+#include <boost/logic/tribool.hpp>
 
 #include <aq/AQThreadRequest.h>
 #include "QueryResolverSimulate.h"
@@ -66,24 +67,11 @@ int processAQMatrix(const std::string& query, const std::string& aqMatrixFileNam
 
 	}
 	
-  std::vector<unsigned int> categories_order;
-  if (settings.useRowResolver)
+  boost::array<uint32_t, 6> categories_order = { K_FROM, K_WHERE, K_SELECT, K_GROUP, K_HAVING, K_ORDER };
+  if (!settings.useRowResolver)
   {
-    categories_order.push_back( K_FROM );
-    categories_order.push_back( K_WHERE );
-    categories_order.push_back( K_SELECT );
-    categories_order.push_back( K_GROUP );
-    categories_order.push_back( K_HAVING );
-    categories_order.push_back( K_ORDER );
-  }
-  else
-  {
-    categories_order.push_back( K_FROM );
-    categories_order.push_back( K_WHERE );
-    categories_order.push_back( K_GROUP );
-    categories_order.push_back( K_HAVING );
-    categories_order.push_back( K_SELECT );
-    categories_order.push_back( K_ORDER );
+    boost::array<uint32_t, 6> new_order = { K_FROM, K_WHERE, K_GROUP, K_HAVING, K_SELECT, K_ORDER };
+    categories_order = new_order;
   }
 	aq::verb::VerbNode::Ptr spTree = aq::verb::VerbNode::BuildVerbsTree(pNode, categories_order, baseDesc, &settings );
 	spTree->changeQuery();
@@ -133,8 +121,6 @@ int transformQuery(const std::string& query, aq::TProjectSettings& settings, aq:
 	aq::tnode	*pNode;
 	int	nRet;
 
-	std::cout << query << std::endl << std::endl;
-
 	//
 	// Parse SQL request
 	{
@@ -148,39 +134,20 @@ int transformQuery(const std::string& query, aq::TProjectSettings& settings, aq:
 		}
 
 	}
-
-	std::cout << *pNode << std::endl;
   
-  std::vector<unsigned int> categories_order;
-  if (settings.useRowResolver)
+  boost::array<uint32_t, 6> categories_order = { K_FROM, K_WHERE, K_SELECT, K_GROUP, K_HAVING, K_ORDER };
+  if (!settings.useRowResolver)
   {
-    categories_order.push_back( K_FROM );
-    categories_order.push_back( K_WHERE );
-    categories_order.push_back( K_SELECT );
-    categories_order.push_back( K_GROUP );
-    categories_order.push_back( K_HAVING );
-    categories_order.push_back( K_ORDER );
-  }
-  else
-  {
-    categories_order.push_back( K_FROM );
-    categories_order.push_back( K_WHERE );
-    categories_order.push_back( K_GROUP );
-    categories_order.push_back( K_HAVING );
-    categories_order.push_back( K_SELECT );
-    categories_order.push_back( K_ORDER );
+    boost::array<uint32_t, 6> new_order = { K_FROM, K_WHERE, K_GROUP, K_HAVING, K_SELECT, K_ORDER };
+    categories_order = new_order;
   }
 	aq::verb::VerbNode::Ptr spTree = aq::verb::VerbNode::BuildVerbsTree(pNode, categories_order, baseDesc, &settings );
 	spTree->changeQuery();
 	aq::cleanQuery( pNode );
-	std::cout << std::endl;
-	std::cout << *pNode << std::endl << std::endl;
 	
 	std::string str;
 	aq::syntax_tree_to_prefix_form(pNode, str);
   aq::ParseJeq( str );
-
-	std::cout << str << std::endl << std::endl;
 
 	return 0;
 }
@@ -359,7 +326,7 @@ int processSQLQueries(std::list<std::string>::const_iterator itBegin, std::list<
 	for (std::list<std::string>::const_iterator it = itBegin; it != itEnd; ++it)
 	{
 
-		aq::Logger::getInstance().log(AQ_NOTICE, "'%s'\n", (*it).c_str());
+		aq::Logger::getInstance().log(AQ_INFO, "'%s'\n", (*it).c_str());
 		boost::posix_time::ptime begin(boost::posix_time::microsec_clock::local_time());
 
     //
@@ -412,45 +379,37 @@ int processSQLQueries(std::list<std::string>::const_iterator itBegin, std::list<
 int main(int argc, char**argv)
 {
 
-  //size_t tableId = 1; 
-  //size_t columnId = 1; 
-  //aq::ColumnType itemType = aq::ColumnType::COL_TYPE_VARCHAR;
-  //size_t itemSize = 26;
-  //size_t packetSize = 1000000;
-  //size_t size = 2;
+  //aq::verb::VerbNode::Ptr v = aq::verb::VerbFactory::GetInstance().getVerb(K_SELECT);
 
-  //// generate a random temporary File of char[26]
-  //char filename[128];
-  //for (uint64_t p = 0; p < size; ++p)
-  //{
-  //  char value[26];
-  //  sprintf( filename, "./test/B001TMP%.4uC%.4uCHA%.4uP%.12u.TMP", tableId, columnId, itemSize, p );
-  //  std::cout << filename << std::endl;
-  //  FILE * fd = fopen(filename, "wb");
-  //  for (uint64_t i = 0; i < packetSize; ++i)
-  //  {
-  //    for (uint64_t j = 0; j < 25; ++j)
-  //    {
-  //      value[j] = 32 + (::rand() % (127 - 32));
-  //    }
-  //    value[25] = 0;
-  //    fwrite(value, sizeof(char), 26, fd);
-  //  }
-  //  fclose(fd);
-  //}
+  //aq::verb::VerbNode::Ptr vl = aq::verb::VerbFactory::GetInstance().getVerb(K_COMMA);
+  //v->setLeftChild(vl);
+
+  //aq::verb::VerbNode::Ptr vll = aq::verb::VerbFactory::GetInstance().getVerb(K_AS);
+  //aq::verb::VerbNode::Ptr vlr = aq::verb::VerbFactory::GetInstance().getVerb(K_AS);
+  //vl->setLeftChild(vll);
+  //vl->setRightChild(vlr);
+
+  //aq::verb::VerbNode::Ptr vlll = aq::verb::VerbFactory::GetInstance().getVerb(K_PERIOD);
+  //aq::verb::VerbNode::Ptr vllr = aq::verb::VerbFactory::GetInstance().getVerb(K_STRING);
+  //aq::verb::VerbNode::Ptr vlrl = aq::verb::VerbFactory::GetInstance().getVerb(K_SUM);
+  //aq::verb::VerbNode::Ptr vlrr = aq::verb::VerbFactory::GetInstance().getVerb(K_STRING);
+  //vll->setLeftChild(vlll);
+  //vll->setRightChild(vllr);
+  //vlr->setLeftChild(vlrl);
+  //vlr->setRightChild(vlrr);
+
+  //aq::verb::VerbNode::Ptr vlrll = aq::verb::VerbFactory::GetInstance().getVerb(K_PERIOD);
+  //vlrl->setLeftChild(vlrll);
   //
-  //aq::Timer time;
-  //FILE * fd = fopen("./test/res.tmp", "wb");
-  //aq::ColumnItem item;
-  //aq::TemporaryColumnMapper mapper("./test/", tableId, columnId, itemType, itemSize, packetSize);
-  //for (uint64_t i = 0; i < size * packetSize; ++i)
-  //{
-  //  mapper.loadValue(i, item);
-  //  fwrite(item.strval.c_str(), sizeof(char), 26, fd);
-  //}
-  //fclose(fd);
-  //std::cout << aq::Timer::getString(time.getTimeElapsed()) << std::endl;
-  //return EXIT_SUCCESS;
+  //aq::verb::VerbNode::dump(std::cout, v);
+
+  //aq::verb::VerbNode::Ptr _v(v->clone());
+  //_v->cloneSubtree(v);
+
+  //aq::verb::VerbNode::dump(std::cout, _v);
+
+  //exit(0);
+
 
 	try
 	{
@@ -487,7 +446,7 @@ int main(int argc, char**argv)
 		bool loadDatabase = false;
     bool force = false;
     bool useColumnResolver = false;
-    bool useBinAQMatrix = false;
+    bool useTextAQMatrix = false;
 
 		// old args for backward compatibility
 		std::vector<std::string> oldArgs;
@@ -504,7 +463,7 @@ int main(int argc, char**argv)
 			("aq-ini,s", po::value<std::string>(&propertiesFile), "")
 			("query-ident", po::value<std::string>(&queryIdent), "")
       ("force", po::bool_switch(&force), "force use of directory if it already exists")
-			("simulate-aq-engine", po::bool_switch(&simulateAQEngine), "")
+			("simulate-aq-engine,z", po::bool_switch(&simulateAQEngine), "")
 			("sql-query,q", po::value<std::string>(&sqlQuery), "")
 			("sql-queries-file,f", po::value<std::string>(&sqlQueriesFile), "")
 			("answer-path", po::value<std::string>(&answerPathStr), "")
@@ -518,7 +477,7 @@ int main(int argc, char**argv)
 			("aq-matrix", po::value<std::string>(&aqMatrixFileName), "")
 			("answer-file", po::value<std::string>(&answerFileName)->default_value("answer.txt"), "")
 			("use-column-resolver", po::bool_switch(&useColumnResolver), "")
-      ("use-bin-aq-matrix", po::bool_switch(&useBinAQMatrix), "")
+      ("use-bin-aq-matrix", po::bool_switch(&useTextAQMatrix), "")
 			("load-db", po::bool_switch(&loadDatabase), "")
       ("load-table", po::value<unsigned int>(&tableIdToLoad)->default_value(0), "")
 			("backward-compatibility", po::value< std::vector<std::string> >(&oldArgs), "old arguments")
@@ -560,7 +519,7 @@ int main(int argc, char**argv)
     
     //
     // Column Binary AQ Matrix (next feature to come)
-    if (useBinAQMatrix)
+    if (!useTextAQMatrix)
     {
       aq::Logger::getInstance().log(AQ_INFO, "use binary aq matrix\n");
       settings.useBinAQMatrix = true;

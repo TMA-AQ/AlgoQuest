@@ -181,13 +181,23 @@ void getTableAlias(aq::tnode *pNode, std::map<std::string, std::string>& tablesA
 }
 
 //------------------------------------------------------------------------------
+std::string syntax_tree_to_prefix_form(aq::tnode * pNode)
+{
+  std::string query;
+  syntax_tree_to_prefix_form(pNode, query);
+  return query;
+}
+
+//------------------------------------------------------------------------------
 std::string& syntax_tree_to_prefix_form( aq::tnode *sqlStatement, std::string& str )
 {
 	if ( sqlStatement == NULL )
 		return str;
   
   aq::tnode * pNode = aq::clone_subtree(sqlStatement);
-  aq::setOneColumnByTableOnSelect(pNode);
+
+  if (pNode->tag == K_SELECT)
+    aq::setOneColumnByTableOnSelect(pNode);
 
 	// str.clear();
 	char szTmpBuf[1000];
@@ -233,6 +243,14 @@ std::string& syntax_tree_to_prefix_form( aq::tnode *sqlStatement, std::string& s
 	}
 
   return str;
+}
+
+//------------------------------------------------------------------------------
+std::string syntax_tree_to_sql_form(aq::tnode * pNode, unsigned int level)
+{
+  std::string query;
+  syntax_tree_to_sql_form(pNode, query, level);
+  return query;
 }
 
 //------------------------------------------------------------------------------

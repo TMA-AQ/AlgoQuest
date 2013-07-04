@@ -14,7 +14,8 @@ public:
 		tnode *pNode, 
 		aq::AQEngine_Intf::mode_t mode, 
 		int selectLevel);
-
+  
+  void renameResult(unsigned int id, std::vector<std::pair<std::string, std::string> >& resultTables);
 	boost::shared_ptr<aq::AQMatrix> getAQMatrix();
 	const std::vector<llong>& getTablesIDs() const;
 

@@ -11,17 +11,27 @@ namespace aq
   {
   public:
     RowProcesses() {}
+    RowProcesses(const RowProcesses& o) {
+      for (auto it = o.processes.begin(); it != o.processes.end(); ++it)
+      {
+        this->processes.push_back(boost::shared_ptr<aq::RowProcess_Intf>((*it)->clone()));
+      }
+    }
     void addProcess(boost::shared_ptr<aq::RowProcess_Intf> _process) { this->processes.push_back(_process); }
     int process(std::vector<Row>& rows) 
     {
       int rc = 0;
-      for (std::list<boost::shared_ptr<aq::RowProcess_Intf> >::iterator it = processes.begin(); it != processes.end(); ++it) 
+      for (auto it = processes.begin(); it != processes.end(); ++it) 
       {
         rc = (*it)->process(rows);
         if (rc == -1)
           break;
       }
       return rc;
+    }
+    virtual RowProcesses * clone()
+    {
+      return new RowProcesses(*this);
     }
   private:
     std::list<boost::shared_ptr<aq::RowProcess_Intf> > processes;

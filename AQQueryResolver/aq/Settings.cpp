@@ -1,6 +1,7 @@
 #include "Settings.h"
 #include <aq/Utilities.h>
 #include <aq/Exceptions.h>
+#include <aq/BaseDesc.h>
 #include <fstream>
 #include <aq/Logger.h>
 #include <boost/property_tree/ptree.hpp>
@@ -22,7 +23,8 @@ TProjectSettings::TProjectSettings()
   szLoaderPath(""),
 	worker(1),
 	group_by_process_size(100000),
-  packSize(1048576), 
+  process_thread(1),
+  packSize(aq::packet_size), 
   maxRecordSize(40960),
   computeAnswer(true),
 	csvFormat(false),
@@ -52,6 +54,7 @@ TProjectSettings::TProjectSettings(const TProjectSettings& obj)
 	fieldSeparator(obj.fieldSeparator),
 	worker(obj.worker),
 	group_by_process_size(obj.group_by_process_size),
+  process_thread(obj.process_thread),
 	packSize(obj.packSize),
 	maxRecordSize(obj.maxRecordSize),
 	computeAnswer(obj.computeAnswer),
@@ -100,6 +103,7 @@ TProjectSettings& TProjectSettings::operator=(const TProjectSettings& obj)
 		::strcpy(szEngineParamsNoDisplay, obj.szEngineParamsNoDisplay);
 		worker = obj.worker;
 		group_by_process_size = obj.group_by_process_size;
+    process_thread = obj.process_thread;
 		packSize = obj.packSize;
 		maxRecordSize = obj.maxRecordSize;
 		computeAnswer = obj.computeAnswer;
@@ -138,6 +142,8 @@ void TProjectSettings::load(const std::string& iniFile)
 		if (opt.is_initialized()) this->worker = opt.get();
     opt = pt.get_optional<size_t>(boost::property_tree::ptree::path_type("group-by-process-size"));
 		if (opt.is_initialized()) this->group_by_process_size = opt.get();
+    opt = pt.get_optional<size_t>(boost::property_tree::ptree::path_type("process-thread"));
+    if (opt.is_initialized()) this->process_thread = opt.get();
 
     //
     // Change '\' by '/'

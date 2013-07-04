@@ -6,22 +6,41 @@ namespace aq
   
   RowTemporaryWritter::RowTemporaryWritter(unsigned int _tableId, const char * _path, unsigned int _packetSize)
     : 
-    RowWritter(_path),
     tableId(_tableId),
     path(_path),
-    packetSize(_packetSize)
+    packetSize(_packetSize),
+    totalCount(0)
+  {
+  }
+  
+  RowTemporaryWritter::RowTemporaryWritter(const RowTemporaryWritter& o)
+    : 
+    tableId(o.tableId),
+    path(o.path),
+    packetSize(o.packetSize),
+    totalCount(o.totalCount)
   {
   }
   
   RowTemporaryWritter::~RowTemporaryWritter()
   {
-    std::for_each(this->columnsWritter.begin(), this->columnsWritter.end(), [] (boost::shared_ptr<ColumnTemporaryWritter> ctw) {
+    for (auto& ctw : this->columnsWritter) 
+    {
       if (ctw->file)
       {
         fclose(ctw->file); 
         ctw->file = 0;
       }
-    });
+    }
+  }
+  
+  int RowTemporaryWritter::process(std::vector<Row>& rows)
+  {
+    for (auto& row : rows) 
+    { 
+      this->process(row); 
+    }
+    return 0;
   }
   
   int RowTemporaryWritter::process(Row& row)
@@ -130,10 +149,11 @@ namespace aq
 
     if (row.flush)
     {
-      std::for_each(this->columnsWritter.begin(), this->columnsWritter.end(), [] (boost::shared_ptr<ColumnTemporaryWritter> ctw) { 
+      for (auto& ctw : this->columnsWritter) 
+      { 
         fclose(ctw->file); 
         ctw->file = 0;
-      });
+      }
     }
 
     return 0;

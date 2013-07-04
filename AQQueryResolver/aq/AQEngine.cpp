@@ -34,7 +34,37 @@ namespace aq
     //
     aq::SaveFile( settings.szOutputFN, query.c_str() );
 
-    //
+    // !!!!!!!!!!!!!!!!!! FIXME !!!!!!!!!!!!!!!
+    // !!!!!!!!!!!!!!!!! HACK FOR DEMO !!!!!!!!
+    static unsigned int id = 1;
+    if (id++ == 3)
+    {
+      std::string query_level_4;
+
+      //query_level_4 = "SELECT . TW_FLUX_QUOTIDIEN_HEBDO_DIAG VAL_INDIC\n";
+      //query_level_4 += "FROM , , B001REG0001TMP0003P000000000007 B001REG0002TMP0003P000000000001 TW_FLUX_QUOTIDIEN_HEBDO_DIAG\n";
+      //query_level_4 += "WHERE AND AND AND AND AND AND\n";
+      //query_level_4 += "K_JEQ K_INNER . B001REG0001TMP0003P000000000007 SEQ_POINT_DE_VENTE_HISTO K_INNER . TW_FLUX_QUOTIDIEN_HEBDO_DIAG SEQ_POINT_DE_VENTE_HISTO\n";
+      //query_level_4 += "K_JEQ K_INNER . B001REG0001TMP0003P000000000007 SEQ_SEM_COURT K_INNER . TW_FLUX_QUOTIDIEN_HEBDO_DIAG SEQ_SEM_COURT\n";
+      //query_level_4 += "K_JEQ K_INNER . B001REG0001TMP0003P000000000007 SEQ_PRODUIT K_INNER . TW_FLUX_QUOTIDIEN_HEBDO_DIAG SEQ_PRODUIT\n";
+      //query_level_4 += "K_JEQ K_INNER . B001REG0001TMP0003P000000000007 SEQ_INDICATEUR K_INNER . TW_FLUX_QUOTIDIEN_HEBDO_DIAG SEQ_INDICATEUR\n";
+      //query_level_4 += "K_JEQ K_INNER . B001REG0001TMP0003P000000000007 SEQ_CBP_HISTO K_INNER . TW_FLUX_QUOTIDIEN_HEBDO_DIAG SEQ_CBP_HISTO\n";
+      //query_level_4 += "K_JEQ K_INNER . B001REG0001TMP0003P000000000007 SEQ_CAF_HISTO K_INNER . TW_FLUX_QUOTIDIEN_HEBDO_DIAG SEQ_CAF_HISTO\n";
+      //query_level_4 += "K_JIEQ K_INNER . B001REG0002TMP0003P000000000001 SEQ_SEM_COURT K_INNER . B001REG0001TMP0003P000000000007 SEQ_SEM_COURT\n";
+      //query_level_4 += "GROUP  ,  ,  ,  ,  ,  ,  . B001REG0002TMP0003P000000000001 ANNEE . B001REG0001TMP0003P000000000007 SEQ_POINT_DE_VENTE_HISTO . B001REG0001TMP0003P000000000007 SEQ_CBP_HISTO . B001REG0001TMP0003P000000000007 SEQ_CAF_HISTO . B001REG0001TMP0003P000000000007 SEQ_PRODUIT . B001REG0001TMP0003P000000000007 SEQ_INDICATEUR . B001REG0002TMP0003P000000000001 SEQ_SEM_COURT\n";
+      
+      //query_level_4 = "SELECT . B001REG0001TMP0003P000000000007 SEQ_SEM_COURT\n";
+      //query_level_4 += "FROM , B001REG0001TMP0003P000000000007 B001REG0002TMP0003P000000000001\n";
+      //query_level_4 += "WHERE K_JIEQ K_INNER . B001REG0002TMP0003P000000000001 SEQ_SEM_COURT K_INNER . B001REG0001TMP0003P000000000007 SEQ_SEM_COURT\n";
+      //query_level_4 += "GROUP  ,  ,  ,  ,  ,  ,  . B001REG0002TMP0003P000000000001 ANNEE . B001REG0001TMP0003P000000000007 SEQ_POINT_DE_VENTE_HISTO . B001REG0001TMP0003P000000000007 SEQ_CBP_HISTO . B001REG0001TMP0003P000000000007 SEQ_CAF_HISTO . B001REG0001TMP0003P000000000007 SEQ_PRODUIT . B001REG0001TMP0003P000000000007 SEQ_INDICATEUR . B001REG0002TMP0003P000000000001 SEQ_SEM_COURT\n";
+            
+      //query_level_4 = "SELECT . TW_FLUX_QUOTIDIEN_HEBDO_DIAG SEQ_SEM_COURT\n";
+      //query_level_4 += "FROM , TW_FLUX_QUOTIDIEN_HEBDO_DIAG B001REG0002TMP0003P000000000001\n";
+      //query_level_4 += "WHERE K_JIEQ K_INNER . B001REG0002TMP0003P000000000001 SEQ_SEM_COURT K_INNER . TW_FLUX_QUOTIDIEN_HEBDO_DIAG SEQ_SEM_COURT\n";
+
+      //aq::SaveFile( settings.szOutputFN, query_level_4.c_str() );
+    }
+
 
 #ifdef WIN32
     // create folders for the engine
@@ -137,6 +167,87 @@ namespace aq
     //this->aqMatrix->simulate(table->TotalCount, 2);
     this->tableIDs.clear();
     this->tableIDs.push_back(table->ID);
+  }
+  
+  void AQEngine::renameResult(unsigned int id, std::vector<std::pair<std::string, std::string> >& resultTables)
+  {
+    std::vector<std::string> files;
+    if(aq::GetFiles(this->settings.szTempPath1, files) != 0)
+      throw aq::generic_error(aq::generic_error::COULD_NOT_OPEN_FILE, "");
+
+    size_t reg = 0;
+    size_t packet = 0;
+    for (auto& file : files)
+    {
+      if (((file).length() == 32)
+        && ((file)[0] == 'B')
+        && ((file)[4] == 'T')
+        && ((file)[9] == 'T')
+        && ((file)[10] == 'P')
+        && ((file)[11] == 'N')
+        && ((file)[17] == 'P')
+        && ((file)[30] == '.')
+        && (((file)[31] == 's') || ((file)[31] == 't'))) // BxxxTxxxxTPNxxxxPxxxxxxxxxxxx.[st]
+      {
+        reg = boost::lexical_cast<size_t>((file).substr(5, 4));
+        packet = boost::lexical_cast<size_t>((file).substr(18, 12));
+      }
+      else if (((file).length() == 26)
+        && ((file)[0] == 'B')
+        && ((file)[4] == 'R')
+        && ((file)[5] == 'E')
+        && ((file)[6] == 'G')
+        && ((file)[11] == 'P')
+        && ((file)[24] == '.')
+        && (((file)[25] == 's') || ((file)[25] == 't'))) // BxxxREGTxxxxPxxxxxxxxxxxx.[st]
+      {
+        reg = boost::lexical_cast<size_t>((file).substr(7, 4));
+        packet = boost::lexical_cast<size_t>((file).substr(12, 12));
+      }
+
+      if (reg != 0)
+      {
+        std::string oldFile = std::string(this->settings.szTempPath1) + "/" + file;
+
+        try
+        {
+          char newFile[_MAX_PATH];
+          sprintf(newFile, "%s/B001REG%.4uTMP%.4uP%.12u.TMP", this->settings.szTempPath1, reg, id, packet);
+          ::remove(newFile);
+          ::rename(oldFile.c_str(), newFile);
+
+          Table::Ptr table = this->baseDesc.getTable(reg);
+          packet = table->TotalCount / this->settings.packSize;
+          sprintf(newFile, "B001REG%.4uTMP%.4uP%.12u", reg, id, packet + 1);
+
+          for (auto it = this->baseDesc.getTables().rbegin(); it != this->baseDesc.getTables().rend(); ++it)
+          {
+            if ((*it)->getReferenceTable() == table->getName())
+            {
+              table = *it;
+              break;
+            }
+          }
+
+          std::pair<std::string, std::string> p(newFile, table->getName());
+          if (std::find(resultTables.begin(), resultTables.end(), p) == resultTables.end())
+          {
+            resultTables.push_back(p);
+          }
+        }
+        catch (const boost::bad_lexical_cast&)
+        {
+          throw aq::generic_error(aq::generic_error::COULD_NOT_OPEN_FILE, "invalid result file '%s'", oldFile.c_str());
+        }
+      }
+
+    }
+
+    if (resultTables.empty())
+    {
+      throw aq::generic_error(aq::generic_error::AQ_ENGINE, "empty result");
+    }
+
   }
 
 #ifdef WIN32

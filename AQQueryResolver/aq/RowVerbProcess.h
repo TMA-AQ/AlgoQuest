@@ -12,9 +12,13 @@ namespace aq
   {
   public:
     RowVerbProcess(aq::verb::VerbNode::Ptr _spTree, 
-      boost::shared_ptr<aq::ApplyRowVisitor> _applyRowVisitor,
       std::vector<aq::verb::VerbNode::Ptr>& _selectVerbs);
+    RowVerbProcess(const RowVerbProcess& o);
     int process(std::vector<Row>& rows);
+    RowVerbProcess * clone()
+    {
+      return new RowVerbProcess(*this);
+    }
   private:
     aq::verb::VerbNode::Ptr spTree;
     std::vector<aq::verb::VerbNode::Ptr> verbs;

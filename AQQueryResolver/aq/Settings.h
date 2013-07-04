@@ -40,8 +40,9 @@ struct TProjectSettings {
 	
 	size_t worker;
 	size_t group_by_process_size;
-
-	int packSize;
+  size_t process_thread;
+	
+  int packSize;
 	int maxRecordSize;
 
 	bool computeAnswer;

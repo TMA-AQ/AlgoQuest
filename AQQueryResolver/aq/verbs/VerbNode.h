@@ -10,6 +10,7 @@
 #include <aq/Row.h>
 #include <aq/RowProcess_Intf.h>
 #include <aq/parser/SQLParser.h>
+#include <boost/array.hpp>
 
 namespace aq {
 namespace verb {
@@ -31,6 +32,7 @@ public:
   virtual void addResult ( aq::Row& row ) {}
 
   virtual VerbNode* clone() const = 0;
+  void cloneSubtree(VerbNode::Ptr v);
 
 	void setLeftChild( VerbNode::Ptr child );
 	void setRightChild( VerbNode::Ptr child );
@@ -59,7 +61,7 @@ public:
 	/// order is given by \a categories_order (the last one will be executed first)
 	/// engine actually executes GROUP BY before select and after where, but
 	/// I need to delete it after select gets the grouping columns
-  static VerbNode::Ptr BuildVerbsTree( aq::tnode* pStart, const std::vector<unsigned int>& categories_order, Base& baseDesc, TProjectSettings * settings );
+  static VerbNode::Ptr BuildVerbsTree( aq::tnode* pStart, const boost::array<unsigned int, 6>& categories_order, Base& baseDesc, TProjectSettings * settings );
    
   /// build a VerbNode subtree corresponding to the ppStart subtree
   /// a branch will end when a VerbNode for that aq::tnode cannot be found

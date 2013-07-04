@@ -10,6 +10,10 @@
 namespace aq
 {
 
+int check_between_for_transform(const aq::tnode& pNode);
+int check_like_for_transform(const aq::tnode& pNode);
+int check_cmp_op_for_transform(const aq::tnode& pNode);
+
 class ExpressionTransform
 {
 public:
@@ -17,10 +21,9 @@ public:
 
   aq::tnode* expression_transform( aq::tnode *pNode, int *pErr );
 
-  int get_thesaurus_for_column_reference(	Column& thesaurus, aq::tnode *pNode, int part, int *pErr );
-
 protected:
   
+  int get_thesaurus_for_column_reference(	Column& thesaurus, aq::tnode *pNode, int part, int *pErr );
   aq::tnode* transform_cmp_op( aq::tnode* pNode, int *pErr );
   aq::tnode* transform_like( aq::tnode* pNode, int *pErr );
   aq::tnode* transform_between( aq::tnode* pNode, int *pErr );

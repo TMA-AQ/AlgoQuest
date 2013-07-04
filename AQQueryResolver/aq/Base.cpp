@@ -86,14 +86,14 @@ Table::Ptr Base::getTable( const std::string& name )
   {
 		if( auxName == this->Tables[idx]->getName() )
     {
-      if (this->Tables[idx]->getReferenceTable() != "")
-      {
-        return this->getTable(this->Tables[idx]->getReferenceTable());
-      }
-      else
-      {
+      //if (this->Tables[idx]->getReferenceTable() != "")
+      //{
+      //  return this->getTable(this->Tables[idx]->getReferenceTable());
+      //}
+      //else
+      //{
         return this->Tables[idx];
-      }
+      //}
     }
   }
 	throw generic_error(generic_error::INVALID_TABLE, "cannot find table %s", name.c_str());

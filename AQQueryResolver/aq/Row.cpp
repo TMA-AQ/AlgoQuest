@@ -85,6 +85,7 @@ Row::Row()
   : 
   count(0), 
   completed(true), 
+  reinit(false),
   flush(false) 
 {
 }
@@ -93,6 +94,7 @@ Row::Row(const Row& source)
   :
   count(source.count),
   completed(source.completed),
+  reinit(source.reinit),
   flush(source.flush)
 {
   std::copy(source.initialRow.begin(), source.initialRow.end(), std::back_inserter<aq::Row::row_t>(this->initialRow));
@@ -109,6 +111,7 @@ Row& Row::operator=(const Row& source)
   {
     this->count = source.count;
     this->completed = source.completed;
+    this->reinit = source.reinit;
     this->flush = source.flush;
     this->computedRow.clear();
     this->initialRow.clear();

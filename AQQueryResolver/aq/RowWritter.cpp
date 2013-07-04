@@ -3,14 +3,24 @@
 
 using namespace aq;
 
-RowWritter::RowWritter(const std::string& filePath)
-	: totalCount(0), firstRow(true)
+RowWritter::RowWritter(const std::string& _filePath)
+	: totalCount(0), filePath(_filePath), firstRow(true)
 {
 	value = static_cast<char*>(malloc(128 * sizeof(char)));
 	if (filePath == "stdout")
 		pFOut = stdout;
 	else
 		pFOut = fopen( filePath.c_str(), "wt" );
+}
+
+RowWritter::RowWritter(const RowWritter& o)
+	: 
+  totalCount(o.totalCount), 
+  pFOut(o.pFOut),
+  filePath(o.filePath),
+  firstRow(o.firstRow)
+{
+	value = static_cast<char*>(malloc(128 * sizeof(char)));
 }
 
 RowWritter::~RowWritter()
@@ -22,7 +32,10 @@ RowWritter::~RowWritter()
 
 int RowWritter::process(std::vector<Row>& rows)
 {
-  std::for_each(rows.begin(), rows.end(), [&] (Row& row) { this->process(row); });
+  for (auto& row : rows) 
+  { 
+    this->process(row); 
+  }
   return 0;
 }
 

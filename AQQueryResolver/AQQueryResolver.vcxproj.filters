@@ -229,10 +229,13 @@
     <ClInclude Include="aq\ParsException.h">
       <Filter>Header Files\aq</Filter>
     </ClInclude>
-    <ClInclude Include="aq\AQThreadRequest.h">
-      <Filter>Header Files\aq</Filter>
+    <ClInclude Include="aq\RowTableWritter.h">
+      <Filter>Header Files\aq\row_solver</Filter>
     </ClInclude>
-    <ClInclude Include="aq\AQThread.h">
+    <ClInclude Include="aq\RowWritter_Intf.h">
+      <Filter>Header Files\aq\row_solver</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\ExprTransform_2.h">
       <Filter>Header Files\aq</Filter>
     </ClInclude>
   </ItemGroup>
@@ -380,6 +383,9 @@
     </ClCompile>
     <ClCompile Include="aq\ParsException.cpp">
       <Filter>Source Files\aq</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\RowTableWritter.cpp">
+      <Filter>Source Files\aq\row_solver</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -248,16 +248,14 @@ char* get_string_without_quotes( char* pszStr ) {
 
 //------------------------------------------------------------------------------
 // Return 1 on true, 0 on false
-int check_between_for_transform( aq::tnode *pNode ) {
-	if ( pNode == NULL )
-		return 0;
+int check_between_for_transform(const aq::tnode& pNode) {
 
-	if ( pNode->tag == K_BETWEEN || pNode->tag == K_NOT_BETWEEN ) {
+	if ( pNode.tag == K_BETWEEN || pNode.tag == K_NOT_BETWEEN ) {
 		// BETWEEN
-		if ( is_column_reference( pNode->left ) != 0 ) {
+		if ( is_column_reference( pNode.left ) != 0 ) {
 			// Left is column reference -> check for strings at right
 			aq::tnode *pNodeTmp;
-			pNodeTmp = pNode->right;
+			pNodeTmp = pNode.right;
 			if ( pNodeTmp != NULL && pNodeTmp->tag == K_AND ) {
 				if (	pNodeTmp->left != NULL && 
 					( pNodeTmp->left->tag == K_STRING || pNodeTmp->left->tag == K_INTEGER ) &&
@@ -430,16 +428,14 @@ aq::tnode* ExpressionTransform::transform_between( aq::tnode* pNode, int *pErr )
 
 //------------------------------------------------------------------------------
 // Return 1 on true, 0 on false
-int check_like_for_transform( aq::tnode *pNode ) {
-	if ( pNode == NULL )
-		return 0;
+int check_like_for_transform(const aq::tnode& pNode) {
 
-	if ( pNode->tag == K_LIKE || pNode->tag == K_NOT_LIKE ) {
+	if ( pNode.tag == K_LIKE || pNode.tag == K_NOT_LIKE ) {
 		// LIKE 
-		if ( is_column_reference( pNode->left ) != 0 ) {
+		if ( is_column_reference( pNode.left ) != 0 ) {
 			// Left is column reference -> check for string or ESCAPE right
 			aq::tnode *pNodeTmp;
-			pNodeTmp = pNode->right;
+			pNodeTmp = pNode.right;
 			if ( pNodeTmp != NULL ) {
 				if ( pNodeTmp->tag == K_STRING )
 					return 1;
@@ -617,26 +613,28 @@ aq::tnode* ExpressionTransform::transform_like( aq::tnode* pNode, int *pErr ) {
 
 //------------------------------------------------------------------------------
 // Return 1 on true, 0 on false
-int check_cmp_op_for_transform( aq::tnode *pNode ) {
-	if ( pNode == NULL )
-		return 0;
+int check_cmp_op_for_transform(const aq::tnode& pNode ) {
 
-	if ( pNode->tag == K_NOT ) {
+	if ( pNode.tag == K_NOT ) {
 		// Check for NOT <, >, <=, >=
-		return check_cmp_op_for_transform( pNode->left );
-	} else
+    if (pNode.left == NULL)
+      return 0;
+    else
+      return check_cmp_op_for_transform( *pNode.left );
+	} 
+  else
 	{
 		// Check for <, >, <=, >= 
-		if ( pNode->tag == K_LT || pNode->tag == K_GT || pNode->tag == K_LEQ || pNode->tag == K_GEQ ) {
-			if ( is_column_reference( pNode->left ) != 0 ) {
+		if ( pNode.tag == K_LT || pNode.tag == K_GT || pNode.tag == K_LEQ || pNode.tag == K_GEQ ) {
+			if ( is_column_reference( pNode.left ) != 0 ) {
 				// Left is column reference -> check for strings at right
-				if (	pNode->right != NULL && 
-					( pNode->right->tag == K_STRING || pNode->right->tag == K_INTEGER || pNode->right->tag == K_REAL ) )
+				if (	pNode.right != NULL && 
+					( pNode.right->tag == K_STRING || pNode.right->tag == K_INTEGER || pNode.right->tag == K_REAL ) )
 					return 1;
-			} else if ( is_column_reference( pNode->right ) != 0 ) {
+			} else if ( is_column_reference( pNode.right ) != 0 ) {
 				// Right is column reference -> check for strings at left
-				if (	pNode->left != NULL && 
-					( pNode->left->tag == K_STRING || pNode->left->tag == K_INTEGER || pNode->left->tag == K_REAL ) )
+				if (	pNode.left != NULL && 
+					( pNode.left->tag == K_STRING || pNode.left->tag == K_INTEGER || pNode.left->tag == K_REAL ) )
 					return 1;
 			}
 		}
@@ -870,15 +868,15 @@ aq::tnode* ExpressionTransform::expression_transform( aq::tnode *pNode, int *pEr
 	// 
 
 	// Check for NOT BETWEEN or BETWEEN 
-	if ( check_between_for_transform( pNode ) != 0 )
+	if ( check_between_for_transform( *pNode ) != 0 )
 		return transform_between( pNode, pErr );
 
 	// Check for NOT LIKE or LIKE
-	if ( check_like_for_transform( pNode ) != 0 ) 
+	if ( check_like_for_transform( *pNode ) != 0 ) 
 		return transform_like( pNode, pErr );
 
 	// Check for <, >, <=, >=
-	if ( check_cmp_op_for_transform( pNode ) != 0 )
+	if ( check_cmp_op_for_transform( *pNode ) != 0 )
 		return transform_cmp_op( pNode, pErr );
 
 	// Call recursively
