@@ -17,10 +17,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlgoQuestEnterpriseManager"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AQUnitTests", "..\AQUnitTests\AQUnitTest.vcxproj", "{CD93F1CB-A928-43D6-8DA6-3A25FC1180AB}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestAQEngine", "C:\Users\AlgoQuest\Documents\Visual Studio 2012\Projects\TestAQEngine\TestAQEngine\TestAQEngine.vcxproj", "{AEF01BF3-3E36-4D80-97C5-850489FC9483}"
-	ProjectSection(ProjectDependencies) = postProject
-		{C29821BB-E679-400F-8F68-20934A012A85} = {C29821BB-E679-400F-8F68-20934A012A85}
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AQEngineTests", "..\AQEngineTests\AQEngineTests.vcxproj", "{AEF01BF3-3E36-4D80-97C5-850489FC9483}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
