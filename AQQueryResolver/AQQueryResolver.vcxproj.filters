@@ -229,6 +229,12 @@
     <ClInclude Include="aq\ParsException.h">
       <Filter>Header Files\aq</Filter>
     </ClInclude>
+    <ClInclude Include="aq\AQThreadRequest.h">
+      <Filter>Header Files\aq</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\AQThread.h">
+      <Filter>Header Files\aq</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="aq\verbs\AggregateVerbs.cpp">

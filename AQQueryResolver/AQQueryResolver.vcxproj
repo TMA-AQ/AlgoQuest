@@ -318,6 +318,8 @@
     <ClInclude Include="aq\AQEngine.h" />
     <ClInclude Include="aq\AQEngine_Intf.h" />
     <ClInclude Include="aq\AQMatrix.h" />
+    <ClInclude Include="aq\AQThread.h" />
+    <ClInclude Include="aq\AQThreadRequest.h" />
     <ClInclude Include="aq\Base.h" />
     <ClInclude Include="aq\Column.h" />
     <ClInclude Include="aq\Column2Table.h" />

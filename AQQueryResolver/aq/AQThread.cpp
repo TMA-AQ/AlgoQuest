@@ -1,4 +1,5 @@
 #include "AQThread.h"
+#include <aq/QueryResolverSimulate.h>
 
 #include <boost/timer.hpp> // pour les tests
 #include <boost/version.hpp> // pour les tests
@@ -14,11 +15,13 @@ namespace aq
 {
 
   // INITIALIZATION PART
-  AQThread::AQThread(aq::tnode* pNode)
-    : _pNode(pNode), _end(false), _threading(false), _ready(false), _initialaze(false)
+  template <class T>
+  AQThread<T>::AQThread(aq::tnode* pNode, T resolver)
+    : _pNode(pNode), _queryResolver(resolver) _patern(NULL), _end(false), _threading(false), _ready(false), _initialaze(false)
   {}
 
-  bool  AQThread::findNodeIn(aq::tnode* pNode, aq::tnode* tNode)
+  template <class T>
+  bool  AQThread<T>::findNodeIn(aq::tnode* pNode, aq::tnode* tNode)
   {
     if (pNode == NULL)
       return false;
@@ -36,28 +39,32 @@ namespace aq
     return false;
   }
 
-  void  AQThread::addListThreadCondition(AQThread* thread)
+  template <class T>
+  void  AQThread<T>::addListThreadCondition(AQThread<T>* thread)
   {
     this->_listThread.push_back(thread);
   }
 
   // THREAD PART
-  void  AQThread::start(int count)
+  template <class T>
+  void  AQThread<T>::start(int count, int time)
   {
     this->_initialaze = true;
-    this->_thread = boost::thread(&AQThread::solveThread, this, count);
+    this->_thread = boost::thread(&AQThread<T>::solveThread, this, count, time);
   }
 
-  void  AQThread::join()
+  template <class T>
+  void  AQThread<T>::join()
   {
     this->_thread.join();
   }
 
-  void  AQThread::solveThread(int count)
+  template <class T>
+  void  AQThread<T>::solveThread(int count, int time)
   {
     boost::xtime xt; // a virer, c'est pour les tests
     boost::xtime_get(&xt, boost::TIME_UTC_); // a virer, c'est pour les tests
-    xt.sec += count * 2; // a virer, c'est pour les tests
+    xt.sec += (time * 2); // a virer, c'est pour les tests
     boost::thread::sleep(xt); // a virer, c'est pour les tests
 
     if (this->_threading == true)
@@ -68,37 +75,122 @@ namespace aq
     std::string newQuery;
     aq::generate_parent(this->_pNode, NULL);
     aq::syntax_tree_to_sql_form(this->_pNode, newQuery);
-    std::cout << "Turn number: [" << count << "] & Select part is:" << std::endl << "[" << newQuery << "]" << std::endl;
+    std::cout << "Turn number: [" << count << "] with timer at [" << (time * 2)
+              << "] & Select part is:" << std::endl << "[" << newQuery << "]" << std::endl;
     // blabla thread fin
 
     this->_threading = false;
     this->_end = true;
     this->_initialaze = false;
+
+
+    //launch the patern
+    if (this->_patern != NULL)
+      if (this->_patern->isReady() == true && this->_patern->threadOver() == false && this->_patern->isThreading() == false)
+        this->_patern->solveThread(++count, rand() % 5);
   }
 
   // CHECK PART
-  bool  AQThread::threadOver()    const
+  template <class T>
+  bool  AQThread<T>::threadOver()    const
   {
     return this->_end;
   }
 
-  bool  AQThread::isThreading()   const
+  template <class T>
+  bool  AQThread<T>::isThreading()   const
   {
     return this->_threading;
   }
 
-  bool  AQThread::isInitialaze()  const
+  template <class T>
+  bool  AQThread<T>::isInitialaze()  const
   {
     return this->_initialaze;
   }
 
-  bool  AQThread::isReady()
+  template <class T>
+  bool  AQThread<T>::isReady()
   {
     this->_ready = true;
-    for (std::vector<AQThread*>::iterator it = this->_listThread.begin(); it != this->_listThread.end(); ++it)
+    for (std::vector<AQThread<T>*>::iterator it = this->_listThread.begin(); it != this->_listThread.end(); ++it)
       if ((*it)->threadOver() == false || (*it)->isThreading() == true)
         this->_ready = false;
     return this->_ready;
   }
 
+  // algo for determinate the patern
+
+  template <class T>
+  bool        AQThread<T>::existanceThread(AQThread<T>* aqthread) const
+  {
+    for (std::vector<AQThread<T>*>::const_iterator it = this->_listThread.begin(); it != this->_listThread.end(); ++it)
+      if (aqthread == (*it))
+        return true;
+
+    for (std::vector<AQThread<T>*>::const_iterator it = this->_listThread.begin(); it != this->_listThread.end(); ++it)
+      return (*it)->existanceThread(aqthread);
+
+    return false;
+  }
+
+  template <class T>
+  void        AQThread<T>::purgeOverList()
+  {
+    for (std::vector<AQThread<T>*>::iterator it = this->_listThread.begin(); it != this->_listThread.end(); ++it)
+      if (this->existanceThread(*it) == true)
+        it = this->_listThread.erase(it);
+  }
+
+  template <class T>
+  void        AQThread<T>::assignPatern(AQThread<T>* patern)
+  {
+    this->setPatern(patern);
+    for (std::vector<AQThread<T>*>::iterator it = this->_listThread.begin(); it != this->_listThread.end(); ++it)
+      (*it)->assignPatern(this);
+  }
+
+  // getter / setter
+  template <class T>
+  aq::tnode*  AQThread<T>::getPNode()  const
+  {
+    return this->_pNode;
+  }
+
+  template <class T>
+  void        AQThread<T>::setPatern(AQThread<T>* patern)
+  {
+    this->_patern = patern;
+  }
+
+  // dump
+  template <class T>
+  void        AQThread<T>::dump()      const
+  {
+    std::string newQuery;
+    aq::generate_parent(this->_pNode, NULL);
+    if (this->_patern != NULL)
+    {
+      aq::syntax_tree_to_sql_form(this->_patern->_pNode, newQuery);
+      std::cout << "My father is [" << newQuery << "] and:" << std::endl;
+    }
+    newQuery = "";
+    aq::syntax_tree_to_sql_form(this->_pNode, newQuery);
+    std::cout << "I'm [" << newQuery << "]";
+    if (this->_listThread.size() == 0)
+      std::cout << std::endl;
+    else
+      std::cout << " and my son(s) is(are) : -->" << std::endl;
+    for (std::vector<AQThread<T>*>::const_iterator it = this->_listThread.begin(); it != this->_listThread.end(); ++it)
+      (*it)->dump();
+    if (this->_listThread.size() > 0)
+      std::cout << "<--" << std::endl;
+  }
+
+  void TemporaryFunction ()
+  {
+    aq::QueryResolverSimulate tmp;
+    aq::AQThread<aq::QueryResolverSimulate> TempObj(NULL, tmp);
+  }
 }
+

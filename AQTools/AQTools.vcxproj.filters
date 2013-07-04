@@ -29,12 +29,24 @@
     <ClInclude Include="aq\Link.h">
       <Filter>Fichiers d%27en-tête\aq</Filter>
     </ClInclude>
+    <ClInclude Include="aq\AQEngineSimulate.h">
+      <Filter>Fichiers d%27en-tête\aq</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\QueryResolverSimulate.h">
+      <Filter>Fichiers d%27en-tête\aq</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="aq\aq_tools.cpp">
       <Filter>Fichiers sources\aq</Filter>
     </ClCompile>
     <ClCompile Include="aq\AQEngineBasic.cpp">
+      <Filter>Fichiers sources\aq</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\AQEngineSimulate.cpp">
+      <Filter>Fichiers sources\aq</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\QueryResolverSimulate.cpp">
       <Filter>Fichiers sources\aq</Filter>
     </ClCompile>
   </ItemGroup>

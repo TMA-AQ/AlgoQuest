@@ -109,7 +109,7 @@
       <PreprocessorDefinitions>_WIN32_WINNT=NTDDI_WIN7;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>
       </SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir);..\AQQueryResolver;..\AQUtil;C:\Boost\install\include\boost-1_50;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);..\AQQueryResolver;..\AQUtil;C:\Boost\install\include\boost-1_52;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>

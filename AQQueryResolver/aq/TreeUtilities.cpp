@@ -212,20 +212,42 @@ void solveSelectStar(aq::tnode* pNode,
       nextFrom = tables[idx];
     if ( !tables[idx] || ( tables[idx]->getTag() == K_SELECT && ( column = find_first_node( tables[idx], K_AS ) ) == NULL )
       || !( column = find_first_node( nextFrom, K_IDENT ) ) )
-      throw aq::parsException( "STAR failed, no AS found", pNode );
-    std::vector<Column::Ptr>& columns = BaseDesc.getTable( column->getData().val_str )->Columns;
-    for( size_t idx2 = 0; idx2 < columns.size(); ++idx2 )
+      throw aq::parsException( "STAR failed, no AS found", pNode, true );
+    aq::tnode *column2;
+    aq::tnode *alias;
+    aq::tnode* colRef;
+    if ( nextFrom != tables[idx] && ( column2 = find_first_node( tables[idx], K_SELECT ) ) != NULL && column2->left )
     {
-      aq::tnode *alias;
-      aq::tnode* colRef;
-      if ( ( alias = find_first_node( tables[idx], K_AS ) ) != NULL &&
-        alias->right && alias->right->getTag() == K_IDENT )
-        colRef = createPeriodColumn( columns[idx2]->getName().c_str(), alias->right->getData().val_str );
-      else
-        colRef = createPeriodColumn( columns[idx2]->getName().c_str(), column->getData().val_str );
-      colRefs.push_back( colRef );
-      columnNames.push_back( std::string(column->getData().val_str) + "." + columns[idx2]->getName() );
-      columnDisplayNames.push_back( std::string(column->getData().val_str) + "." + columns[idx2]->getOriginalName() );
+      std::vector<aq::tnode*> select;
+      commaListToNodeArray( column2->left, select );
+      for ( size_t idx2 = 0; idx2 < select.size(); ++idx2 )
+      {
+        if ( ( column = find_first_node( select[idx2], K_COLUMN ) ) == NULL )
+          throw aq::parsException( "pNode->left is empty in { void solveSelectStar }, this exception should be throw in { int SQLParse } -> ", tables[idx], true );
+        if ( ( alias = find_first_node( tables[idx], K_AS ) ) != NULL &&
+          alias->right && alias->right->getTag() == K_IDENT )
+          colRef = createPeriodColumn( column->getData().val_str, alias->right->getData().val_str );
+        else
+          throw aq::parsException( "No alias found for ", tables[idx], true );
+        colRefs.push_back( colRef );
+        columnNames.push_back( std::string( alias->right->getData().val_str ) + "." + std::string( column->getData().val_str ) );
+        columnDisplayNames.push_back( std::string( alias->right->getData().val_str ) + "." + std::string( column->getData().val_str ) );
+      }
+    }
+    else
+    {
+      std::vector<Column::Ptr>& columns = BaseDesc.getTable( column->getData().val_str )->Columns;
+      for( size_t idx2 = 0; idx2 < columns.size(); ++idx2 )
+      {
+        if ( ( alias = find_first_node( tables[idx], K_AS ) ) != NULL &&
+          alias->right && alias->right->getTag() == K_IDENT )
+          colRef = createPeriodColumn( columns[idx2]->getName().c_str(), alias->right->getData().val_str );
+        else
+          colRef = createPeriodColumn( columns[idx2]->getName().c_str(), column->getData().val_str );
+        colRefs.push_back( colRef );
+        columnNames.push_back( std::string( column->getData().val_str ) + "." + columns[idx2]->getName() );
+        columnDisplayNames.push_back( std::string( column->getData().val_str ) + "." + columns[idx2]->getOriginalName() );
+      }
     }
   }
   pNode->left = assignSafe( nodeArrayToCommaList( colRefs ), pNode->left );
@@ -258,7 +280,7 @@ void solveIdentRequest( aq::tnode* pNode, Base& BaseDesc )
       fake = false;
       std::vector<std::string> dummy1;
       std::vector<std::string> dummy2;
-      solveSelectStar( pNode, BaseDesc, dummy1, dummy2 ); // a refaire le solveSelectStar + les exceptions!
+      solveSelectStar( pNode, BaseDesc, dummy1, dummy2 );
     }
 
     aq::tnode*  assign = NULL;

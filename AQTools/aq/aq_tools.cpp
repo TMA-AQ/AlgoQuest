@@ -27,6 +27,9 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
+#include <aq/AQThreadRequest.h>
+#include "QueryResolverSimulate.h"
+
 // fixme
 #include "Link.h"
 
@@ -278,6 +281,21 @@ int processQuery(const std::string& query, aq::TProjectSettings& settings, aq::B
 #endif
 
 		}
+    
+    int maxThread = 10;
+    for (int i = 0; i < maxThread; ++i)
+    {
+      aq::AQThreadRequest<aq::QueryResolverSimulate> thread(5, &settings, aq_engine, baseDesc);
+      thread.solveRequest(pNode);
+      if (i != (maxThread - 1))
+        std::cout << std::endl << "next step ---> number: " << (i + 2) << std::endl << std::endl;
+    }
+
+    aq::solveIdentRequest(pNode, baseDesc);
+    std::string std;
+    aq::generate_parent(pNode, NULL);
+    aq::syntax_tree_to_sql_form(pNode, std);
+    std::cout << std << std::endl;
 
 		//
 		// Transform SQL request in prefix form, 
