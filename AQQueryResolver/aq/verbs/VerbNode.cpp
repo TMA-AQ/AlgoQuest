@@ -30,6 +30,26 @@ void VerbNode::setBrother( VerbNode::Ptr brother )
 }
 
 //------------------------------------------------------------------------------
+void VerbNode::cloneSubtree(VerbNode::Ptr v)
+{
+  if (v->getLeftChild())
+  {
+    this->Left = v->getLeftChild()->clone();
+    this->Left->cloneSubtree(v->getLeftChild());
+  }
+  if (v->getRightChild())
+  {
+    this->Right = v->getRightChild()->clone();
+    this->Right->cloneSubtree(v->getRightChild());
+  }
+  if (v->getBrother())
+  {
+    this->Brother = v->getBrother()->clone();
+    this->Brother->cloneSubtree(v->getBrother());
+  }
+}
+
+//------------------------------------------------------------------------------
 void VerbNode::changeQuery()
 {
 	if( this->Brother )
@@ -209,7 +229,7 @@ VerbNode::Ptr VerbNode::build( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* p
 }
 
 //------------------------------------------------------------------------------
-VerbNode::Ptr VerbNode::BuildVerbsTree( aq::tnode* pStart, const std::vector<unsigned int>& categories_order, Base& baseDesc, TProjectSettings * settings )
+VerbNode::Ptr VerbNode::BuildVerbsTree( aq::tnode* pStart, const boost::array<unsigned int, 6>& categories_order, Base& baseDesc, TProjectSettings * settings )
 {
   aq::Logger::getInstance().log(AQ_DEBUG, "build verb tree\n");
 	if( pStart->tag != K_SELECT )
@@ -294,7 +314,7 @@ void VerbNode::dump(std::ostream& os, VerbNode::Ptr tree, std::string ident)
 {
   if (tree != NULL)
   {
-    os << id_to_string(tree->getVerbType()) << std::endl;
+    os << id_to_string(tree->getVerbType()) << " [" << tree.get() << "]" << std::endl;
     os << ident << "  left -> ";
     dump(os, tree->getLeftChild(), ident + "  ");
     os << ident << "  right -> ";

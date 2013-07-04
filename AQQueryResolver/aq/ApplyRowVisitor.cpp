@@ -5,7 +5,6 @@ namespace aq
 
 ApplyRowVisitor::ApplyRowVisitor()
   :
-  rows(1), // fixme
   n(0)
 {
 }
@@ -13,7 +12,7 @@ ApplyRowVisitor::ApplyRowVisitor()
 // Aggregate Verbs
 void ApplyRowVisitor::visit(verb::AggregateVerb* agg)
 {
-  std::for_each(this->rows.begin(), this->rows.end(), [&] (aq::Row& row) {
+  std::for_each(this->rows->begin(), this->rows->end(), [&] (aq::Row& row) {
     agg->addResult(row);
   });
 }
@@ -28,7 +27,13 @@ void ApplyRowVisitor::visit(verb::RowNumberVerb*){}
 void ApplyRowVisitor::visit(verb::SumVerb*){}
 
 // Arithmetics Verbs
-void ApplyRowVisitor::visit(verb::BinaryVerb*){}
+void ApplyRowVisitor::visit(verb::BinaryVerb* bv)
+{
+  std::for_each(this->rows->begin(), this->rows->end(), [&] (aq::Row& row) {
+    bv->addResult(row);
+  });
+}
+
 void ApplyRowVisitor::visit(verb::DivideVerb*){}
 void ApplyRowVisitor::visit(verb::MinusVerb*){}
 void ApplyRowVisitor::visit(verb::MultiplyVerb*){}
@@ -41,14 +46,14 @@ void ApplyRowVisitor::visit(verb::AsteriskVerb*){}
 
 void ApplyRowVisitor::visit(verb::AsVerb* as)
 {
-  std::for_each(this->rows.begin(), this->rows.end(), [&] (aq::Row& row) {
+  std::for_each(this->rows->begin(), this->rows->end(), [&] (aq::Row& row) {
     as->addResult(row);
   });
 }
 
 void ApplyRowVisitor::visit(verb::ColumnVerb* column)
 {
-  std::for_each(this->rows.begin(), this->rows.end(), [&] (aq::Row& row) {
+  std::for_each(this->rows->begin(), this->rows->end(), [&] (aq::Row& row) {
     column->addResult(row);
   });
 }
@@ -110,7 +115,7 @@ void ApplyRowVisitor::visit(verb::FromVerb*)
 void ApplyRowVisitor::visit(verb::GroupVerb* group)
 {
   this->context = K_GROUP;
-  std::for_each(this->rows.begin(), this->rows.end(), [&] (aq::Row& row) {
+  std::for_each(this->rows->begin(), this->rows->end(), [&] (aq::Row& row) {
     group->addResult(row);
   });
 }

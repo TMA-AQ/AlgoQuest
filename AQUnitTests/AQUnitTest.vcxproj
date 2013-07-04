@@ -175,10 +175,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AQMatrixTest.cpp" />
-    <ClCompile Include="BaseDescTest.cpp" />
-    <ClCompile Include="JeqParserTest.cpp" />
+    <ClCompile Include="src\AQMatrixTest.cpp" />
     <ClCompile Include="src\AQUnitTests.cpp" />
+    <ClCompile Include="src\BaseDescTest.cpp" />
+    <ClCompile Include="src\ColumnMapperTest.cpp" />
+    <ClCompile Include="src\ExprTransformTest.cpp" />
+    <ClCompile Include="src\JeqParserTest.cpp" />
     <ClCompile Include="src\ParserTest.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

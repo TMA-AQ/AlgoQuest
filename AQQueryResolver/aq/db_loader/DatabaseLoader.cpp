@@ -43,7 +43,7 @@ char k_rep_racine[k_file_name_size_max] = ".";          // a passer en argument
 char k_rep_param[k_file_name_size_max] = "parameters/"; //  a passer en argument
 char k_batch_loader [ k_batch_size_max ]; // from ini.properties
 char ini_filename [ k_batch_size_max ];
-int k_packet_size = 1048576;
+// int k_packet_size = 1048576;
 // parameter for vdg construction
 // FLOAT INFOS to get from file descriptor or ini.properties
 char k_double_separator = ',';
@@ -247,7 +247,7 @@ int cut_in_col (const char * iniFilename, size_t num_table, size_t num_column)
 	strcpy (my_dir_source ,rep_source);
 	strcpy (my_dir_cible ,rep_cible);
 
-	int max_read = k_packet_size; // old value 4096; 
+	int max_read = aq::packet_size; // old value 4096; 
 	int nb_fields;
 	int indice_car;
 	unsigned char  my_char;
@@ -321,7 +321,7 @@ int cut_in_col (const char * iniFilename, size_t num_table, size_t num_column)
 			write_n_enreg++;
 			total_nb_enreg++;
 			// changement de paquet ?
-			if ( write_n_enreg > k_packet_size /*1048576 */  ) // **** important pour avoir des paquet de 1048576 lignes
+			if ( write_n_enreg > aq::packet_size )
 			{
 				// fermeture de la  colonne du paquet en cours
 				fflush( fcol );

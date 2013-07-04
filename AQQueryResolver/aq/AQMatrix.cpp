@@ -36,7 +36,7 @@ namespace
 	struct row_cmp_t
 	{
 	public:
-		row_cmp_t(std::vector<ColumnMapper::Ptr>& _columnMapper)
+		row_cmp_t(std::vector<ColumnMapper_Intf::Ptr>& _columnMapper)
 			: columnMapper(_columnMapper),
 				row1(_columnMapper.size()),
 				row2(_columnMapper.size())
@@ -47,7 +47,7 @@ namespace
 			// fill row to compare
 			size_t pos = 0;
 			ColumnItem item;
-			std::for_each(columnMapper.begin(), columnMapper.end(), [&] (ColumnMapper::Ptr& c) {
+			std::for_each(columnMapper.begin(), columnMapper.end(), [&] (ColumnMapper_Intf::Ptr& c) {
 				c->loadValue(idx1, *row1[pos]);
 				c->loadValue(idx2, *row2[pos]);
 				++pos;
@@ -61,7 +61,7 @@ namespace
 			return false;
 		}
 	private:
-		std::vector<ColumnMapper::Ptr>& columnMapper;
+		std::vector<ColumnMapper_Intf::Ptr>& columnMapper;
 		std::vector<ColumnItem::Ptr> row1;
 		std::vector<ColumnItem::Ptr> row2;
 	};
@@ -123,6 +123,7 @@ void AQMatrix::simulate(size_t rows, const std::vector<long long>& tableIDs)
 	this->hasCount = true;
 	this->totalCount = rows;
 	this->nbRows = rows;
+  this->size = rows;
 	this->matrix.resize(tableIDs.size());
 
   for ( size_t idx = 0; idx < tableIDs.size(); ++idx )
@@ -132,6 +133,8 @@ void AQMatrix::simulate(size_t rows, const std::vector<long long>& tableIDs)
     for (size_t idx = 0; idx < rows; ++idx)
       (*it).indexes.push_back(rand() % this->baseDesc.getTable((*it).table_id)->TotalCount);
 	this->count.resize(rows, 1);
+
+  this->groupByIndex.push_back(std::make_pair(rows, rows));
 }
 
 void AQMatrix::clear()
@@ -196,6 +199,8 @@ void AQMatrix::load(const char * filePath, std::vector<long long>& tableIDs)
   fread(&nbRows, sizeof(uint64_t), 1, fd);
   fread(&nbGroups, sizeof(uint64_t), 1, fd);
 
+  aq::Logger::getInstance().log(AQ_NOTICE, "aq matrix: [count:%u;rows:%u;groups:%u]\n", count, nbRows, nbGroups);
+
   uint64_t countCheck = 0;
   uint64_t rowCheck = 0;
   uint64_t grpCount, grpRows;
@@ -204,11 +209,11 @@ void AQMatrix::load(const char * filePath, std::vector<long long>& tableIDs)
     fread(&grpCount, sizeof(uint64_t), 1, fd);
     fread(&grpRows, sizeof(uint64_t), 1, fd);
     
-    // FIXME
-    if (grpCount == 0)
-      grpCount = count - countCheck;
-    if (grpRows == 0)
-      grpRows = nbRows - rowCheck;
+    //// FIXME
+    //if (grpCount == 0)
+    //  grpCount = count - countCheck;
+    //if (grpRows == 0)
+    //  grpRows = nbRows - rowCheck;
 
     if ((grpCount == 0) || (grpRows == 0))
       throw aq::generic_error(aq::generic_error::AQ_ENGINE, "bad value in result");
@@ -252,8 +257,6 @@ void AQMatrix::load(const char * filePath, std::vector<long long>& tableIDs)
   this->totalCount = this->count.size();
 	this->nbRows = this->count.size();
   this->size = this->count.size();
-
-  aq::Logger::getInstance().log(AQ_INFO, "%u rows to proceed (count:%u;group:%u)\n", this->nbRows, count, nbGroups);
 }
 
 void AQMatrix::load(const char * filePath, const char fieldSeparator, std::vector<long long>& tableIDs)
@@ -446,56 +449,56 @@ void AQMatrix::computeUniqueRow(std::vector<std::vector<size_t> >& mapToUniqueIn
 }
 
 // void AQMatrix::groupBy(const std::map<size_t, std::vector<std::pair<size_t, aq::ColumnType> > >& columnsByTableId)
-void AQMatrix::groupBy(std::vector<aq::ColumnMapper::Ptr>& columnsMapper)
-{
-	if (this->matrix.size() == 0)
-		return;
-
-	size_t size = this->matrix[0].indexes.size();
-
-	//
-	// TODO : check index length integrity
-	//for (size_t index = 0; index < size; ++index)
-	//{
-	//	// Load Row and compute group by key
-	//	size_t r = 0;
-	//	group_by_key_t gk;
-	//	gk.len = 0;
-	//	gk.value = NULL;
-	//	ColumnItem::Ptr c;
-	//	for (size_t i = 0; i < columnsMapper.size(); ++i)
-	//	{
-	//		c = columnsMapper[i].loadValue(index);
-	//		size_t pos = gk.len;
-	//		gk.len += sizeof(c->numval);
-	//		if (gk.value == NULL)
-	//			gk.value = static_cast<uint8_t*>(::malloc(gk.len * sizeof(uint8_t)));
-	//		else
-	//			gk.value = static_cast<uint8_t*>(::realloc(gk.value, gk.len * sizeof(uint8_t)));
-	//		::memcpy(gk.value + pos, &c->numval, sizeof(c->numval));
-	//	}
-	//	this->groupByIndex[gk].push_back(index);
-	//}
-
-	////////////////////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////////////////////
-	
-	// ColumnItem::Ptr item;
-	row_cmp_t row_cmp(columnsMapper);
-	std::set<index_holder_t, index_holder_cmp_t> indexes_to_sort;
-	for (size_t i = 0; i < size; ++i)
-	{
-		if ((i % 100000) == 0) aq::Logger::getInstance().log(AQ_DEBUG, "%u index sorted\n", i);
-		index_holder_t ih = { i, row_cmp };
-		indexes_to_sort.insert(ih);
-	}
-
-	group_by_key_t gk = { 0, NULL } ;
-	//for (std::set<index_holder_t, index_holder_cmp_t>::const_iterator it = indexes_to_sort.begin(); it != indexes_to_sort.end(); ++it)
-	//	this->groupByIndex[gk].push_back((*it).index);
-		
-	aq::Logger::getInstance().log(AQ_DEBUG, "%u group\n", groupByIndex.size());
-}
+//void AQMatrix::groupBy(std::vector<aq::ColumnMapper::Ptr>& columnsMapper)
+//{
+//	if (this->matrix.size() == 0)
+//		return;
+//
+//	size_t size = this->matrix[0].indexes.size();
+//
+//	//
+//	// TODO : check index length integrity
+//	//for (size_t index = 0; index < size; ++index)
+//	//{
+//	//	// Load Row and compute group by key
+//	//	size_t r = 0;
+//	//	group_by_key_t gk;
+//	//	gk.len = 0;
+//	//	gk.value = NULL;
+//	//	ColumnItem::Ptr c;
+//	//	for (size_t i = 0; i < columnsMapper.size(); ++i)
+//	//	{
+//	//		c = columnsMapper[i].loadValue(index);
+//	//		size_t pos = gk.len;
+//	//		gk.len += sizeof(c->numval);
+//	//		if (gk.value == NULL)
+//	//			gk.value = static_cast<uint8_t*>(::malloc(gk.len * sizeof(uint8_t)));
+//	//		else
+//	//			gk.value = static_cast<uint8_t*>(::realloc(gk.value, gk.len * sizeof(uint8_t)));
+//	//		::memcpy(gk.value + pos, &c->numval, sizeof(c->numval));
+//	//	}
+//	//	this->groupByIndex[gk].push_back(index);
+//	//}
+//
+//	////////////////////////////////////////////////////////////////////////////////
+//	////////////////////////////////////////////////////////////////////////////////
+//	
+//	// ColumnItem::Ptr item;
+//	row_cmp_t row_cmp(columnsMapper);
+//	std::set<index_holder_t, index_holder_cmp_t> indexes_to_sort;
+//	for (size_t i = 0; i < size; ++i)
+//	{
+//		if ((i % 100000) == 0) aq::Logger::getInstance().log(AQ_DEBUG, "%u index sorted\n", i);
+//		index_holder_t ih = { i, row_cmp };
+//		indexes_to_sort.insert(ih);
+//	}
+//
+//	group_by_key_t gk = { 0, NULL } ;
+//	//for (std::set<index_holder_t, index_holder_cmp_t>::const_iterator it = indexes_to_sort.begin(); it != indexes_to_sort.end(); ++it)
+//	//	this->groupByIndex[gk].push_back((*it).index);
+//		
+//	aq::Logger::getInstance().log(AQ_DEBUG, "%u group\n", groupByIndex.size());
+//}
 
 void AQMatrix::compress()
 {
@@ -526,8 +529,10 @@ void AQMatrix::writeTemporaryTable()
   FILE * fd;
   std::vector<std::map<uint64_t, FILE*> > fds(this->matrix.size());
   uint32_t status = 11;
+  uint32_t garbage1 = 0;
+  uint64_t garbage2 = 0;
   uint64_t invalid = 0;
-  uint64_t pos = 0;
+  uint32_t pos = 0;
   uint64_t grpIndex = 1;
   uint64_t size = (*this->matrix.begin()).indexes.size();
   for (uint64_t i = 0; i < size; ++i, ++grpIndex)
@@ -557,9 +562,11 @@ void AQMatrix::writeTemporaryTable()
         fd = it->second;
       }
       
+      fwrite(&garbage2, sizeof(uint64_t), 1, fd);
       fwrite(&grpIndex, sizeof(uint64_t), 1, fd);
       fwrite(&invalid, sizeof(uint64_t), 1, fd);
-      fwrite(&pos, sizeof(uint64_t), 1, fd);
+      fwrite(&pos, sizeof(uint32_t), 1, fd);
+      fwrite(&garbage1, sizeof(uint32_t), 1, fd);
     }
   }
   

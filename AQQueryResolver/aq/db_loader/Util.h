@@ -7,7 +7,7 @@
 #define k_record_size_max 40960   // record in a file
 #define k_field_size_max 4096   // record in a file  
 #define k_file_name_size_max 4096    // nom de fichier 
-#define k_taille_paquet 1048576;  // nbre max d'enreg dans un paquet
+// #define k_taille_paquet 1048576;  // nbre max d'enreg dans un paquet
 // #define k_max_open_file 15 // nbre de fichiers ouverts en meme temps
 #define  k_taille_message  4096 
 

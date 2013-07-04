@@ -2,6 +2,7 @@
 #include <aq/Exceptions.h>
 #include <cstdio>
 #include <sstream>
+#include <cassert>
 
 namespace aq
 {
@@ -218,6 +219,7 @@ TID2String g_id2kstr[] = {
   { K_IDENT, "K_IDENT" },
   { K_IMMEDIATE, "K_IMMEDIATE" },
   { K_IN, "K_IN" },
+  { K_IN_VALUES, "K_IN_VALUES" },
   { K_INNER, "K_INNER" },
   { K_INSERT, "K_INSERT" },
   { K_INSERT_ARGS, "K_INSERT_ARGS" },
@@ -335,6 +337,7 @@ const char* id_to_kstring( unsigned int nID ) {
 			return g_id2kstr[ i ].pszStr;
 		}
 	}
+  assert(false);
   return NULL;
 }
 

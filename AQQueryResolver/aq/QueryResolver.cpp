@@ -7,6 +7,7 @@
 
 #include "RowProcesses.h"
 #include "RowWritter.h"
+#include "RowTableWritter.h"
 #include "RowBinaryWritter.h"
 #include "RowVerbProcess.h"
 #include "RowTemporaryWritter.h"
@@ -51,9 +52,11 @@ QueryResolver::QueryResolver(aq::tnode * _sqlStatement, TProjectSettings * _pSet
     id_generator(_id),
     id(_id),
     nested(id > 1),
+    inWhereClause(false),
     hasGroupBy(false),
     hasOrderBy(false),
-    hasPartitionBy(false)
+    hasPartitionBy(false),
+    compressable(boost::none)
 {
   this->sqlStatement->to_upper();
   this->originalSqlStatement = aq::clone_subtree(this->sqlStatement);
@@ -65,8 +68,14 @@ QueryResolver::QueryResolver(aq::tnode * _sqlStatement, TProjectSettings * _pSet
 QueryResolver::~QueryResolver()
 {
   aq::delete_subtree(this->originalSqlStatement);
-  std::for_each(this->aliases.begin(), this->aliases.end(), [] (std::pair<std::string, tnode*> v) { aq::delete_subtree(v.second); });
+  for (auto& v : this->aliases) { aq::delete_subtree(v.second); }
 	aq::Logger::getInstance().log(AQ_INFO, "Query Resolver: Time elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
+}
+
+//------------------------------------------------------------------------------
+void QueryResolver::addInnerQuery(const char * id, boost::shared_ptr<QueryResolver> qr)
+{
+  this->nestedTables[id] = qr;
 }
 
 //-------------------------------------------------------------------------------
@@ -81,15 +90,21 @@ Table::Ptr QueryResolver::solve()
   aq::generate_parent(this->sqlStatement, NULL);
   aq::addAlias(this->sqlStatement->left);
 	
+#ifdef _DEBUG
+  std::string sql_query;
+  std::cout << *this->sqlStatement << std::endl;
+  std::cout << aq::syntax_tree_to_sql_form(this->sqlStatement, sql_query) << std::endl;
+#endif
+
   bool hasWhere = find_main_node(this->sqlStatement, K_WHERE) != NULL;
 	this->hasGroupBy = find_main_node(this->sqlStatement, K_GROUP) != NULL;
 	this->hasOrderBy = find_main_node(this->sqlStatement, K_ORDER) != NULL;
 
   std::list<tnode*> columns;
   aq::selectToList(this->sqlStatement, columns);
-  for (auto it = columns.begin(); it != columns.end(); ++it)
+  for (auto& col : columns)
   {
-    this->aliases.insert(std::make_pair((*it)->right->getData().val_str, aq::clone_subtree((*it)->left)));
+    this->aliases.insert(std::make_pair(col->right->getData().val_str, aq::clone_subtree(col->left)));
   }
 
   if (this->hasGroupBy)
@@ -97,22 +112,24 @@ Table::Ptr QueryResolver::solve()
     tnode * grpNode = find_main_node(this->sqlStatement, K_GROUP);
     std::vector<tnode*> cl;
     aq::getColumnsList(grpNode->left->left, cl);
-    std::for_each(cl.begin(), cl.end(), [&] (tnode* n) {
+    for (auto& n : cl) 
+    {
       this->groupBy.push_back(aq::clone_subtree(n));
-    });
+    }
 
-    //cl.clear();
-    //aq::getColumnsList(this->sqlStatement->left, cl);
-    //std::for_each(cl.begin(), cl.end(), [&] (tnode* n) {
-    //  if ((n->tag == K_AS) && (n->left->tag == K_MIN))
-    //  {
-    //    // FIXME : this suppose that the min aggregate function is applied to only one column
-    //    this->groupBy.push_back(aq::clone_subtree(n->left->left));
-    //  }
-    //});
+    cl.clear();
+    aq::getColumnsList(this->sqlStatement->left, cl);
+    for (auto& n : cl) 
+    {
+      if ((n->tag == K_AS) && (n->left->tag == K_MIN)) // TODO : for all aggregate function
+      {
+        // FIXME : this suppose that the min aggregate function is applied to only one column
+        this->orderBy.push_back(aq::clone_subtree(n->left->left));
+      }
+    }
 
   }
-  if (!this->hasGroupBy && hasWhere)
+  if (!this->hasGroupBy/* && hasWhere*/) // FIXME : why where is needed ?
   {
     std::list<tnode*> aggregateColumns;
     aq::findAggregateFunction(columns, aggregateColumns);
@@ -130,15 +147,16 @@ Table::Ptr QueryResolver::solve()
     // to solve a partition by we must perform an order on result
     // so we get all the column defining the partition
     this->hasPartitionBy = true;
-    for (auto it = partitionsNodes.begin(); it != partitionsNodes.end(); ++it)
+    for (auto& n : partitionsNodes)
     {
       this->partitions.push_back(std::vector<tnode*>());
       std::vector<tnode*>& v = *(this->partitions.rbegin());
       std::vector<tnode*> cl;
-      aq::getColumnsList((*it)->left->left, cl);
-      std::for_each(cl.begin(), cl.end(), [&] (tnode* n) {
+      aq::getColumnsList(n->left->left, cl);
+      for (auto& n : cl) 
+      {
         v.push_back(aq::clone_subtree(n));
-      });
+      }
     }
   }
   aq::removePartitionBy(this->sqlStatement);
@@ -146,19 +164,26 @@ Table::Ptr QueryResolver::solve()
 	this->solveNested(this->sqlStatement, this->level, NULL, false, false);
 
 #ifdef _DEBUG
-	std::string sql_query;
+	sql_query = "";
   std::cout << aq::multiline_query(aq::syntax_tree_to_sql_form(this->sqlStatement, sql_query)) << std::endl;
 #endif
 
   this->changeTemporaryTableName(this->sqlStatement);
-  std::for_each(this->groupBy.begin(), this->groupBy.end(), [&] (tnode* n) {
+  for (auto& n : this->groupBy) 
+  {
     this->changeTemporaryTableName(n);
-  });
-  std::for_each(this->partitions.begin(), this->partitions.end(), [&] (std::vector<tnode*>& v) {
-    std::for_each(v.begin(), v.end(), [&] (tnode * n) {
+  }
+  for (auto& n : this->orderBy) 
+  {
+    this->changeTemporaryTableName(n);
+  }
+  for (auto& v : this->partitions) 
+  {
+    for (auto& n : v)
+    {
       this->changeTemporaryTableName(n);
-    });
-  });
+    }
+  }
   
 #ifdef _DEBUG
   sql_query = "";
@@ -166,10 +191,10 @@ Table::Ptr QueryResolver::solve()
 #endif
 
 // #ifdef OUTPUT_NESTED_QUERIES
-	std::string str;
-	aq::syntax_tree_to_prefix_form( this->sqlStatement, str );
-	aq::SaveFile( pSettings->szOutputFN, str.c_str() );
-	aq::MakeBackupFile( pSettings->szOutputFN, aq::backup_type_t::Before, this->level, this->id );
+	//std::string str;
+	//aq::syntax_tree_to_prefix_form( this->sqlStatement, str );
+	//aq::SaveFile( pSettings->szOutputFN, str.c_str() );
+	//aq::MakeBackupFile( pSettings->szOutputFN, aq::backup_type_t::Before, this->level, this->id );
 // #endif
 
 #ifdef _DEBUG
@@ -181,24 +206,11 @@ Table::Ptr QueryResolver::solve()
   
   //
   // processing order of main verb of the request depends of the resolution mode ('by row' or 'by column')
-  std::vector<unsigned int> categories_order;
-  if (pSettings->useRowResolver)
+  boost::array<uint32_t, 6> categories_order =  { K_FROM, K_WHERE, K_SELECT, K_GROUP, K_HAVING, K_ORDER };
+  if (!pSettings->useRowResolver)
   {
-    categories_order.push_back( K_FROM );
-    categories_order.push_back( K_WHERE );
-    categories_order.push_back( K_SELECT );
-    categories_order.push_back( K_GROUP );
-    categories_order.push_back( K_HAVING );
-    categories_order.push_back( K_ORDER );
-  }
-  else
-  {
-    categories_order.push_back( K_FROM );
-    categories_order.push_back( K_WHERE );
-    categories_order.push_back( K_GROUP );
-    categories_order.push_back( K_HAVING );
-    categories_order.push_back( K_SELECT );
-    categories_order.push_back( K_ORDER );
+    boost::array<uint32_t, 6> new_order =  { K_FROM, K_WHERE, K_SELECT, K_GROUP, K_HAVING, K_ORDER };
+    categories_order = new_order;
   }
   
 	//
@@ -236,14 +248,14 @@ Table::Ptr QueryResolver::solve()
   {
     AQEngine_Intf::mode_t mode;
     analyze::type_t type;
-    if (!this->nested)
+    if (!this->nested || this->inWhereClause)
     {
       mode = AQEngine_Intf::mode_t::REGULAR;
       type = analyze::type_t::REGULAR;
     }
     else
     {
-      if (this->hasGroupBy)
+      if (this->hasGroupBy || this->hasPartitionBy)
       {
         mode = AQEngine_Intf::mode_t::NESTED_1;
         type = this->isCompressable() ? analyze::type_t::TEMPORARY_TABLE : analyze::type_t::TEMPORARY_COLUMN;
@@ -257,37 +269,47 @@ Table::Ptr QueryResolver::solve()
 
     // Generate AQEngine Query
     std::string query;
+    std::string group;
     std::string order;
+    std::string group_and_order;
     aq::syntax_tree_to_prefix_form(this->sqlStatement, query);
 
-    // a group is an order in aq engine => change ORDER by GROUP
-    std::string::size_type pos = query.find("GROUP");
-    if (pos != std::string::npos)
+    std::string::size_type posOrder = query.find("ORDER");
+    std::string::size_type posGroup = query.find("GROUP");
+    if ((posOrder != std::string::npos) || (posGroup != std::string::npos))
     {
-      query.replace(pos, 5, "ORDER");
-    }
-
-    pos = query.find("ORDER");
-    if (pos != std::string::npos)
-    {
-      order = query.substr(pos);
+      std::string::size_type pos = std::min(posOrder, posGroup);
+      group_and_order = query.substr(pos);
       query = query.substr(0, pos);
     }
     ParseJeq(query);
 
     if (!this->groupBy.empty())
     {
-      order = " ORDER ";
+      group = "GROUP ";
       for (size_t i = 0; i < this->groupBy.size() - 1; ++i)
-        order += " , ";
+        group += " , ";
       for (auto it = this->groupBy.begin(); it != this->groupBy.end(); ++it)
       {
-        aq::syntax_tree_to_prefix_form(*it, order);
+        aq::syntax_tree_to_prefix_form(*it, group);
       }
     }
-    else if (!this->partitions.empty() && !this->partitions[0].empty() && (order == ""))
+
+    //if (!this->orderBy.empty())
+    //{
+    //  order = "ORDER ";
+    //  for (size_t i = 0; i < this->orderBy.size() - 1; ++i)
+    //    order += " , ";
+    //  for (auto it = this->orderBy.begin(); it != this->orderBy.end(); ++it)
+    //  {
+    //    aq::syntax_tree_to_prefix_form(*it, order);
+    //  }
+    //}
+    
+    if (!this->partitions.empty() && !this->partitions[0].empty() && (order == ""))
     {
-      order = "\nORDER ";
+      assert(false);
+      order = "ORDER ";
       for (size_t i = 0; i < this->partitions[0].size() - 1; ++i)
         order += " , ";
       for (auto it = this->partitions[0].begin(); it != this->partitions[0].end(); ++it)
@@ -295,10 +317,15 @@ Table::Ptr QueryResolver::solve()
         aq::syntax_tree_to_prefix_form(*it, order);
       }
     }
-    query += order;
+
+    boost::algorithm::trim(query);
+    boost::algorithm::trim(group);
+    boost::algorithm::trim(order);
+    query += "\n" + group + "\n" + order;
     
     // Call AQEngine
     aq_engine->call(query, mode);
+    aq::MakeBackupFile(pSettings->szOutputFN, aq::backup_type_t::Empty, this->level, this->id);
 
     // parse result
     if (pSettings->computeAnswer)
@@ -367,6 +394,7 @@ void QueryResolver::solveNested(aq::tnode*& pNode, unsigned int nSelectLevel, aq
       // bool resolverMode = this->pSettings->useRowResolver; // FIXME: pSettings should be clone
       // this->pSettings->useRowResolver = false;
       QueryResolver queryResolver(pNode, this->pSettings, this->aq_engine, this->BaseDesc, nSelectLevel, ++this->nestedId);
+      queryResolver.setInWereClause();
       queryResolver.solve();
       Table::Ptr table = queryResolver.getResult();
       // this->pSettings->useRowResolver = resolverMode;
@@ -380,7 +408,7 @@ void QueryResolver::solveNested(aq::tnode*& pNode, unsigned int nSelectLevel, aq
       }
       else
       {
-        table->load(this->pSettings->szTempPath1, this->pSettings->packSize);
+        // table->load(this->pSettings->szTempPath1, this->pSettings->packSize);
         pNode = aq::GetTree( *table );
         if (pNode == NULL)
         {
@@ -388,10 +416,6 @@ void QueryResolver::solveNested(aq::tnode*& pNode, unsigned int nSelectLevel, aq
         }
       }
     }
-    //else
-    //{
-    //  throw aq::generic_error(aq::generic_error::INVALID_QUERY, "SELECT must be in FROM or WHERE clause");
-    //}
   }
   else
   {
@@ -493,11 +517,6 @@ void QueryResolver::solveAQMatriceByRows(aq::verb::VerbNode::Ptr spTree)
 	std::vector<Column::Ptr> columnTypes;
 	aq::getColumnTypes( this->sqlStatement, columnTypes, this->BaseDesc );
 	
-// #ifdef OUTPUT_NESTED_QUERIES
-	aq::MakeBackupFile( pSettings->szOutputFN, aq::backup_type_t::Empty, this->level, this->id );
-	aq::MakeBackupFile( pSettings->szAnswerFN, aq::backup_type_t::Before, this->level, this->id );
-// #endif
-
   // build process to apply on each row
   boost::shared_ptr<aq::RowProcesses> processes(new aq::RowProcesses);
   
@@ -516,21 +535,35 @@ void QueryResolver::solveAQMatriceByRows(aq::verb::VerbNode::Ptr spTree)
   }
 
   //
-  // Verbs Processing
-  std::vector<aq::verb::VerbNode::Ptr> selectVerbs;
-  getSelectVerbs(spTree, selectVerbs);
-  boost::shared_ptr<aq::ApplyRowVisitor> applyRowVisitor(new aq::ApplyRowVisitor);
-  boost::shared_ptr<aq::RowVerbProcess> rowVerbProcess(new aq::RowVerbProcess(spTree, applyRowVisitor, selectVerbs));
-	processes->addProcess(rowVerbProcess);
+  // Aggregate Verbs Processing
+  std::vector<aq::verb::VerbNode::Ptr> aggregateVerbs;
+  getSelectVerbs(spTree, aggregateVerbs);
+  boost::shared_ptr<aq::RowVerbProcess> aggregateVerbProcess(new aq::RowVerbProcess(spTree, aggregateVerbs));
+	processes->addProcess(aggregateVerbProcess);
+
+  //
+  // Algebric Verbs Processing
+  std::vector<aq::verb::VerbNode::Ptr> algebricVerbs;
+  boost::shared_ptr<aq::RowVerbProcess> algebricVerbProcess(new aq::RowVerbProcess(spTree, algebricVerbs));
+	processes->addProcess(algebricVerbProcess);
 
   ////
   //// Output Processing
-  boost::shared_ptr<aq::RowWritter> rowWritter;
+  boost::shared_ptr<aq::RowWritter_Intf> rowWritter;
   if (this->nested)
   {
-    std::string path = this->pSettings->szTempRootPath + "/" + this->pSettings->queryIdent;
-    rowWritter.reset(new aq::RowTemporaryWritter(static_cast<unsigned>(BaseDesc.getTables().size() + 1), path.c_str(), pSettings->packSize));
-    processes->addProcess(rowWritter);
+    if (this->inWhereClause)
+    {
+      this->result.reset(new Table("tmp", static_cast<unsigned>(this->BaseDesc.getTables().size() + 1), true));
+      rowWritter.reset(new aq::RowTableWritter(this->result));
+      processes->addProcess(rowWritter);
+    }
+    else
+    {
+      std::string path = this->pSettings->szTempRootPath + "/" + this->pSettings->queryIdent;
+      rowWritter.reset(new aq::RowTemporaryWritter(static_cast<unsigned>(BaseDesc.getTables().size() + 1), path.c_str(), pSettings->packSize));
+      processes->addProcess(rowWritter);
+    }
   }
   else
   {
@@ -541,27 +574,27 @@ void QueryResolver::solveAQMatriceByRows(aq::verb::VerbNode::Ptr spTree)
 
   //
   // build result from aq matrix
+  std::vector<aq::Row> dummy;
   timer.start();
   aq::solveAQMatrix_V2(
     *(aq_engine->getAQMatrix()), aq_engine->getTablesIDs(), columnTypes, columnNodes, 
-    *pSettings, BaseDesc, 
-    processes, applyRowVisitor->rows, 
-    this->hasGroupBy );
+    *pSettings, BaseDesc, processes, dummy, pSettings->process_thread,
+    this->hasGroupBy || this->hasPartitionBy );
   aq::Logger::getInstance().log(AQ_INFO, "build result from aq matrix: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
 
   //
   // build table result (need by nested query)
-  if (this->nested)
+  if (this->nested && !this->inWhereClause)
   {
     const std::vector<Column::Ptr>& columnsWritter = rowWritter->getColumns();
     std::copy(columnsWritter.begin(), columnsWritter.end(), std::back_inserter(this->columns));
 
-    assert(this->resultTables.size() == 1);
-    this->result.reset(new Table(this->resultTables[0].first, static_cast<unsigned>(this->BaseDesc.getTables().size() + 1), true));
+    std::string name = (this->resultTables.size() == 1) ? this->resultTables[0].first : "tmp";
+    this->result.reset(new Table(name, static_cast<unsigned>(this->BaseDesc.getTables().size() + 1), true));
     for (std::vector<Column::Ptr>::const_iterator it = this->columns.begin(); it != this->columns.end(); ++it)
     {
       Column::Ptr column = (*it);
-      column->setTableName(this->resultTables[0].first);
+      column->setTableName(name);
       this->result->Columns.push_back(column);
     }
     this->result->TotalCount = rowWritter->getTotalCount();
@@ -577,15 +610,37 @@ void QueryResolver::generateTemporaryTable()
 
   // the table is compress and refer to a physical table so the alias table must be rename by real table name
   assert(this->resultTables.empty());
-  // this->resultTables.push_back(std::make_pair("B001REG0001TMP0001P000000000007", this->BaseDesc.getTables()[matrix->getTableId(0) - 1]->getName()));
 
   const AQMatrix::matrix_t& m = matrix->getMatrix();
-  std::for_each(m.begin(), m.end(), [&] (const AQMatrix::matrix_t::value_type& c) {
+  assert(m.size() == 1);
+  for (auto& c : m) 
+  {
     this->resultTables.push_back(std::make_pair(c.tableName, c.baseTableName));
-  });
+  }
 
   aq::Table::Ptr table(new Table(this->resultTables[0].first, static_cast<unsigned>(this->BaseDesc.getTables().size() + 1), true));
-  table->setReferenceTable(this->BaseDesc.getTables()[matrix->getTableId(0) - 1]->getName());
+  table->setReferenceTable(this->resultTables[0].second);
+
+  // TODO : add column according to query
+  //aq::Table::Ptr refTable = this->BaseDesc.getTable(this->resultTables[0].second);
+  //std::for_each(refTable->Columns.begin(), refTable->Columns.end(), [&] (aq::Column::Ptr column) {
+  //  table->Columns.push_back(new aq::Column(*column));
+  //});
+
+  unsigned int columnId = 1;
+  for (auto& a : this->aliases) 
+  {
+    // FIXME
+    std::string columnName = a.first;
+    std::string::size_type pos = columnName.find(".");
+    if (pos != std::string::npos)
+    {
+      columnName = columnName.substr(pos + 1);
+    }
+    aq::Column::Ptr c(new aq::Column(columnName, columnId++, 0, aq::ColumnType::COL_TYPE_INT));
+    table->Columns.push_back(c);
+  }
+
   this->BaseDesc.getTables().push_back(table);
 }
 
@@ -593,55 +648,21 @@ void QueryResolver::generateTemporaryTable()
 void QueryResolver::renameResultTable()
 {
 
-  std::vector<std::string> files;
-  if(aq::GetFiles(this->pSettings->szTempPath1, files) != 0)
-    throw aq::generic_error(aq::generic_error::COULD_NOT_OPEN_FILE, "");
+  aq_engine->renameResult(this->id, this->resultTables);
 
-  for (auto it = files.begin(); it != files.end(); ++it)
+  for (auto& e : this->resultTables) 
   {
-    // BxxxTxxxxTPNxxxxPxxxxxxxxxx.[st]
-    if (((*it).length() == 32)
-      && ((*it)[0] == 'B')
-      && ((*it)[4] == 'T')
-      && ((*it)[9] == 'T')
-      && ((*it)[10] == 'P')
-      && ((*it)[11] == 'N')
-      && ((*it)[17] == 'P')
-      && ((*it)[30] == '.')
-      && (((*it)[31] == 's') || ((*it)[31] == 't')))
-    {
-      std::string oldFile = std::string(this->pSettings->szTempPath1) + "/" + *it;
-
-      try
-      {
-        char newFile[_MAX_PATH];
-        size_t reg = boost::lexical_cast<size_t>((*it).substr(5, 4));
-        size_t packet = boost::lexical_cast<size_t>((*it).substr(18, 12));
-        sprintf(newFile, "%s/B001REG%.4uTMP%.4uP%.12u.TMP", this->pSettings->szTempPath1, reg, this->id, packet);
-        ::remove(newFile);
-        ::rename(oldFile.c_str(), newFile);
-
-        Table::Ptr table = this->BaseDesc.getTable(reg);
-        packet = table->TotalCount / this->pSettings->packSize;
-        sprintf(newFile, "B001REG%.4uTMP%.4uP%.12u", reg, this->id, packet + 1);
-        std::pair<std::string, std::string> p(newFile, table->getName());
-        if (std::find(this->resultTables.begin(), this->resultTables.end(), p) == this->resultTables.end())
-        {
-          this->resultTables.push_back(p);
-        }
-      }
-      catch (const boost::bad_lexical_cast&)
-      {
-        throw aq::generic_error(aq::generic_error::COULD_NOT_OPEN_FILE, "invalid result file '%s'", oldFile.c_str());
-      }
-    }
-  }
-
-  std::for_each(this->resultTables.begin(), this->resultTables.end(), [&] (const std::pair<std::string, std::string>& e) {
     aq::Table::Ptr table(new Table(e.first, 1, true));
     table->setReferenceTable(e.second);
+    
+    aq::Table::Ptr refTable = this->BaseDesc.getTable(e.second);
+    for (auto& column : refTable->Columns) 
+    {
+      table->Columns.push_back(new aq::Column(*column));
+    }
+
     this->BaseDesc.getTables().push_back(table);
-  });
+  }
 
   
 	// copy WHERE's conditions to outer select WHERE
@@ -651,26 +672,27 @@ void QueryResolver::renameResultTable()
     // keep only join
     aq::tnode * joinNode = aq::clone_subtree(whereNode->left); // FIXME : possible memory leak
     joinNode = aq::getJoin(joinNode);
-    // rename table in join by temporary table
-    std::cout << *joinNode << std::endl;
-
-    // look for K_IDENT (should be K_TABLE)
-    std::vector<tnode*> ltables;
-    aq::find_nodes(joinNode, K_IDENT, ltables);
-    for (auto it = ltables.begin(); it != ltables.end(); ++it)
+    if (joinNode)
     {
-      std::string tableName = (*it)->getData().val_str;
-      aq::Table::Ptr table = this->BaseDesc.getTable(tableName);
-      for (auto itR = this->resultTables.begin(); itR != this->resultTables.end(); ++itR)
+      // rename table in join by temporary table
+
+      // look for K_IDENT (should be K_TABLE)
+      std::vector<tnode*> ltables;
+      aq::find_nodes(joinNode, K_IDENT, ltables);
+      for (auto& n : ltables) 
       {
-        if (itR->second == table->getName())
+        aq::Table::Ptr table = this->BaseDesc.getTable(n->getData().val_str);
+        for (auto& rt : this->resultTables)
         {
-          (*it)->set_string_data(itR->first.c_str());
+          if (rt.second == table->getName())
+          {
+            n->set_string_data(rt.first.c_str());
+          }
         }
       }
-    }
 
-		aq::addConditionsToWhere(joinNode, this->outerSelect);
+      aq::addConditionsToWhere(joinNode, this->outerSelect);
+    }
 	}
 	// aq::addInnerOuterNodes(whereNode->left, K_INNER, K_INNER);
 }
@@ -685,77 +707,107 @@ void QueryResolver::changeTemporaryTableName(aq::tnode * pNode)
     aq::tnode * column = pNode->right;
     assert((table != NULL) && (table->tag == K_IDENT) && (table->getDataType() == aq::NODE_DATA_STRING));
     assert((column != NULL) && (table->tag == K_IDENT) && (table->getDataType() == aq::NODE_DATA_STRING));
-    for (auto it = this->nestedTables.begin(); it != this->nestedTables.end(); ++it) 
+
+    // !!!!!!!!!!! FIXME !!!!!!!!!!!!! Hacking for testing (DEMO July 4 2013) !!!!!!!!!!!!!!!
+    if ((strcmp("B", table->getData().val_str) == 0) &&
+      (strcmp("MIN_SEM_COURT", column->getData().val_str) == 0))
     {
-      if (it->first == table->getData().val_str)
+      column->set_string_data("SEQ_SEM_COURT");
+      table->set_string_data("B001REG0001TMP0003P000000000007");
+    }
+
+    for (auto& nestedTable : this->nestedTables) 
+    {
+      if (nestedTable.first == table->getData().val_str)
       {
-        Table::Ptr tmp = it->second->getResult();
+        Table::Ptr tmp = nestedTable.second->getResult();
         if (tmp)
         {
-          for (auto itCol = tmp->Columns.begin(); itCol != tmp->Columns.end(); ++itCol)
+          for (auto& col : tmp->Columns)
           {
-            if ((*itCol)->getName() == column->getData().val_str)
+            if (col->getName() == column->getData().val_str)
             {
               char * buf = static_cast<char*>(malloc(128 * sizeof(char)));
-              std::string type_str = columnTypeToStr((*itCol)->Type);
-              sprintf(buf, "C%.4u%s%.4u", (*itCol)->ID, type_str.c_str(), (*itCol)->Size);
+              std::string type_str = columnTypeToStr(col->Type);
+              sprintf(buf, "C%.4u%s%.4u", col->ID, type_str.c_str(), col->Size);
               aq::Logger::getInstance().log(AQ_DEBUG, "change column name '%s' by '%s'\n", column->getData().val_str, buf);
               column->set_string_data(buf);
               free(buf);
+              changeTemporaryTableName(table); // FIXME
             }
           }
         }
         else
         {
-          assert(it->second->isCompressable());
-          if (!it->second->isCompressable())
+          assert(nestedTable.second->isCompressable());
+          if (!nestedTable.second->isCompressable())
             throw aq::generic_error(aq::generic_error::INVALID_TABLE, "empty result on a non compressable nested result");
-          auto baseTables = it->second->getResultTables();
-          for (auto itTable = baseTables.begin(); itTable != baseTables.end(); ++itTable)
+          for (auto& baseTable : nestedTable.second->getResultTables())
           {
-            aq::Table::Ptr tableDesc = this->BaseDesc.getTable(itTable->first);
+            aq::Table::Ptr tableBase = this->BaseDesc.getTable(baseTable.first);
+            aq::Table::Ptr tableDesc = this->BaseDesc.getTable(baseTable.first);
+
+            //while (tableBase->isTemporary())
+            //{
+            //  tableBase = this->BaseDesc.getTable(tableBase->getReferenceTable());
+            //}
+
             // check if the column belong to the table
             bool isPresent = false;
-            for (auto itCol = tableDesc->Columns.begin(); (itCol != tableDesc->Columns.end()) && !isPresent; ++itCol)
+            for (auto& col : tableDesc->Columns)
             {
-              if ((*itCol)->getName() == column->getData().val_str)
+              if (col->getName() == column->getData().val_str)
               {
                 // nothing to do
                 isPresent = true;
+                break;
               }
             }
+
             // if the column doesn't belong to the table, it should be an alias
             if (!isPresent)
             {
               // find the original column and change alias name
-              std::string new_column_name = it->second->getOriginalColumn(column->getData().val_str);
+              std::string new_column_name = nestedTable.second->getOriginalColumn(column->getData().val_str);
               if (new_column_name != "")
               {
                 isPresent = true;
                 column->set_string_data(new_column_name.c_str());
               }
             }
+
             if (isPresent)
             {
-              table->set_string_data(itTable->first.c_str());
+              if (tableDesc->isTemporary())
+              {
+                // even is the column isPresent, it can be an alias
+                std::string new_column_name = nestedTable.second->getOriginalColumn(column->getData().val_str);
+                if (new_column_name != "")
+                {
+                  isPresent = true;
+                  column->set_string_data(new_column_name.c_str());
+                }
+              }
+              table->set_string_data(baseTable.first.c_str());
             }
+
           }
         }
       }
     }
-    // changeTemporaryTableName(table);
     assert(!pNode->next);
     return;
   }
   else if ((pNode->tag == K_IDENT) && (pNode->getDataType() == aq::NODE_DATA_STRING))
   {
-    for (std::map<std::string, boost::shared_ptr<QueryResolver> >::const_iterator it = this->nestedTables.begin(); it != this->nestedTables.end(); ++it) 
+    for (auto& nestedTable : this->nestedTables) 
     {
-      if (it->first == pNode->getData().val_str)
+      if (nestedTable.first == pNode->getData().val_str)
       {
-        if (it->second->isCompressable())
+        if (nestedTable.second->isCompressable())
         {
-          const std::vector<std::pair<std::string, std::string> >& v = it->second->getResultTables();
+          const auto& v = nestedTable.second->getResultTables();
+          assert(!v.empty());
           if (v.size() == 1)
           {
             pNode->set_string_data(v[0].first.c_str());
@@ -781,7 +833,7 @@ void QueryResolver::changeTemporaryTableName(aq::tnode * pNode)
         else
         {
           char * buf = static_cast<char*>(malloc(128 * sizeof(char)));
-          sprintf(buf, "TMP%.4uSIZE%.10u", it->second->getResult()->ID, it->second->getResult()->TotalCount);
+          sprintf(buf, "TMP%.4uSIZE%.10u", nestedTable.second->getResult()->ID, nestedTable.second->getResult()->TotalCount);
           aq::Logger::getInstance().log(AQ_DEBUG, "change table name '%s' by '%s'\n", pNode->getData().val_str, buf);
           pNode->set_string_data(buf);
           free(buf);
@@ -796,12 +848,12 @@ void QueryResolver::changeTemporaryTableName(aq::tnode * pNode)
   // change table and column name in BaseDesc
   if (pNode == this->sqlStatement)
   {
-    for (std::map<std::string, boost::shared_ptr<QueryResolver> >::const_iterator itTemp = this->nestedTables.begin(); itTemp != this->nestedTables.end(); ++itTemp)
+    for (auto& nestedTable : this->nestedTables)
     {
-      if (!itTemp->second->result)
+      if (!nestedTable.second->result)
       {
-        assert(itTemp->second->isCompressable());
-        if (!itTemp->second->isCompressable())
+        assert(nestedTable.second->isCompressable());
+        if (!nestedTable.second->isCompressable())
         {
           throw aq::generic_error(aq::generic_error::INVALID_TABLE, "");
         }
@@ -809,11 +861,11 @@ void QueryResolver::changeTemporaryTableName(aq::tnode * pNode)
       }
 
       char * name = static_cast<char*>(malloc(128 * sizeof(char)));
-      sprintf(name, "TMP%.4uSIZE%.10u", itTemp->second->result->ID, itTemp->second->result->TotalCount);
-      itTemp->second->result->setName(name);
+      sprintf(name, "TMP%.4uSIZE%.10u", nestedTable.second->result->ID, nestedTable.second->result->TotalCount);
+      nestedTable.second->result->setName(name);
       free(name);
 
-      Table::Ptr tmp = itTemp->second->getResult();
+      Table::Ptr tmp = nestedTable.second->getResult();
       for (std::vector<Column::Ptr>::iterator itCol = tmp->Columns.begin(); itCol != tmp->Columns.end(); ++itCol)
       {
         char * buf = static_cast<char*>(malloc(128 * sizeof(char)));
@@ -840,18 +892,25 @@ bool QueryResolver::isCompressable()
 {
   // check function select
   // if only column table and min/max occur, the AQMatrix of this query can be compressed
-  if (this->compressable) // already compute
-    return compressable;
-  
-  bool c = true;
-  tnode * select = aq::find_main_node(this->originalSqlStatement, K_SELECT);
-  std::vector<tnode*> nodes;
-  aq::getColumnsList(select->left, nodes);
-  for (auto it = nodes.begin(); (it != nodes.end()) && c; ++it)
+  if (this->compressable.indeterminate_value) // already compute
   {
-    c = isColumn(*it) || isMinMax(*it);
+    if (this->hasPartitionBy)
+    {
+      this->compressable = false;
+    }
+    else
+    {
+      bool c = true;
+      tnode * select = aq::find_main_node(this->originalSqlStatement, K_SELECT);
+      std::vector<tnode*> nodes;
+      aq::getColumnsList(select->left, nodes);
+      for (auto it = nodes.begin(); (it != nodes.end()) && c; ++it)
+      {
+        c = isColumn(*it) || isMinMax(*it);
+      }
+      this->compressable = c;
+    }
   }
-  this->compressable = c;
   return this->compressable;
 }
 
@@ -957,24 +1016,11 @@ boost::shared_ptr<QueryResolver> QueryResolver::SolveSelectFromSelect(	aq::tnode
   std::cout << aq::syntax_tree_to_prefix_form(pExteriorSelect, queryExterior) << std::endl;
 #endif
 
-  std::vector<unsigned int> categories_order;
-  if (pSettings->useRowResolver)
+  boost::array<uint32_t, 6> categories_order = { K_FROM, K_WHERE, K_SELECT, K_GROUP, K_HAVING, K_ORDER };
+  if (!pSettings->useRowResolver)
   {
-    categories_order.push_back( K_FROM );
-    categories_order.push_back( K_WHERE );
-    categories_order.push_back( K_SELECT );
-    categories_order.push_back( K_GROUP );
-    categories_order.push_back( K_HAVING );
-    categories_order.push_back( K_ORDER );
-  }
-  else
-  {
-    categories_order.push_back( K_FROM );
-    categories_order.push_back( K_WHERE );
-    categories_order.push_back( K_GROUP );
-    categories_order.push_back( K_HAVING );
-    categories_order.push_back( K_SELECT );
-    categories_order.push_back( K_ORDER );
+    boost::array<uint32_t, 6> new_order = { K_FROM, K_WHERE, K_GROUP, K_HAVING, K_SELECT, K_ORDER };
+    categories_order = new_order;
   }
 	aq::verb::VerbNode::Ptr spTree = aq::verb::VerbNode::BuildVerbsTree( pInteriorSelect, categories_order, this->BaseDesc, this->pSettings );
 	spTree->changeQuery();

@@ -180,10 +180,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aq\AQEngineBasic.h" />
+    <ClInclude Include="aq\AQEngineSimulate.h" />
     <ClInclude Include="aq\Link.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="aq\AQEngineBasic.cpp" />
+    <ClCompile Include="aq\AQEngineSimulate.cpp" />
     <ClCompile Include="aq\aq_tools.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

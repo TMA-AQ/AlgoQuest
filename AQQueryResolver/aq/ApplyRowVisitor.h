@@ -11,13 +11,13 @@ class ApplyRowVisitor : public verb::VerbVisitor
 {
 public:
 
-  std::vector<aq::Row> rows;
+  std::vector<aq::Row> * rows;
 
   ApplyRowVisitor();
 
   void clear() { this->n = 0; }
   void inc() { this->n++; }
-  bool full() const { return (this->n + 1) == rows.size(); }
+  bool full() const { return (rows != NULL) && (this->n + 1) == rows->size(); }
   
 	// Aggregate Verbs
 	void visit(verb::AggregateVerb*);

@@ -134,13 +134,11 @@ void BinaryVerb::changeResult(	Table::Ptr table,
 }
 
 //------------------------------------------------------------------------------
-void BinaryVerb::addResult(	aq::Row& row, 
-								VerbResult::Ptr resLeft, 
-								VerbResult::Ptr resRight, 
-								VerbResult::Ptr resNext )
+void BinaryVerb::addResult(aq::Row& row)
 {
-	assert( resLeft && resRight );
-	this->computeResult( resLeft, resRight );
+  throw aq::generic_error(aq::generic_error::NOT_IMPLEMENED, "binary operation are not implemented");
+	// this->computeResult( resLeft, resRight );
+  // this->computeResult(this->getLeftChild()->Result, this->getRightChild()->Result);
 }
 
 //------------------------------------------------------------------------------
@@ -178,12 +176,6 @@ ColumnType MinusVerb::outputType( ColumnType inputType1, ColumnType inputType2 )
 }
 
 //------------------------------------------------------------------------------
-void MinusVerb::accept(VerbVisitor* visitor)
-{
-  visitor->visit(this);
-}
-
-//------------------------------------------------------------------------------
 VERB_IMPLEMENT( PlusVerb );
 
 //------------------------------------------------------------------------------
@@ -213,12 +205,6 @@ ColumnType PlusVerb::outputType( ColumnType inputType1, ColumnType inputType2 )
 }
 
 //------------------------------------------------------------------------------
-void PlusVerb::accept(VerbVisitor* visitor)
-{
-  visitor->visit(this);
-}
-
-//------------------------------------------------------------------------------
 VERB_IMPLEMENT( MultiplyVerb );
 
 //------------------------------------------------------------------------------
@@ -243,12 +229,6 @@ ColumnType MultiplyVerb::outputType( ColumnType inputType1, ColumnType inputType
 }
 
 //------------------------------------------------------------------------------
-void MultiplyVerb::accept(VerbVisitor* visitor)
-{
-  visitor->visit(this);
-}
-
-//------------------------------------------------------------------------------
 VERB_IMPLEMENT( DivideVerb );
 
 //------------------------------------------------------------------------------
@@ -270,12 +250,6 @@ ColumnType DivideVerb::outputType( ColumnType inputType1, ColumnType inputType2 
 		)
 		return inputType1;
 	throw verb_error(generic_error::VERB_TYPE_MISMATCH, this->getVerbType() );
-}
-
-//------------------------------------------------------------------------------
-void DivideVerb::accept(VerbVisitor* visitor)
-{
-  visitor->visit(this);
 }
 
 }

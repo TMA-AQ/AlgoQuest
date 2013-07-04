@@ -5,7 +5,6 @@
 #include <vector>
 #include <iostream>
 
-unsigned nb = 1048576;
 std::vector<int> offset_v;
 
 void ReadOffset(const char * pszFileName) 
@@ -33,7 +32,7 @@ int main(int argc, char ** argv)
 	timer.start();
 	aq::FileMapper fileMapper(argv[1]);
 	int theOffset;
-	for (size_t i = 0; i < nb; i++)
+	for (size_t i = 0; i < aq::packet_size; i++)
 	{
 		fileMapper.read(&theOffset, i * sizeof(int), sizeof(int));
 		if (theOffset != offset_v[i])

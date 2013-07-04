@@ -22,7 +22,7 @@ namespace aq
       this->process(rows);
       return 0;
     }
-
+    virtual RowProcess_Intf * clone() = 0;
   };
 
 }

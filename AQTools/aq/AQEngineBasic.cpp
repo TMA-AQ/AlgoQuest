@@ -6,10 +6,14 @@ void AQEngineBasic::call(const std::string&, aq::AQEngine_Intf::mode_t)
 {
 }
 
-void AQEngineBasic::call(TProjectSettings& settings, 
-												 tnode *pNode, 
-												 aq::AQEngine_Intf::mode_t mode, 
-												 int selectLevel)
+void AQEngineBasic::call(TProjectSettings&, 
+												 tnode *, 
+												 aq::AQEngine_Intf::mode_t , 
+												 int)
+{
+}
+
+void renameResult(unsigned int, std::vector<std::pair<std::string, std::string> >&)
 {
 }
 

@@ -48,6 +48,7 @@ namespace aq
     row_t computedRow;
     unsigned int count;
     bool completed;
+    bool reinit;
     bool flush;
   };
 

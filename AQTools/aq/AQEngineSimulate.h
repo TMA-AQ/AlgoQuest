@@ -17,16 +17,19 @@ namespace aq
     AQEngineSimulate(Base& _baseDesc, TProjectSettings& settings);
     void call(const std::string& query, aq::AQEngine_Intf::mode_t mode); 
     void call(aq::tnode * pNode, aq::AQEngine_Intf::mode_t mode, int selectLevel);
+    
+    void renameResult(unsigned int id, std::vector<std::pair<std::string, std::string> >& resultTables);
 
     void setAQMatrix(boost::shared_ptr<aq::AQMatrix> _aqMatrix);
     void setTablesIDs(std::vector<llong>& _tableIDs);
-
+    
     boost::shared_ptr<aq::AQMatrix>   getAQMatrix();
     const std::vector<llong>&         getTablesIDs() const;
-
-    void  AQEngineSimulate::createTableIDs(aq::tnode* pNode);
-
+    
   private:
+    void createTableIDs(const std::string& query);
+    void createTableIDs(aq::tnode* pNode);
+
     boost::shared_ptr<aq::AQMatrix> aqMatrix;
     std::vector<llong> tableIDs;
     const Base& baseDesc;

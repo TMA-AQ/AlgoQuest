@@ -329,6 +329,7 @@
     <ClInclude Include="aq\db_loader\Util.h" />
     <ClInclude Include="aq\DumpVisitor.h" />
     <ClInclude Include="aq\ExprTransform.h" />
+    <ClInclude Include="aq\ExprTransform_2.h" />
     <ClInclude Include="aq\LIKE_PatternMatching.h" />
     <ClInclude Include="aq\Optimizations.h" />
     <ClInclude Include="aq\parser\ID2Str.h" />
@@ -342,10 +343,12 @@
     <ClInclude Include="aq\RowBinaryWritter.h" />
     <ClInclude Include="aq\RowProcesses.h" />
     <ClInclude Include="aq\RowProcess_Intf.h" />
+    <ClInclude Include="aq\RowTableWritter.h" />
     <ClInclude Include="aq\RowTemporaryWritter.h" />
     <ClInclude Include="aq\RowSolver.h" />
     <ClInclude Include="aq\RowVerbProcess.h" />
     <ClInclude Include="aq\RowWritter.h" />
+    <ClInclude Include="aq\RowWritter_Intf.h" />
     <ClInclude Include="aq\Settings.h" />
     <ClInclude Include="aq\SQLPrefix.h" />
     <ClInclude Include="aq\statement_resolver.h" />
@@ -397,6 +400,7 @@
     <ClCompile Include="aq\Row.cpp" />
     <ClCompile Include="aq\RowBinaryWritter.cpp" />
     <ClCompile Include="aq\RowSolver.cpp" />
+    <ClCompile Include="aq\RowTableWritter.cpp" />
     <ClCompile Include="aq\RowTemporaryWritter.cpp" />
     <ClCompile Include="aq\RowVerbProcess.cpp" />
     <ClCompile Include="aq\RowWritter.cpp" />

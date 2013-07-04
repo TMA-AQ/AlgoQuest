@@ -218,6 +218,7 @@ void tnode::set_int_data( llong nVal )
 
   this->data.val_int	 = nVal;
   this->eNodeDataType = NODE_DATA_INT;
+  this->nStrBufCb = 0;
 }
 
 //------------------------------------------------------------------------------
@@ -228,6 +229,7 @@ void tnode::set_double_data( double dVal )
 
   this->data.val_number	= dVal;
   this->eNodeDataType	= NODE_DATA_NUMBER;
+  this->nStrBufCb = 0;
 }
 
 //------------------------------------------------------------------------------
@@ -295,7 +297,7 @@ std::string tnode::to_string() const
 //------------------------------------------------------------------------------
 void tnode::to_upper()
 {
-  if (this->eNodeDataType == NODE_DATA_STRING) boost::to_upper(this->data.val_str);
+  if ((this->eNodeDataType == NODE_DATA_STRING) && (this->tag != K_STRING)) boost::to_upper(this->data.val_str);
   if (this->left) this->left->to_upper();
   if (this->right) this->right->to_upper();
   if (this->next) this->next->to_upper();
