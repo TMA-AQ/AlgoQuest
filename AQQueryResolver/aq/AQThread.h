@@ -114,6 +114,9 @@ namespace aq
       this->_queryResolver->setTime(time);
       this->_queryResolver->solve();
 
+      this->setTime(time * 2);
+      this->setGlobalTime();
+
 
       // blabla thread debut
       std::cout << "Turn number: [" << count << "] with timer at [" << (time * 2)
@@ -178,38 +181,68 @@ namespace aq
     //--------------------------------------------------------------------------------------------
 
 
-    // getter
+    // getter / setter
     //--------------------------------------------------------------------------------------------
 
-    aq::tnode*  getPNode()  const {
+    aq::tnode*  getPNode()          const {
       return this->_pNode;
     }
     
+    int         getTime()           const {
+      return this->_time;
+    }
+
+    int         getGlobalTime()     const {
+      return this->_globalTime;
+    }
+
+    void        setGlobalTime() {
+      int globalTime = 0;
+      for (const auto& it : this->_listThread)
+        if (it->getGlobalTime() > globalTime)
+          globalTime = it->getGlobalTime();
+      this->_globalTime = this->_time + globalTime;
+    }
+
+    void        setTime(int time) {
+      this->_time = time;
+    }
+
     //--------------------------------------------------------------------------------------------
 
 
     // dump part
     //--------------------------------------------------------------------------------------------
 
-    void  dump(std::ostream& os, const std::string& indent)    const {
-      if (this->_patern != NULL)
-      {
-        os << indent << "My father is [" << this->_patern->_pNode << "] and:" << std::endl;
-      }
-      os << indent << "I'm [" << this->_pNode << "]";
-      if (this->_listThread.size() == 0)
-        os << std::endl;
-      else
-      {
-        os << " and my son(s) is(are) : " << std::endl;
-        os << indent << "-->" << std::endl;
-      }
+    void  secretModule(std::string& str, const std::string& indent)                      const {
+      str.insert(0, indent);
+      for (size_t i = 0; i < str.size(); ++i)
+        if (str.at(i) == '\n')
+          str.insert(i + 1, indent);
+    }
+
+    void  presentation(std::ostream& os, std::string indent)  const {
+      os << indent << "<globalTime> #- " << this->getGlobalTime() << " -# </globalTime>" << std::endl;
+      os << indent << "<time> #- " << this->getTime() << " -# </time>" << std::endl;
+      os << indent << "<adress> #- [" << this->_pNode << "] -# </adress>" << std::endl;
+      std::string str;
+      aq::generate_parent(this->_pNode, NULL);
+      aq::syntax_tree_to_sql_form(this->_pNode, str);
+      aq::multiline_query(str);
+      this->secretModule(str, indent);
+      os << indent << "<request>" << std::endl << str << std::endl << indent << "</request>" << std::endl;
+    }
+
+    void  dump(std::ostream& os, std::string indent)          const {
+      os << indent << "<query>" << std::endl;
+      this->presentation(os, indent);
+      if (this->_listThread.size() > 0)
+        os << indent << "<child>" << std::endl;
       for (std::vector<AQThread*>::const_iterator it = this->_listThread.begin(); it != this->_listThread.end(); ++it)
         (*it)->dump(os, indent + "  ");
       if (this->_listThread.size() > 0)
-      {
-        os << indent << "<--" << std::endl;
-      }
+        os << indent << "</child>" << std::endl;
+      os << indent << "</query>" << std::endl;
     }
 
     //--------------------------------------------------------------------------------------------
@@ -225,6 +258,9 @@ namespace aq
     bool                    _threading;
     bool                    _ready;
     bool                    _initialaze;
+
+    int                     _time;
+    int                     _globalTime;
 
     boost::thread           _thread;
 

@@ -85,11 +85,12 @@ Table::Ptr QueryResolver::solve()
   {
 		throw aq::generic_error(aq::generic_error::INVALID_QUERY, "");
   }
-
+  
+  // post processing before solving nested queries
 	aq::solveIdentRequest(this->sqlStatement, BaseDesc);
   aq::generate_parent(this->sqlStatement, NULL);
   aq::addAlias(this->sqlStatement->left);
-	
+
 #ifdef _DEBUG
   std::string sql_query;
   std::cout << *this->sqlStatement << std::endl;
@@ -161,10 +162,19 @@ Table::Ptr QueryResolver::solve()
   }
   aq::removePartitionBy(this->sqlStatement);
 
-	this->solveNested(this->sqlStatement, this->level, NULL, false, false);
+  // solve nested queries
+	// this->solveNested(this->sqlStatement, this->level, NULL, false, false);
+  this->solveNested();
+
+  std::cout << *this->sqlStatement << std::endl;
+
+  // post processing after solving nested queries
+  aq::dateNodeToBigInt(this->sqlStatement);
+  aq::transformExpression(this->BaseDesc, *this->pSettings, this->sqlStatement);
 
 #ifdef _DEBUG
 	sql_query = "";
+  std::cout << *this->sqlStatement << std::endl;
   std::cout << aq::multiline_query(aq::syntax_tree_to_sql_form(this->sqlStatement, sql_query)) << std::endl;
 #endif
 
@@ -224,10 +234,10 @@ Table::Ptr QueryResolver::solve()
     std::cout << "nodes tree:" << std::endl;
     std::cout << *this->sqlStatement << std::endl;
     std::cout << "verbs tree:" << std::endl;
-    aq::verb::VerbNode::dump(std::cout, spTree);
-    DumpVisitor printer;
+    // aq::verb::VerbNode::dump(std::cout, spTree);
+    // DumpVisitor printer;
     // spTree->apply(&printer);
-    std::cout << std::endl << printer.getQuery() << std::endl;
+    // std::cout << std::endl << printer.getQuery() << std::endl;
   }
 #endif
   
@@ -357,6 +367,15 @@ Table::Ptr QueryResolver::solve()
 }
 
 //------------------------------------------------------------------------------
+void QueryResolver::solveNested()
+{
+  for (auto& qr : this->nestedTables)
+  {
+    qr.second->solve();
+  }
+}
+
+//------------------------------------------------------------------------------
 void QueryResolver::solveNested(aq::tnode*& pNode, unsigned int nSelectLevel, aq::tnode* pLastSelect, bool inFrom, bool inIn)
 {
 	if((pNode == NULL) || (pNode->tag == K_DELETED))
@@ -447,7 +466,7 @@ void QueryResolver::executeNested(aq::tnode * pNode)
 
   std::string alias;
   aq::tnode * as = pNode->parent;
-  if ((as != NULL) && (as->tag == K_AS) && (as->right != NULL) && (as->right->getDataType() == aq::NODE_DATA_STRING))
+  if ((as != NULL) && (as->tag == K_AS) && (as->right != NULL) && (as->right->getDataType() == aq::tnode::tnodeDataType::NODE_DATA_STRING))
   {
     alias = pNode->parent->right->getData().val_str;
   }
@@ -622,24 +641,25 @@ void QueryResolver::generateTemporaryTable()
   table->setReferenceTable(this->resultTables[0].second);
 
   // TODO : add column according to query
-  //aq::Table::Ptr refTable = this->BaseDesc.getTable(this->resultTables[0].second);
-  //std::for_each(refTable->Columns.begin(), refTable->Columns.end(), [&] (aq::Column::Ptr column) {
-  //  table->Columns.push_back(new aq::Column(*column));
-  //});
-
-  unsigned int columnId = 1;
-  for (auto& a : this->aliases) 
+  aq::Table::Ptr refTable = this->BaseDesc.getTable(this->resultTables[0].second);
+  for (auto& column : refTable->Columns) 
   {
-    // FIXME
-    std::string columnName = a.first;
-    std::string::size_type pos = columnName.find(".");
-    if (pos != std::string::npos)
-    {
-      columnName = columnName.substr(pos + 1);
-    }
-    aq::Column::Ptr c(new aq::Column(columnName, columnId++, 0, aq::ColumnType::COL_TYPE_INT));
-    table->Columns.push_back(c);
+    table->Columns.push_back(new aq::Column(*column));
   }
+
+  //unsigned int columnId = 1;
+  //for (auto& a : this->aliases) 
+  //{
+  //  // FIXME
+  //  std::string columnName = a.first;
+  //  std::string::size_type pos = columnName.find(".");
+  //  if (pos != std::string::npos)
+  //  {
+  //    columnName = columnName.substr(pos + 1);
+  //  }
+  //  aq::Column::Ptr c(new aq::Column(columnName, columnId++, 0, aq::ColumnType::COL_TYPE_INT));
+  //  table->Columns.push_back(c);
+  //}
 
   this->BaseDesc.getTables().push_back(table);
 }
@@ -705,8 +725,8 @@ void QueryResolver::changeTemporaryTableName(aq::tnode * pNode)
   {
     aq::tnode * table = pNode->left;
     aq::tnode * column = pNode->right;
-    assert((table != NULL) && (table->tag == K_IDENT) && (table->getDataType() == aq::NODE_DATA_STRING));
-    assert((column != NULL) && (table->tag == K_IDENT) && (table->getDataType() == aq::NODE_DATA_STRING));
+    assert((table != NULL) && (table->tag == K_IDENT) && (table->getDataType() == aq::tnode::tnodeDataType::NODE_DATA_STRING));
+    assert((column != NULL) && (table->tag == K_IDENT) && (table->getDataType() == aq::tnode::tnodeDataType::NODE_DATA_STRING));
 
     // !!!!!!!!!!! FIXME !!!!!!!!!!!!! Hacking for testing (DEMO July 4 2013) !!!!!!!!!!!!!!!
     if ((strcmp("B", table->getData().val_str) == 0) &&
@@ -798,7 +818,7 @@ void QueryResolver::changeTemporaryTableName(aq::tnode * pNode)
     assert(!pNode->next);
     return;
   }
-  else if ((pNode->tag == K_IDENT) && (pNode->getDataType() == aq::NODE_DATA_STRING))
+  else if ((pNode->tag == K_IDENT) && (pNode->getDataType() == aq::tnode::tnodeDataType::NODE_DATA_STRING))
   {
     for (auto& nestedTable : this->nestedTables) 
     {

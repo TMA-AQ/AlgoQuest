@@ -9,10 +9,14 @@
 
 namespace aq
 {
+  
+aq::tnode* create_eq_subtree_string(const char* pszRightItem);
+aq::tnode* create_eq_subtree_integer(llong nRightItem);
+aq::tnode* create_eq_subtree_double(double dRightItem);
 
-int check_between_for_transform(const aq::tnode& pNode);
-int check_like_for_transform(const aq::tnode& pNode);
-int check_cmp_op_for_transform(const aq::tnode& pNode);
+bool check_between_for_transform(const aq::tnode& pNode);
+bool check_like_for_transform(const aq::tnode& pNode);
+bool check_cmp_op_for_transform(const aq::tnode& pNode);
 
 class ExpressionTransform
 {

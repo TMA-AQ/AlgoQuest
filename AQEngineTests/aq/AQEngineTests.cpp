@@ -1,7 +1,6 @@
 // TestAQEngine.cpp : définit le point d'entrée pour l'application console.
 //
 
-#include "stdafx.h"
 #include "Util.h"
 #include "QueryGenerator.h"
 #include <aq/Logger.h>
@@ -17,7 +16,7 @@ namespace po = boost::program_options;
 
 bool aq::verbose = false;
 
-extern int functional_tests(const std::string& dbPath, const std::string& queryIdent, const std::string& aqEngine, 
+extern int functional_tests(const std::string& dbPath, std::string& queryIdent, const std::string& aqEngine, 
                             const std::string& queriesFilename, const std::string& filter,
                             const std::string& logFilename, uint64_t limit, bool stopOnError);
 
@@ -56,6 +55,7 @@ int main(int argc, char ** argv)
       ("log,o", po::value<std::string>(&logFilename)->default_value("./test_aq_engine.log"), "")
       ("generate", po::bool_switch(&generate), "")
       ("stop-on-error,e", po::bool_switch(&stopOnError), "")
+      ("stop-on-error,s", po::bool_switch(&stopOnError), "")
       ("verbose,v", po::bool_switch(&aq::verbose), "set verbosity")
 			;
 

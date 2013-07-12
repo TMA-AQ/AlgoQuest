@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Util.h"
 #include <aq/FileMapper.h>
 #include <aq/WindowFileMapper.h>
@@ -52,24 +51,31 @@ int generate_database(const char * path, const char * name)
 }
 
 // ------------------------------------------------------------------------------
-int generate_working_directories(const std::string& dbPath, const std::string& queryIdent, std::string& iniFilename)
+int generate_working_directories(const std::string& dbPath, std::string& queryIdent, std::string& iniFilename)
 {
   boost::filesystem::path p;
-  p = boost::filesystem::path(dbPath + "calculus/test_aq_engine");
+  p = boost::filesystem::path(dbPath + "calculus/" + queryIdent);
   boost::filesystem::create_directory(p);
-  p = boost::filesystem::path(dbPath + "data_orga/tmp/test_aq_engine");
-  if (boost::filesystem::exists(p))
+  p = boost::filesystem::path(dbPath + "data_orga/tmp/" + queryIdent);
+  std::string tmp = dbPath + "data_orga/tmp/";
+  std::string tmp2 = queryIdent;
+  for (int i =  0; boost::filesystem::exists(p); ++i)
   {
-    std::cerr << p << " already exist : STOP" << std::endl;
-    exit(-1);
+    queryIdent = tmp2 + std::to_string(i);
+    p = tmp + queryIdent;
+    if (i == 10)
+    {
+      std::cerr << p << " already exist : STOP" << std::endl;
+      exit(-1);
+    }
   }
   boost::filesystem::create_directory(p);
-  p = boost::filesystem::path(dbPath + "data_orga/tmp/test_aq_engine/dpy");
+  p = boost::filesystem::path(dbPath + "data_orga/tmp/" + queryIdent + "/dpy");
   boost::filesystem::create_directory(p);
-  p = boost::filesystem::path(dbPath + "calculus/test_aq_engine");
+  p = boost::filesystem::path(dbPath + "calculus/" + queryIdent);
   boost::filesystem::create_directory(p);
   
-  iniFilename = dbPath + "calculus/test_aq_engine/aq_engine.ini";
+  iniFilename = dbPath + "calculus/" + queryIdent + "/aq_engine.ini";
   std::ofstream ini(iniFilename.c_str());
   ini << "export.filename.final=" << dbPath << "base_struct/base." << std::endl;
   ini << "step1.field.separator=;" << std::endl;
@@ -169,7 +175,8 @@ void get_columns(std::vector<std::string>& columns, const std::string& query, co
 int check_answer_data(const std::string& answerPath, const std::string& dbPath, const size_t limit, const size_t packetSize, 
                       const std::vector<std::string>& selectedColumns,
                       const std::vector<std::string>& groupedColumns, 
-                      const std::vector<std::string>& orderedColumns)
+                      const std::vector<std::string>& orderedColumns,
+                      const WhereValidator& whereValidator)
 {
   std::string baseFilename(dbPath);
   baseFilename += "/base_struct/base";
@@ -320,6 +327,13 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
         ++itGrouped;
         ++itOrdered;
       }
+      
+      if (!whereValidator.check(matrix, columnMappers, i))
+      {
+        std::cerr << "BAD WHERING: TODO : print expected value" << std::endl;
+        exit(-1);
+      }
+
       if (aq::verbose)
         std::cout << " | ";
     }

@@ -613,9 +613,9 @@ void checkTree( tnode * tree, std::set<tnode*>& nodes)
 
   switch (tree->getDataType())
   {
-  case NODE_DATA_INT: break;
-  case NODE_DATA_NUMBER: break;
-  case NODE_DATA_STRING: 
+  case aq::tnode::tnodeDataType::NODE_DATA_INT: break;
+  case aq::tnode::tnodeDataType::NODE_DATA_NUMBER: break;
+  case aq::tnode::tnodeDataType::NODE_DATA_STRING: 
     //assert(tree->data.val_str != NULL); 
     //assert((tree->nStrBufCb % STR_BUF_SIZE_ROUND_UP) == 0);
     //assert(tree->nStrBufCb >= strlen(tree->data.val_str));

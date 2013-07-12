@@ -1,5 +1,7 @@
 #include "RowSolver.h"
 #include "TemporaryColumnMapper.h"
+#include <aq/FileMapper.h>
+#include <aq/WindowFileMapper.h>
 #include <aq/Exceptions.h>
 #include <aq/Timer.h>
 #include <aq/Logger.h>
@@ -11,6 +13,32 @@ boost::mutex mutex;
 namespace aq 
 {
   
+boost::shared_ptr<ColumnMapper_Intf> new_column_mapper(const aq::ColumnType type, const char * path, const size_t tableId, 
+                                                       const size_t columnId, const size_t size, const size_t packetSize)
+{      
+  boost::shared_ptr<ColumnMapper_Intf> cm;
+  switch(type)
+  {
+  case aq::ColumnType::COL_TYPE_BIG_INT:
+  case aq::ColumnType::COL_TYPE_DATE1:
+  case aq::ColumnType::COL_TYPE_DATE2:
+  case aq::ColumnType::COL_TYPE_DATE3:
+  case aq::ColumnType::COL_TYPE_DATE4:
+    cm.reset(new aq::ColumnMapper<int64_t, aq::WindowFileMapper>(path, tableId, columnId, size, packetSize));
+    break;
+  case aq::ColumnType::COL_TYPE_INT:
+    cm.reset(new aq::ColumnMapper<int32_t, aq::WindowFileMapper>(path, tableId, columnId, size, packetSize));
+    break;
+  case aq::ColumnType::COL_TYPE_DOUBLE:
+    cm.reset(new aq::ColumnMapper<double, aq::WindowFileMapper>(path, tableId, columnId, size, packetSize));
+    break;
+  case aq::ColumnType::COL_TYPE_VARCHAR:
+    cm.reset(new aq::ColumnMapper<char, aq::WindowFileMapper>(path, tableId, columnId, size, packetSize));
+    break;
+  }
+  return cm;
+}
+
 void prepareColumnAndColumnMapper(const TProjectSettings& settings,
                                   const Base& BaseDesc,
                                   const std::vector<Column::Ptr>& columnTypes, 
@@ -46,29 +74,15 @@ void prepareColumnAndColumnMapper(const TProjectSettings& settings,
     }
     else
     {
-      const aq::Column::Ptr c = columnTypes[i];
-      switch(c->Type)
+      const aq::Column::Ptr& c = columnTypes[i];
+
+      Table::Ptr table = BaseDesc.getTable(c->TableID);
+      while (table->isTemporary()) 
       {
-      case aq::ColumnType::COL_TYPE_BIG_INT:
-      case aq::ColumnType::COL_TYPE_DATE1:
-      case aq::ColumnType::COL_TYPE_DATE2:
-      case aq::ColumnType::COL_TYPE_DATE3:
-      case aq::ColumnType::COL_TYPE_DATE4:
-        // assert(c->Size == 1);
-        cm.reset(new aq::ColumnMapper<int64_t>(settings.szThesaurusPath, c->TableID, c->ID, 1/*c->Size*/, settings.packSize));
-        break;
-      case aq::ColumnType::COL_TYPE_INT:
-        // assert(c->Size == 1);
-        cm.reset(new aq::ColumnMapper<int32_t>(settings.szThesaurusPath, c->TableID, c->ID, 1/*c->Size*/, settings.packSize));
-        break;
-      case aq::ColumnType::COL_TYPE_DOUBLE:
-        // assert(c->Size == 1);
-        cm.reset(new aq::ColumnMapper<double>(settings.szThesaurusPath, c->TableID, c->ID, 1/*c->Size*/, settings.packSize));
-        break;
-      case aq::ColumnType::COL_TYPE_VARCHAR:
-        cm.reset(new aq::ColumnMapper<char>(settings.szThesaurusPath, c->TableID, c->ID, c->Size, settings.packSize));
-        break;
+        table = BaseDesc.getTable(table->getReferenceTable());
       }
+
+      cm = new_column_mapper(c->Type, settings.szThesaurusPath, table->ID, c->ID, c->Size, settings.packSize);
     }
     columnsMapper.push_back(cm);
   }
@@ -116,28 +130,7 @@ void addGroupColumn(const TProjectSettings& settings,
           }
           else
           {
-            switch(column->Type)
-            {
-            case aq::ColumnType::COL_TYPE_BIG_INT:
-            case aq::ColumnType::COL_TYPE_DATE1:
-            case aq::ColumnType::COL_TYPE_DATE2:
-            case aq::ColumnType::COL_TYPE_DATE3:
-            case aq::ColumnType::COL_TYPE_DATE4:
-              // assert(column->Size == 1);
-              cm.reset(new aq::ColumnMapper<int64_t>(settings.szThesaurusPath, column->TableID, column->ID, 1/*column->Size*/, settings.packSize));
-              break;
-            case aq::ColumnType::COL_TYPE_INT:
-              // assert(column->Size == 1);
-              cm.reset(new aq::ColumnMapper<int32_t>(settings.szThesaurusPath, column->TableID, column->ID, 1/*column->Size*/, settings.packSize));
-              break;
-            case aq::ColumnType::COL_TYPE_DOUBLE:
-              // assert(column->Size == 1);
-              cm.reset(new aq::ColumnMapper<double>(settings.szThesaurusPath, column->TableID, column->ID, 1/*column->Size*/, settings.packSize));
-              break;
-            case aq::ColumnType::COL_TYPE_VARCHAR:
-              cm.reset(new aq::ColumnMapper<char>(settings.szThesaurusPath, column->TableID, column->ID, column->Size, settings.packSize));
-              break;
-            }
+            cm = new_column_mapper(column->Type, settings.szThesaurusPath, column->TableID, column->ID, column->Size, settings.packSize);
           }
           columnsMapper.push_back(cm);
           found = true;
@@ -177,6 +170,9 @@ columnsMapper(_columnsMapper),
 
 void ThreadResolver::solve()
 {  
+  assert(isGroupedColumn.size() == columns.size());
+  assert(columnToAQMatrixColumn.size() == columns.size());
+
   aq::Timer timer;
   std::vector<aq::Row> rows(1);
   aq::Row& row = rows[0];
@@ -198,17 +194,15 @@ void ThreadResolver::solve()
       // initial row
       aq::row_item_t& item_tmp = row.initialRow[c];
       boost::lock_guard<boost::mutex> lock(mutex);
-      if (c < columnToAQMatrixColumn.size()) // FIXME
+      assert(c < columnToAQMatrixColumn.size());
+      columnsMapper[c]->loadValue(aqMatrix.getColumn(columnToAQMatrixColumn[c])[i], *item_tmp.item);
+      if (item_tmp.columnName == "")
       {
-        columnsMapper[c]->loadValue(aqMatrix.getColumn(columnToAQMatrixColumn[c])[i], *item_tmp.item);
-        if (item_tmp.columnName == "")
-        {
-          item_tmp.type = columns[c]->Type;
-          item_tmp.size = static_cast<unsigned int>(columns[c]->Size);
-          item_tmp.tableName = columns[c]->getTableName();
-          item_tmp.columnName = columns[c]->getName();
-          item_tmp.grouped = columns[c]->GroupBy;
-        }
+        item_tmp.type = columns[c]->Type;
+        item_tmp.size = static_cast<unsigned int>(columns[c]->Size);
+        item_tmp.tableName = columns[c]->getTableName();
+        item_tmp.columnName = columns[c]->getName();
+        item_tmp.grouped = columns[c]->GroupBy;
       }
     }
 
@@ -286,14 +280,21 @@ void solveAQMatrix_V2(aq::AQMatrix& aqMatrix,
   std::vector<size_t> columnToAQMatrixColumn;
   for (auto& c : columns) 
   {
+    Table::Ptr table = BaseDesc.getTable(c->TableID);
+    while (table->isTemporary())
+    {
+      table = BaseDesc.getTable(table->getReferenceTable());
+    }
     for (size_t j = 0; j < aqMatrix.getNbColumn(); ++j) 
     {
-      if (c->TableID == tableIDs[j])
+      if (table->ID== tableIDs[j])
       {
         columnToAQMatrixColumn.push_back(j);
+        break;
       }
     }
   }
+  assert(columnToAQMatrixColumn.size() == columns.size());
 
   // NOTE : EACH GROUP CAN BE PROCESS INDEPENDENTLY (THEREFORE MULTITHREAD CAN BE USED)
   std::vector<bool> isGroupedColumn;
@@ -310,6 +311,7 @@ void solveAQMatrix_V2(aq::AQMatrix& aqMatrix,
     }
     isGroupedColumn.push_back(isGrouped);
   }
+  assert(isGroupedColumn.size() == columns.size());
   
   if (processThread == 1)
   {

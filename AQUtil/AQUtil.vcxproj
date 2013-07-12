@@ -164,11 +164,13 @@
     <ClInclude Include="aq\Exceptions.h" />
     <ClInclude Include="aq\FileMapper.h" />
     <ClInclude Include="aq\Logger.h" />
+    <ClInclude Include="aq\MMapFileMapper.h" />
     <ClInclude Include="aq\Object.h" />
     <ClInclude Include="aq\ParallelProcess.h" />
     <ClInclude Include="aq\Symbole.h" />
     <ClInclude Include="aq\Timer.h" />
     <ClInclude Include="aq\Utilities.h" />
+    <ClInclude Include="aq\WindowFileMapper.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
@@ -181,6 +183,7 @@
     <ClCompile Include="aq\Logger.cpp" />
     <ClCompile Include="aq\Timer.cpp" />
     <ClCompile Include="aq\Utilities.cpp" />
+    <ClCompile Include="aq\WindowFileMapper.cpp" />
     <ClCompile Include="Tests\check_file_mapper.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>

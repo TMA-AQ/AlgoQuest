@@ -130,7 +130,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -158,10 +158,12 @@
   <ItemGroup>
     <ClCompile Include="aq\FunctionalTests.cpp" />
     <ClCompile Include="aq\AQEngineTests.cpp" />
+    <ClCompile Include="aq\QueryGenerator.cpp" />
     <ClCompile Include="aq\QueryReader.cpp" />
     <ClCompile Include="aq\Util.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="aq\QueryGenerator.h" />
     <ClInclude Include="aq\QueryReader.h" />
     <ClInclude Include="aq\Util.h" />
   </ItemGroup>

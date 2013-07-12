@@ -3,6 +3,7 @@
 #include "parser/sql92_grm_tab.hpp"
 #include "Column2Table.h"
 #include "LIKE_PatternMatching.h"
+#include "TreeUtilities.h"
 #include <stdio.h>
 #include <malloc.h>
 #include <string.h>
@@ -21,24 +22,6 @@ namespace aq
 #ifndef _MAX_PATH
 #define _MAX_PATH 256
 #endif 
-
-//------------------------------------------------------------------------------
-// Return 1 for true, 0 for false//
-int is_column_reference( aq::tnode *pNode ) {
-	if ( pNode == NULL )
-		return 0;
-	if ( pNode->tag != K_PERIOD )
-		return 0;
-	if ( pNode->left == NULL )
-		return 0;
-	if ( pNode->right == NULL )
-		return 0;
-	if ( pNode->left->tag != K_IDENT )
-		return 0;
-	if ( pNode->right->tag != K_COLUMN )
-		return 0;
-	return 1;
-}
 
 //------------------------------------------------------------------------------
 int ExpressionTransform::get_thesaurus_for_column(	Column& thesaurus, 
@@ -248,7 +231,7 @@ char* get_string_without_quotes( char* pszStr ) {
 
 //------------------------------------------------------------------------------
 // Return 1 on true, 0 on false
-int check_between_for_transform(const aq::tnode& pNode) {
+bool check_between_for_transform(const aq::tnode& pNode) {
 
 	if ( pNode.tag == K_BETWEEN || pNode.tag == K_NOT_BETWEEN ) {
 		// BETWEEN
@@ -261,12 +244,12 @@ int check_between_for_transform(const aq::tnode& pNode) {
 					( pNodeTmp->left->tag == K_STRING || pNodeTmp->left->tag == K_INTEGER ) &&
 					pNodeTmp->right != NULL && 
 					( pNodeTmp->right->tag == K_STRING || pNodeTmp->right->tag == K_INTEGER ) ) {
-						return 1;
+						return true;
 				}
 			}
 		}
 	}
-	return 0;
+	return false;
 }
 
 //------------------------------------------------------------------------------
@@ -428,7 +411,7 @@ aq::tnode* ExpressionTransform::transform_between( aq::tnode* pNode, int *pErr )
 
 //------------------------------------------------------------------------------
 // Return 1 on true, 0 on false
-int check_like_for_transform(const aq::tnode& pNode) {
+bool check_like_for_transform(const aq::tnode& pNode) {
 
 	if ( pNode.tag == K_LIKE || pNode.tag == K_NOT_LIKE ) {
 		// LIKE 
@@ -442,12 +425,12 @@ int check_like_for_transform(const aq::tnode& pNode) {
 				if ( pNodeTmp->tag == K_ESCAPE ) {
 					if (	pNodeTmp->left != NULL && pNodeTmp->left->tag == K_STRING &&
 						pNodeTmp->right != NULL && pNodeTmp->right->tag == K_STRING )
-						return 1;
+						return true;
 				}
 			}
 		}
 	}
-	return 0;
+	return false;
 }
 
 //------------------------------------------------------------------------------
@@ -613,12 +596,12 @@ aq::tnode* ExpressionTransform::transform_like( aq::tnode* pNode, int *pErr ) {
 
 //------------------------------------------------------------------------------
 // Return 1 on true, 0 on false
-int check_cmp_op_for_transform(const aq::tnode& pNode ) {
+bool check_cmp_op_for_transform(const aq::tnode& pNode ) {
 
 	if ( pNode.tag == K_NOT ) {
 		// Check for NOT <, >, <=, >=
     if (pNode.left == NULL)
-      return 0;
+      return false;
     else
       return check_cmp_op_for_transform( *pNode.left );
 	} 
@@ -630,16 +613,16 @@ int check_cmp_op_for_transform(const aq::tnode& pNode ) {
 				// Left is column reference -> check for strings at right
 				if (	pNode.right != NULL && 
 					( pNode.right->tag == K_STRING || pNode.right->tag == K_INTEGER || pNode.right->tag == K_REAL ) )
-					return 1;
+					return true;
 			} else if ( is_column_reference( pNode.right ) != 0 ) {
 				// Right is column reference -> check for strings at left
 				if (	pNode.left != NULL && 
 					( pNode.left->tag == K_STRING || pNode.left->tag == K_INTEGER || pNode.left->tag == K_REAL ) )
-					return 1;
+					return true;
 			}
 		}
 	}
-	return 0;
+	return false;
 }
 
 //------------------------------------------------------------------------------

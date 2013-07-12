@@ -343,7 +343,7 @@ IntValueVerb::IntValueVerb()
 //------------------------------------------------------------------------------
 bool IntValueVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
-	assert( pNode->getDataType() == NODE_DATA_INT );
+	assert( pNode->getDataType() == aq::tnode::tnodeDataType::NODE_DATA_INT );
 	this->Result = new Scalar(COL_TYPE_INT, 4, ColumnItem((double)pNode->getData().val_int));
 	return false;
 }
@@ -364,7 +364,7 @@ DoubleValueVerb::DoubleValueVerb()
 //------------------------------------------------------------------------------
 bool DoubleValueVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
-	assert( pNode->getDataType() == NODE_DATA_NUMBER );
+	assert( pNode->getDataType() == aq::tnode::tnodeDataType::NODE_DATA_NUMBER );
 	this->Result = new Scalar(COL_TYPE_DOUBLE, 8, ColumnItem(pNode->getData().val_number));
 	return false;
 }
@@ -385,7 +385,7 @@ StringValueVerb::StringValueVerb()
 //------------------------------------------------------------------------------
 bool StringValueVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
-	assert( pNode->getDataType() == NODE_DATA_STRING );
+	assert( pNode->getDataType() == aq::tnode::tnodeDataType::NODE_DATA_STRING );
 	this->Result = new Scalar(COL_TYPE_VARCHAR, 128, ColumnItem(pNode->getData().val_str)); // FIXME
 	return false;
 }

@@ -24,7 +24,7 @@ bool ComparisonVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 									VerbResult::Ptr resNext )
 {
 	assert( pNode );
-	assert( pNode->getDataType() != NODE_DATA_STRING );
+	assert( pNode->getDataType() != aq::tnode::tnodeDataType::NODE_DATA_STRING );
 	int pErr = 0;
 	//the argument given to expression_transform will be destroyed if the function
 	//is successful
@@ -70,7 +70,7 @@ bool ComparisonVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 		throw verb_error(generic_error::GENERIC, this->getVerbType());
 	}
 	//pNodeClone already deleted by expression_transform
-	assert( newNode->getDataType() != NODE_DATA_STRING );
+	assert( newNode->getDataType() != aq::tnode::tnodeDataType::NODE_DATA_STRING );
 	*pNode = *newNode; // FIXME
   pNode->left = newNode->left;
   pNode->right = newNode->right;

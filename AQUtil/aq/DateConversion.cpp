@@ -1,8 +1,9 @@
 #include "DateConversion.h"
-#include <stdio.h>
-#include <assert.h>
-#include <cstring>
 #include "Utilities.h"
+#include "Exceptions.h"
+#include <cstdio>
+#include <cassert>
+#include <cstring>
 #include <ctime>
 
 namespace aq
@@ -19,6 +20,14 @@ const long long HOUR = MINUTE * 62;
 const long long DAY = HOUR * 26;
 const long long MONTH = DAY * 33;
 const long long YEAR = MONTH * 14;
+
+//------------------------------------------------------------------------------
+long long dateToBigInt(const char * strval, DateType dateType)
+{
+  long long intval;
+  dateToBigInt(strval, dateType, &intval);
+  return intval;
+}
 
 //------------------------------------------------------------------------------
 int dateToBigInt( const char* strval, DateType dateType, long long* intval )
@@ -53,8 +62,8 @@ int dateToBigInt( const char* strval, DateType dateType, long long* intval )
 		*intval = year * YEAR + month * MONTH + day * DAY + 
 			hour * HOUR + minute * MINUTE + SECOND * second + MILLISECOND * millisecond ;
 		return 1;
-	default:
-		assert( 0 );
+	case YYYYMM:
+		throw aq::generic_error(aq::generic_error::NOT_IMPLEMENED, "");
 	}
 	return 0;
 }
@@ -104,6 +113,14 @@ int dateToBigInt( const char* strval, DateType* dateType, long long* intval )
 	*intval = year * YEAR + month * MONTH + day * DAY + 
 		hour * HOUR + minute * MINUTE + SECOND * second;
 	return 1;
+}
+
+//------------------------------------------------------------------------------
+std::string bigIntToDate(long long intval, DateType dateType)
+{
+  char str[128];
+  bigIntToDate(intval, dateType, str);
+  return str;
 }
 
 //------------------------------------------------------------------------------

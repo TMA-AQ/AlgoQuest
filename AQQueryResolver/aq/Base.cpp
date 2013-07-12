@@ -204,47 +204,38 @@ void Base::loadFromRawFile( const char* pszDataBaseFile ) {
 			strtoupr( szColumnType );
 			if ( strcmp( szColumnType, "NUMBER" ) == 0 )
       {
-        nColumnSize = 8;
 				eColumnType = COL_TYPE_INT;
       }
 			else if ( strcmp( szColumnType, "INT" ) == 0 )
       {
-        nColumnSize = 4;
 				eColumnType = COL_TYPE_INT;
       }
 			else if ( strcmp( szColumnType, "BIG_INT" ) == 0 )
       {
-        nColumnSize = 8;
 				eColumnType = COL_TYPE_BIG_INT;
       }
 			else if ( strcmp( szColumnType, "FLOAT" ) == 0 )
       {
-        nColumnSize = 8;
 				eColumnType = COL_TYPE_DOUBLE;
       }
 			else if ( strcmp( szColumnType, "DOUBLE" ) == 0 )
       {
-        nColumnSize = 8;
 				eColumnType = COL_TYPE_DOUBLE;
       }
 			else if ( strcmp( szColumnType, "DATE1" ) == 0 )
       {
-        nColumnSize = 8;
 				eColumnType = COL_TYPE_DATE1;
       }
 			else if ( strcmp( szColumnType, "DATE2" ) == 0 )
       {
-        nColumnSize = 8;
 				eColumnType = COL_TYPE_DATE2;
       }
 			else if ( strcmp( szColumnType, "DATE3" ) == 0 )
       {
-        nColumnSize = 8;
 				eColumnType = COL_TYPE_DATE3;
       }
 			else // if ( strcmp( szColumnType, "VARCHAR2" ) == 0 )	// Same for CHAR
       {
-        nColumnSize *= sizeof(char);
 				eColumnType = COL_TYPE_VARCHAR;
       }
 

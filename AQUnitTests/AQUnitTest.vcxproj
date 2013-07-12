@@ -175,13 +175,19 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\DateConversionTest.cpp" />
     <ClCompile Include="src\AQMatrixTest.cpp" />
+    <ClCompile Include="src\AQThreadTests.cpp" />
     <ClCompile Include="src\AQUnitTests.cpp" />
     <ClCompile Include="src\BaseDescTest.cpp" />
     <ClCompile Include="src\ColumnMapperTest.cpp" />
     <ClCompile Include="src\ExprTransformTest.cpp" />
     <ClCompile Include="src\JeqParserTest.cpp" />
     <ClCompile Include="src\ParserTest.cpp" />
+    <ClCompile Include="src\QueryResolverSimulate.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\QueryResolverSimulate.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

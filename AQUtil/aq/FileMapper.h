@@ -1,20 +1,7 @@
 #ifndef __FILE_MAPPER_H__
 #define __FILE_MAPPER_H__
 
-#ifdef WIN32
-#include <windows.h>
-#else
-#include <sys/mman.h>
-#endif
-
 #include <string>
-
-#ifdef min
-#undef min
-#endif
-#ifdef max
-#undef max
-#endif
 
 namespace aq
 {
@@ -26,28 +13,14 @@ public:
 	~FileMapper();
 
 	int read(void * buffer, size_t offset, size_t len);
-  size_t size() { return this->cbFile; }
+  size_t size() { return this->m_size; }
 
 private:
 	FileMapper(const FileMapper&);
 	FileMapper& operator=(const FileMapper&);
-
-	void remap(size_t offset);
-
-	const std::string filename;
-
-#ifdef WIN32
-	DWORD cbView;
-  HANDLE hfile;
-	HANDLE hmap;
-	char const * pView;
-#else
-#endif
-
-	unsigned long long cbFile;
-	unsigned long long windowOffset;
-
-	unsigned nbRemap;
+	const std::string m_filename;
+  size_t m_size;
+  FILE * m_fd;
 };
 
 }

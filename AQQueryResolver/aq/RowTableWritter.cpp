@@ -61,7 +61,7 @@ namespace aq
 
   unsigned int RowTableWritter::getTotalCount() const
   {
-    return this->table->TotalCount;
+    return static_cast<unsigned int>(this->table->TotalCount);
   }
 
 

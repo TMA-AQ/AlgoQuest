@@ -448,58 +448,6 @@ void AQMatrix::computeUniqueRow(std::vector<std::vector<size_t> >& mapToUniqueIn
 	}
 }
 
-// void AQMatrix::groupBy(const std::map<size_t, std::vector<std::pair<size_t, aq::ColumnType> > >& columnsByTableId)
-//void AQMatrix::groupBy(std::vector<aq::ColumnMapper::Ptr>& columnsMapper)
-//{
-//	if (this->matrix.size() == 0)
-//		return;
-//
-//	size_t size = this->matrix[0].indexes.size();
-//
-//	//
-//	// TODO : check index length integrity
-//	//for (size_t index = 0; index < size; ++index)
-//	//{
-//	//	// Load Row and compute group by key
-//	//	size_t r = 0;
-//	//	group_by_key_t gk;
-//	//	gk.len = 0;
-//	//	gk.value = NULL;
-//	//	ColumnItem::Ptr c;
-//	//	for (size_t i = 0; i < columnsMapper.size(); ++i)
-//	//	{
-//	//		c = columnsMapper[i].loadValue(index);
-//	//		size_t pos = gk.len;
-//	//		gk.len += sizeof(c->numval);
-//	//		if (gk.value == NULL)
-//	//			gk.value = static_cast<uint8_t*>(::malloc(gk.len * sizeof(uint8_t)));
-//	//		else
-//	//			gk.value = static_cast<uint8_t*>(::realloc(gk.value, gk.len * sizeof(uint8_t)));
-//	//		::memcpy(gk.value + pos, &c->numval, sizeof(c->numval));
-//	//	}
-//	//	this->groupByIndex[gk].push_back(index);
-//	//}
-//
-//	////////////////////////////////////////////////////////////////////////////////
-//	////////////////////////////////////////////////////////////////////////////////
-//	
-//	// ColumnItem::Ptr item;
-//	row_cmp_t row_cmp(columnsMapper);
-//	std::set<index_holder_t, index_holder_cmp_t> indexes_to_sort;
-//	for (size_t i = 0; i < size; ++i)
-//	{
-//		if ((i % 100000) == 0) aq::Logger::getInstance().log(AQ_DEBUG, "%u index sorted\n", i);
-//		index_holder_t ih = { i, row_cmp };
-//		indexes_to_sort.insert(ih);
-//	}
-//
-//	group_by_key_t gk = { 0, NULL } ;
-//	//for (std::set<index_holder_t, index_holder_cmp_t>::const_iterator it = indexes_to_sort.begin(); it != indexes_to_sort.end(); ++it)
-//	//	this->groupByIndex[gk].push_back((*it).index);
-//		
-//	aq::Logger::getInstance().log(AQ_DEBUG, "%u group\n", groupByIndex.size());
-//}
-
 void AQMatrix::compress()
 {
   size_t p = 0;
@@ -531,7 +479,7 @@ void AQMatrix::writeTemporaryTable()
   uint32_t status = 11;
   uint32_t garbage1 = 0;
   uint64_t garbage2 = 0;
-  uint64_t invalid = 0;
+  uint32_t invalid = 0;
   uint32_t pos = 0;
   uint64_t grpIndex = 1;
   uint64_t size = (*this->matrix.begin()).indexes.size();
@@ -562,11 +510,11 @@ void AQMatrix::writeTemporaryTable()
         fd = it->second;
       }
       
-      fwrite(&garbage2, sizeof(uint64_t), 1, fd);
-      fwrite(&grpIndex, sizeof(uint64_t), 1, fd);
-      fwrite(&invalid, sizeof(uint64_t), 1, fd);
+      // fwrite(&garbage2, sizeof(uint64_t), 1, fd);
+      // fwrite(&grpIndex, sizeof(uint64_t), 1, fd);
+      fwrite(&invalid, sizeof(uint32_t), 1, fd);
       fwrite(&pos, sizeof(uint32_t), 1, fd);
-      fwrite(&garbage1, sizeof(uint32_t), 1, fd);
+      // fwrite(&garbage1, sizeof(uint32_t), 1, fd);
     }
   }
   

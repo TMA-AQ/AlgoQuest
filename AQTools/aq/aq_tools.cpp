@@ -29,7 +29,6 @@
 #include <boost/logic/tribool.hpp>
 
 #include <aq/AQThreadRequest.h>
-#include "QueryResolverSimulate.h"
 
 // fixme
 #include "Link.h"
@@ -248,21 +247,6 @@ int processQuery(const std::string& query, aq::TProjectSettings& settings, aq::B
 #endif
 
 		}
-    
-    int maxThread = 10;
-    for (int i = 0; i < maxThread; ++i)
-    {
-      aq::AQThreadRequest<aq::QueryResolverSimulate> thread(5, &settings, aq_engine, baseDesc);
-      thread.solveRequest(pNode);
-      if (i != (maxThread - 1))
-        std::cout << std::endl << "next step ---> number: " << (i + 2) << std::endl << std::endl;
-    }
-
-    aq::solveIdentRequest(pNode, baseDesc);
-    std::string std;
-    aq::generate_parent(pNode, NULL);
-    aq::syntax_tree_to_sql_form(pNode, std);
-    std::cout << std << std::endl;
 
 		//
 		// Transform SQL request in prefix form, 
@@ -378,38 +362,6 @@ int processSQLQueries(std::list<std::string>::const_iterator itBegin, std::list<
 // -------------------------------------------------------------------------------------------------
 int main(int argc, char**argv)
 {
-
-  //aq::verb::VerbNode::Ptr v = aq::verb::VerbFactory::GetInstance().getVerb(K_SELECT);
-
-  //aq::verb::VerbNode::Ptr vl = aq::verb::VerbFactory::GetInstance().getVerb(K_COMMA);
-  //v->setLeftChild(vl);
-
-  //aq::verb::VerbNode::Ptr vll = aq::verb::VerbFactory::GetInstance().getVerb(K_AS);
-  //aq::verb::VerbNode::Ptr vlr = aq::verb::VerbFactory::GetInstance().getVerb(K_AS);
-  //vl->setLeftChild(vll);
-  //vl->setRightChild(vlr);
-
-  //aq::verb::VerbNode::Ptr vlll = aq::verb::VerbFactory::GetInstance().getVerb(K_PERIOD);
-  //aq::verb::VerbNode::Ptr vllr = aq::verb::VerbFactory::GetInstance().getVerb(K_STRING);
-  //aq::verb::VerbNode::Ptr vlrl = aq::verb::VerbFactory::GetInstance().getVerb(K_SUM);
-  //aq::verb::VerbNode::Ptr vlrr = aq::verb::VerbFactory::GetInstance().getVerb(K_STRING);
-  //vll->setLeftChild(vlll);
-  //vll->setRightChild(vllr);
-  //vlr->setLeftChild(vlrl);
-  //vlr->setRightChild(vlrr);
-
-  //aq::verb::VerbNode::Ptr vlrll = aq::verb::VerbFactory::GetInstance().getVerb(K_PERIOD);
-  //vlrl->setLeftChild(vlrll);
-  //
-  //aq::verb::VerbNode::dump(std::cout, v);
-
-  //aq::verb::VerbNode::Ptr _v(v->clone());
-  //_v->cloneSubtree(v);
-
-  //aq::verb::VerbNode::dump(std::cout, _v);
-
-  //exit(0);
-
 
 	try
 	{
@@ -665,6 +617,9 @@ int main(int argc, char**argv)
 					pos = line.find(";");
 					if (pos != std::string::npos)
 					{
+            boost::trim(currentQuery);
+            if (currentQuery == "exit;") 
+              break;
 						queries.push_back(currentQuery);
 						currentQuery = "";
 					}

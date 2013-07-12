@@ -61,6 +61,7 @@ public:
 
 private:
   /// solve all selects found in the main select
+  void solveNested();
 	void solveNested(aq::tnode*& pNode, unsigned int nSelectLevel, aq::tnode* pLastSelect, bool inFrom, bool inIn);
   void changeTemporaryTableName(aq::tnode * pNode);
   bool isCompressable();
