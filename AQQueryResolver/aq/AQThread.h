@@ -191,32 +191,24 @@ namespace aq
     // dump part
     //--------------------------------------------------------------------------------------------
 
-    void  dump(int level)    const {
+    void  dump(std::ostream& os, const std::string& indent)    const {
       if (this->_patern != NULL)
       {
-        for (int i = 0; i < level; ++i)
-          std::cout << "  ";
-        std::cout << "My father is [" << this->_patern->_pNode << "] and:" << std::endl;
+        os << indent << "My father is [" << this->_patern->_pNode << "] and:" << std::endl;
       }
-      for (int i = 0; i < level; ++i)
-        std::cout << "  ";
-      std::cout << "I'm [" << this->_pNode << "]";
+      os << indent << "I'm [" << this->_pNode << "]";
       if (this->_listThread.size() == 0)
-        std::cout << std::endl;
+        os << std::endl;
       else
       {
-        std::cout << " and my son(s) is(are) : " << std::endl;
-        for (int i = 0; i < level; ++i)
-          std::cout << "  ";
-        std::cout << "-->" << std::endl;
+        os << " and my son(s) is(are) : " << std::endl;
+        os << indent << "-->" << std::endl;
       }
       for (std::vector<AQThread*>::const_iterator it = this->_listThread.begin(); it != this->_listThread.end(); ++it)
-        (*it)->dump(level + 1);
+        (*it)->dump(os, indent + "  ");
       if (this->_listThread.size() > 0)
       {
-        for (int i = 0; i < level; ++i)
-          std::cout << "  ";
-        std::cout << "<--" << std::endl;
+        os << indent << "<--" << std::endl;
       }
     }
 
