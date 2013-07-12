@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "Util.h"
+#include "QueryGenerator.h"
 #include <aq/Logger.h>
 #include <string>
 #include <cstdint>
@@ -17,7 +18,8 @@ namespace po = boost::program_options;
 bool aq::verbose = false;
 
 extern int functional_tests(const std::string& dbPath, const std::string& queryIdent, const std::string& aqEngine, 
-                            const std::string& queriesFilename, const std::string& logFilename, uint64_t limit, bool stopOnError);
+                            const std::string& queriesFilename, const std::string& filter,
+                            const std::string& logFilename, uint64_t limit, bool stopOnError);
 
 int main(int argc, char ** argv)
 {
@@ -30,10 +32,13 @@ int main(int argc, char ** argv)
     std::string queryIdent;
     std::string aqEngine;
     std::string queriesFilename;
+    std::string query;
+    std::string filter;
     std::string logFilename;
     size_t limit;
     unsigned int logLevel;
     bool stopOnError = false;
+    bool generate = false;
 
     po::options_description desc("Allowed options");
 		desc.add_options()
@@ -46,9 +51,11 @@ int main(int argc, char ** argv)
       ("query-ident,i", po::value<std::string>(&queryIdent)->default_value("test_aq_engine"), "")
       ("aq-engine,e", po::value<std::string>(&aqEngine)->default_value("E:/AQ_Bin/AQ_Engine_21_11.exe"), "")
       ("queries,q", po::value<std::string>(&queriesFilename)->default_value("queries.aql"), "")
+      ("query", po::value<std::string>(&query)->default_value(""), "")
+      ("filter,f", po::value<std::string>(&filter)->default_value(""), "")
       ("log,o", po::value<std::string>(&logFilename)->default_value("./test_aq_engine.log"), "")
+      ("generate", po::bool_switch(&generate), "")
       ("stop-on-error,e", po::bool_switch(&stopOnError), "")
-      
       ("verbose,v", po::bool_switch(&aq::verbose), "set verbosity")
 			;
 
@@ -72,7 +79,15 @@ int main(int argc, char ** argv)
     
     std::string dbPath = rootPath + "/" + dbName + "/";
 
-    return functional_tests(dbPath, queryIdent, aqEngine, queriesFilename, logFilename, limit, stopOnError);
+    if (generate)
+    {
+      aq::QueryGenerator queryGen(query);
+      queryGen.generate(std::cout);
+    }
+    else
+    {
+      return functional_tests(dbPath, queryIdent, aqEngine, queriesFilename, filter, logFilename, limit, stopOnError);
+    }
   }
   catch (const std::exception& e)
   {
