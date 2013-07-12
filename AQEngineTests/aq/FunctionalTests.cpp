@@ -1,5 +1,6 @@
 #include "Util.h"
 #include "QueryReader.h"
+#include "WhereValidator.h"
 #include <aq/Base.h>
 #include <aq/Timer.h>
 #include <aq/Exceptions.h>
@@ -7,7 +8,7 @@
 #include <boost/program_options.hpp>
 #include <boost/algorithm/string.hpp>
 
-int functional_tests(const std::string& dbPath, const std::string& queryIdent, const std::string& aqEngine, 
+int functional_tests(const std::string& dbPath, std::string& queryIdent, const std::string& aqEngine, 
                      const std::string& queriesFilename, const std::string& logFilename, uint64_t limit, bool stopOnError)
 {
   int rc = 0;
@@ -43,6 +44,10 @@ int functional_tests(const std::string& dbPath, const std::string& queryIdent, c
     std::vector<std::string> orderedColumns;
     aq::get_columns(orderedColumns, query, "ORDER");
 
+    aq::WhereValidator whereValidator;
+    whereValidator.parseQuery(query);
+    whereValidator.dump(std::cout);
+    
     // execute query
     std::cout << std::endl;
     std::cout << "checking '" << reader.getFullIdent() << "'" << std::endl;
@@ -62,7 +67,7 @@ int functional_tests(const std::string& dbPath, const std::string& queryIdent, c
     {
       std::string answerPath(dbPath);
       answerPath += "/data_orga/tmp/" + std::string(queryIdent) + "/dpy/";
-      rc = aq::check_answer_data(answerPath, dbPath, limit, aq::packet_size, selectedColumns, groupedColumns, orderedColumns);
+      rc = aq::check_answer_data(answerPath, dbPath, limit, aq::packet_size, selectedColumns, groupedColumns, orderedColumns, whereValidator);
     }
     ++nb_queries_tested;
 
