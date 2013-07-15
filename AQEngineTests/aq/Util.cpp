@@ -1,6 +1,6 @@
 #include "Util.h"
 #include <aq/FileMapper.h>
-#include <aq/WindowFileMapper.h>
+#include <aq/WIN32FileMapper.h>
 #include <aq/Base.h>
 #include <aq/Timer.h>
 #include <aq/Exceptions.h>
@@ -230,20 +230,17 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
       switch((*itCol)->Type)
       {
       case aq::ColumnType::COL_TYPE_INT:
-        cm.reset(new aq::ColumnMapper<int32_t, aq::WindowFileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, 1/*(*itCol)->Size*/, packetSize));
+        cm.reset(new aq::ColumnMapper<int32_t, aq::WIN32FileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, 1/*(*itCol)->Size*/, packetSize));
         break;
       case aq::ColumnType::COL_TYPE_BIG_INT:
-      case aq::ColumnType::COL_TYPE_DATE1:
-      case aq::ColumnType::COL_TYPE_DATE2:
-      case aq::ColumnType::COL_TYPE_DATE3:
-      case aq::ColumnType::COL_TYPE_DATE4:
-        cm.reset(new aq::ColumnMapper<int64_t, aq::WindowFileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, 1/*(*itCol)->Size*/, packetSize));
+      case aq::ColumnType::COL_TYPE_DATE:
+        cm.reset(new aq::ColumnMapper<int64_t, aq::WIN32FileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, 1/*(*itCol)->Size*/, packetSize));
         break;
       case aq::ColumnType::COL_TYPE_DOUBLE:
-        cm.reset(new aq::ColumnMapper<double, aq::WindowFileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, 1/*(*itCol)->Size*/, packetSize));
+        cm.reset(new aq::ColumnMapper<double, aq::WIN32FileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, 1/*(*itCol)->Size*/, packetSize));
         break;
       case aq::ColumnType::COL_TYPE_VARCHAR:
-        cm.reset(new aq::ColumnMapper<char, aq::WindowFileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, (*itCol)->Size, packetSize));
+        cm.reset(new aq::ColumnMapper<char, aq::WIN32FileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, (*itCol)->Size, packetSize));
         break;
       }
       tableColumnMappers.push_back(cm);
@@ -328,11 +325,11 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
         ++itOrdered;
       }
       
-      if (!whereValidator.check(matrix, columnMappers, i))
-      {
-        std::cerr << "BAD WHERING: TODO : print expected value" << std::endl;
-        exit(-1);
-      }
+      //if (!whereValidator.check(matrix, columnMappers, i))
+      //{
+      //  std::cerr << "BAD WHERING: TODO : print expected value" << std::endl;
+      //  exit(-1);
+      //}
 
       if (aq::verbose)
         std::cout << " | ";

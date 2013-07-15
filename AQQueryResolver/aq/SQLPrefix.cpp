@@ -63,11 +63,10 @@ char* realloc_string_buffer( char* pszStr, unsigned int *pncbBuf, unsigned int n
 // Returns NULL on error !
 void show_node( aq::tnode *pNode, std::string& str, char* szTmpBuf, char* szBuffer )
 {
-	const char * pszToAdd;
+	std::string pszToAdd;
 	
 	memset(szBuffer, 0, STR_BUF_SIZE);
 
-	pszToAdd = NULL;
 	switch ( pNode->tag ) {
 		case K_INTEGER:
 			sprintf( szTmpBuf, "K_VALUE %lld", pNode->getData().val_int );
@@ -84,8 +83,10 @@ void show_node( aq::tnode *pNode, std::string& str, char* szTmpBuf, char* szBuff
 			pszToAdd = szTmpBuf;
 			break;
 		case K_DATE_VALUE:
-			bigIntToDate( pNode->getData().val_int, DDMMYYYY_HHMMSS, szTmpBuf );
-			pszToAdd = szTmpBuf;
+      {
+        DateConversion dateConverter;
+        pszToAdd = dateConverter.bigIntToDate(pNode->getData().val_int);
+      }
 			break;
 		case K_IDENT:
 		case K_COLUMN:
@@ -96,9 +97,6 @@ void show_node( aq::tnode *pNode, std::string& str, char* szTmpBuf, char* szBuff
 			break;
 	}
 
-	if ( pszToAdd == NULL ) 
-		return;
-	
 	//add extra spaces
 	if ( str.length() > 0 ) {
 		if (	pNode->tag == K_SELECT || pNode->tag == K_FROM 
@@ -298,9 +296,8 @@ std::string& syntax_tree_to_sql_form(aq::tnode * pNode, std::string& query, unsi
 			break;
 		case K_DATE_VALUE:
 		{
-			char tmp[128];
-			bigIntToDate( pNode->getData().val_int, DDMMYYYY_HHMMSS, tmp );
-			stmp << tmp;
+      DateConversion dateConverter;
+			stmp << dateConverter.bigIntToDate(pNode->getData().val_int);
 		}
 			break;
 		case K_STRING:
@@ -363,9 +360,8 @@ std::string& syntax_tree_to_sql_form_nonext(aq::tnode * pNode, std::string& quer
 			break;
 		case K_DATE_VALUE:
 		{
-			char tmp[128];
-			bigIntToDate( pNode->getData().val_int, DDMMYYYY_HHMMSS, tmp );
-			stmp << tmp;
+      DateConversion dateConverter;
+			stmp << dateConverter.bigIntToDate(pNode->getData().val_int);
 		}
 			break;
 		case K_STRING:

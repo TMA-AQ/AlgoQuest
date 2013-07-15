@@ -3,30 +3,47 @@
 
 #include <cstdint>
 #include <string>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 namespace aq
 {
 
-typedef enum 
+class DateConversion
 {
-	DDMMYYYY_HHMMSS,
-	DDMMYYYY,
-	DDMMYY,
-	DDMMYYYY_HHMMSS_MMM,
-	YYYYMM
-}DateType;
 
-//1 - success, 0 - failure
-long long dateToBigInt(const char * strval, DateType dateType= DateType::DDMMYYYY);
-std::string bigIntToDate(long long intval, DateType dateType = DateType::DDMMYYYY);
-int dateToBigInt( const char* strval, DateType dateType, long long* intval );
-int dateToBigInt( const char* strval, DateType* dateType, long long* intval );
-int bigIntToDate( long long intval, DateType dateType, char* strval );
-void dateToParts(	long long intval, int& year, int& month, int& day, int& hour, 
-					int& minute, int& second, int& millisecond );
-void dateFromParts(	long long& intval, int year, int month, int day, int hour, 
-					int minute, int second, int millisecond );
-long long currentDate();
+public:
+
+  typedef enum 
+  {
+    ISO_EXTENDED
+  } DateType;
+
+  DateConversion();
+  DateConversion(const char * format);
+  ~DateConversion();
+
+  void setInputFormat(const char * format) { this->input_facet->format(format); }
+  void setOutputFormat(const char * format) { this->output_facet->format(format); }
+
+  /// 1 - success, 0 - failure
+  long long dateToBigInt(const char * strval);
+  long long dateToBigInt(const char * strval, const char * format);
+  std::string bigIntToDate(long long intval);
+  std::string bigIntToDate(long long intval, const char * format);
+  
+  static long long currentDate();
+
+private:;
+  DateConversion(const DateConversion& o); // not implemented
+  DateConversion& operator=(const DateConversion& o); // not implemented
+
+  int dateToBigInt( const char* strval, DateType dateType, long long* intval );
+  int bigIntToDate( long long intval, DateType dateType, char* strval );
+  
+  std::stringstream ssInput, ssOutput;
+  boost::posix_time::time_input_facet * input_facet, * convert_input_facet;
+  boost::posix_time::time_facet * output_facet, * convert_output_facet;
+};
 
 }
 

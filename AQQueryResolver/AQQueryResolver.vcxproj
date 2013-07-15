@@ -331,7 +331,6 @@
     <ClInclude Include="aq\db_loader\Util.h" />
     <ClInclude Include="aq\DumpVisitor.h" />
     <ClInclude Include="aq\ExprTransform.h" />
-    <ClInclude Include="aq\ExprTransform_2.h" />
     <ClInclude Include="aq\LIKE_PatternMatching.h" />
     <ClInclude Include="aq\Optimizations.h" />
     <ClInclude Include="aq\parser\ID2Str.h" />
@@ -389,7 +388,6 @@
     <ClCompile Include="aq\db_loader\Util.cpp" />
     <ClCompile Include="aq\DumpVisitor.cpp" />
     <ClCompile Include="aq\ExprTransform.cpp" />
-    <ClCompile Include="aq\ExprTransform_2.cpp" />
     <ClCompile Include="aq\LIKE_PatternMatching.cpp" />
     <ClCompile Include="aq\Optimizations.cpp" />
     <ClCompile Include="aq\parser\ID2Str.cpp" />

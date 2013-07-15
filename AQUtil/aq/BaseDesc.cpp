@@ -82,7 +82,7 @@ void fill_column_type(base_t::table_t::col_t * colonne, const char * type_aux)
 		colonne->type = t_long_long;
 		strcpy(colonne->cadrage,"D"); 
 	}
-	else if ( strcmp(type_aux,"DATE1") == 0 )
+	else if ( strcmp(type_aux,"DATE1") == 0 || strcmp(type_aux,"DATE") == 0)
 	{
 		colonne->type=t_date1;
 		strcpy(colonne->cadrage,"D"); 
@@ -231,13 +231,15 @@ void build_base_from_xml ( std::istream& is, base_t& base )
   boost::property_tree::xml_parser::read_xml(is, parser);
   base.nom = parser.get<std::string>("Database.<xmlattr>.Name");
   boost::property_tree::ptree tables = parser.get_child("Database.Tables");
-  std::for_each(tables.begin(), tables.end(), [&] (const boost::property_tree::ptree::value_type& ptTable) {
+  for (auto& ptTable : tables) 
+  {
     base_t::table_t table;
     table.nom = ptTable.second.get<std::string>("<xmlattr>.Name");
     table.num = ptTable.second.get<int>("<xmlattr>.ID");
     table.nb_enreg = ptTable.second.get<int>("<xmlattr>.NbRows");
     boost::property_tree::ptree columns = ptTable.second.get_child("Columns");
-    std::for_each(columns.begin(), columns.end(), [&] (const boost::property_tree::ptree::value_type& ptColumn) {
+    for (auto& ptColumn : columns) 
+    {
       base_t::table_t::col_t col;
       col.nom = ptColumn.second.get<std::string>("<xmlattr>.Name");
       col.num = ptColumn.second.get<int>("<xmlattr>.ID");
@@ -245,10 +247,10 @@ void build_base_from_xml ( std::istream& is, base_t& base )
       std::string type = ptColumn.second.get<std::string>("<xmlattr>.Type");
       fill_column_type(&col, type.c_str());
       table.colonne.push_back(col);
-    });
+    }
     table.nb_cols = static_cast<int>(table.colonne.size());
     base.table.push_back(table);
-  });
+  }
   base.nb_tables = static_cast<int>(base.table.size());
 }
 
@@ -256,15 +258,17 @@ void dump_xml_base(std::ostream& oss, const base_t& base)
 {
   oss << "<Database Name=\"" << base.nom << "\">" << std::endl;
   oss << "<Tables>" << std::endl;
-  std::for_each(base.table.begin(), base.table.end(), [&] (const base_t::table_t& table) {
+  for (auto& table : base.table) 
+  {
     oss << "<Table Name=\"" << table.nom << "\" ID=\"" << table.num << "\" NbRows=\"" << table.nb_enreg << "\">" << std::endl;
     oss << "<Columns>" << std::endl;
-    std::for_each(table.colonne.begin(), table.colonne.end(), [&] (const base_t::table_t::col_t& column) {
+    for (auto& column : table.colonne) 
+    {
       oss << "<Column Name=\"" << column.nom << "\" ID=\""<< column.num << "\" Size=\"" << column.taille << "\" Type=\"" << type_to_string(column.type) << "\"/>" << std::endl;
-    });
+    }
     oss << "</Columns>" << std::endl;
     oss << "</Table>" << std::endl;
-  });
+  }
   oss << "</Tables>" << std::endl;
   oss << "</Database>" << std::endl;
 }

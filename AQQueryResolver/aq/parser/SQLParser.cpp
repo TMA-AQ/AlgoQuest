@@ -250,10 +250,7 @@ void tnode::set_data( const data_holder_t data, ColumnType type )
 	{
 	case COL_TYPE_INT:
 	case COL_TYPE_BIG_INT:
-	case COL_TYPE_DATE1:
-	case COL_TYPE_DATE2:
-	case COL_TYPE_DATE3:
-	case COL_TYPE_DATE4:
+	case COL_TYPE_DATE:
 		this->tag = K_INTEGER;
 		this->set_int_data( (llong) data.val_int );
 		break;

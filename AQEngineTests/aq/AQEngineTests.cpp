@@ -54,7 +54,6 @@ int main(int argc, char ** argv)
       ("filter,f", po::value<std::string>(&filter)->default_value(""), "")
       ("log,o", po::value<std::string>(&logFilename)->default_value("./test_aq_engine.log"), "")
       ("generate", po::bool_switch(&generate), "")
-      ("stop-on-error,e", po::bool_switch(&stopOnError), "")
       ("stop-on-error,s", po::bool_switch(&stopOnError), "")
       ("verbose,v", po::bool_switch(&aq::verbose), "set verbosity")
 			;

@@ -161,11 +161,17 @@
     <ClCompile Include="aq\QueryGenerator.cpp" />
     <ClCompile Include="aq\QueryReader.cpp" />
     <ClCompile Include="aq\Util.cpp" />
+    <ClCompile Include="aq\WhereComparator.cpp" />
+    <ClCompile Include="aq\WhereIn.cpp" />
+    <ClCompile Include="aq\WhereValidator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aq\QueryGenerator.h" />
     <ClInclude Include="aq\QueryReader.h" />
     <ClInclude Include="aq\Util.h" />
+    <ClInclude Include="aq\WhereComparator.h" />
+    <ClInclude Include="aq\WhereIn.h" />
+    <ClInclude Include="aq\WhereValidator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

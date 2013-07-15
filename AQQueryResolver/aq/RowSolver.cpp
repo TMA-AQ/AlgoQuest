@@ -1,7 +1,7 @@
 #include "RowSolver.h"
 #include "TemporaryColumnMapper.h"
 #include <aq/FileMapper.h>
-#include <aq/WindowFileMapper.h>
+#include <aq/WIN32FileMapper.h>
 #include <aq/Exceptions.h>
 #include <aq/Timer.h>
 #include <aq/Logger.h>
@@ -20,20 +20,17 @@ boost::shared_ptr<ColumnMapper_Intf> new_column_mapper(const aq::ColumnType type
   switch(type)
   {
   case aq::ColumnType::COL_TYPE_BIG_INT:
-  case aq::ColumnType::COL_TYPE_DATE1:
-  case aq::ColumnType::COL_TYPE_DATE2:
-  case aq::ColumnType::COL_TYPE_DATE3:
-  case aq::ColumnType::COL_TYPE_DATE4:
-    cm.reset(new aq::ColumnMapper<int64_t, aq::WindowFileMapper>(path, tableId, columnId, size, packetSize));
+  case aq::ColumnType::COL_TYPE_DATE:
+    cm.reset(new aq::ColumnMapper<int64_t, aq::WIN32FileMapper>(path, tableId, columnId, size, packetSize));
     break;
   case aq::ColumnType::COL_TYPE_INT:
-    cm.reset(new aq::ColumnMapper<int32_t, aq::WindowFileMapper>(path, tableId, columnId, size, packetSize));
+    cm.reset(new aq::ColumnMapper<int32_t, aq::WIN32FileMapper>(path, tableId, columnId, size, packetSize));
     break;
   case aq::ColumnType::COL_TYPE_DOUBLE:
-    cm.reset(new aq::ColumnMapper<double, aq::WindowFileMapper>(path, tableId, columnId, size, packetSize));
+    cm.reset(new aq::ColumnMapper<double, aq::WIN32FileMapper>(path, tableId, columnId, size, packetSize));
     break;
   case aq::ColumnType::COL_TYPE_VARCHAR:
-    cm.reset(new aq::ColumnMapper<char, aq::WindowFileMapper>(path, tableId, columnId, size, packetSize));
+    cm.reset(new aq::ColumnMapper<char, aq::WIN32FileMapper>(path, tableId, columnId, size, packetSize));
     break;
   }
   return cm;

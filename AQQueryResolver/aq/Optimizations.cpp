@@ -31,9 +31,7 @@ ColumnItem::Ptr getMinMaxFromThesaurus(	size_t tableID, size_t colIdx, size_t pa
 		binItemSize = 4;
 		break;
 	case COL_TYPE_BIG_INT:
-	case COL_TYPE_DATE1:
-	case COL_TYPE_DATE2:
-	case COL_TYPE_DATE3:
+	case COL_TYPE_DATE:
 	case COL_TYPE_DOUBLE:
 		binItemSize = 8;
 		break;
@@ -70,9 +68,7 @@ ColumnItem::Ptr getMinMaxFromThesaurus(	size_t tableID, size_t colIdx, size_t pa
 		}
 		break;
 	case COL_TYPE_BIG_INT:
-	case COL_TYPE_DATE1:
-	case COL_TYPE_DATE2:
-	case COL_TYPE_DATE3:
+	case COL_TYPE_DATE:
 		{
 			llong *pItemData = (llong*)( pTmpBuf );
 			minMax = new ColumnItem( (double) *pItemData );

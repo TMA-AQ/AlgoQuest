@@ -66,10 +66,10 @@
     <ClInclude Include="aq\Object.h">
       <Filter>Fichiers d%27en-tête\aq</Filter>
     </ClInclude>
-    <ClInclude Include="aq\WindowFileMapper.h">
+    <ClInclude Include="aq\MMapFileMapper.h">
       <Filter>Fichiers d%27en-tête\aq</Filter>
     </ClInclude>
-    <ClInclude Include="aq\MMapFileMapper.h">
+    <ClInclude Include="aq\WIN32FileMapper.h">
       <Filter>Fichiers d%27en-tête\aq</Filter>
     </ClInclude>
   </ItemGroup>
@@ -107,7 +107,7 @@
     <ClCompile Include="aq\DBTypes.cpp">
       <Filter>Fichiers sources\aq</Filter>
     </ClCompile>
-    <ClCompile Include="aq\WindowFileMapper.cpp">
+    <ClCompile Include="aq\WIN32FileMapper.cpp">
       <Filter>Fichiers sources\aq</Filter>
     </ClCompile>
   </ItemGroup>

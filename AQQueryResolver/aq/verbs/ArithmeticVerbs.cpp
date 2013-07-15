@@ -164,13 +164,10 @@ void MinusVerb::transformItem(	const ColumnItem& item1, const ColumnItem& item2,
 //------------------------------------------------------------------------------
 ColumnType MinusVerb::outputType( ColumnType inputType1, ColumnType inputType2 )
 {
-	if( inputType1 >= COL_TYPE_DATE1 && inputType1 <= COL_TYPE_DATE4 &&
-		inputType2 >= COL_TYPE_DATE1 && inputType2 <= COL_TYPE_DATE4
-		)
+	if ( inputType1 == COL_TYPE_DATE && inputType2 == COL_TYPE_DATE)
 		return inputType1;
-	if( (inputType1 == COL_TYPE_DOUBLE || inputType1 == COL_TYPE_INT) &&
-		(inputType2 == COL_TYPE_DOUBLE || inputType2 == COL_TYPE_INT)
-		)
+	if ( (inputType1 == COL_TYPE_DOUBLE || inputType1 == COL_TYPE_INT) &&
+		(inputType2 == COL_TYPE_DOUBLE || inputType2 == COL_TYPE_INT))
 		return inputType1;
 	throw verb_error(generic_error::VERB_TYPE_MISMATCH, this->getVerbType() );
 }
@@ -195,7 +192,7 @@ void PlusVerb::transformItem(	const ColumnItem& item1, const ColumnItem& item2,
 //------------------------------------------------------------------------------
 ColumnType PlusVerb::outputType( ColumnType inputType1, ColumnType inputType2 )
 {
-	if (inputType1 >= COL_TYPE_DATE1 && inputType1 <= COL_TYPE_DATE4 && inputType2 >= COL_TYPE_DATE1 && inputType2 <= COL_TYPE_DATE4)
+	if (inputType1 == COL_TYPE_DATE && inputType2 == COL_TYPE_DATE)
 		return min(inputType1, inputType2);
 	if ((inputType1 == COL_TYPE_DOUBLE || inputType1 == COL_TYPE_INT) && (inputType2 == COL_TYPE_DOUBLE || inputType2 == COL_TYPE_INT))
 		return max(inputType1, inputType2);

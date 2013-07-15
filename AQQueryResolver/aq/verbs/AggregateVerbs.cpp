@@ -844,9 +844,7 @@ void LagVerb::changeResult(	Table::Ptr table,
 		{
 		case COL_TYPE_INT:
 		case COL_TYPE_BIG_INT:
-		case COL_TYPE_DATE1:
-		case COL_TYPE_DATE2:
-		case COL_TYPE_DATE3:
+		case COL_TYPE_DATE:
 		case COL_TYPE_DOUBLE:
 			defaultValue = new ColumnItem(static_cast<double>(this->Default->getData().val_int));
 			break;

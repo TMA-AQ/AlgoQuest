@@ -235,9 +235,6 @@
     <ClInclude Include="aq\RowWritter_Intf.h">
       <Filter>Header Files\aq\row_solver</Filter>
     </ClInclude>
-    <ClInclude Include="aq\ExprTransform_2.h">
-      <Filter>Header Files\aq</Filter>
-    </ClInclude>
     <ClInclude Include="aq\AQThread.h">
       <Filter>Header Files\aq</Filter>
     </ClInclude>
@@ -398,9 +395,6 @@
     </ClCompile>
     <ClCompile Include="aq\RowTableWritter.cpp">
       <Filter>Source Files\aq\row_solver</Filter>
-    </ClCompile>
-    <ClCompile Include="aq\ExprTransform_2.cpp">
-      <Filter>Source Files\aq</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

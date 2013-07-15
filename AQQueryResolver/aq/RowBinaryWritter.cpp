@@ -38,10 +38,7 @@ int RowBinaryWritter::process(Row& row)
         fwrite(&(*it).item->numval, sizeof(double), 1, pFOut);
         break;
       case aq::ColumnType::COL_TYPE_BIG_INT:
-      case aq::ColumnType::COL_TYPE_DATE1:
-      case aq::ColumnType::COL_TYPE_DATE2:
-      case aq::ColumnType::COL_TYPE_DATE3:
-      case aq::ColumnType::COL_TYPE_DATE4:
+      case aq::ColumnType::COL_TYPE_DATE:
         uint64_value = static_cast<uint64_t>((*it).item->numval);
         fwrite(&uint64_value, sizeof(uint64_t), 1, pFOut);
         break;

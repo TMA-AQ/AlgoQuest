@@ -95,10 +95,7 @@ namespace aq
         switch (this->columnsWritter[c]->column->Type)
         {
         case ColumnType::COL_TYPE_BIG_INT:
-        case ColumnType::COL_TYPE_DATE1:
-        case ColumnType::COL_TYPE_DATE2:
-        case ColumnType::COL_TYPE_DATE3:
-        case ColumnType::COL_TYPE_DATE4:
+        case ColumnType::COL_TYPE_DATE:
           {
             int64_t value = static_cast<int64_t>((*it).item->numval);
             fwrite(&value, sizeof(int64_t), 1, this->columnsWritter[c]->file);

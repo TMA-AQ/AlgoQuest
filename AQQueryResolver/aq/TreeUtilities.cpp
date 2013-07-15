@@ -1,9 +1,9 @@
 #include "TreeUtilities.h"
-#include "ExprTransform_2.h"
+#include "ExprTransform.h"
 #include "parser/sql92_grm_tab.hpp"
 #include <cassert>
 #include <algorithm>
-#include <aq/WindowFileMapper.h>
+#include <aq/WIN32FileMapper.h>
 #include <aq/DateConversion.h>
 #include <aq/Exceptions.h>
 #include <aq/Logger.h>
@@ -1285,9 +1285,7 @@ aq::tnode* Getnode( ColumnItem::Ptr item, ColumnType type )
 	switch( type )
 	{
 	case COL_TYPE_INT:
-	case COL_TYPE_DATE1:
-	case COL_TYPE_DATE2:
-	case COL_TYPE_DATE3:
+	case COL_TYPE_DATE:
 		pNode = new aq::tnode( K_INTEGER );
 		pNode->set_int_data( (llong) item->numval );
 		break;
@@ -1512,8 +1510,14 @@ void dateNodeToBigInt(tnode * pNode)
     if (pNode->tag == K_TO_DATE)
     {
       assert(pNode->left != NULL);
+      DateConversion dateConverter;
       long long value;
-      aq::dateToBigInt(pNode->left->getData().val_str, DateType::DDMMYYYY, &value);
+      if (pNode->right != NULL)
+      {
+        assert(pNode->right->getDataType() == tnode::tnodeDataType::NODE_DATA_STRING);
+        dateConverter.setInputFormat(pNode->right->getData().val_str);
+      }
+      value = dateConverter.dateToBigInt(pNode->left->getData().val_str);
       pNode->tag = K_INTEGER;
       pNode->set_int_data(value);
       aq::delete_subtree(pNode->left);
@@ -1537,7 +1541,7 @@ void transformExpression(const aq::Base& baseDesc, const aq::TProjectSettings& s
       aq::tnode * cmpNode = NULL;
       while ((cmpNode = aq::find_first_node(whereNode, tag)) != NULL)
       {
-        aq::transform_2<aq::WindowFileMapper>(baseDesc, settings, cmpNode);
+        aq::expression_transform::transform<aq::WIN32FileMapper>(baseDesc, settings, cmpNode);
       }
     }
   }

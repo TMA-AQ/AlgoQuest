@@ -22,10 +22,7 @@ enum ColumnType
 	COL_TYPE_INT,
 	COL_TYPE_BIG_INT,
 	COL_TYPE_DOUBLE,
-	COL_TYPE_DATE1,
-	COL_TYPE_DATE2,
-	COL_TYPE_DATE3,
-	COL_TYPE_DATE4
+	COL_TYPE_DATE,
 };
 	
 //------------------------------------------------------------------------------

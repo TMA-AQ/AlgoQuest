@@ -242,15 +242,11 @@ ToDateVerb::ToDateVerb()
 bool ToDateVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
 	assert( pNode );
-	this->OutputType = COL_TYPE_DATE1;
+	this->OutputType = COL_TYPE_DATE;
 	if( pNode->right )
 	{
 		assert( pNode->right->tag == K_STRING );
 		char *strval = pNode->right->getData().val_str;
-		if( strcmp( strval, "DD/MM/YYYY" ) == 0 )
-			this->OutputType = COL_TYPE_DATE2;
-		else if( strcmp( strval, "DD/MM/YY" ) == 0 )
-			this->OutputType = COL_TYPE_DATE3;
 	}
 	return false;
 }
@@ -258,11 +254,8 @@ bool ToDateVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode
 //------------------------------------------------------------------------------
 void ToDateVerb::transformItem( const ColumnItem& item, ColumnItem& result )
 {
-	llong intval;
-	DateType resultType;
-	if( !dateToBigInt( item.strval.c_str(), &resultType, &intval ) )
-		throw verb_error( generic_error::TYPE_MISMATCH, this->getVerbType() );
-
+	DateConversion dateConverter;
+	llong intval = dateConverter.dateToBigInt(item.strval.c_str());
 	result = ColumnItem( (double) intval );
 }
 
@@ -285,15 +278,20 @@ YearVerb::YearVerb()
 //------------------------------------------------------------------------------
 void YearVerb::transformItem( const ColumnItem& item, ColumnItem& result )
 {
-	int year, month, day, hour, minute, second, millisecond;
-	dateToParts( (llong) item.numval, year, month, day, hour, minute, second, millisecond );
-	result = ColumnItem( (double) year );
+  // TODO
+	// int year, month, day, hour, minute, second, millisecond;
+  // dateToParts( (llong) item.numval, year, month, day, hour, minute, second, millisecond );
+	
+  assert(false);
+  throw aq::generic_error(aq::generic_error::NOT_IMPLEMENED, "");
+
+  result = ColumnItem(0.0);
 }
 
 //------------------------------------------------------------------------------
 ColumnType YearVerb::outputType( ColumnType inputType )
 {
-	if( !(inputType >= COL_TYPE_DATE1 && inputType <= COL_TYPE_DATE4) )
+	if (inputType != COL_TYPE_DATE)
 		throw verb_error(generic_error::VERB_TYPE_MISMATCH, this->getVerbType() );
 
 	return COL_TYPE_INT;
@@ -309,15 +307,20 @@ MonthVerb::MonthVerb()
 //------------------------------------------------------------------------------
 void MonthVerb::transformItem( const ColumnItem& item, ColumnItem& result )
 {
-	int year, month, day, hour, minute, second, millisecond;
-	dateToParts( (llong) item.numval, year, month, day, hour, minute, second, millisecond );
-	result = ColumnItem( (double) month );
+  // TODO
+	// int year, month, day, hour, minute, second, millisecond;
+	// dateToParts( (llong) item.numval, year, month, day, hour, minute, second, millisecond );
+
+  assert(false);
+  throw aq::generic_error(aq::generic_error::NOT_IMPLEMENED, "");
+
+	result = ColumnItem(0.0);
 }
 
 //------------------------------------------------------------------------------
 ColumnType MonthVerb::outputType( ColumnType inputType )
 {
-	if( !(inputType >= COL_TYPE_DATE1 && inputType <= COL_TYPE_DATE4) )
+	if (inputType != COL_TYPE_DATE)
 		throw verb_error(generic_error::VERB_TYPE_MISMATCH, this->getVerbType() );
 
 	return COL_TYPE_INT;
@@ -333,15 +336,20 @@ DayVerb::DayVerb()
 //------------------------------------------------------------------------------
 void DayVerb::transformItem( const ColumnItem& item, ColumnItem& result )
 {
-	int year, month, day, hour, minute, second, millisecond;
-	dateToParts( (llong) item.numval, year, month, day, hour, minute, second, millisecond );
-	result = ColumnItem( (double) day );
+  // TODO
+	// int year, month, day, hour, minute, second, millisecond;
+  // dateToParts( (llong) item.numval, year, month, day, hour, minute, second, millisecond );
+  
+  assert(false);
+  throw aq::generic_error(aq::generic_error::NOT_IMPLEMENED, "");
+
+	result = ColumnItem(0.0);
 }
 
 //------------------------------------------------------------------------------
 ColumnType DayVerb::outputType( ColumnType inputType )
 {
-	if( !(inputType >= COL_TYPE_DATE1 && inputType <= COL_TYPE_DATE4) )
+	if (inputType != COL_TYPE_DATE)
 		throw verb_error(generic_error::VERB_TYPE_MISMATCH, this->getVerbType() );
 
 	return COL_TYPE_INT;
@@ -385,15 +393,13 @@ void ToCharVerb::transformItem( const ColumnItem& item, ColumnItem& result )
 //------------------------------------------------------------------------------
 ColumnType ToCharVerb::outputType( ColumnType inputType )
 {
-	if( !(inputType >= COL_TYPE_DATE1 && inputType <= COL_TYPE_DATE4) &&
+	if (inputType != COL_TYPE_DATE &&
 		inputType != COL_TYPE_DOUBLE &&
 		inputType != COL_TYPE_INT &&
 		inputType != COL_TYPE_BIG_INT )
 		throw verb_error(generic_error::VERB_TYPE_MISMATCH, this->getVerbType() );
 
 	this->InputType = inputType;
-	if( this->Format == "YYYYMM" )
-		this->InputType = COL_TYPE_DATE4;
 	return COL_TYPE_VARCHAR;
 }
 
@@ -409,21 +415,26 @@ void DateVerb::transformItem( const ColumnItem& item, ColumnItem& result )
 {
 	int day = 0, month = 0, year = 0;
 	int hour = 0, minute = 0, second = 0, millisecond  = 0;
-	dateToParts( (llong) item.numval, year, month, day, hour, minute, second, 
-		millisecond );
-	hour = minute = second = millisecond  = 0;
 	llong intval;
-	dateFromParts( intval, year, month, day, hour, minute, second, millisecond );
+
+  // TODO
+	//dateToParts( (llong) item.numval, year, month, day, hour, minute, second, millisecond );
+	//hour = minute = second = millisecond  = 0;
+	//dateFromParts( intval, year, month, day, hour, minute, second, millisecond );
+  
+  assert(false);
+  throw aq::generic_error(aq::generic_error::NOT_IMPLEMENED, "");
+
 	result.numval = (double) intval;
 }
 
 //------------------------------------------------------------------------------
 ColumnType DateVerb::outputType( ColumnType inputType )
 {
-	if( !(inputType >= COL_TYPE_DATE1 && inputType <= COL_TYPE_DATE4) )
+	if (inputType != COL_TYPE_DATE)
 		throw verb_error(generic_error::VERB_TYPE_MISMATCH, this->getVerbType() );
 
-	return COL_TYPE_DATE2;
+	return COL_TYPE_DATE;
 }
 
 }
