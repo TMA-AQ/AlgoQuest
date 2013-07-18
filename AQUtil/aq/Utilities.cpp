@@ -467,9 +467,9 @@ aq::ColumnType symbole_to_column_type(symbole s)
   {
   case t_int: return aq::COL_TYPE_INT; break;
   case t_long_long: return aq::COL_TYPE_BIG_INT; break;
-  case t_date1: return aq::COL_TYPE_DATE1; break;
-  case t_date2: return aq::COL_TYPE_DATE1; break;
-  case t_date3: return aq::COL_TYPE_DATE1; break;
+  case t_date1: return aq::COL_TYPE_DATE; break;
+  case t_date2: return aq::COL_TYPE_DATE; break;
+  case t_date3: return aq::COL_TYPE_DATE; break;
   case t_char: return aq::COL_TYPE_VARCHAR; break;
   case t_double: return aq::COL_TYPE_DOUBLE; break;
   case t_raw: return aq::COL_TYPE_VARCHAR; break;
@@ -549,6 +549,8 @@ void FileWriteEnreg( aq::ColumnType col_type, const int col_size, char *my_field
 	long long int dum_long_long;
 	long long int *my_long_long = &dum_long_long;
 
+  DateConversion dateConverter;
+
 	if ( (int) strlen ( my_field ) >= col_size ) my_field[ col_size ] = 0 ;
 
 	switch (  col_type )
@@ -581,41 +583,16 @@ void FileWriteEnreg( aq::ColumnType col_type, const int col_size, char *my_field
 		fwrite( my_double, sizeof(double), 1, fcol );
 		break;
 
-	case COL_TYPE_DATE1 :
-	case COL_TYPE_DATE2 :
-	case COL_TYPE_DATE3 :
+	case COL_TYPE_DATE:
 		{
-			char *dateBuf;
-			DateType dateType;
-			switch( col_type )
+			if ( (strcmp ( my_field, "NULL")  ==   0) ||	(strcmp( my_field, "" ) == 0) )
+      {
+        *my_long_long  = 'NULL'; // ****
+      }
+      else
 			{
-			case COL_TYPE_DATE1 :
-				dateBuf = "DD/MM/YYYY HH:MM:SS";
-				dateType = DDMMYYYY_HHMMSS;
-				break;
-			case COL_TYPE_DATE2 :
-				dateBuf = "DD/MM/YYYY";
-				dateType = DDMMYYYY;
-				break;
-			case COL_TYPE_DATE3 :
-				dateBuf = "DD/MM/YY";
-				dateType = DDMMYY;
-				break;
-			default:
-				throw generic_error(generic_error::TYPE_MISMATCH, "");
-			}
-			if ( (strcmp ( my_field, "NULL")  ==   0) ||	(strcmp( my_field, "" ) == 0) )  *my_long_long  = 'NULL'; // ****
-			else
-			{
-				if ( dateToBigInt(my_field, dateType, my_long_long) )
-				{
-					fwrite( my_long_long , sizeof(long long), 1, fcol );
-				}
-				else
-				{
-					//sprintf ( a_message, "Champ DATE invalide. Format attendu: %s. Champ: %s.", dateBuf, my_field );
-					throw generic_error(generic_error::TYPE_MISMATCH, "");
-				}
+				dateConverter.dateToBigInt(my_field);
+        fwrite( my_long_long , sizeof(long long), 1, fcol );
 			}
 		}
 		break;

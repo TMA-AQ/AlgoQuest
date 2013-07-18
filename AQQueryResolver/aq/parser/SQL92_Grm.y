@@ -941,12 +941,12 @@ comp_op	: K_EQ
 //----------------
 between_predicate	: row_value_constructor K_NOT K_BETWEEN
 						row_value_constructor K_AND row_value_constructor {
-														$2->left	= $3;
-														$3->left	= $1;
-														$3->right	= $5;
+														$3->left	 = $1;
+														$3->tag = K_NOT_BETWEEN;
+														$3->right = $5;
 														$5->left	= $4;
-														$5->right	= $6;
-														$$			= $2;
+														$5->right = $6;
+														$$ = $3;
 													}
 					|  row_value_constructor K_BETWEEN
 						row_value_constructor K_AND row_value_constructor	{
@@ -987,33 +987,33 @@ in_value_list	: value_expression
 //----------------
 like_predicate	: row_value_constructor K_NOT K_LIKE pattern
 					/* [ K_ESCAPE <escape character> ] */	{
-														$2->left	= $3;
-														$3->left	= $1;
-														$3->right	= $4;
-														$$			= $2;
+														$3->left	 = $1;
+														$3->tag = K_NOT_LIKE;
+														$3->right = $4;
+														$$ = $3;
 													}
 				| row_value_constructor K_NOT K_LIKE pattern K_ESCAPE K_STRING {
-														$2->left	= $3;
 														$3->left	= $1;
-														$3->right	= $5;
-														$5->left	= $4;
-														$5->right	= $6;
-														$$			= $2;
+														$3->tag = K_NOT_LIKE;
+														$3->right = $5;
+														$5->left	 = $4;
+														$5->right = $6;
+														$$ = $3;
 													}
 				| match_value K_NOT K_LIKE pattern
 					/* [ K_ESCAPE <escape character> ] */	{
-														$2->left	= $3;
 														$3->left	= $1;
-														$3->right	= $4;
-														$$			= $2;
+														$3->tag = K_NOT_LIKE;
+														$3->right = $4;
+														$$ = $3;
 													}
 				| match_value K_NOT K_LIKE pattern K_ESCAPE K_STRING {
-														$2->left	= $3;
-														$3->left	= $1;
-														$3->right	= $5;
-														$5->left	= $4;
-														$5->right	= $6;
-														$$			= $2;
+														$3->left	 = $1;
+														$3->tag = K_NOT_LIKE;
+														$3->right = $5;
+														$5->left	 = $4;
+														$5->right = $6;
+														$$ = $3;
 													}
 				| match_value K_LIKE pattern
 					/* [ K_ESCAPE escape_character ] */		{

@@ -252,6 +252,8 @@ namespace aq
 
 #ifdef WIN32
 
+#include <windows.h>
+
 // ------------------------------------------------------------------------------------------------
   AQEngineWindows::AQEngineWindows(Base& _baseDesc, TProjectSettings& _settings)
     : AQEngine(_baseDesc, _settings)

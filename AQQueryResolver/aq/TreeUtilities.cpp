@@ -1,12 +1,16 @@
 #include "TreeUtilities.h"
+#include "ExprTransform.h"
 #include "parser/sql92_grm_tab.hpp"
 #include <cassert>
 #include <algorithm>
+#include <aq/WIN32FileMapper.h>
+#include <aq/DateConversion.h>
 #include <aq/Exceptions.h>
 #include <aq/Logger.h>
 #include <boost/bind.hpp>
 #include <boost/scoped_array.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/array.hpp>
 
 //------------------------------------------------------------------------------
 const int nrJoinTypes = 7;
@@ -774,7 +778,7 @@ bool isMonoTable(aq::tnode * query, std::string& tableName)
 		if (tables.size() == 1)
 		{
 			aq::tnode * tmp = *tables.begin();
-			if ((tmp->tag == K_IDENT) && (tmp->getDataType() == NODE_DATA_STRING))
+			if ((tmp->tag == K_IDENT) && (tmp->getDataType() == aq::tnode::tnodeDataType::NODE_DATA_STRING))
 			{
 				tableName = tmp->getData().val_str;
 				return true;
@@ -1281,9 +1285,7 @@ aq::tnode* Getnode( ColumnItem::Ptr item, ColumnType type )
 	switch( type )
 	{
 	case COL_TYPE_INT:
-	case COL_TYPE_DATE1:
-	case COL_TYPE_DATE2:
-	case COL_TYPE_DATE3:
+	case COL_TYPE_DATE:
 		pNode = new aq::tnode( K_INTEGER );
 		pNode->set_int_data( (llong) item->numval );
 		break;
@@ -1479,6 +1481,69 @@ void removePartitionBy(tnode *& pNode)
   else
   {
     aq::Logger::getInstance().log(AQ_WARNING, "cannot remove partition by on a no SELECT node");
+  }
+}
+
+//------------------------------------------------------------------------------
+// Return 1 for true, 0 for false//
+int is_column_reference(const aq::tnode *pNode) 
+{
+	if ( pNode == NULL )
+		return 0;
+	if ( pNode->tag != K_PERIOD )
+		return 0;
+	if ( pNode->left == NULL )
+		return 0;
+	if ( pNode->right == NULL )
+		return 0;
+	if ( pNode->left->tag != K_IDENT )
+		return 0;
+	if ( pNode->right->tag != K_COLUMN )
+		return 0;
+	return 1;
+}
+
+void dateNodeToBigInt(tnode * pNode)
+{
+  if (pNode != NULL)
+  {
+    if (pNode->tag == K_TO_DATE)
+    {
+      assert(pNode->left != NULL);
+      DateConversion dateConverter;
+      long long value;
+      if (pNode->right != NULL)
+      {
+        assert(pNode->right->getDataType() == tnode::tnodeDataType::NODE_DATA_STRING);
+        dateConverter.setInputFormat(pNode->right->getData().val_str);
+      }
+      value = dateConverter.dateToBigInt(pNode->left->getData().val_str);
+      pNode->tag = K_INTEGER;
+      pNode->set_int_data(value);
+      aq::delete_subtree(pNode->left);
+      aq::delete_subtree(pNode->right);
+      aq::delete_subtree(pNode->next);
+    }
+    dateNodeToBigInt(pNode->left);
+    dateNodeToBigInt(pNode->right);
+    dateNodeToBigInt(pNode->next);
+  }
+}
+
+void transformExpression(const aq::Base& baseDesc, const aq::TProjectSettings& settings, aq::tnode * tree)
+{
+  aq::tnode * whereNode = aq::find_main_node(tree, K_WHERE);
+  if (whereNode)
+  {
+    unsigned int tags[] = { K_LT, K_LEQ, K_GT, K_GEQ, K_BETWEEN, K_NOT_BETWEEN, K_LIKE, K_NOT_LIKE };
+    for (auto& tag : tags)
+    {
+      aq::tnode * cmpNode = NULL;
+      while ((cmpNode = aq::find_first_node(whereNode, tag)) != NULL)
+      {
+        aq::expression_transform::transform<aq::WIN32FileMapper>(baseDesc, settings, cmpNode);
+      }
+    }
   }
 }
 

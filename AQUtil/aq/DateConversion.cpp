@@ -1,9 +1,12 @@
 #include "DateConversion.h"
-#include <stdio.h>
-#include <assert.h>
-#include <cstring>
 #include "Utilities.h"
+#include "Exceptions.h"
+#include <cstdio>
+#include <cassert>
+#include <cstring>
 #include <ctime>
+#include <iostream>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 namespace aq
 {
@@ -21,95 +24,62 @@ const long long MONTH = DAY * 33;
 const long long YEAR = MONTH * 14;
 
 //------------------------------------------------------------------------------
-int dateToBigInt( const char* strval, DateType dateType, long long* intval )
+DateConversion::DateConversion()
 {
-	if( !strval || !intval )
-		return 0;
-	int day = 0, month = 0, year = 0;
-	int hour = 0, minute = 0, second = 0, millisecond  = 0;
-	switch( dateType )
-	{
-	case DDMMYYYY_HHMMSS:
-		if( sscanf( strval, "%d/%d/%d %d:%d:%d", &day, &month, &year, 
-			&hour, &minute, &second ) != 6 )
-			return 0;
-		*intval = year * YEAR + month * MONTH + day * DAY + 
-			hour * HOUR + minute * MINUTE + SECOND * second;
-		return 1;
-	case DDMMYYYY:
-		if( sscanf( strval, "%d/%d/%d", &day, &month, &year ) != 3 )
-			return 0;
-		*intval = year * YEAR + month * MONTH + day * DAY;
-		return 1;
-	case DDMMYY:
-		if( sscanf( strval, "%d/%d/%d", &day, &month, &year ) != 3 )
-			return 0;
-		*intval = (year + (year >= 30 ? 1900 : 2000)) * YEAR + month * MONTH + day * DAY;
-		return 1;
-	case DDMMYYYY_HHMMSS_MMM:
-		if( sscanf( strval, "%d/%d/%d %d:%d:%d.%d", &day, &month, &year, 
-			&hour, &minute, &second, &millisecond ) != 7 )
-			return 0;
-		*intval = year * YEAR + month * MONTH + day * DAY + 
-			hour * HOUR + minute * MINUTE + SECOND * second + MILLISECOND * millisecond ;
-		return 1;
-	default:
-		assert( 0 );
-	}
-	return 0;
+  input_facet = new boost::posix_time::time_input_facet("%Y-%m-%d %H:%M:%S");
+  output_facet = new boost::posix_time::time_facet("%Y-%m-%d %H:%M:%S");
+  convert_input_facet = new boost::posix_time::time_input_facet("%Y-%m-%d %H:%M:%S");
+  convert_output_facet = new boost::posix_time::time_facet("%Y-%m-%d %H:%M:%S");
+  ssInput.imbue(std::locale(std::locale::classic(), convert_output_facet));
+  ssInput.imbue(std::locale(ssInput.getloc(), input_facet));
+  ssOutput.imbue(std::locale(std::locale::classic(), output_facet));
+  ssOutput.imbue(std::locale(ssOutput.getloc(), convert_input_facet));
 }
 
 //------------------------------------------------------------------------------
-int dateToBigInt( const char* strval, DateType* dateType, long long* intval )
+DateConversion::DateConversion(const char * format)
 {
-	if( !strval || !dateType || !intval )
-		return 0;
-	int day = 0, month = 0, year = 0;
-	int hour = 0, minute = 0, second = 0, millisecond  = 0;
-	if( sscanf( strval, "%d/%d/%d %d:%d:%d.%d", &day, &month, &year, 
-		&hour, &minute, &second, &millisecond ) == 7 )
-	{
-		*dateType = DDMMYYYY_HHMMSS_MMM;
-	}
-	else if( sscanf( strval, "%d/%d/%d %d:%d:%d", &day, &month, &year, 
-				&hour, &minute, &second ) == 6 )
-	{
-		*dateType = DDMMYYYY_HHMMSS;
-	}
-	else 
-	{
-		if( strlen( strval ) > 10 )
-			return 0;
-		char yearstr[5];
-		if( sscanf( strval, "%d/%d/%s", &day, &month, yearstr ) != 3 )
-			return 0;
-		llong intval;
-		if( StrToInt( yearstr, &intval ) != 0 )
-			return 0;
-		int year = (int) intval;
-		switch( strlen( yearstr ) )
-		{
-		case 4:
-			*dateType = DDMMYYYY;
-			break;
-		case 2:
-			*dateType = DDMMYY;
-			year += year >= 30 ? 1900: 2000;
-			break;
-		default:
-			return 0;
-		}
-	}
-
-	*intval = year * YEAR + month * MONTH + day * DAY + 
-		hour * HOUR + minute * MINUTE + SECOND * second;
-	return 1;
+  input_facet = new boost::posix_time::time_input_facet(format);
+  output_facet = new boost::posix_time::time_facet(format);
+  convert_input_facet = new boost::posix_time::time_input_facet("%Y-%m-%d %H:%M:%S");
+  convert_output_facet = new boost::posix_time::time_facet("%Y-%m-%d %H:%M:%S");
+  ssInput.imbue(std::locale(std::locale::classic(), convert_output_facet));
+  ssInput.imbue(std::locale(ssInput.getloc(), input_facet));
+  ssOutput.imbue(std::locale(std::locale::classic(), output_facet));
+  ssOutput.imbue(std::locale(ssOutput.getloc(), convert_input_facet));
 }
 
 //------------------------------------------------------------------------------
-//strval must be allocated and big enough
-int bigIntToDate( long long intval, DateType dateType, char* strval )
+DateConversion::~DateConversion()
 {
+}
+
+//------------------------------------------------------------------------------
+long long DateConversion::dateToBigInt(const char * strval)
+{
+  long long intval;
+	unsigned int day = 0, month = 0, year = 0;
+	unsigned int hour = 0, minute = 0, second = 0, millisecond  = 0;
+
+  boost::posix_time::ptime d(boost::posix_time::not_a_date_time);
+  this->ssInput.str(strval);
+  this->ssInput >> d;
+  ssInput.str("");
+  ssInput << d;
+
+  if( sscanf( ssInput.str().c_str(), "%u-%u-%u %u:%u:%u", &year, &month, &day, &hour, &minute, &second ) != 6 )
+  {
+    throw aq::generic_error(aq::generic_error::INVALID_DATE_FORMAT, "");
+  }
+  intval = year * YEAR + month * MONTH + day * DAY + hour * HOUR + minute * MINUTE + second * SECOND ;
+
+  return intval;
+}
+
+//------------------------------------------------------------------------------
+std::string DateConversion::bigIntToDate(long long intval)
+{
+  char str[128]; // FIXME
 	int year = (int)(intval / YEAR);
 	intval %= YEAR;
 	int month = (int)(intval / MONTH);
@@ -122,70 +92,23 @@ int bigIntToDate( long long intval, DateType dateType, char* strval )
 	intval %= MINUTE;
 	int second = (int)(intval / SECOND);
 	intval %= SECOND;
-	switch( dateType )
-	{
-	case DDMMYYYY_HHMMSS:
-		if( sprintf( strval, "%.2d/%.2d/%.4d %.2d:%.2d:%.2d", day, month, year, 
-			hour, minute, second ) < 0 )
-			return 0;
-		return 1;
-	case DDMMYYYY:
-		if( sprintf( strval, "%.2d/%.2d/%.4d", day, month, year ) < 0 )
-			return 0;
-		return 1;
-	case DDMMYY:
-		if( sprintf( strval, "%.2d/%.2d/%.2d", day, month, year % 100 ) < 0 )
-			return 0;
-		return 1;
-	case DDMMYYYY_HHMMSS_MMM:
-		{
-			int millisecond = (int)(intval / MILLISECOND);
-			intval %= MILLISECOND;
-			if( sprintf( strval, "%.2d/%.2d/%.4d %.2d:%.2d:%.2d.%.3d", day, month, year, 
-				hour, minute, second, millisecond ) < 0 )
-				return 0;
-			return 1;
-		}
-	case YYYYMM:
-		if( sprintf( strval, "%.4d%.2d", year, month ) < 0 )
-			return 0;
-		return 1;
-	default:
-		assert( 0 );
-	}
-	return 0;
+  
+  if( sprintf( str, "%.4d-%.2d-%.2d %.2d:%.2d:%.2d", year, month, day, hour, minute, second ) < 0 )
+  {
+    throw aq::generic_error(aq::generic_error::INVALID_DATE_FORMAT, "");
+  }
+
+  boost::posix_time::ptime d(boost::posix_time::not_a_date_time);
+  this->ssOutput.str(str);
+  this->ssOutput >> d;
+  ssOutput.str("");
+  ssOutput << d;
+
+  return ssOutput.str();
 }
 
 //------------------------------------------------------------------------------
-void dateToParts(	long long intval, int& year, int& month, int& day, int& hour, 
-				int& minute, int& second, int& millisecond )
-{
-	year = (int)(intval / YEAR);
-	intval %= YEAR;
-	month = (int)(intval / MONTH);
-	intval %= MONTH;
-	day = (int)(intval / DAY);
-	intval %= DAY;
-	hour = (int)(intval / HOUR);
-	intval %= HOUR;
-	minute = (int)(intval / MINUTE);
-	intval %= MINUTE;
-	second = (int)(intval / SECOND);
-	intval %= SECOND;
-	millisecond = (int)(intval / MILLISECOND);
-	intval %= MILLISECOND;
-}
-
-//------------------------------------------------------------------------------
-void dateFromParts(	long long& intval, int year, int month, int day, int hour, 
-				   int minute, int second, int millisecond )
-{
-	intval = year * YEAR + month * MONTH + day * DAY + 
-		hour * HOUR + minute * MINUTE + SECOND * second + MILLISECOND * millisecond;
-}
-
-//------------------------------------------------------------------------------
-long long currentDate()
+long long DateConversion::currentDate()
 {
 	time_t currentTime_t = time(NULL);
 	struct tm *currentTime = localtime( &currentTime_t );

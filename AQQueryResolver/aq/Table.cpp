@@ -211,9 +211,7 @@ void Table::loadColumn(Column::Ptr col, const Table& aqMatrix, const std::vector
 		nBinItemSize	= 4;
 		break;
 	case COL_TYPE_BIG_INT:
-	case COL_TYPE_DATE1:
-	case COL_TYPE_DATE2:
-	case COL_TYPE_DATE3:
+	case COL_TYPE_DATE:
 	case COL_TYPE_DOUBLE:
 		nTmpBufSize		= 1000;
 		nBinItemSize	= 8;
@@ -283,9 +281,7 @@ void Table::loadColumn(Column::Ptr col, const Table& aqMatrix, const std::vector
 			}
 			break;
 		case COL_TYPE_BIG_INT:
-		case COL_TYPE_DATE1:
-		case COL_TYPE_DATE2:
-		case COL_TYPE_DATE3:
+		case COL_TYPE_DATE:
 			{
 				long long *pnItemData;
 				pnItemData = (long long*)( pTmpBuf );
@@ -360,9 +356,7 @@ void Table::loadColumn(Column::Ptr col, const std::vector<size_t>& uniqueIndex, 
 		nBinItemSize	= 4;
 		break;
 	case COL_TYPE_BIG_INT:
-	case COL_TYPE_DATE1:
-	case COL_TYPE_DATE2:
-	case COL_TYPE_DATE3:
+	case COL_TYPE_DATE:
 	case COL_TYPE_DOUBLE:
 		nTmpBufSize		= 1000;
 		nBinItemSize	= 8;
@@ -427,9 +421,7 @@ void Table::loadColumn(Column::Ptr col, const std::vector<size_t>& uniqueIndex, 
 			}
 			break;
 		case COL_TYPE_BIG_INT:
-		case COL_TYPE_DATE1:
-		case COL_TYPE_DATE2:
-		case COL_TYPE_DATE3:
+		case COL_TYPE_DATE:
 			{
 				long long *pnItemData;
 				pnItemData = (long long*)( pTmpBuf );

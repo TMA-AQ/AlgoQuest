@@ -332,6 +332,8 @@ void FileWriteEnreg(symbole col_type, int col_size, char *my_field, FILE *fcol, 
 	long long int dum_long_long;
 	long long int *my_long_long = &dum_long_long;
 
+  DateConversion dateConverter;
+
 	if ( (int) strlen ( my_field ) >= col_size ) my_field[ col_size ] = 0 ;
 
 	switch (  col_type )
@@ -368,39 +370,14 @@ void FileWriteEnreg(symbole col_type, int col_size, char *my_field, FILE *fcol, 
 	case t_date2 :
 	case t_date3 :
 		{
-			char *dateBuf;
-			DateType dateType;
-			switch( col_type )
-			{
-			case t_date1 :
-				dateBuf = "DD/MM/YYYY HH:MM:SS";
-				dateType = DDMMYYYY_HHMMSS;
-				break;
-			case t_date2 :
-				dateBuf = "DD/MM/YYYY";
-				dateType = DDMMYYYY;
-				break;
-			case t_date3 :
-				dateBuf = "DD/MM/YY";
-				dateType = DDMMYY;
-				break;
-			default:
-				printf ("type de colonne  non traite \n");
-			}
 			if ( (strcmp ( my_field, "NULL") == 0) || (strcmp( my_field, "" ) == 0) )  
+      {
 				*my_long_long  = 'NULL'; // ****
+      }
 			else
 			{
-				if ( dateToBigInt(my_field, dateType, my_long_long) )
-				{
-					fwrite( my_long_long , sizeof(long long), 1, fcol );
-				}
-				else
-				{
-					sprintf ( a_message, "Champ DATE invalide. "
-						"Format attendu: %s. Champ: %s. Row: %d", dateBuf, my_field, rowNr );
-					die_with_error ( a_message );
-				}
+				dateConverter.dateToBigInt(my_field);
+        fwrite( my_long_long , sizeof(long long), 1, fcol );
 			}
 		}
 		break;

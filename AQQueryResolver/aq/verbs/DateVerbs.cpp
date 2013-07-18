@@ -21,7 +21,7 @@ bool CurrentDateVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 									VerbResult::Ptr resRight, 
 									VerbResult::Ptr resNext )
 {
-	Scalar::Ptr scalar = new Scalar( COL_TYPE_DATE1, 8, ColumnItem( (double) currentDate() ) );
+	Scalar::Ptr scalar = new Scalar( COL_TYPE_DATE, 8, ColumnItem( (double) DateConversion::currentDate() ) );
 	pNode->tag = K_DATE_VALUE;
 	pNode->set_data( scalar->getValue(), scalar->Type );
 	this->Result = scalar;

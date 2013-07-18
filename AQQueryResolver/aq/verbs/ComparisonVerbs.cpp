@@ -3,6 +3,7 @@
 #include <aq/ExprTransform.h>
 #include <aq/Exceptions.h>
 #include <aq/Logger.h>
+#include <aq/WIN32FileMapper.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 using namespace std;
@@ -24,7 +25,7 @@ bool ComparisonVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 									VerbResult::Ptr resNext )
 {
 	assert( pNode );
-	assert( pNode->getDataType() != NODE_DATA_STRING );
+	assert( pNode->getDataType() != aq::tnode::tnodeDataType::NODE_DATA_STRING );
 	int pErr = 0;
 	//the argument given to expression_transform will be destroyed if the function
 	//is successful
@@ -34,7 +35,7 @@ bool ComparisonVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 	{
 		boost::posix_time::ptime begin(boost::posix_time::microsec_clock::local_time());
     aq::ExpressionTransform expTrans(*this->m_baseDesc, *this->m_settings);
-		newNode = expTrans.expression_transform( pNodeClone, &pErr );
+		newNode = expTrans.transform<aq::WIN32FileMapper>(pNodeClone);
 		boost::posix_time::ptime end(boost::posix_time::microsec_clock::local_time());
 		std::ostringstream oss;
 		oss << "expression_transform elapsed time: " << (end - begin) << " ms";
@@ -70,7 +71,7 @@ bool ComparisonVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 		throw verb_error(generic_error::GENERIC, this->getVerbType());
 	}
 	//pNodeClone already deleted by expression_transform
-	assert( newNode->getDataType() != NODE_DATA_STRING );
+	assert( newNode->getDataType() != aq::tnode::tnodeDataType::NODE_DATA_STRING );
 	*pNode = *newNode; // FIXME
   pNode->left = newNode->left;
   pNode->right = newNode->right;

@@ -12,10 +12,7 @@ const aq::data_holder_t Scalar::getValue() const
 	{
 	case aq::COL_TYPE_INT:
 	case aq::COL_TYPE_BIG_INT:
-	case aq::COL_TYPE_DATE1:
-	case aq::COL_TYPE_DATE2:
-	case aq::COL_TYPE_DATE3:
-	case aq::COL_TYPE_DATE4:
+	case aq::COL_TYPE_DATE:
 		data.val_int = static_cast<long long>(Item.numval);
 		break;
 	case aq::COL_TYPE_DOUBLE:

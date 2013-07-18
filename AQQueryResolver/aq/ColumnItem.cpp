@@ -41,13 +41,10 @@ ColumnItem::ColumnItem( char* str, ColumnType type )
 	case COL_TYPE_DOUBLE:
 		StrToDouble(str, &this->numval);
 		break;
-	case COL_TYPE_DATE1:
-	case COL_TYPE_DATE2:
-	case COL_TYPE_DATE3:
+	case COL_TYPE_DATE:
 		{
-			DateType dateType;
-			llong intval;
-			dateToBigInt( str, &dateType, &intval );
+			DateConversion dateConverter;
+			llong intval = dateConverter.dateToBigInt(str);
 			this->numval = (double) intval;
 		}
 		break;
@@ -84,14 +81,12 @@ void ColumnItem::toString( char* buffer, const ColumnType& type ) const
 		case COL_TYPE_DOUBLE:
 			doubleToString( buffer, this->numval );
 			break;
-		case COL_TYPE_DATE1:
-			bigIntToDate( (long long) this->numval, DDMMYYYY_HHMMSS, buffer );
-			break;
-		case COL_TYPE_DATE2:
-			bigIntToDate( (long long) this->numval, DDMMYYYY, buffer );
-			break;
-		case COL_TYPE_DATE3:
-			bigIntToDate( (long long) this->numval, DDMMYY, buffer );
+		case COL_TYPE_DATE:
+      {
+        DateConversion dateConverter;
+        std::string date_str = dateConverter.bigIntToDate((long long) this->numval);
+        strcpy(buffer, date_str.c_str());
+      }
 			break;
 		case COL_TYPE_VARCHAR:
 			res = sprintf( buffer, this->strval.c_str() );
@@ -113,9 +108,7 @@ bool ColumnItem::lessThan( const ColumnItem * first, const ColumnItem * second, 
 	case COL_TYPE_INT: 
 	case COL_TYPE_BIG_INT:
 	case COL_TYPE_DOUBLE:
-	case COL_TYPE_DATE1:
-	case COL_TYPE_DATE2:
-	case COL_TYPE_DATE3:
+	case COL_TYPE_DATE:
 		return first->numval < second->numval;
 		break;
 	case COL_TYPE_VARCHAR: 
@@ -142,9 +135,7 @@ bool ColumnItem::equal( const ColumnItem * first, const ColumnItem * second, Col
 	case COL_TYPE_INT: 
 	case COL_TYPE_BIG_INT:
 	case COL_TYPE_DOUBLE:
-	case COL_TYPE_DATE1:
-	case COL_TYPE_DATE2:
-	case COL_TYPE_DATE3:
+	case COL_TYPE_DATE:
 		return first->numval == second->numval;
 		break;
 	case COL_TYPE_VARCHAR: 

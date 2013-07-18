@@ -9,7 +9,8 @@
 #include <boost/algorithm/string.hpp>
 
 int functional_tests(const std::string& dbPath, std::string& queryIdent, const std::string& aqEngine, 
-                     const std::string& queriesFilename, const std::string& logFilename, uint64_t limit, bool stopOnError)
+                     const std::string& queriesFilename, const std::string& filter, 
+                     const std::string& logFilename, uint64_t limit, bool stopOnError)
 {
   int rc = 0;
   uint64_t nb_queries_tested = 0;
@@ -24,6 +25,22 @@ int functional_tests(const std::string& dbPath, std::string& queryIdent, const s
   std::string query;
   while ((query = reader.next()) != "")
   {
+    if (filter != "")
+    {
+      std::string::size_type pos = filter.find("/");
+      if (pos != std::string::npos)
+      {
+        if ((reader.getSuite() + std::string("/") + reader.getIdent()) != filter) 
+        {
+          continue;
+        }
+      }
+      else if (reader.getSuite() != filter)
+      {
+        continue;
+      }
+    }
+
     std::string iniFilename;
     aq::generate_working_directories(dbPath, queryIdent, iniFilename);
 
@@ -46,8 +63,8 @@ int functional_tests(const std::string& dbPath, std::string& queryIdent, const s
 
     // check for Whering
     aq::WhereValidator whereValidator;
-    whereValidator.parseQuery(query);
-    whereValidator.dump(std::cout);
+    //whereValidator.parseQuery(query);
+    //whereValidator.dump(std::cout);
     
     // execute query
     std::cout << std::endl;

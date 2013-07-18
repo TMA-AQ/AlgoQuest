@@ -250,10 +250,7 @@ void tnode::set_data( const data_holder_t data, ColumnType type )
 	{
 	case COL_TYPE_INT:
 	case COL_TYPE_BIG_INT:
-	case COL_TYPE_DATE1:
-	case COL_TYPE_DATE2:
-	case COL_TYPE_DATE3:
-	case COL_TYPE_DATE4:
+	case COL_TYPE_DATE:
 		this->tag = K_INTEGER;
 		this->set_int_data( (llong) data.val_int );
 		break;
@@ -613,9 +610,9 @@ void checkTree( tnode * tree, std::set<tnode*>& nodes)
 
   switch (tree->getDataType())
   {
-  case NODE_DATA_INT: break;
-  case NODE_DATA_NUMBER: break;
-  case NODE_DATA_STRING: 
+  case aq::tnode::tnodeDataType::NODE_DATA_INT: break;
+  case aq::tnode::tnodeDataType::NODE_DATA_NUMBER: break;
+  case aq::tnode::tnodeDataType::NODE_DATA_STRING: 
     //assert(tree->data.val_str != NULL); 
     //assert((tree->nStrBufCb % STR_BUF_SIZE_ROUND_UP) == 0);
     //assert(tree->nStrBufCb >= strlen(tree->data.val_str));

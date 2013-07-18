@@ -117,14 +117,17 @@ void Base::loadFromBaseDesc(const aq::base_t& base)
       unsigned int size = 0;
       switch (type)
       {
-      case COL_TYPE_VARCHAR: size = column.taille * sizeof(char); break;
-      case COL_TYPE_INT: size = 4; break;
+      case COL_TYPE_VARCHAR: 
+        size = column.taille * sizeof(char); 
+        break;
+      case COL_TYPE_INT: 
+        size = 4; 
+        break;
       case COL_TYPE_BIG_INT:
       case COL_TYPE_DOUBLE:
-      case COL_TYPE_DATE1:
-      case COL_TYPE_DATE2:
-      case COL_TYPE_DATE3:
-      case COL_TYPE_DATE4: size = 8; break;
+      case COL_TYPE_DATE: 
+        size = 8; 
+        break;
       }
       pTD->Columns.push_back(new Column(column.nom, column.num, size, type));
 		});
@@ -204,48 +207,35 @@ void Base::loadFromRawFile( const char* pszDataBaseFile ) {
 			strtoupr( szColumnType );
 			if ( strcmp( szColumnType, "NUMBER" ) == 0 )
       {
-        nColumnSize = 8;
 				eColumnType = COL_TYPE_INT;
       }
 			else if ( strcmp( szColumnType, "INT" ) == 0 )
       {
-        nColumnSize = 4;
 				eColumnType = COL_TYPE_INT;
       }
 			else if ( strcmp( szColumnType, "BIG_INT" ) == 0 )
       {
-        nColumnSize = 8;
 				eColumnType = COL_TYPE_BIG_INT;
       }
 			else if ( strcmp( szColumnType, "FLOAT" ) == 0 )
       {
-        nColumnSize = 8;
 				eColumnType = COL_TYPE_DOUBLE;
       }
 			else if ( strcmp( szColumnType, "DOUBLE" ) == 0 )
       {
-        nColumnSize = 8;
 				eColumnType = COL_TYPE_DOUBLE;
       }
-			else if ( strcmp( szColumnType, "DATE1" ) == 0 )
+			else if ( strcmp( szColumnType, "DATE" ) == 0 || strcmp( szColumnType, "DATE1" ) == 0)
       {
-        nColumnSize = 8;
-				eColumnType = COL_TYPE_DATE1;
+				eColumnType = COL_TYPE_DATE;
       }
-			else if ( strcmp( szColumnType, "DATE2" ) == 0 )
+			else if ( strcmp( szColumnType, "VARCHAR2" ) == 0 )	// Same for CHAR
       {
-        nColumnSize = 8;
-				eColumnType = COL_TYPE_DATE2;
-      }
-			else if ( strcmp( szColumnType, "DATE3" ) == 0 )
-      {
-        nColumnSize = 8;
-				eColumnType = COL_TYPE_DATE3;
-      }
-			else // if ( strcmp( szColumnType, "VARCHAR2" ) == 0 )	// Same for CHAR
-      {
-        nColumnSize *= sizeof(char);
 				eColumnType = COL_TYPE_VARCHAR;
+      }
+      else
+      {
+        throw aq::generic_error(aq::generic_error::NOT_IMPLEMENED, "type %s not supported", szColumnType);
       }
 
 			pTD->Columns.push_back( new Column( std::string(szColumnName), nColumnId, nColumnSize, eColumnType ) );
@@ -290,9 +280,7 @@ void Base::saveToRawFile( const char* pszDataBaseFile )
 			case COL_TYPE_INT: szColumnType = "INT"; break;
 			case COL_TYPE_BIG_INT: szColumnType = "BIG_INT"; break;
 			case COL_TYPE_DOUBLE: szColumnType = "DOUBLE"; break;
-			case COL_TYPE_DATE1: szColumnType = "DATE1"; break;
-			case COL_TYPE_DATE2: szColumnType = "DATE2"; break;
-			case COL_TYPE_DATE3: szColumnType = "DATE3"; break;
+			case COL_TYPE_DATE: szColumnType = "DATE"; break;
 			case COL_TYPE_VARCHAR: szColumnType = "VARCHAR2"; break;
 			default:
 				throw generic_error(generic_error::NOT_IMPLEMENED, "");

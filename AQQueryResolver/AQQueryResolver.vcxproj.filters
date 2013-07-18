@@ -235,7 +235,16 @@
     <ClInclude Include="aq\RowWritter_Intf.h">
       <Filter>Header Files\aq\row_solver</Filter>
     </ClInclude>
-    <ClInclude Include="aq\ExprTransform_2.h">
+    <ClInclude Include="aq\AQThread.h">
+      <Filter>Header Files\aq</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\AQThreadRequest.h">
+      <Filter>Header Files\aq</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\ThesaurusReader.h">
+      <Filter>Header Files\aq</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\QuerySplitter.h">
       <Filter>Header Files\aq</Filter>
     </ClInclude>
   </ItemGroup>

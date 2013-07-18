@@ -101,17 +101,17 @@ namespace aq
       {
         ++count;
         nbrThread = 0;
-        for (std::vector<AQThread<T>*>::const_iterator it = this->_thread.begin();
-          it != this->_thread.end(); ++it)
-          if ((*it)->isReady() == true && (*it)->threadOver() == false && (*it)->isThreading() == false && nbrThread < this->_nbrThread)
+        for (auto& th : this->_thread)
+        {
+          if (th->isReady() && !th->threadOver() && !th->isThreading() && (nbrThread < this->_nbrThread))
           {
-            (*it)->start(count, (rand() % 5));
+            th->start(count, (rand() % 5));
             ++nbrThread;
           }
-          for (std::vector<AQThread<T>*>::const_iterator it = this->_thread.begin();
-            it != this->_thread.end(); ++it)
-            if ((*it)->isInitialaze() == true)
-              (*it)->join();
+        }
+        for (auto& th : this->_thread)
+          if (th->isInitialaze() == true)
+            th->join();
       }
     }
      
@@ -121,8 +121,8 @@ namespace aq
     // dump
     //--------------------------------------------------------------------------------------------
 
-    void  dump(std::ostream& os)  const {
-      this->_thread.front()->dump(os, "");
+    void  dump(std::ostream& os)        const {
+      this->_thread.front()->dump(os, "  ");
     }
      
     //--------------------------------------------------------------------------------------------

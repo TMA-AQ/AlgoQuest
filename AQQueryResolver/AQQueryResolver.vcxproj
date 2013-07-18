@@ -331,7 +331,6 @@
     <ClInclude Include="aq\db_loader\Util.h" />
     <ClInclude Include="aq\DumpVisitor.h" />
     <ClInclude Include="aq\ExprTransform.h" />
-    <ClInclude Include="aq\ExprTransform_2.h" />
     <ClInclude Include="aq\LIKE_PatternMatching.h" />
     <ClInclude Include="aq\Optimizations.h" />
     <ClInclude Include="aq\parser\ID2Str.h" />
@@ -341,6 +340,7 @@
     <ClInclude Include="aq\ParsException.h" />
     <ClInclude Include="aq\QueryAnalyzer.h" />
     <ClInclude Include="aq\QueryResolver.h" />
+    <ClInclude Include="aq\QuerySplitter.h" />
     <ClInclude Include="aq\Row.h" />
     <ClInclude Include="aq\RowBinaryWritter.h" />
     <ClInclude Include="aq\RowProcesses.h" />
@@ -356,6 +356,7 @@
     <ClInclude Include="aq\statement_resolver.h" />
     <ClInclude Include="aq\Table.h" />
     <ClInclude Include="aq\TemporaryColumnMapper.h" />
+    <ClInclude Include="aq\ThesaurusReader.h" />
     <ClInclude Include="aq\TreeUtilities.h" />
     <ClInclude Include="aq\verbs\AggregateVerbs.h" />
     <ClInclude Include="aq\verbs\ArithmeticVerbs.h" />

@@ -88,27 +88,13 @@ void Convert(	ColumnItem& dest, int destType,
 			assert( 0 );
 		}
 		break;
-	case COL_TYPE_DATE1:
-	case COL_TYPE_DATE2:
-	case COL_TYPE_DATE3:
-	case COL_TYPE_DATE4:
+	case COL_TYPE_DATE:
 		switch( destType )
 		{
 		case COL_TYPE_VARCHAR:
 			{
-				char dateBuf[30];
-				DateType dateType;
-				switch( sourceType )
-				{
-				case COL_TYPE_DATE1: dateType = aq::DateType::DDMMYYYY_HHMMSS; break;
-				case COL_TYPE_DATE2: dateType = aq::DateType::DDMMYYYY; break;
-				case COL_TYPE_DATE3: dateType = aq::DateType::DDMMYY; break;
-				case COL_TYPE_DATE4: dateType = aq::DateType::YYYYMM; break;
-				default:
-					assert( 0 );
-				}
-				bigIntToDate( (long long) source.numval, dateType, dateBuf );
-				dest.strval = dateBuf;
+				DateConversion dateConverter;
+				dest.strval = dateConverter.bigIntToDate((long long) source.numval);
 			}
 			break;
 		default:

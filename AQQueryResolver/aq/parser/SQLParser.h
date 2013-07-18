@@ -13,15 +13,16 @@ namespace aq
 {
 
 //------------------------------------------------------------------------------
-typedef enum {
-	NODE_DATA_STRING,
-	NODE_DATA_INT,
-	NODE_DATA_NUMBER
-} tnodeDataType;
-
-//------------------------------------------------------------------------------
 class tnode 
 {
+public:
+  enum tnodeDataType
+  {
+    NODE_DATA_STRING,
+    NODE_DATA_INT,
+    NODE_DATA_NUMBER
+  };
+
 public:
   tnode(short _tag);
   tnode(const tnode& source);

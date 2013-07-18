@@ -182,13 +182,11 @@
     <ClInclude Include="aq\AQEngineBasic.h" />
     <ClInclude Include="aq\AQEngineSimulate.h" />
     <ClInclude Include="aq\Link.h" />
-    <ClInclude Include="aq\QueryResolverSimulate.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="aq\AQEngineBasic.cpp" />
     <ClCompile Include="aq\AQEngineSimulate.cpp" />
     <ClCompile Include="aq\aq_tools.cpp" />
-    <ClCompile Include="aq\QueryResolverSimulate.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

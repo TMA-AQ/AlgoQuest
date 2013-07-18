@@ -149,9 +149,7 @@ void Column::setBinItemSize()
 		nBinItemSize	= 4;
 		break;
 	case COL_TYPE_BIG_INT:
-	case COL_TYPE_DATE1:
-	case COL_TYPE_DATE2:
-	case COL_TYPE_DATE3:
+	case COL_TYPE_DATE:
 	case COL_TYPE_DOUBLE:
 		nBinItemSize	= 8;
 		break;
@@ -255,9 +253,7 @@ int Column::loadFromThesaurus(	const char *pszFilePath, int nFileType,
 		nTmpBufSize		= 1000;
 		nBinItemSize	= 4;
 	} else if ( eColumnType == COL_TYPE_BIG_INT || 
-				eColumnType == COL_TYPE_DATE1 || 
-				eColumnType == COL_TYPE_DATE2 || 
-				eColumnType == COL_TYPE_DATE3 || 
+				eColumnType == COL_TYPE_DATE || 
 				eColumnType == COL_TYPE_DOUBLE ) {
 		nTmpBufSize		= 1000;
 		nBinItemSize	= 8;
@@ -335,8 +331,7 @@ int Column::loadFromThesaurus(	const char *pszFilePath, int nFileType,
 
 				this->Items.push_back( new ColumnItem( *pnItemData ) );
 			}
-		} else if ( eColumnType == COL_TYPE_DATE1 || eColumnType == COL_TYPE_DATE2 || 
-			eColumnType == COL_TYPE_DATE3 || eColumnType == COL_TYPE_BIG_INT ) {
+		} else if ( eColumnType == COL_TYPE_DATE || eColumnType == COL_TYPE_BIG_INT ) {
 			/* Define the Data pointer in our buffer ! */
 			long long *pnItemData;
 			pnItemData = (long long*)( pTmpBuf );
@@ -490,9 +485,7 @@ void Column::loadFromFile( const std::string& file )
 		nBinItemSize	= 4;
 		break;
 	case COL_TYPE_BIG_INT:
-	case COL_TYPE_DATE1:
-	case COL_TYPE_DATE2:
-	case COL_TYPE_DATE3:
+	case COL_TYPE_DATE:
 	case COL_TYPE_DOUBLE:
 		nTmpBufSize		= 1000;
 		nBinItemSize	= 8;
@@ -532,9 +525,7 @@ void Column::loadFromFile( const std::string& file )
 		}
 		break;
 	case COL_TYPE_BIG_INT:
-	case COL_TYPE_DATE1:
-	case COL_TYPE_DATE2:
-	case COL_TYPE_DATE3:
+	case COL_TYPE_DATE:
 		{
 			long long *pnItemData;
 			pnItemData = (long long*)( pTmpBuf );
@@ -633,9 +624,7 @@ void Column::saveToFile(	const std::string& file, size_t startIdx, size_t endIdx
 			}
 			break;
 		case COL_TYPE_BIG_INT:
-		case COL_TYPE_DATE1:
-		case COL_TYPE_DATE2:
-		case COL_TYPE_DATE3:
+		case COL_TYPE_DATE:
 			{
 				llong val = 'NULL';
 				if( this->Items[realIdx] )
@@ -760,9 +749,7 @@ void Column::dumpRaw( std::ostream& os )
   case COL_TYPE_INT: os << "INT"; break;
   case COL_TYPE_BIG_INT: os << "BIG_INT"; break;
   case COL_TYPE_DOUBLE: os << "DOUBLE"; break;
-  case COL_TYPE_DATE1: os << "DATE1"; break;
-  case COL_TYPE_DATE2: os << "DATE2"; break;
-  case COL_TYPE_DATE3: os << "DATE3"; break;
+  case COL_TYPE_DATE: os << "DATE"; break;
   case COL_TYPE_VARCHAR: os << "VARCHAR2"; break;
   default:
     throw generic_error(generic_error::NOT_IMPLEMENED, "");
@@ -783,9 +770,7 @@ void Column::dumpXml( std::ostream& os )
   case COL_TYPE_INT: os << "INT"; break;
   case COL_TYPE_BIG_INT: os << "BIG_INT"; break;
   case COL_TYPE_DOUBLE: os << "DOUBLE"; break;
-  case COL_TYPE_DATE1: os << "DATE1"; break;
-  case COL_TYPE_DATE2: os << "DATE2"; break;
-  case COL_TYPE_DATE3: os << "DATE3"; break;
+  case COL_TYPE_DATE: os << "DATE"; break;
   case COL_TYPE_VARCHAR: os << "VARCHAR2"; break;
   default:
     throw generic_error(generic_error::NOT_IMPLEMENED, "");

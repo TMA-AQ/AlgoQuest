@@ -100,4 +100,11 @@ void setOneColumnByTableOnSelect(tnode * pNode);
 
 void removePartitionBy(tnode *& pNode);
 
+/// Return 1 for true, 0 for false
+int is_column_reference(const aq::tnode * pNode);
+
+void dateNodeToBigInt(tnode * pNode);
+
+void transformExpression(const aq::Base& baseDesc, const aq::TProjectSettings& settings, aq::tnode * tree);
+
 }
