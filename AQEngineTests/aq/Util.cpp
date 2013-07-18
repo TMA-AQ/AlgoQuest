@@ -13,7 +13,7 @@
 namespace aq
 {
 
-  typedef std::vector<aq::ColumnItem::Ptr> v_item_t;
+  typedef std::vector<std::pair<aq::ColumnItem::Ptr, aq::ColumnType> > v_item_t;
   struct grp_cmp
   {
     bool operator()(const v_item_t& v1, const v_item_t& v2)
@@ -21,10 +21,13 @@ namespace aq
       assert(v1.size() == v2.size());
       for (size_t i = 0; i < v1.size(); ++i)
       {
-        if (!aq::ColumnItem::lessThan(*v1[i], *v2[i]))
+        assert(v1[i].second == v2[i].second);
+        if (aq::ColumnItem::lessThan(v1[i].first.get(), v2[i].first.get(), v1[i].second))
+          return true;
+        else if (!aq::ColumnItem::equal(v1[i].first.get(), v2[i].first.get(), v1[i].second))
           return false;
       }
-      return true;
+      return false;
     }
   };
 
@@ -128,14 +131,14 @@ int check_answer_validity(const char * dbPath, const char * queryIdent, aq::AQMa
     matrix.load(answerFile.c_str(), tablesIds);
     if (nbRows != 0)
     {
-      if (matrix.getSize() != nbRows)
+      if (matrix.getNbRows() != nbRows)
       {
-        std::cerr << "ERROR: expected " << nbRows << " rows, get " << matrix.getSize() << std::endl;
+        std::cerr << "ERROR: expected " << nbRows << " rows, get " << matrix.getNbRows() << std::endl;
         rc = -1;
       }
       else
       {
-        std::cout << "\t" << "rows match [" << matrix.getSize() << "]" << std::endl;
+        std::cout << "\t" << "rows match [" << matrix.getNbRows() << "]" << std::endl;
       }
     }
     if (nbGroups != 0)
@@ -216,7 +219,7 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
   std::cout << "\t" << tableIDs.size() << " tables: [ ";
   std::for_each(tableIDs.begin(), tableIDs.end(), [&] (long long id) { std::cout << id << " "; });
   std::cout << "]" << std::endl;
-  std::cout << "\t" << matrix.getSize() << " results" << std::endl;
+  std::cout << "\t" << matrix.getNbRows() << " results" << std::endl;
   std::cout << "\t" << matrix.getGroupBy().size() << " groups" << std::endl;
   
   const aq::AQMatrix::matrix_t& m = matrix.getMatrix();
@@ -318,12 +321,12 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
           if (new_group || (i == 0))
           {
             *itGrouped->first = *item;
-            v.push_back(item);
+            v.push_back(std::make_pair(item, cm.second->getType()));
           }
           else if (!aq::ColumnItem::equal(item.get(), itGrouped->first.get(), cm.second->getType()))
           {
-            std::cerr << "BAD GROUPING: TODO : print expected value" << std::endl;
-            exit(-1);
+            std::cerr << std::endl << "BAD GROUPING: get '" << item->toString(cm.second->getType()) << "', expect '" << itGrouped->first->toString(cm.second->getType()) << "'" << std::endl;
+            return -1;
           }
         }
 
@@ -338,11 +341,10 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
             !aq::ColumnItem::equal(item.get(), itGrouped->first.get(), cm.second->getType()) && 
             !aq::ColumnItem::lessThan(itGrouped->first.get(), item.get(), cm.second->getType()))
           {
-            std::cerr << "BAD ORDERING: TODO : print expected value" << std::endl;
-            exit(-1);
+            std::cerr << std::endl << "BAD ORDERING: get '" << item->toString(cm.second->getType()) << "', expect '" << itGrouped->first->toString(cm.second->getType()) << "'" << std::endl;
+            return -1;
           }
         }
-
 
         ++itSelected;
         ++itGrouped;
@@ -352,6 +354,9 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
       if (aq::verbose)
         std::cout << " | ";
     }
+    
+    if (aq::verbose)
+      std::cout << std::endl;
 
     if (!v.empty())
     {
@@ -359,19 +364,23 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
         groups.insert(v);
       else
       {
-        std::cerr << "BAD GROUPING: TODO : print expected value" << std::endl;
-        exit(-1);
+        std::string group = "[ ";
+        for (auto& g : v)
+        {
+          group += g.first->toString(g.second) + " ";
+        }
+        group += "]" ;
+        std::cerr << std::endl << "BAD GROUPING: group " << group << " already insert" << std::endl;
+        return -1;
       }
     }
 
     if (whereValidator.check(matrix, columnMappers, i) == false)
     {
-      std::cerr << "BAD WHERING: TODO : print expected value" << std::endl;
-      exit(-1);
+      std::cerr << std::endl << "WHERE VALIDATOR FAILED" << std::endl;
+      return -1;
     }
 
-    if (aq::verbose)
-      std::cout << std::endl;
   }
 
   return 0;
