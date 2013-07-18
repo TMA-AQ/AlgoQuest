@@ -311,7 +311,7 @@ std::string& syntax_tree_to_sql_form(aq::tnode * pNode, std::string& query, unsi
 		}
 		query += " " + stmp.str();
     if ( bill == true && pNode->tag != K_IDENT && pNode->tag != K_STRING && pNode->tag != K_COLUMN
-      && pNode->tag != K_REAL && pNode->tag != K_INTEGER && pNode->tag != K_DATE_VALUE )
+      && pNode->tag != K_REAL && pNode->tag != K_INTEGER && pNode->tag != K_DATE_VALUE && pNode->tag != K_STAR )
     {
       query += " (";
       aq::syntax_tree_to_sql_form(pNode->left, query, ++level);
@@ -332,7 +332,7 @@ std::string& syntax_tree_to_sql_form_nonext(aq::tnode * pNode, std::string& quer
 {
 	if (pNode == NULL) return query;
 
-	if (level > 100) 
+	if (level > 100)
 	{
 		query += " ... ";
 		return query;

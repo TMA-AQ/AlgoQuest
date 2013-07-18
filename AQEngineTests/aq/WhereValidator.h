@@ -52,21 +52,29 @@ namespace aq
     // Check if the condition(s) mate with the answer
     //-------------------------------------------------------------------------
 
-    bool  check(const aq::AQMatrix& matrix, 
-                const std::map<size_t, std::vector<boost::shared_ptr<aq::ColumnMapper_Intf> > >& mapper,
-                size_t i)                       const;
+    bool  check(const aq::AQMatrix& matrix, mapMap& mapper, size_t i) const;
+
+    //-------------------------------------------------------------------------
+    // Setter
+    //-------------------------------------------------------------------------
+
+    void  setBaseDesc(const aq::Base& baseDesc)
+    {
+      for (auto& c : this->_condition)
+        c->setValues(baseDesc);
+    }
 
     //-------------------------------------------------------------------------
     // Dump
     //-------------------------------------------------------------------------
 
-    void  dump(std::ostream& os)                const;
+    void  dump(std::ostream& os)                                      const;
 
     //-------------------------------------------------------------------------
 
   private:
 
-    KeyWord getKeyWord(const std::string& word) const;
+    KeyWord getKeyWord(const std::string& word)                       const;
 
   private:
 
@@ -74,7 +82,7 @@ namespace aq
     // Attribute
     //-------------------------------------------------------------------------
 
-    std::map<WhereValidator::KeyWord, boost::function<AWhereCondition* (const std::string&)> >   _creator;
+    std::map<WhereValidator::KeyWord, boost::function<AWhereCondition* (const std::string&)> >  _creator;
     std::vector<AWhereCondition*>                                                               _condition;
   };
 

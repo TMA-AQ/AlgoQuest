@@ -5,12 +5,28 @@
 #include <aq/Timer.h>
 #include <aq/Exceptions.h>
 #include <iostream>
+#include <algorithm>
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 #include <boost/algorithm/string.hpp>
 
 namespace aq
 {
+
+  typedef std::vector<aq::ColumnItem::Ptr> v_item_t;
+  struct grp_cmp
+  {
+    bool operator()(const v_item_t& v1, const v_item_t& v2)
+    {
+      assert(v1.size() == v2.size());
+      for (size_t i = 0; i < v1.size(); ++i)
+      {
+        if (!aq::ColumnItem::lessThan(*v1[i], *v2[i]))
+          return false;
+      }
+      return true;
+    }
+  };
 
 // ----------------------------------------------------------------------------
 int generate_database(const char * path, const char * name)
@@ -176,7 +192,7 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
                       const std::vector<std::string>& selectedColumns,
                       const std::vector<std::string>& groupedColumns, 
                       const std::vector<std::string>& orderedColumns,
-                      const WhereValidator& whereValidator)
+                      WhereValidator& whereValidator)
 {
   std::string baseFilename(dbPath);
   baseFilename += "/base_struct/base";
@@ -186,6 +202,10 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
   aq::TProjectSettings settings;
   aq::Base baseDesc;
   baseDesc.loadFromRawFile(baseFilename.c_str());
+
+  // Set the baseDesc for the Where Conditions
+  whereValidator.setBaseDesc(baseDesc);
+
 
   aq::AQMatrix matrix(settings, baseDesc);
   
@@ -206,7 +226,7 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
   std::vector<bool> isSelected;
   std::vector<std::pair<aq::ColumnItem::Ptr, bool> > isGrouped;
   std::vector<std::pair<aq::ColumnItem::Ptr, bool> > isOrdered;
-  std::map<size_t, std::vector<boost::shared_ptr<aq::ColumnMapper_Intf> > > columnMappers;
+  std::map<size_t, std::map<size_t, boost::shared_ptr<aq::ColumnMapper_Intf> > > columnMappers;
   for (auto it = m.begin(); it != m.end(); ++it)
   {
     if (size == 0)
@@ -219,7 +239,7 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
       exit(-1);
     }
     
-    std::vector<boost::shared_ptr<aq::ColumnMapper_Intf> > tableColumnMappers;
+    std::map<size_t, boost::shared_ptr<aq::ColumnMapper_Intf> > tableColumnMappers;
     const aq::AQMatrix::matrix_t::value_type t = *it;
     aq::Table::Ptr table = baseDesc.getTable(t.table_id);
     if (aq::verbose)
@@ -243,7 +263,7 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
         cm.reset(new aq::ColumnMapper<char, aq::WIN32FileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, (*itCol)->Size, packetSize));
         break;
       }
-      tableColumnMappers.push_back(cm);
+      tableColumnMappers[(*itCol)->ID] = cm;
       bool isSelecting = std::find(selectedColumns.begin(), selectedColumns.end(), std::string(table->getName() + "." + (*itCol)->getName())) != selectedColumns.end();
       isSelected.push_back(isSelecting);
       bool isGrouping = std::find(groupedColumns.begin(), groupedColumns.end(), std::string(table->getName() + "." + (*itCol)->getName())) != groupedColumns.end();
@@ -263,9 +283,11 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
   // print data and check group
   char buf[128];
   size_t groupIndex = 0;
+  std::set<v_item_t, grp_cmp> groups;
   std::vector<size_t> groupCount(matrix.getGroupBy().size(), 0);
   for (size_t i = 0; i < size && ((limit == 0) || (i < limit)); ++i)
   {
+    v_item_t v;
     bool new_group = false;
     assert(groupCount[groupIndex] <= matrix.getGroupBy()[groupIndex].first);
     if (groupCount[groupIndex] == matrix.getGroupBy()[groupIndex].first)
@@ -285,8 +307,8 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
       for (auto& cm : columnMappers[t.table_id])
       {
         aq::ColumnItem::Ptr item(new aq::ColumnItem);
-        cm->loadValue(t.indexes[i], *item);
-        item->toString(buf, cm->getType());
+        cm.second->loadValue(t.indexes[i] - 1, *item);
+        item->toString(buf, cm.second->getType());
         if (aq::verbose && *itSelected)
           std::cout << buf << " ; ";
 
@@ -296,8 +318,9 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
           if (new_group || (i == 0))
           {
             *itGrouped->first = *item;
+            v.push_back(item);
           }
-          else if (!aq::ColumnItem::equal(item.get(), itGrouped->first.get(), cm->getType()))
+          else if (!aq::ColumnItem::equal(item.get(), itGrouped->first.get(), cm.second->getType()))
           {
             std::cerr << "BAD GROUPING: TODO : print expected value" << std::endl;
             exit(-1);
@@ -312,28 +335,41 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
             *itOrdered->first = *item;
           }
           else if (
-            !aq::ColumnItem::equal(item.get(), itGrouped->first.get(), cm->getType()) && 
-            !aq::ColumnItem::lessThan(itGrouped->first.get(), item.get(), cm->getType()))
+            !aq::ColumnItem::equal(item.get(), itGrouped->first.get(), cm.second->getType()) && 
+            !aq::ColumnItem::lessThan(itGrouped->first.get(), item.get(), cm.second->getType()))
           {
             std::cerr << "BAD ORDERING: TODO : print expected value" << std::endl;
             exit(-1);
           }
         }
 
+
         ++itSelected;
         ++itGrouped;
         ++itOrdered;
       }
-      
-      //if (!whereValidator.check(matrix, columnMappers, i))
-      //{
-      //  std::cerr << "BAD WHERING: TODO : print expected value" << std::endl;
-      //  exit(-1);
-      //}
 
       if (aq::verbose)
         std::cout << " | ";
     }
+
+    if (!v.empty())
+    {
+      if (groups.size() == 0 || groups.find(v) == groups.end())
+        groups.insert(v);
+      else
+      {
+        std::cerr << "BAD GROUPING: TODO : print expected value" << std::endl;
+        exit(-1);
+      }
+    }
+
+    if (whereValidator.check(matrix, columnMappers, i) == false)
+    {
+      std::cerr << "BAD WHERING: TODO : print expected value" << std::endl;
+      exit(-1);
+    }
+
     if (aq::verbose)
       std::cout << std::endl;
   }

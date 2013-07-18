@@ -68,9 +68,7 @@ namespace aq
 
   //-------------------------------------------------------------------------------
 
-  bool  WhereValidator::check(const aq::AQMatrix& matrix, 
-                              const std::map<size_t, std::vector<boost::shared_ptr<aq::ColumnMapper_Intf> > >& mapper,
-                              size_t i)         const
+  bool  WhereValidator::check(const aq::AQMatrix& matrix, mapMap& mapper, size_t i)         const
   {
     for (auto& it : this->_condition)
       if (!it->checkCondition(matrix, mapper, i))

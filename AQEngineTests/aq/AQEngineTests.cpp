@@ -2,7 +2,6 @@
 //
 
 #include "Util.h"
-#include "QueryGenerator.h"
 #include <aq/Logger.h>
 #include <string>
 #include <cstdint>
@@ -80,8 +79,8 @@ int main(int argc, char ** argv)
 
     if (generate)
     {
-      aq::QueryGenerator queryGen(query);
-      queryGen.generate(std::cout);
+      //aq::QueryGenerator queryGen(query);
+      //queryGen.generate(std::cout);
     }
     else
     {

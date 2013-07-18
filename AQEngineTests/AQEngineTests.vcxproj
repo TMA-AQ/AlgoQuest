@@ -148,17 +148,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ProjectReference Include="E:\AlgoQuest_DEV\AQQueryResolver\AQQueryResolver.vcxproj">
-      <Project>{c29821bb-e679-400f-8f68-20934a012a85}</Project>
-    </ProjectReference>
-    <ProjectReference Include="E:\AlgoQuest_DEV\AQUtil\AQUtil.vcxproj">
-      <Project>{49633ed8-bd24-4937-a454-7f73c1f9afd0}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="aq\FunctionalTests.cpp" />
     <ClCompile Include="aq\AQEngineTests.cpp" />
-    <ClCompile Include="aq\QueryGenerator.cpp" />
     <ClCompile Include="aq\QueryReader.cpp" />
     <ClCompile Include="aq\Util.cpp" />
     <ClCompile Include="aq\WhereComparator.cpp" />
@@ -166,12 +157,20 @@
     <ClCompile Include="aq\WhereValidator.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="aq\QueryGenerator.h" />
+    <ClInclude Include="aq\AWhereCondition.h" />
     <ClInclude Include="aq\QueryReader.h" />
     <ClInclude Include="aq\Util.h" />
     <ClInclude Include="aq\WhereComparator.h" />
     <ClInclude Include="aq\WhereIn.h" />
     <ClInclude Include="aq\WhereValidator.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AQQueryResolver\AQQueryResolver.vcxproj">
+      <Project>{c29821bb-e679-400f-8f68-20934a012a85}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\AQUtil\AQUtil.vcxproj">
+      <Project>{49633ed8-bd24-4937-a454-7f73c1f9afd0}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

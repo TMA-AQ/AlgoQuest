@@ -9,7 +9,6 @@
 
 namespace aq
 {
-
 extern bool verbose;
 
 int generate_database(const char * path, const char * name);
@@ -23,7 +22,7 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
                       const std::vector<std::string>& selectedColumns,
                       const std::vector<std::string>& groupedColumns,
                       const std::vector<std::string>& orderedColumns,
-                      const WhereValidator& whereValidator);
+                      WhereValidator& whereValidator);
 int print_temporary_table(const std::string& tablePath, const std::string& dbPath, const size_t limit, const size_t packetSize);
 
 }
