@@ -44,6 +44,7 @@ int functional_tests(const std::string& dbPath, std::string& queryIdent, const s
     std::vector<std::string> orderedColumns;
     aq::get_columns(orderedColumns, query, "ORDER");
 
+    // check for Whering
     aq::WhereValidator whereValidator;
     whereValidator.parseQuery(query);
     whereValidator.dump(std::cout);
