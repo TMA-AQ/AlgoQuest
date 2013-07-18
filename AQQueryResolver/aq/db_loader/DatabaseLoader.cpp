@@ -221,13 +221,14 @@ int cut_in_col (const char * iniFilename, size_t num_table, size_t num_column)
 
 	// preparation des noms de fichiers
   i = 0;
-  std::for_each (my_base.table.begin(), my_base.table.end(), [&] (const aq::base_t::table_t& table) {
+  for (auto& table : my_base.table) 
+  {
 		strcpy ( cust_name, table.nom.c_str() );
 		nettoie_nom (cust_name); // ote les " " 
 		strcat ( cust_name,".txt");  
 		strcpy ( cust_file_name[ i ], cust_name );
     ++i;
-	});
+	}
   
 	// load num_table from base_struct
 	aq::s_list_int  l_n_table;
@@ -237,10 +238,11 @@ int cut_in_col (const char * iniFilename, size_t num_table, size_t num_column)
 	l_n_table.part = ( int * ) safecalloc( max_nb_table, sizeof( int ) );       
 	// load n_table as declared in base_struct   
   i = 0;
-  std::for_each (my_base.table.begin(), my_base.table.end(), [&] (const aq::base_t::table_t& table) {
+  for (auto& table : my_base.table) 
+  {
     *( l_n_table.part + i ) = table.num ; 
     ++i;
-	});
+	}
   
 	// printf ("step 2 \n");
 	// declaration des repertoire source et cible

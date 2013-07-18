@@ -27,6 +27,7 @@ public:
 	
 	ColumnItem& operator=( const ColumnItem& source);
 	void toString( char* buffer, const aq::ColumnType& type ) const;
+  std::string toString(const aq::ColumnType& type) const;
 
 //private:	
 //	boost::variant<std::string, double> val;

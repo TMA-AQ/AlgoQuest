@@ -128,19 +128,19 @@ Table::Ptr QueryResolver::solve()
         this->orderBy.push_back(aq::clone_subtree(n->left->left));
       }
     }
-
   }
-  if (!this->hasGroupBy/* && hasWhere*/) // FIXME : why where is needed ?
+
+  if (this->hasOrderBy)
   {
-    std::list<tnode*> aggregateColumns;
-    aq::findAggregateFunction(columns, aggregateColumns);
-    if (!aggregateColumns.empty())
+    tnode * grpNode = find_main_node(this->sqlStatement, K_ORDER);
+    std::vector<tnode*> cl;
+    aq::getColumnsList(grpNode->left->left, cl);
+    for (auto& n : cl) 
     {
-      aq::addEmptyGroupBy(this->sqlStatement);
-      this->hasGroupBy = true;
+      this->orderBy.push_back(aq::clone_subtree(n));
     }
   }
-  
+
   std::vector<tnode*> partitionsNodes;
 	find_nodes(this->sqlStatement->left, K_PARTITION, partitionsNodes);
   if (!partitionsNodes.empty())
@@ -159,14 +159,32 @@ Table::Ptr QueryResolver::solve()
         v.push_back(aq::clone_subtree(n));
       }
     }
+    // add order
+    tnode * orderNode = find_first_node(this->sqlStatement->left, K_ORDER);
+    std::vector<tnode*> orderByNodes;
+    aq::getColumnsList(orderNode->left->left, orderByNodes);
+    for (auto& n : orderByNodes)
+    {
+      std::cout << *n << std::endl;
+      this->orderBy.push_back(aq::clone_subtree(n));
+    }
   }
   aq::removePartitionBy(this->sqlStatement);
-
+  
+  if (!this->hasGroupBy && !this->hasPartitionBy/* && hasWhere*/) // FIXME : why where is needed ?
+  {
+    std::list<tnode*> aggregateColumns;
+    aq::findAggregateFunction(columns, aggregateColumns);
+    if (!aggregateColumns.empty())
+    {
+      aq::addEmptyGroupBy(this->sqlStatement);
+      this->hasGroupBy = true;
+    }
+  }
+  
   // solve nested queries
 	// this->solveNested(this->sqlStatement, this->level, NULL, false, false);
   this->solveNested();
-
-  std::cout << *this->sqlStatement << std::endl;
 
   // post processing after solving nested queries
   aq::dateNodeToBigInt(this->sqlStatement);
@@ -305,34 +323,40 @@ Table::Ptr QueryResolver::solve()
       }
     }
 
-    //if (!this->orderBy.empty())
-    //{
-    //  order = "ORDER ";
-    //  for (size_t i = 0; i < this->orderBy.size() - 1; ++i)
-    //    order += " , ";
-    //  for (auto it = this->orderBy.begin(); it != this->orderBy.end(); ++it)
-    //  {
-    //    aq::syntax_tree_to_prefix_form(*it, order);
-    //  }
-    //}
-    
-    if (!this->partitions.empty() && !this->partitions[0].empty() && (order == ""))
+    if (!this->orderBy.empty())
     {
-      assert(false);
       order = "ORDER ";
-      for (size_t i = 0; i < this->partitions[0].size() - 1; ++i)
+      for (size_t i = 0; i < this->orderBy.size() - 1; ++i)
         order += " , ";
-      for (auto it = this->partitions[0].begin(); it != this->partitions[0].end(); ++it)
+      for (auto it = this->orderBy.begin(); it != this->orderBy.end(); ++it)
       {
         aq::syntax_tree_to_prefix_form(*it, order);
+      }
+    }
+    
+    if (!this->partitions.empty() && !this->partitions[0].empty() && (group == ""))
+    {
+      group = "GROUP ";
+      for (size_t i = 0; i < this->partitions[0].size() - 1; ++i)
+        group += " , ";
+      for (auto it = this->partitions[0].begin(); it != this->partitions[0].end(); ++it)
+      {
+        aq::syntax_tree_to_prefix_form(*it, group);
       }
     }
 
     boost::algorithm::trim(query);
     boost::algorithm::trim(group);
     boost::algorithm::trim(order);
-    query += "\n" + group + "\n" + order;
-    
+    if (!group.empty())
+    {
+      query += "\n" + group;
+    }
+    if (!order.empty())
+    {
+      query += "\n" + order;
+    }
+
     // Call AQEngine
     aq_engine->call(query, mode);
     aq::MakeBackupFile(pSettings->szOutputFN, aq::backup_type_t::Empty, this->level, this->id);
@@ -593,12 +617,8 @@ void QueryResolver::solveAQMatriceByRows(aq::verb::VerbNode::Ptr spTree)
 
   //
   // build result from aq matrix
-  std::vector<aq::Row> dummy;
   timer.start();
-  aq::solveAQMatrix_V2(
-    *(aq_engine->getAQMatrix()), aq_engine->getTablesIDs(), columnTypes, columnNodes, 
-    *pSettings, BaseDesc, processes, dummy, pSettings->process_thread,
-    this->hasGroupBy || this->hasPartitionBy );
+  aq::solveAQMatrix(aq_engine->getAQMatrix(), columnTypes, columnNodes, *pSettings, BaseDesc, processes, pSettings->process_thread, this->hasGroupBy || this->hasPartitionBy );
   aq::Logger::getInstance().log(AQ_INFO, "build result from aq matrix: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
 
   //

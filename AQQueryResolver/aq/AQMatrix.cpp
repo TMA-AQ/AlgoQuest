@@ -123,7 +123,6 @@ void AQMatrix::simulate(size_t rows, const std::vector<long long>& tableIDs)
 	this->hasCount = true;
 	this->totalCount = rows;
 	this->nbRows = rows;
-  this->size = rows;
 	this->matrix.resize(tableIDs.size());
 
   for ( size_t idx = 0; idx < tableIDs.size(); ++idx )
@@ -144,7 +143,6 @@ void AQMatrix::clear()
   groupByIndex.clear();
 	totalCount = 0;
 	nbRows = 0;
-  size = 0;
 	hasCount = false;
 }
 
@@ -177,15 +175,28 @@ void AQMatrix::write(const char * filePath)
 
 void AQMatrix::load(const char * filePath, std::vector<long long>& tableIDs)
 {
+  this->loadHeader(filePath, tableIDs);
+  this->loadData(filePath);
+}
+
+void AQMatrix::loadHeader(const char * filePath, std::vector<long long>& tableIDs)
+{
   std::string answertHeader(filePath);
-  answertHeader += "/AnswerHeader00000.a";
+  answertHeader += "/AnswerHeader.a";
   FILE * fd = fopen(answertHeader.c_str(), "rb");
   if (fd == NULL)
   {
-    throw aq::generic_error(aq::generic_error::AQ_ENGINE, "cannot find aq matrix header file");
+    // try old name
+    std::string answertHeader(filePath);
+    answertHeader += "/AnswerHeader00000.a";
+    fd = fopen(answertHeader.c_str(), "rb");
+    if (fd == NULL)
+    {
+      throw aq::generic_error(aq::generic_error::AQ_ENGINE, "cannot find aq matrix header file");
+    }
   }
 
-  uint64_t nbTable, tableId, count, nbRows, nbGroups;
+  uint64_t nbTable, tableId, nbGroups;
   fread(&nbTable, sizeof(uint64_t), 1, fd);
   for (uint32_t i = 0; i < nbTable; ++i)
   {
@@ -195,11 +206,11 @@ void AQMatrix::load(const char * filePath, std::vector<long long>& tableIDs)
     tableIDs.push_back(tableId);
   }
   
-  fread(&count, sizeof(uint64_t), 1, fd);
-  fread(&nbRows, sizeof(uint64_t), 1, fd);
+  fread(&this->totalCount, sizeof(uint64_t), 1, fd);
+  fread(&this->nbRows, sizeof(uint64_t), 1, fd);
   fread(&nbGroups, sizeof(uint64_t), 1, fd);
 
-  aq::Logger::getInstance().log(AQ_NOTICE, "aq matrix: [count:%u;rows:%u;groups:%u]\n", count, nbRows, nbGroups);
+  aq::Logger::getInstance().log(AQ_NOTICE, "aq matrix: [count:%u;rows:%u;groups:%u]\n", this->totalCount, nbRows, nbGroups);
 
   uint64_t countCheck = 0;
   uint64_t rowCheck = 0;
@@ -209,12 +220,6 @@ void AQMatrix::load(const char * filePath, std::vector<long long>& tableIDs)
     fread(&grpCount, sizeof(uint64_t), 1, fd);
     fread(&grpRows, sizeof(uint64_t), 1, fd);
     
-    //// FIXME
-    //if (grpCount == 0)
-    //  grpCount = count - countCheck;
-    //if (grpRows == 0)
-    //  grpRows = nbRows - rowCheck;
-
     if ((grpCount == 0) || (grpRows == 0))
       throw aq::generic_error(aq::generic_error::AQ_ENGINE, "bad value in result");
 
@@ -224,22 +229,30 @@ void AQMatrix::load(const char * filePath, std::vector<long long>& tableIDs)
     assert(grpCount);
     assert(grpRows);
   }
-  if ((count != countCheck) || (nbRows != rowCheck))
+  if ((this->totalCount != countCheck) || (this->nbRows != rowCheck))
     throw aq::generic_error(aq::generic_error::AQ_ENGINE, "mismatch values in result");
 
   fclose(fd);
   
-  std::string answerData(filePath);
-  answerData += "/AnswerData00000.a";
-  fd = fopen(answerData.c_str(), "rb");
-  if (fd == NULL)
+  this->hasCount = true;
+}
+
+void AQMatrix::loadData(const char * filePath)
+{
+  this->answerFormat = std::string(filePath);
+  this->answerFormat += "/AnswerData%.5u.a";
+  uint64_t nbPacket = (this->nbRows / aq::packet_size) + 1; 
+  char * answerData = (char*)::malloc(strlen(filePath) + 18 + 1);
+  for (uint64_t packet = 0; packet < nbPacket; ++packet)
   {
-    throw aq::generic_error(aq::generic_error::AQ_ENGINE, "cannot find aq matrix data file");
-  }
-  uint64_t value;
-  for (uint64_t i = 0; i < nbGroups; ++i)
-  {
-    for (uint64_t j = 0; j < this->groupByIndex[i].second; ++j)
+    sprintf(answerData, this->answerFormat.c_str(), packet);
+    FILE * fd = fopen(answerData, "rb");
+    if (fd == NULL)
+    {
+      throw aq::generic_error(aq::generic_error::AQ_ENGINE, "cannot find aq matrix data file %s", answerData);
+    }
+    uint64_t value;
+    for (size_t i = 0; (i < aq::packet_size) && this->count.size() < nbRows; ++i)
     {
       for (size_t c = 0; c < this->matrix.size(); ++c)
       {
@@ -249,170 +262,50 @@ void AQMatrix::load(const char * filePath, std::vector<long long>& tableIDs)
       fread(&value, sizeof(uint64_t), 1, fd);
       this->count.push_back(value);
     }
-  }
-
-  if (fd != NULL)
     fclose(fd);
-  this->hasCount = true;
-  this->totalCount = this->count.size();
-	this->nbRows = this->count.size();
-  this->size = this->count.size();
+  }
+  free(answerData);
+  assert(this->totalCount == this->count.size());
+	assert(this->nbRows == this->count.size());
 }
 
-void AQMatrix::load(const char * filePath, const char fieldSeparator, std::vector<long long>& tableIDs)
+void AQMatrix::prepareData(const char * filePath)
 {
-	char		*pszAnswer = NULL;
-	char		*psz = NULL;
-	FILE		*pFIn = NULL;
-	uint64_t nVal = 0;
-	double	 dVal = 0;
-	char		*pszBigBuffer = NULL;
-	bool		 foundFirstLine = false;
+  this->nbRowsParsed = 0;
+  this->packet = 0;
+  this->nbPacket = this->nbRows / aq::packet_size; 
+  this->answerFormat = std::string(filePath);
+  this->answerFormat += "/AnswerData%.5u.a";
+}
 
-	pFIn = fopenUTF8( filePath, "rt" );
-	FileCloser fileCloser( pFIn );
-	if( !pFIn )
-		throw generic_error(generic_error::COULD_NOT_OPEN_FILE, "");
-
-	this->matrix.clear();
-  this->count.clear();
-  this->groupByIndex.clear();
-
-	pszBigBuffer = new char[STR_BIG_BUF_SIZE];
-	boost::scoped_array<char> pszBigBufferDel( pszBigBuffer );
-	llong lineNr = 0;
-	size_t expected_size = 0;
-	std::vector<std::pair<size_t, size_t> > description;
-
-  // read until the first ';'
-  char c = '\0';
-  while (!feof(pFIn) && c != ';')
+void AQMatrix::loadNextPacket()
+{
+  char * answerData = (char*)::malloc(this->answerFormat.size() + 1);
+  sprintf(answerData, this->answerFormat.c_str(), this->packet);
+  FILE * fd = fopen(answerData, "rb");
+  if (fd == NULL)
   {
-    fread(&c, sizeof(char), 1, pFIn);
+    throw aq::generic_error(aq::generic_error::AQ_ENGINE, "cannot find aq matrix data file %s", answerData);
   }
-  if (c == ';')
+  uint64_t value;
+  for (size_t i = 0; (i < aq::packet_size) && this->count.size() < nbRows; ++i)
   {
-    fseek(pFIn, -1, SEEK_CUR);
+    for (size_t c = 0; c < this->matrix.size(); ++c)
+    {
+      fread(&value, sizeof(uint64_t), 1, fd);
+      this->matrix[c].indexes.push_back(value);
+    }
+    fread(&value, sizeof(uint64_t), 1, fd);
+    this->count.push_back(value);
   }
+  fclose(fd);
+  this->packet += 1;
 
-	while( psz = ReadValidLine( pFIn, pszBigBuffer, STR_BIG_BUF_SIZE, 0 ) )
-	{
-		std::vector<char*> fields;
-		splitLine( psz, fieldSeparator, fields, true );
-		switch( lineNr++ )
-		{
-		case 0: //first line is a description
-			{
-				if( psz[0] != fieldSeparator )
-				{
-          throw aq::generic_error(aq::generic_error::AQ_ENGINE, "bad format of aq engine matrix");
-				}
-				//answer is empty, but this is not an error
-				if( fields.size() < 1 )
-					return;
-
-				//check for "Count"
-				std::string lastField = fields[fields.size() - 1];
-				strtoupr(lastField);
-				Trim(lastField);
-				this->hasCount = (lastField == "COUNT");
-
-				//initialize columns
-				expected_size = fields.size();
-				for( size_t idx = 0; idx < fields.size(); ++idx )
-				{
-					column_t c;
-
-					if( this->hasCount && (idx + 1 == fields.size()) )
-					{
-						description.push_back(std::make_pair(4, 0));
-						assert(lastField == "COUNT");
-					}
-					else 
-					{
-						std::string field = fields[idx];
-						char* tableNr = strchr(fields[idx], ':');
-						std::string tableNrStr(tableNr + 1);
-						Trim(tableNrStr);
-						llong tableID = boost::lexical_cast<llong>(tableNrStr.c_str());
-						if (field.find("Num_table") != std::string::npos)
-						{
-							tableIDs.push_back(tableID);
-							c.table_id = tableID;
-							description.push_back(std::make_pair(1, tableID));
-						}
-						else if (field.find("Group_Key") != std::string::npos)
-						{
-							c.table_id = tableID;
-							description.push_back(std::make_pair(2, tableID));
-						}
-						else if (field.find("Order_Key") != std::string::npos)
-						{
-							c.table_id = tableID;
-							description.push_back(std::make_pair(3, tableID));
-						}
-						else
-						{
-							throw generic_error(generic_error::INVALID_FILE, "bad format of aq engine matrix");
-						}
-					}
-
-          if (std::find_if(this->matrix.begin(), this->matrix.end(), boost::bind(std::equal_to<size_t>(), c.table_id, boost::bind(&column_t::table_id, _1))) == this->matrix.end())
-            this->matrix.push_back(c);
-				}
-				continue;
-			}
-		case 1: //second line is count(*)
-		{
-			std::string pszTrim(psz);
-			Trim(pszTrim);
-			this->totalCount = boost::lexical_cast<uint64_t>(pszTrim.c_str());
-			continue;
-		}
-		case 2: //third line is the number of rows in the answer
-		{
-			std::string pszTrim(psz);
-			Trim(pszTrim);
-			this->nbRows = boost::lexical_cast<uint64_t>(pszTrim.c_str());
-			continue;
-		}
-		default:;
-		}
-
-		//
-		// Lines must start with a field separator
-		if( psz[0] != fieldSeparator )
-			continue;
-		if( fields.size() != expected_size )
-			throw generic_error(generic_error::INVALID_TABLE, "");
-		assert( fields.size() == expected_size );
-		std::string pszTrim;
-		for( size_t idx = 0; idx < fields.size(); ++idx )
-		{
-			pszTrim = fields[idx];
-			Trim(pszTrim);
-			nVal = boost::lexical_cast<uint64_t>(pszTrim.c_str());
-			switch (description[idx].first)
-			{
-			case 1: this->matrix[idx].indexes.push_back(nVal); break;
-			case 2: this->matrix[idx].grpKey.push_back(nVal); break;
-			case 3: this->matrix[idx].orderKey.push_back(nVal); break;
-			case 4: this->count.push_back(nVal); break;
-			default: assert(false);
-			}
-		}
-	}
-
-  this->size = 0;
-	for (size_t i = 0; i < this->matrix.size(); ++i)
-	{
-		if (this->size == 0)
-			this->size = this->matrix[i].indexes.size();
-		else if (this->size != this->matrix[i].indexes.size())
-		{
-			throw generic_error(generic_error::INVALID_TABLE, "columns answer are not equals");
-		}
-	}
+  if (this->packet == nbPacket)
+  {
+    assert(this->totalCount == this->count.size());
+    assert(this->nbRows == this->count.size());
+  }
 }
 
 void AQMatrix::computeUniqueRow(std::vector<std::vector<size_t> >& mapToUniqueIndex, std::vector<std::vector<size_t> >& uniqueIndex) const

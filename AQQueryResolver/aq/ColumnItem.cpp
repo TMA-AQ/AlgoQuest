@@ -98,6 +98,30 @@ void ColumnItem::toString( char* buffer, const ColumnType& type ) const
 		throw generic_error(generic_error::GENERIC, "");
 }
 
+std::string ColumnItem::toString(const aq::ColumnType& type) const
+{
+  std::stringstream ss;
+  switch( type )
+  {
+  case COL_TYPE_BIG_INT:
+  case COL_TYPE_INT:
+    ss << static_cast<int>(this->numval);
+    return ss.str();
+  case COL_TYPE_DOUBLE:
+    ss << this->numval;
+    return ss.str();
+  case COL_TYPE_DATE:
+    {
+      DateConversion dateConverter;
+      return dateConverter.bigIntToDate((long long) this->numval);
+    }
+  case COL_TYPE_VARCHAR:
+    return this->strval;
+  }
+  assert(false);
+  throw generic_error(generic_error::GENERIC, "");
+}
+
 //------------------------------------------------------------------------------
 bool ColumnItem::lessThan( const ColumnItem * first, const ColumnItem * second, ColumnType type )
 {

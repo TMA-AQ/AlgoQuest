@@ -86,7 +86,7 @@ int processAQMatrix(const std::string& query, const std::string& aqMatrixFileNam
 	answerFile.push_back(aqMatrixFileName);
 	for (std::vector<std::string>::const_iterator it = answerFile.begin(); it != answerFile.end(); ++it)
 	{
-		aqMatrix->load((*it).c_str(), settings.fieldSeparator, tableIDs);
+		aqMatrix->load((*it).c_str(), tableIDs);
 	}
 	// aqMatrix->simulate(113867938, 2);
 	// aqMatrix->simulate(10, 2);

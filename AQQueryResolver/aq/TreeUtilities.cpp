@@ -911,149 +911,6 @@ void readPosFile( const char* filePath, std::vector<llong>& vals )
 }
 
 //------------------------------------------------------------------------------
-// DEPRECATED
-void SolveMinMaxGroupBy::modifyTmpFiles(	const char* tmpPath, 
-											int selectLevel,
-											Base& BaseDesc, 
-											TProjectSettings& Settings )
-{
-  assert(false);
-  throw aq::generic_error(aq::generic_error::NOT_IMPLEMENED, "DEPRECATED FEATURE (modifyTmpFiles)");
-
-	if( !this->pGroupBy )
-		return;
-
-	/*std::vector<string> files;
-	if( GetFiles( tmpPath, files ) != 0 )
-		throw generic_error(generic_error::INVALID_FILE, "");*/
-
-	Table& templateTable = *BaseDesc.getTable( this->tableName );
-
-	/*std::vector<llong> rows;
-	/* read tmp file
-	for( size_t idx = 0; idx < files.size(); ++idx )
-	{
-		string valstr = files[idx].substr( 5, 4 );
-		int tIdx2 = atoi( valstr.c_str() );
-		if( (tIdx1 + 1) != tIdx2 )
-			continue;
-		string filePath = tmpPath;
-		filePath += files[idx];
-		readTmpFile( filePath.c_str(), rows );
-	}*/
-	/*for( size_t idx = 0; idx < files.size(); ++idx )
-	{
-		string filePath = tmpPath;
-		filePath += "\\";
-		filePath += files[idx];
-		readPosFile( filePath.c_str(), rows );
-	}
-	if( rows.size() < 1 )
-		return; //nothing to modify
-	sort( rows.begin(), rows.end() );*/
-
-	std::vector<int> colIds;
-	getColumnsIds( templateTable, this->columns, colIds );
-
-	Table table;
-	std::vector<Column::Ptr> columnTypes;
-	for( size_t idx = 0; idx < colIds.size(); ++idx )
-	{
-		columnTypes.push_back( new Column(*templateTable.Columns[colIds[idx]]) );
-		columnTypes[idx]->setTableName( this->tableName );
-	}
-
-	//load table from disk
-	/*char* myRecord = new char[Settings.maxRecordSize];
-	boost::scoped_array<char> myRecordDel( myRecord );
-
-	string tablePath = Settings.szRootPath;
-	tablePath += "data_orga\\tables\\" + templateTable.getOriginalName() + ".txt";
-	FILE* fIn = fopenUTF8( tablePath.c_str(), "rt" );
-	if( !fIn )
-		throw generic_error(generic_error::COULD_NOT_OPEN_FILE, "");;
-
-	int idxRows = 0;
-	for( llong idx = 0; idx <= rows[rows.size() - 1]; ++idx )
-	{
-		fgets( myRecord, Settings.maxRecordSize, fIn );
-		if( idx != rows[idxRows] )
-			continue;
-		++idxRows;
-
-		std::vector<char*> fields;
-		splitLine( myRecord, Settings.fieldSeparator, fields, false );
-		for( size_t idx2 = 0; idx2 < colIds.size(); ++idx2 )
-			table.Columns[idx2]->Items.push_back( 
-				new ColumnItem(fields[colIds[idx2]], table.Columns[idx2]->Type) );
-	}*/
-  std::vector<std::string> answerFiles;
-  answerFiles.push_back(Settings.szAnswerFN);
-
-	aq::AQMatrix aqMatrix(Settings, BaseDesc);
-	std::vector<llong> tableIDs;
-	for (std::vector<std::string>::const_iterator it = answerFiles.begin(); it != answerFiles.end(); ++it)
-	{
-		aqMatrix.load((*it).c_str(), Settings.fieldSeparator, tableIDs);
-	}
-
-	table.loadFromTableAnswerByColumn( aqMatrix, tableIDs, columnTypes, Settings, BaseDesc );
-
-	aq::verb::TablePartition::Ptr partition = new aq::verb::TablePartition();
-	std::vector<size_t> index;
-	std::vector<Column::Ptr> orderColumns;
-	for( size_t idx = 0; idx < table.Columns.size(); ++idx )
-		if( idx != minMaxCol )
-			orderColumns.push_back( table.Columns[idx] );
-	table.orderBy(orderColumns, partition, index);
-	assert( partition->Rows.size() > 0 );
-	std::vector<llong> finalRows;
-	for( size_t idx = 0; idx < partition->Rows.size() - 1; ++idx )
-	{
-		size_t selIdx = partition->Rows[idx];
-		for( size_t idx2 = partition->Rows[idx] + 1; idx2 < partition->Rows[idx+1]; ++idx2 )
-			if( this->_min )
-			{
-				if( ColumnItem::lessThan(	table.Columns[minMaxCol]->Items[idx2].get(),
-								table.Columns[minMaxCol]->Items[selIdx].get(),
-								table.Columns[minMaxCol]->Type ) )
-					selIdx = idx2;
-			}
-			else
-			{
-				if( ColumnItem::lessThan(	table.Columns[minMaxCol]->Items[selIdx].get(),
-								table.Columns[minMaxCol]->Items[idx2].get(),
-								table.Columns[minMaxCol]->Type ) )
-					selIdx = idx2;
-			}
-
-		finalRows.push_back( index[selIdx] );
-	}
-
-	int nrPacks = (int) (finalRows.size() / Settings.packSize);
-	if( finalRows.size() % Settings.packSize != 0 )
-		++nrPacks;
-	--selectLevel;
-	char buf[_MAX_PATH];
-	sprintf( buf, "%s_%d", Settings.szTempPath1, selectLevel );
-
-  boost::filesystem::path path(buf);
-  if (!boost::filesystem::create_directory(path))
-  {
-    throw aq::generic_error(aq::generic_error::COULD_NOT_OPEN_FILE, "cannot create directory '%s'", buf);
-  }
-
-  for( size_t idx = 0; idx < nrPacks; ++idx )
-	{
-		char file[_MAX_PATH];
-		//BxxxTxxxxPxxxxxxxxxx
-    // FIXME
-		// sprintf( file, "%s\\B001T%04dP%010d.tmp", path, selectLevel, tIdx1 + 1, idx + 1 );
-		writeTmpFile( file, finalRows, idx * Settings.packSize, (idx + 1) * Settings.packSize );
-	}
-}
-
-//------------------------------------------------------------------------------
 void getColumnsIds(	const Table& table, std::vector<aq::tnode*>& columns, std::vector<int>& valuePos )
 {
 	std::vector<std::string> columnsStr;
@@ -1257,21 +1114,22 @@ void getColumnTypes( aq::tnode* pNode, std::vector<Column::Ptr>& columnTypes, Ba
 		bool found = false;
 		Column auxCol;
 		auxCol.setName(colNode->right->getData().val_str);
-		for( size_t idx = 0; idx < table.Columns.size(); ++idx )
-			if( table.Columns[idx]->getName() == auxCol.getName() )
+		for(auto& c : table.Columns)
+    {
+			if (c->getName() == auxCol.getName())
 			{
-				Column::Ptr column = new Column(*table.Columns[idx]);
+				Column::Ptr column = new Column(*c);
         column->setTableName(table.getName());
-				//column->Type = table.Columns[idx]->Type;
-				//column->setTableName( table.getName() );
-				//column->setName( table.Columns[idx]->getName() );
-				//column->Size = table.Columns[idx]->Size;
-				//column->ID = table.Columns[idx]->ID;
 				columnTypes.push_back( column );
 				found = true;
 				break;
 			}
-		assert( found ); // tma: FIXME: raise an exception
+    }
+    assert(found);
+    if (!found)
+    {
+      throw aq::generic_error(aq::generic_error::INVALID_QUERY, "");
+    }
 	}
 	reverse(columnTypes.begin(), columnTypes.end());
 }
@@ -1457,7 +1315,7 @@ void removePartitionByFromSelect(tnode *& pNode)
 {
   if (pNode != NULL)
   {
-    if (pNode->tag == K_ORDER)
+    if ((pNode->tag == K_ORDER) || (pNode->tag == K_PARTITION))
     {
       tnode * n = find_deeper_node(pNode, K_FRAME);
       n = aq::clone_subtree(n);

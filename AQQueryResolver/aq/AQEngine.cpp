@@ -34,38 +34,6 @@ namespace aq
     //
     aq::SaveFile( settings.szOutputFN, query.c_str() );
 
-    // !!!!!!!!!!!!!!!!!! FIXME !!!!!!!!!!!!!!!
-    // !!!!!!!!!!!!!!!!! HACK FOR DEMO !!!!!!!!
-    static unsigned int id = 1;
-    if (id++ == 3)
-    {
-      std::string query_level_4;
-
-      //query_level_4 = "SELECT . TW_FLUX_QUOTIDIEN_HEBDO_DIAG VAL_INDIC\n";
-      //query_level_4 += "FROM , , B001REG0001TMP0003P000000000007 B001REG0002TMP0003P000000000001 TW_FLUX_QUOTIDIEN_HEBDO_DIAG\n";
-      //query_level_4 += "WHERE AND AND AND AND AND AND\n";
-      //query_level_4 += "K_JEQ K_INNER . B001REG0001TMP0003P000000000007 SEQ_POINT_DE_VENTE_HISTO K_INNER . TW_FLUX_QUOTIDIEN_HEBDO_DIAG SEQ_POINT_DE_VENTE_HISTO\n";
-      //query_level_4 += "K_JEQ K_INNER . B001REG0001TMP0003P000000000007 SEQ_SEM_COURT K_INNER . TW_FLUX_QUOTIDIEN_HEBDO_DIAG SEQ_SEM_COURT\n";
-      //query_level_4 += "K_JEQ K_INNER . B001REG0001TMP0003P000000000007 SEQ_PRODUIT K_INNER . TW_FLUX_QUOTIDIEN_HEBDO_DIAG SEQ_PRODUIT\n";
-      //query_level_4 += "K_JEQ K_INNER . B001REG0001TMP0003P000000000007 SEQ_INDICATEUR K_INNER . TW_FLUX_QUOTIDIEN_HEBDO_DIAG SEQ_INDICATEUR\n";
-      //query_level_4 += "K_JEQ K_INNER . B001REG0001TMP0003P000000000007 SEQ_CBP_HISTO K_INNER . TW_FLUX_QUOTIDIEN_HEBDO_DIAG SEQ_CBP_HISTO\n";
-      //query_level_4 += "K_JEQ K_INNER . B001REG0001TMP0003P000000000007 SEQ_CAF_HISTO K_INNER . TW_FLUX_QUOTIDIEN_HEBDO_DIAG SEQ_CAF_HISTO\n";
-      //query_level_4 += "K_JIEQ K_INNER . B001REG0002TMP0003P000000000001 SEQ_SEM_COURT K_INNER . B001REG0001TMP0003P000000000007 SEQ_SEM_COURT\n";
-      //query_level_4 += "GROUP  ,  ,  ,  ,  ,  ,  . B001REG0002TMP0003P000000000001 ANNEE . B001REG0001TMP0003P000000000007 SEQ_POINT_DE_VENTE_HISTO . B001REG0001TMP0003P000000000007 SEQ_CBP_HISTO . B001REG0001TMP0003P000000000007 SEQ_CAF_HISTO . B001REG0001TMP0003P000000000007 SEQ_PRODUIT . B001REG0001TMP0003P000000000007 SEQ_INDICATEUR . B001REG0002TMP0003P000000000001 SEQ_SEM_COURT\n";
-      
-      //query_level_4 = "SELECT . B001REG0001TMP0003P000000000007 SEQ_SEM_COURT\n";
-      //query_level_4 += "FROM , B001REG0001TMP0003P000000000007 B001REG0002TMP0003P000000000001\n";
-      //query_level_4 += "WHERE K_JIEQ K_INNER . B001REG0002TMP0003P000000000001 SEQ_SEM_COURT K_INNER . B001REG0001TMP0003P000000000007 SEQ_SEM_COURT\n";
-      //query_level_4 += "GROUP  ,  ,  ,  ,  ,  ,  . B001REG0002TMP0003P000000000001 ANNEE . B001REG0001TMP0003P000000000007 SEQ_POINT_DE_VENTE_HISTO . B001REG0001TMP0003P000000000007 SEQ_CBP_HISTO . B001REG0001TMP0003P000000000007 SEQ_CAF_HISTO . B001REG0001TMP0003P000000000007 SEQ_PRODUIT . B001REG0001TMP0003P000000000007 SEQ_INDICATEUR . B001REG0002TMP0003P000000000001 SEQ_SEM_COURT\n";
-            
-      //query_level_4 = "SELECT . TW_FLUX_QUOTIDIEN_HEBDO_DIAG SEQ_SEM_COURT\n";
-      //query_level_4 += "FROM , TW_FLUX_QUOTIDIEN_HEBDO_DIAG B001REG0002TMP0003P000000000001\n";
-      //query_level_4 += "WHERE K_JIEQ K_INNER . B001REG0002TMP0003P000000000001 SEQ_SEM_COURT K_INNER . TW_FLUX_QUOTIDIEN_HEBDO_DIAG SEQ_SEM_COURT\n";
-
-      //aq::SaveFile( settings.szOutputFN, query_level_4.c_str() );
-    }
-
-
 #ifdef WIN32
     // create folders for the engine
     // mkdir( settings.szTempPath1 );
@@ -98,18 +66,10 @@ namespace aq
       timer.start();
       tableIDs.clear();
       aqMatrix.reset(new aq::AQMatrix(settings, baseDesc));
-    
-      if (settings.useBinAQMatrix)
-      {
-        aqMatrix->load(settings.szTempPath2, this->tableIDs);
-        aq::Logger::getInstance().log(AQ_NOTICE, "Load From Binary AQ Matrix: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
-      }
-      else
-      {
-        aqMatrix->load(settings.szAnswerFN, settings.fieldSeparator, this->tableIDs);
-        aq::Logger::getInstance().log(AQ_NOTICE, "Load From Text AQ Matrix: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
-      }
-    
+
+#ifdef __LOAD_FULL_AQ_MATRIX__
+      aqMatrix->load(settings.szTempPath2, this->tableIDs);
+      aq::Logger::getInstance().log(AQ_NOTICE, "Load From Binary AQ Matrix: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
       if (mode == REGULAR)
       {
         aq::DeleteFolder( settings.szTempPath2 );
@@ -118,6 +78,10 @@ namespace aq
       {
         aq::CleanFolder( settings.szTempPath1 );
       }
+#else
+      aqMatrix->loadHeader(settings.szTempPath2, this->tableIDs);
+      aqMatrix->prepareData(settings.szTempPath2);
+#endif
 
     }
     else if (mode == NESTED_2)

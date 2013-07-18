@@ -19,7 +19,8 @@ FileMapper::~FileMapper()
 int FileMapper::read(void * buffer, size_t offset, size_t len) 
 {
   assert(this->m_fd);
-  fseek(this->m_fd, offset, SEEK_SET);
+  assert(offset < std::numeric_limits<long>::max());
+  fseek(this->m_fd, static_cast<long>(offset), SEEK_SET);
   fread(buffer, 1, len, this->m_fd);
   if (feof(this->m_fd))
     return -1;

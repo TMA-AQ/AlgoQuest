@@ -334,8 +334,6 @@ void FileWriteEnreg(symbole col_type, int col_size, char *my_field, FILE *fcol, 
 
   DateConversion dateConverter;
 
-	if ( (int) strlen ( my_field ) >= col_size ) my_field[ col_size ] = 0 ;
-
 	switch (  col_type )
 	{
 	case t_int :
