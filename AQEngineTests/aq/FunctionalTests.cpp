@@ -63,8 +63,8 @@ int functional_tests(const std::string& dbPath, std::string& queryIdent, const s
 
     // check for Whering
     aq::WhereValidator whereValidator;
-    //whereValidator.parseQuery(query);
-    //whereValidator.dump(std::cout);
+    whereValidator.parseQuery(query);
+    whereValidator.dump(std::cout);
     
     // execute query
     std::cout << std::endl;

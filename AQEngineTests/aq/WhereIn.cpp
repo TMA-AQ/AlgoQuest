@@ -27,7 +27,7 @@ namespace aq
   void  WhereIn::setValues(const aq::Base& baseDesc)
   {
     boost::to_upper(this->_query);
-    std::vector<std::string> vecter;
+    std::string s1, s2;
     std::vector<std::string> vecter2;
     std::vector<int> vecter1;
     boost::split(vecter2, this->_query, boost::is_any_of(" "));
@@ -35,13 +35,13 @@ namespace aq
     {
       if (v->find("TABLE") != std::string::npos)
       {
-        vecter.push_back((*v));
+        s1 = (*v);
         ++v;
-        vecter.push_back((*v));
+        s2 = (*v);
         break;
       }
     }
-    
+    pairString tabVal = std::make_pair(s1, s2);
     for (auto& v = vecter2.begin(); v != vecter2.end(); ++v)
     {
       if (v->find("K_VALUE") != std::string::npos)
@@ -51,27 +51,8 @@ namespace aq
       }
     }
 
-    size_t t1 = 0, t2 = 0;
-    for (auto& it = baseDesc.getTables().begin(); it != baseDesc.getTables().end(); ++it)
-    {
-      for (auto& v = vecter.begin(); v != vecter.end(); ++v)
-      {
-        if ((*it)->getName() == (*v))
-        {
-          ++v;
-          for (auto& it2 = (*it)->Columns.begin(); it2 != (*it)->Columns.end(); ++it2)
-          {
-            if ((*it2)->getName() == (*v))
-            {
-              t1 = (*it)->ID;
-              t2 = (*it2)->ID;
-            }
-          }
-        }
-      }
-    }
-
-    this->_values = std::make_pair(std::make_pair(t1, t2), vecter1);
+    pairSize val = this->makePairSize(baseDesc, tabVal);
+    this->_values = std::make_pair(val, vecter1);
   }
 
 }
