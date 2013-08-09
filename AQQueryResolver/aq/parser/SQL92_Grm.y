@@ -56,7 +56,8 @@ using namespace aq;
 %token K_NULL K_ON K_ORDER K_OUTER K_RIGHT K_ROLLBACK K_SELECT K_SET 
 %token K_SUBSTRING K_SUM K_TABLE K_THEN K_TRANSACTION K_UNION K_UPDATE
 %token K_VALUES K_WHEN K_WHERE K_WORK K_YEAR
-%token K_TO K_TO_DATE K_TO_CHAR
+
+%token K_FUNC K_TO K_TO_DATE K_TO_CHAR
 
 %token K_CALL K_COLUMNS K_LIST K_OUTREF K_SOURCE K_START 
 
@@ -584,6 +585,7 @@ numeric_value_function	: square_root
 						| year_expresssion
 						| month_expresssion
 						| day_expresssion
+						| aq_function
 						;
 
 value_expression_primary	: column_reference
@@ -1367,7 +1369,21 @@ day_expresssion	: K_DAY K_LPAREN datetime_value_expression K_RPAREN {
 														$1->left	= $3;
 														$$			= $1;
 													}
-				;						
+				;			
+				
+aq_function		: K_FUNC K_LPAREN aq_arg_list K_RPAREN				{
+														$1->left	= $3;
+														$$			= $1;
+													}
+				;
+
+aq_arg_list		: value_expression
+				| value_expression K_COMMA aq_arg_list				{
+														$2->left	= $1;
+														$2->right	= $3;
+														$$			= $2;
+													}
+				;
 
 //---------------------------------------------------
 binary_substring_function	: K_SUBSTRING K_LPAREN binary_primary 
