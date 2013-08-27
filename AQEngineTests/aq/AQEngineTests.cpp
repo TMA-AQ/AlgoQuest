@@ -17,7 +17,7 @@ bool aq::verbose = false;
 
 extern int functional_tests(const std::string& dbPath, std::string& queryIdent, const std::string& aqEngine, 
                             const std::string& queriesFilename, const std::string& filter,
-                            const std::string& logFilename, uint64_t limit, bool stopOnError);
+                            const std::string& logFilename, uint64_t limit, bool stopOnError, bool checkCondition);
 
 int main(int argc, char ** argv)
 {
@@ -37,6 +37,7 @@ int main(int argc, char ** argv)
     unsigned int logLevel;
     bool stopOnError = false;
     bool generate = false;
+    bool checkCondition = false;
 
     po::options_description desc("Allowed options");
 		desc.add_options()
@@ -53,6 +54,7 @@ int main(int argc, char ** argv)
       ("filter,f", po::value<std::string>(&filter)->default_value(""), "")
       ("log,o", po::value<std::string>(&logFilename)->default_value("./test_aq_engine.log"), "")
       ("generate", po::bool_switch(&generate), "")
+      ("checkCondition,c", po::bool_switch(&checkCondition), "")
       ("stop-on-error,s", po::bool_switch(&stopOnError), "")
       ("verbose,v", po::bool_switch(&aq::verbose), "set verbosity")
 			;
@@ -84,13 +86,13 @@ int main(int argc, char ** argv)
     }
     else
     {
-      return functional_tests(dbPath, queryIdent, aqEngine, queriesFilename, filter, logFilename, limit, stopOnError);
+      return functional_tests(dbPath, queryIdent, aqEngine, queriesFilename, filter, logFilename, limit, stopOnError, checkCondition);
     }
   }
   catch (const std::exception& e)
   {
     std::cerr << e.what() << std::endl;
   }
-
+  
   return EXIT_SUCCESS;
 }

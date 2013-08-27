@@ -17,7 +17,7 @@ int run_aq_engine(const std::string& aq_engine, const std::string& iniFilename, 
 
 void get_columns(std::vector<std::string>& columns, const std::string& query, const std::string& key);
 int check_answer_validity(const char * dbPath, const char * queryIdent, aq::AQMatrix& matrix, 
-                          const uint64_t nbRows, const uint64_t nbGroups);
+                          const uint64_t count, const uint64_t nbRows, const uint64_t nbGroups);
 int check_answer_data(const std::string& answerPath, const std::string& dbPath, const size_t limit, const size_t packetSize, 
                       const std::vector<std::string>& selectedColumns,
                       const std::vector<std::string>& groupedColumns,

@@ -118,7 +118,7 @@ int run_aq_engine(const std::string& aq_engine, const std::string& iniFilename, 
 }
 
 // ------------------------------------------------------------------------------
-int check_answer_validity(const char * dbPath, const char * queryIdent, aq::AQMatrix& matrix, const uint64_t nbRows, const uint64_t nbGroups)
+int check_answer_validity(const char * dbPath, const char * queryIdent, aq::AQMatrix& matrix, const uint64_t count, const uint64_t nbRows, const uint64_t nbGroups)
 {
   int rc = 0;
   try
@@ -129,6 +129,14 @@ int check_answer_validity(const char * dbPath, const char * queryIdent, aq::AQMa
     iniFilename += "/calculus/" + std::string(queryIdent) + "/aq_engine.ini";
     std::vector<long long> tablesIds;
     matrix.load(answerFile.c_str(), tablesIds);
+    if (count != 0)
+    {
+      if (matrix.getTotalCount() != count)
+      {
+        std::cerr << "ERROR: expected " << count << " count, get " << matrix.getTotalCount() << std::endl;
+        rc = -1;
+      }
+    }
     if (nbRows != 0)
     {
       if (matrix.getNbRows() != nbRows)
@@ -311,9 +319,19 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
       {
         aq::ColumnItem::Ptr item(new aq::ColumnItem);
         cm.second->loadValue(t.indexes[i] - 1, *item);
-        item->toString(buf, cm.second->getType());
+        
         if (aq::verbose && *itSelected)
-          std::cout << buf << " ; ";
+        {
+          if (t.indexes[i] > 0)
+          {
+            item->toString(buf, cm.second->getType());
+            std::cout << buf << " ; ";
+          }
+          else
+          {
+            std::cout << "NULL ; ";
+          }
+        }
 
         assert(itGrouped != isGrouped.end());
         if (itGrouped->second)

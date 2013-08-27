@@ -10,7 +10,7 @@
 
 int functional_tests(const std::string& dbPath, std::string& queryIdent, const std::string& aqEngine, 
                      const std::string& queriesFilename, const std::string& filter, 
-                     const std::string& logFilename, uint64_t limit, bool stopOnError)
+                     const std::string& logFilename, uint64_t limit, bool stopOnError, bool checkCondition)
 {
   int rc = 0;
   uint64_t nb_queries_tested = 0;
@@ -63,9 +63,12 @@ int functional_tests(const std::string& dbPath, std::string& queryIdent, const s
 
     // check for Whering
     aq::WhereValidator whereValidator;
-    //whereValidator.parseQuery(query);
-    //whereValidator.dump(std::cout);
-    
+    if (checkCondition)
+    {
+      whereValidator.parseQuery(query);
+      // whereValidator.dump(std::cout);
+    }
+
     // execute query
     std::cout << std::endl;
     std::cout << "checking '" << reader.getFullIdent() << "'" << std::endl;
@@ -77,9 +80,10 @@ int functional_tests(const std::string& dbPath, std::string& queryIdent, const s
     rc = aq::run_aq_engine(aqEngine, iniFilename, queryIdent);
     if (rc == 0)
     {
+      uint64_t count = reader.extract_value<uint64_t>("count", 0);
       uint64_t nbRows = reader.extract_value<uint64_t>("rows", 0);
       uint64_t nbGroups = reader.extract_value<uint64_t>("groups", 0);
-      rc = aq::check_answer_validity(dbPath.c_str(), queryIdent.c_str(), matrix, nbRows, nbGroups);
+      rc = aq::check_answer_validity(dbPath.c_str(), queryIdent.c_str(), matrix, count, nbRows, nbGroups);
     }
     if (rc == 0)
     {
@@ -126,5 +130,5 @@ int functional_tests(const std::string& dbPath, std::string& queryIdent, const s
 
   log.close();
 
-  return rc;
+  return EXIT_SUCCESS;
 }
