@@ -29,6 +29,7 @@
 #include <boost/logic/tribool.hpp>
 
 #include <aq/AQThreadRequest.h>
+#include "AQFunctor.h"
 
 // fixme
 #include "Link.h"
@@ -246,9 +247,28 @@ int processQuery(const std::string& query, aq::TProjectSettings& settings, aq::B
 			std::cout << *pNode << std::endl;
 #endif
 
-		}
+    }
 
-		//
+    //---------------------------------------------------------------------------------------
+    // test du functor
+    //---------------------------------------------------------------------------------------
+#if defined(_FUNCTOR)
+    try
+    {
+      aq::AQFunctor test(pNode, "C:/Users/AlgoQuest/Documents/AlgoQuest/AQSuite/x64/Debug/AQFunctionTest.dll");
+      test.dump(std::cout);
+      test.callFunctor();
+    }
+    catch (...)
+    {
+      throw;
+    }
+#endif
+
+    //---------------------------------------------------------------------------------------
+
+
+    //
 		// Transform SQL request in prefix form, 
     unsigned int id_generator = 1;
 		aq::QueryResolver queryResolver(pNode, &settings, aq_engine, baseDesc, id_generator);
@@ -386,6 +406,7 @@ int main(int argc, char**argv)
 		std::string answerPathStr;
 		std::string aqMatrixFileName;
 		std::string answerFileName;
+    std::string DLLFunction;
 		unsigned int worker;
 		unsigned int queryWorker;
     unsigned int tableIdToLoad;
@@ -428,6 +449,7 @@ int main(int argc, char**argv)
 			("skip-nested-query", po::bool_switch(&skipNestedQuery), "")
 			("aq-matrix", po::value<std::string>(&aqMatrixFileName), "")
 			("answer-file", po::value<std::string>(&answerFileName)->default_value("answer.txt"), "")
+      ("use-dll-function", po::value<std::string>(&DLLFunction), "Choise your own .dll to use your function")
 			("use-column-resolver", po::bool_switch(&useColumnResolver), "")
       ("use-bin-aq-matrix", po::bool_switch(&useTextAQMatrix), "")
 			("load-db", po::bool_switch(&loadDatabase), "")

@@ -23,6 +23,7 @@
 char			[A-Za-z\_\x80-\xFF]
 char_			[A-Za-z\_\x80-\xFF]
 char2			[A-Za-z\_\'\.\"\x80-\xFF]
+char3			[a-zA-Z0-9\_]+
 numbers			([0-9])+
 delim			[" "\n\t\r]
 whitespace		{delim}
@@ -76,6 +77,7 @@ FOR				[Ff][Oo][Rr]
 FRAME			[Ff][Rr][Aa][Mm][Ee]
 FROM			[Ff][Rr][Oo][Mm]
 FULL			[Ff][Uu][Ll][Ll]
+FUNC			[aA][qQ][_]{char3}
 GROUP			[Gg][Rr][Oo][Uu][Pp]
 HAVING			[Hh][Aa][Vv][Ii][Nn][Gg]
 IN				[Ii][Nn]
@@ -270,6 +272,14 @@ UNKNOWN			[Uu][Nn][Kk][Nn][Oo][Ww][Nn]
 
 
 	/* KEY_WORDS */
+
+	
+{FUNC}*			{
+				 /* yylval.pStr = yytext */
+				 yylval = new tnode( K_FUNC );
+				 yylval->set_string_data( yytext );
+				 return K_FUNC;
+				}
 
 {ABS}			{ yylval = new tnode( K_ABS ); return K_ABS; }
 {ALL}			{ yylval = new tnode( K_ALL ); return K_ALL; }

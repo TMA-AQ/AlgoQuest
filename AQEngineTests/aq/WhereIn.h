@@ -6,7 +6,7 @@
 namespace aq
 {
 
-  typedef std::pair<std::pair<size_t, size_t>, std::vector<int> > pairVector;
+  typedef std::pair<std::pair<size_t, size_t>, std::vector<int> > pairPair_Vector;
 
   class WhereIn : public AWhereCondition
   {
@@ -19,7 +19,7 @@ namespace aq
     void  setValues(const aq::Base& baseDesc);
 
   private:
-    pairVector  _values;
+    pairPair_Vector  _values;
   };
 
 }
