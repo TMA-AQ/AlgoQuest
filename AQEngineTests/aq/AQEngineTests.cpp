@@ -1,4 +1,4 @@
-// TestAQEngine.cpp : définit le point d'entrée pour l'application console.
+// TestAQEngine.cppï¿½: dï¿½finit le point d'entrï¿½e pour l'application console.
 //
 
 #include "Util.h"
@@ -14,6 +14,11 @@
 namespace po = boost::program_options;
 
 bool aq::verbose = false;
+
+void yyerror(char const *)
+{
+
+}
 
 extern int functional_tests(const std::string& dbPath, std::string& queryIdent, const std::string& aqEngine, 
                             const std::string& queriesFilename, const std::string& filter,

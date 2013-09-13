@@ -4,6 +4,7 @@
 #include <aq/Base.h>
 #include <aq/Timer.h>
 #include <aq/Exceptions.h>
+#include <fstream>
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 #include <boost/algorithm/string.hpp>

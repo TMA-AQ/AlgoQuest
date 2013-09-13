@@ -151,7 +151,7 @@ namespace aq
     std::string s1, s2;
     std::vector<operateur> operateur;
     ++this->_pos;
-    for (auto& v = (vecteur.begin() + this->_pos); v != vecteur.end(); ++v)
+    for (auto v = (vecteur.begin() + this->_pos); v != vecteur.end(); ++v)
     {
       if ((*v) == ".")
       {
@@ -175,7 +175,7 @@ namespace aq
   void                    WhereComparator::setPos(const std::vector<std::string>& vecteur)
   {
     size_t pos = this->_pos;
-    for (auto& v = (vecteur.begin() + this->_pos); v != vecteur.end(); ++v)
+    for (auto v = (vecteur.begin() + this->_pos); v != vecteur.end(); ++v)
     {
       if ((*v) == "K_INNER")
       {

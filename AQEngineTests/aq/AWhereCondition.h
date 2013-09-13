@@ -61,9 +61,9 @@ namespace aq
 
     pairSize            makePairSize(const aq::Base& baseDesc, const pairString& tabVal)
     {
-      for (auto& it = baseDesc.getTables().begin(); it != baseDesc.getTables().end(); ++it)
+      for (auto it = baseDesc.getTables().begin(); it != baseDesc.getTables().end(); ++it)
         if ((*it)->getName() == tabVal.first)
-          for (auto& it2 = (*it)->Columns.begin(); it2 != (*it)->Columns.end(); ++it2)
+          for (auto it2 = (*it)->Columns.begin(); it2 != (*it)->Columns.end(); ++it2)
             if ((*it2)->getName() == tabVal.second)
               return std::make_pair((*it)->ID, (*it2)->ID);
       return std::make_pair(0, 0);
