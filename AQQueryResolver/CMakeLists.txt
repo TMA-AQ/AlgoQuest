@@ -10,15 +10,13 @@ find_package(Boost 1.50.0 COMPONENTS program_options thread filesystem system ti
 include_directories(
   ${PROJECT_SOURCE_DIR}
   ${Boost_INCLUDE_DIRS}
-  ${AQUTIL_SOURCE_DIR}
-  /home/thomas/Projects/AlgoQuest/AQUtil
+  $ENV{AQUTIL_SOURCE_DIR}
 )
 
 link_directories(
   ${LIBRARY_OUTPUT_PATH}
   ${Boost_LIBRARY_DIRS}
-  ${AQUTIL_LIBRARY_DIR}
-  /home/thomas/Projects/AlgoQuest/AQUtil/lib
+  $ENV{AQUTIL_LIBRARY_DIR}
 )
 
 set(CMAKE_CXX_FLAGS "-O0 -ggdb -std=c++11")
