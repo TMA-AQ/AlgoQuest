@@ -18,14 +18,24 @@ link_directories(
   ${Boost_LIBRARY_DIRS}
 )
 
-set(CMAKE_CXX_FLAGS "-O0 -ggdb -std=c++11")
-
 file(
-  GLOB_RECURSE
+  GLOB
   source_files
   aq/*.cpp
   aq/*.h
 )
+
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+
+    # Linux specific code
+    SET(OperatingSystem "Linux")
+
+    set(CMAKE_CXX_FLAGS "-O0 -ggdb -std=c++11")
+
+    file(GLOB exclude_files "aq/WIN32FileMapper.*")
+    list(REMOVE_ITEM source_files ${exclude_files})
+
+ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 add_library(
   aq_util

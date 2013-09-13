@@ -58,8 +58,8 @@ DateConversion::~DateConversion()
 long long DateConversion::dateToBigInt(const char * strval)
 {
   long long intval;
-	unsigned int day = 0, month = 0, year = 0;
-	unsigned int hour = 0, minute = 0, second = 0, millisecond  = 0;
+  unsigned int day = 0, month = 0, year = 0;
+  unsigned int hour = 0, minute = 0, second = 0;
 
   boost::posix_time::ptime d(boost::posix_time::not_a_date_time);
   this->ssInput.str(strval);

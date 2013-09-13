@@ -1,3 +1,4 @@
+#include <aq/BaseDesc.h>
 #include <aq/FileMapper.h>
 #include <aq/Timer.h>
 #include <cstdlib>
@@ -7,7 +8,7 @@
 
 std::vector<int> offset_v;
 
-void ReadOffset(const char * pszFileName) 
+void ReadOffset(const char * pszFileName, size_t nb) 
 {
 	FILE* prmFile = NULL;
 	prmFile = fopen( pszFileName, "rb" );
@@ -26,7 +27,7 @@ void ReadOffset(const char * pszFileName)
 int main(int argc, char ** argv)
 {
 	aq::Timer timer;
-	ReadOffset(argv[1]);
+	ReadOffset(argv[1], 100);
 	std::cout << "Read offset in " << aq::Timer::getString(timer.getTimeElapsed()) << " ms" << std::endl;
 
 	timer.start();
