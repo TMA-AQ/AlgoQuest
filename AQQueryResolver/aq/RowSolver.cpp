@@ -1,12 +1,19 @@
 #include "RowSolver.h"
 #include "TemporaryColumnMapper.h"
 #include <aq/FileMapper.h>
-#include <aq/WIN32FileMapper.h>
 #include <aq/Exceptions.h>
 #include <aq/Timer.h>
 #include <aq/Logger.h>
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
+
+#if defined(WIN32)
+# include <aq/WIN32FileMapper.h>
+typedef aq::WIN32FileMapper FileMapper;
+#else
+# include <aq/FileMapper.h>
+typedef aq::FileMapper FileMapper;
+#endif
 
 boost::mutex mutex;
 
@@ -64,16 +71,16 @@ boost::shared_ptr<ColumnMapper_Intf> new_column_mapper(const aq::ColumnType type
   {
   case aq::ColumnType::COL_TYPE_BIG_INT:
   case aq::ColumnType::COL_TYPE_DATE:
-    cm.reset(new aq::ColumnMapper<int64_t, aq::WIN32FileMapper>(path, tableId, columnId, size, packetSize));
+    cm.reset(new aq::ColumnMapper<int64_t, FileMapper>(path, tableId, columnId, size, packetSize));
     break;
   case aq::ColumnType::COL_TYPE_INT:
-    cm.reset(new aq::ColumnMapper<int32_t, aq::WIN32FileMapper>(path, tableId, columnId, size, packetSize));
+    cm.reset(new aq::ColumnMapper<int32_t, FileMapper>(path, tableId, columnId, size, packetSize));
     break;
   case aq::ColumnType::COL_TYPE_DOUBLE:
-    cm.reset(new aq::ColumnMapper<double, aq::WIN32FileMapper>(path, tableId, columnId, size, packetSize));
+    cm.reset(new aq::ColumnMapper<double, FileMapper>(path, tableId, columnId, size, packetSize));
     break;
   case aq::ColumnType::COL_TYPE_VARCHAR:
-    cm.reset(new aq::ColumnMapper<char, aq::WIN32FileMapper>(path, tableId, columnId, size, packetSize));
+    cm.reset(new aq::ColumnMapper<char, FileMapper>(path, tableId, columnId, size, packetSize));
     break;
   }
   return cm;
@@ -327,7 +334,7 @@ void solveAQMatrix(boost::shared_ptr<aq::AQMatrix> aqMatrix,
   {
 
     // dispatch on several thread
-    const std::vector<std::pair<size_t, size_t> >& grp = aqMatrix->getGroupBy();
+    const std::vector<std::pair<uint64_t, uint64_t> >& grp = aqMatrix->getGroupBy();
     std::vector<std::pair<size_t, size_t> > threadIndices;
     if (processThread > grp.size())
     {
@@ -343,7 +350,7 @@ void solveAQMatrix(boost::shared_ptr<aq::AQMatrix> aqMatrix,
     {
       uint64_t step = aqMatrix->getNbRows() / processThread;
       threadIndices.resize(processThread, std::make_pair(0, 0));
-      std::vector<std::pair<size_t, size_t> >::const_iterator itGrp = grp.begin();
+      std::vector<std::pair<uint64_t, uint64_t> >::const_iterator itGrp = grp.begin();
       uint64_t pos = 0;
       for (auto it = threadIndices.begin(); (it != threadIndices.end()) && (itGrp != grp.end()); ++it)
       {

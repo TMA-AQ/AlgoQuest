@@ -2,6 +2,7 @@
 #define __THESAURUS_READER_H__
 
 #include "ColumnMapper_Intf.h"
+#include <aq/Exceptions.h>
 #include <boost/filesystem.hpp>
 
 namespace aq

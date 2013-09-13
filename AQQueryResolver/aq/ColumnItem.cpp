@@ -89,7 +89,7 @@ void ColumnItem::toString( char* buffer, const ColumnType& type ) const
       }
 			break;
 		case COL_TYPE_VARCHAR:
-			res = sprintf( buffer, this->strval.c_str() );
+                  res = sprintf( buffer, "%s", this->strval.c_str() );
 			break;
 		default:
 			assert( 0 );

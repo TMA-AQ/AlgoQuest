@@ -38,6 +38,7 @@ namespace
     aq::tnode * n = NULL;
     switch (type)
     {
+    case aq::ColumnType::COL_TYPE_BIG_INT:
     case aq::ColumnType::COL_TYPE_INT: 
     case aq::ColumnType::COL_TYPE_DATE: 
       n = new aq::tnode( K_INTEGER );
@@ -212,28 +213,6 @@ namespace
 }
 
 namespace aq {
-  namespace expression_transform {
-  
-    template <class M>
-    aq::tnode * transform(const aq::Base& base, const aq::TProjectSettings& settings, aq::tnode * node)
-    {
-      aq::tnode * newNode = aq::clone_subtree(node);
-      aq::ExpressionTransform expTr(base, settings);
-      newNode = expTr.transform<M>(newNode);
-
-      *node = *newNode;
-      aq::delete_subtree(node->left);
-      aq::delete_subtree(node->right);
-      aq::delete_subtree(node->next);
-      node->left = newNode->left;
-      node->right = newNode->right;
-      node->next = newNode->next;
-      node->parent = NULL;
-
-      return node;
-    }
-
-  }
 
 class ExpressionTransform
 {
@@ -440,6 +419,29 @@ aq::tnode * ExpressionTransform::transform(aq::tnode * pNode, CMP& cmp) const
 
 	delete_subtree(pNode);
 	return pNodeRes;
+}
+
+namespace expression_transform {
+  
+  template <class M>
+  aq::tnode * transform(const aq::Base& base, const aq::TProjectSettings& settings, aq::tnode * node)
+  {
+    aq::tnode * newNode = aq::clone_subtree(node);
+    aq::ExpressionTransform expTr(base, settings);
+    newNode = expTr.transform<M>(newNode);
+
+    *node = *newNode;
+    aq::delete_subtree(node->left);
+    aq::delete_subtree(node->right);
+    aq::delete_subtree(node->next);
+    node->left = newNode->left;
+    node->right = newNode->right;
+    node->next = newNode->next;
+    node->parent = NULL;
+
+    return node;
+  }
+
 }
 
 }

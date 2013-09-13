@@ -94,7 +94,7 @@ void AggregateVerb::addResult(aq::Row& row)
 {
   if (this->index == -1)
   {
-    assert(row.computedRow.size() <= std::numeric_limits<int>::max());
+    assert(row.computedRow.size() <= std::numeric_limits<size_t>::max());
     this->index = static_cast<int>(row.computedRow.size()) - 1;
     aq::row_item_t& row_item = row.computedRow[this->index];
     switch (this->getVerbType())
@@ -293,8 +293,8 @@ bool CountVerb::preprocessQuery(	aq::tnode* pStart, aq::tnode* pNode, aq::tnode*
 llong computeCount( Table::Ptr table, llong start, llong end )
 {
 	if( table->Columns.size() == 0 ||
-		start == 0 && end == table->Columns[0]->Items.size() ||
-		end <= 0 )
+		( start == 0 ) && ( end == table->Columns[0]->Items.size() ) ||
+		( end <= 0 ) )
 		return table->TotalCount;
 	if( !table->HasCount )
 		return end - start;
@@ -641,7 +641,7 @@ Column::Ptr OffsetColumn(	Column::Ptr column, TablePartition::Ptr partition,
 	vector<size_t>& partitions = partition->Rows;
 	size_t partIdx = 0;
 	assert( partitions.size() > 1 );
-	assert( partitions[partitions.size() - 1] >= (int) column->Items.size() );
+	assert( partitions[partitions.size() - 1] >= column->Items.size() );
 	Column::Ptr columnCount = column->getCount();
 	Column::Ptr newColumnCount = NULL;
 	if( columnCount )

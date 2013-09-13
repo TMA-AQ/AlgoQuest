@@ -61,7 +61,7 @@ namespace aq
       AQThread<T>* thread = new AQThread<T>(pNode, resolver);
       //-----------------------------------------------
 
-      for (std::vector<AQThread<T>*>::iterator it = this->_thread.begin();
+      for (typename std::vector<AQThread<T>*>::iterator it = this->_thread.begin();
         it != this->_thread.end(); ++it)
         if ((*it)->findNodeIn((*it)->getPNode(), pNode) == true && (*it)->getPNode() != pNode && *it != thread)
           (*it)->addListThreadCondition(thread);

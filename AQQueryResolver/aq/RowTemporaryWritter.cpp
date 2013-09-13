@@ -1,5 +1,6 @@
 #include "RowTemporaryWritter.h"
 #include <aq/Utilities.h>
+#include <cstring>
 
 namespace aq
 {

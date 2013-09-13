@@ -3,7 +3,6 @@
 #include "parser/sql92_grm_tab.hpp"
 #include <cassert>
 #include <algorithm>
-#include <aq/WIN32FileMapper.h>
 #include <aq/DateConversion.h>
 #include <aq/Exceptions.h>
 #include <aq/Logger.h>
@@ -11,6 +10,16 @@
 #include <boost/scoped_array.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/array.hpp>
+
+
+#if defined(WIN32)
+# include <aq/WIN32FileMapper.h>
+typedef aq::WIN32FileMapper FileMapper;
+#else
+# include <aq/FileMapper.h>
+typedef aq::FileMapper FileMapper;
+#endif
+
 
 //------------------------------------------------------------------------------
 const int nrJoinTypes = 7;
@@ -1399,7 +1408,7 @@ void transformExpression(const aq::Base& baseDesc, const aq::TProjectSettings& s
       aq::tnode * cmpNode = NULL;
       while ((cmpNode = aq::find_first_node(whereNode, tag)) != NULL)
       {
-        aq::expression_transform::transform<aq::WIN32FileMapper>(baseDesc, settings, cmpNode);
+        aq::expression_transform::transform<aq::FileMapper>(baseDesc, settings, cmpNode);
       }
     }
   }
