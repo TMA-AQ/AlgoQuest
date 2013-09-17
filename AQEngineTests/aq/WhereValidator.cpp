@@ -40,6 +40,14 @@ namespace aq
     }
   }
 
+  void  WhereValidator::addJoinConditions(const std::vector<aq::core::JoinCondition>& jcs)
+  {
+  }
+
+  void  WhereValidator::addInConditions(const std::vector<aq::core::InCondition>& ics)
+  {
+  }
+
   void  WhereValidator::createCondition(const std::string& cutQuery, WhereValidator::KeyWord ref)
   {
     if (ref & K_KEYWORD)

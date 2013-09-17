@@ -9,6 +9,8 @@
 # include "WhereIn.h"
 # include "WhereComparator.h"
 
+# include <aq/AQLQuery.h>
+
 namespace aq
 {
 
@@ -35,7 +37,9 @@ namespace aq
     // Parse and cut the query to different condition(s) for the key word WHERE
     //-------------------------------------------------------------------------
 
-    void  parseQuery(const std::string& query);
+    void  parseQuery(const std::string& query); /// \deprecated
+    void  addJoinConditions(const std::vector<aq::core::JoinCondition>& jcs);
+    void  addInConditions(const std::vector<aq::core::InCondition>& ics);
     void  createCondition(const std::string& vacheQuery, WhereValidator::KeyWord ref);
 
     static AWhereCondition*  createInCondition(const std::string& vacheQuery)

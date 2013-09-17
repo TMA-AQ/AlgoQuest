@@ -1188,7 +1188,7 @@ aq::tnode* GetTree( Table& table )
 	return pStart;
 }
 
-void selectToList(tnode* pNode, std::list<tnode*>& columns)
+void toNodeListToStdList(tnode* pNode, std::list<tnode*>& columns)
 {	
   if( !pNode || !pNode->left )
 		return;
@@ -1196,7 +1196,7 @@ void selectToList(tnode* pNode, std::list<tnode*>& columns)
   {
     assert(pNode->left->right);
     columns.push_back(pNode->left->right);
-    selectToList(pNode->left, columns);
+    toNodeListToStdList(pNode->left, columns);
   }
   else
   {

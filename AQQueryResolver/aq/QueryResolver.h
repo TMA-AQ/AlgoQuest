@@ -24,6 +24,11 @@ public:
   /// main entry
 	Table::Ptr solve();
 
+  /// 
+  void preProcess();
+  aq::verb::VerbNode::Ptr postProcess();
+  void resolve(aq::verb::VerbNode::Ptr);
+
   /// \{
   /// Once aq engine has been called, aq engine matrix must be solve
   /// There is three case:
@@ -41,7 +46,7 @@ public:
 
   /// deprecated
 	Table::Ptr solveAQMatriceByColumns(aq::verb::VerbNode::Ptr spTree);
-
+  
 	Table::Ptr getResult() { return this->result; }
   const std::vector<Column::Ptr> getColumns() const { return this->columns; }
   const ColumnItem& getValue(size_t row, size_t column) const;

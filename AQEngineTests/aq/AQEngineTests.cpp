@@ -15,29 +15,18 @@ namespace po = boost::program_options;
 
 bool aq::verbose = false;
 
-extern int functional_tests(const std::string& dbPath, std::string& queryIdent, const std::string& aqEngine, 
-                            const std::string& queriesFilename, const std::string& filter,
-                            const std::string& logFilename, uint64_t limit, bool stopOnError, bool checkCondition);
-
 int main(int argc, char ** argv)
 {
 
   try
   {
+    aq::opt o = { "", "", "", "", "", "", "", 0, false, false, false, false, false };
     std::string logMode;
     std::string rootPath;
     std::string dbName;
-    std::string queryIdent;
-    std::string aqEngine;
-    std::string queriesFilename;
     std::string query;
-    std::string filter;
-    std::string logFilename;
-    size_t limit;
     unsigned int logLevel;
-    bool stopOnError = false;
     bool generate = false;
-    bool checkCondition = false;
 
     po::options_description desc("Allowed options");
 		desc.add_options()
@@ -46,16 +35,21 @@ int main(int argc, char ** argv)
 			("log-level", po::value<unsigned int>(&logLevel)->default_value(AQ_LOG_NOTICE), "CRITICAL(2), ERROR(3), WARNING(4), NOTICE(5), INFO(6), DEBUG(7)")
       ("root-path,r", po::value<std::string>(&rootPath)->default_value("E:/AQ_DATABASES/DB/"), "")
       ("db-name,n", po::value<std::string>(&dbName)->default_value("MSALGOQUEST"), "")
-      ("limit,l", po::value<size_t>(&limit)->default_value(0), "0 -> no limit")
-      ("query-ident,i", po::value<std::string>(&queryIdent)->default_value("test_aq_engine"), "")
-      ("aq-engine,e", po::value<std::string>(&aqEngine)->default_value("E:/AQ_Bin/AQ_Engine_21_11.exe"), "")
-      ("queries,q", po::value<std::string>(&queriesFilename)->default_value("queries.aql"), "")
+      ("working-path", po::value<std::string>(&o.workingPath)->default_value(""), "")
+      ("limit,l", po::value<size_t>(&o.limit)->default_value(0), "0 -> no limit")
+      ("query-ident,i", po::value<std::string>(&o.queryIdent)->default_value("test_aq_engine"), "")
+      ("aq-engine,e", po::value<std::string>(&o.aqEngine)->default_value("E:/AQ_Bin/AQ_Engine.exe"), "")
+      ("queries,q", po::value<std::string>(&o.queriesFilename)->default_value("query.aql"), "")
       ("query", po::value<std::string>(&query)->default_value(""), "")
-      ("filter,f", po::value<std::string>(&filter)->default_value(""), "")
-      ("log,o", po::value<std::string>(&logFilename)->default_value("./test_aq_engine.log"), "")
+      ("filter,f", po::value<std::string>(&o.filter)->default_value(""), "")
+      ("log,o", po::value<std::string>(&o.logFilename)->default_value("./test_aq_engine.log"), "")
+
+      ("execute", po::bool_switch(&o.execute), "")
       ("generate", po::bool_switch(&generate), "")
-      ("checkCondition,c", po::bool_switch(&checkCondition), "")
-      ("stop-on-error,s", po::bool_switch(&stopOnError), "")
+      ("check-result", po::bool_switch(&o.checkResult), "")
+      ("check-condition", po::bool_switch(&o.checkCondition), "")
+      ("aql-2-sql", po::bool_switch(&o.aql2sql), "")
+      ("stop-on-error,s", po::bool_switch(&o.stopOnError), "")
       ("verbose,v", po::bool_switch(&aq::verbose), "set verbosity")
 			;
 
@@ -77,7 +71,7 @@ int main(int argc, char ** argv)
 		aq::Logger::getInstance(argv[0], logMode == "STDOUT" ? STDOUT : logMode == "LOCALFILE" ? LOCALFILE : logMode == "SYSLOG" ? SYSLOG : STDOUT);
 		aq::Logger::getInstance().setLevel(logLevel);
     
-    std::string dbPath = rootPath + "/" + dbName + "/";
+    o.dbPath = rootPath + "/" + dbName + "/";
 
     if (generate)
     {
@@ -86,7 +80,8 @@ int main(int argc, char ** argv)
     }
     else
     {
-      return functional_tests(dbPath, queryIdent, aqEngine, queriesFilename, filter, logFilename, limit, stopOnError, checkCondition);
+      if (o.workingPath == "") o.workingPath = o.dbPath;
+      return functional_tests(o);
     }
   }
   catch (const std::exception& e)

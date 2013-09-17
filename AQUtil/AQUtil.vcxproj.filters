@@ -72,6 +72,15 @@
     <ClInclude Include="aq\WIN32FileMapper.h">
       <Filter>Fichiers d%27en-tête\aq</Filter>
     </ClInclude>
+    <ClInclude Include="aq\Algo.h">
+      <Filter>Fichiers d%27en-tête\aq</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\AQLParser.h">
+      <Filter>Fichiers d%27en-tête\aq</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\AQLQuery.h">
+      <Filter>Fichiers d%27en-tête\aq</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="aq\Logger.cpp">
@@ -108,6 +117,12 @@
       <Filter>Fichiers sources\aq</Filter>
     </ClCompile>
     <ClCompile Include="aq\WIN32FileMapper.cpp">
+      <Filter>Fichiers sources\aq</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\AQLQuery.cpp">
+      <Filter>Fichiers sources\aq</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\AQLSpiritParser.cpp">
       <Filter>Fichiers sources\aq</Filter>
     </ClCompile>
   </ItemGroup>

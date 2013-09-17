@@ -358,9 +358,9 @@ int load_db(const char * propertiesFile, unsigned int tableId)
   return EXIT_SUCCESS;
 }
 
-int test_aq_lib(const char * query)
+const char * aql2sql(const char * aql_query)
 {
-  return boost::lexical_cast<int>(query);
+  return "prout";
 }
 
 }
