@@ -62,8 +62,6 @@ char name_log [ k_taille_message ];
 int cut_in_col (const char * iniFilename, size_t num_table, size_t num_column) 
 {
 	// parametres des emplacement des fichiers 
-	char *param_file;
-	param_file =(char *) safecalloc ( k_file_name_size_max, sizeof(char) );
 	rep_source =(char *) safecalloc ( k_file_name_size_max, sizeof(char) );
 	rep_cible =(char *) safecalloc ( k_file_name_size_max , sizeof(char) );
 	base_desc_file =  (char *) safecalloc ( k_file_name_size_max, sizeof(char) );
@@ -91,8 +89,6 @@ int cut_in_col (const char * iniFilename, size_t num_table, size_t num_column)
 	my_dir_source  = (char *) safecalloc (k_file_name_size_max, sizeof(char));
 	char *my_dir_cible;
 	my_dir_cible  = (char *) safecalloc (k_file_name_size_max, sizeof(char)); 
-	char *my_dir_root;
-	my_dir_root  = (char *) safecalloc (k_file_name_size_max, sizeof(char)); 
 
 	// init
 	aq::s_prefixe prefixe;

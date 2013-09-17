@@ -30,12 +30,12 @@ file(
 )
 
 add_executable(
-  aq-tools
+  aq-engine-tests
   ${source_files}
 )
 
 target_link_libraries( 
-  aq-tools
+  aq-engine-tests
   aq_query_resolver
   aq_util
   ${Boost_LIBRARIES}

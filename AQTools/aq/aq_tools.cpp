@@ -29,7 +29,8 @@
 #include <boost/logic/tribool.hpp>
 
 #include <aq/AQThreadRequest.h>
-#include "AQFunctor.h"
+
+// #include <aq/AQFunctor.h>
 
 // fixme
 #include "Link.h"

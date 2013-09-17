@@ -2,6 +2,7 @@
 #define __AQ_COLUMN_MAPPER_H__
 
 #include "ColumnMapper_Intf.h"
+#include <aq/Utilities.h>
 #include <aq/Logger.h>
 #include <aq/DBTypes.h>
 #include <map>

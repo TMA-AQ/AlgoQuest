@@ -1,14 +1,22 @@
 #include "Util.h"
 #include <aq/FileMapper.h>
-#include <aq/WIN32FileMapper.h>
 #include <aq/Base.h>
 #include <aq/Timer.h>
 #include <aq/Exceptions.h>
 #include <iostream>
 #include <algorithm>
+#include <fstream>
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 #include <boost/algorithm/string.hpp>
+
+#if defined(WIN32)
+# include <aq/WIN32FileMapper.h>
+typedef aq::WIN32FileMapper FileMapper;
+#else
+# include <aq/FileMapper.h>
+typedef aq::FileMapper FileMapper;
+#endif
 
 namespace aq
 {
@@ -254,17 +262,17 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
       switch((*itCol)->Type)
       {
       case aq::ColumnType::COL_TYPE_INT:
-        cm.reset(new aq::ColumnMapper<int32_t, aq::WIN32FileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, 1/*(*itCol)->Size*/, packetSize));
+        cm.reset(new aq::ColumnMapper<int32_t, FileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, 1/*(*itCol)->Size*/, packetSize));
         break;
       case aq::ColumnType::COL_TYPE_BIG_INT:
       case aq::ColumnType::COL_TYPE_DATE:
-        cm.reset(new aq::ColumnMapper<int64_t, aq::WIN32FileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, 1/*(*itCol)->Size*/, packetSize));
+        cm.reset(new aq::ColumnMapper<int64_t, FileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, 1/*(*itCol)->Size*/, packetSize));
         break;
       case aq::ColumnType::COL_TYPE_DOUBLE:
-        cm.reset(new aq::ColumnMapper<double, aq::WIN32FileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, 1/*(*itCol)->Size*/, packetSize));
+        cm.reset(new aq::ColumnMapper<double, FileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, 1/*(*itCol)->Size*/, packetSize));
         break;
       case aq::ColumnType::COL_TYPE_VARCHAR:
-        cm.reset(new aq::ColumnMapper<char, aq::WIN32FileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, (*itCol)->Size, packetSize));
+        cm.reset(new aq::ColumnMapper<char, FileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, (*itCol)->Size, packetSize));
         break;
       }
       tableColumnMappers[(*itCol)->ID] = cm;

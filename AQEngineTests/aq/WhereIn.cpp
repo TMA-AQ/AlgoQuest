@@ -31,7 +31,7 @@ namespace aq
     std::vector<std::string> vecter2;
     std::vector<int> vecter1;
     boost::split(vecter2, this->_query, boost::is_any_of(" "));
-    for (auto& v = vecter2.begin(); v != vecter2.end(); ++v)
+    for (auto v = vecter2.begin(); v != vecter2.end(); ++v)
     {
       if (v->find("TABLE") != std::string::npos)
       {
@@ -42,7 +42,7 @@ namespace aq
       }
     }
     pairString tabVal = std::make_pair(s1, s2);
-    for (auto& v = vecter2.begin(); v != vecter2.end(); ++v)
+    for (auto v = vecter2.begin(); v != vecter2.end(); ++v)
     {
       if (v->find("K_VALUE") != std::string::npos)
       {

@@ -64,11 +64,11 @@ namespace aq
 
     bool  existanceThread(AQThread* aqthread, int level) const {
       if (level == 1)
-        for (std::vector<AQThread*>::const_iterator it = this->_listThread.begin(); it != this->_listThread.end(); ++it)
+        for (typename std::vector<AQThread*>::const_iterator it = this->_listThread.begin(); it != this->_listThread.end(); ++it)
           if (aqthread->getPNode() == (*it)->getPNode())
             return true;
 
-      for (std::vector<AQThread*>::const_iterator it = this->_listThread.begin(); it != this->_listThread.end(); ++it)
+      for (typename std::vector<AQThread*>::const_iterator it = this->_listThread.begin(); it != this->_listThread.end(); ++it)
         if ((*it)->existanceThread(aqthread, 1) == true)
           return true;
 
@@ -76,7 +76,7 @@ namespace aq
     }
 
     void  purgeOverList() {
-      std::vector<AQThread*>::iterator it = this->_listThread.begin();
+      typename std::vector<AQThread*>::iterator it = this->_listThread.begin();
       while (it != this->_listThread.end())
         if (this->existanceThread(*it, 0) == true)
           it = this->_listThread.erase(it);
@@ -89,7 +89,7 @@ namespace aq
 
     void  assignPatern(AQThread* patern) {
       this->setPatern(patern);
-      for (std::vector<AQThread*>::iterator it = this->_listThread.begin(); it != this->_listThread.end(); ++it)
+      for (typename std::vector<AQThread*>::iterator it = this->_listThread.begin(); it != this->_listThread.end(); ++it)
         (*it)->assignPatern(this);
     }
 
@@ -148,7 +148,7 @@ namespace aq
     }
 
     void  assignAnswer() {
-      for (std::vector<AQThread*>::iterator it = this->_listThread.begin(); it != this->_listThread.end(); ++it)
+      for (typename std::vector<AQThread*>::iterator it = this->_listThread.begin(); it != this->_listThread.end(); ++it)
         this->_queryResolver->addQueryResolverSimulate((*it)->_queryResolver->getID(), (*it)->_queryResolver->getAnswer());
     }
     
@@ -172,7 +172,7 @@ namespace aq
 
     bool  isReady() {
       this->_ready = true;
-      for (std::vector<AQThread*>::iterator it = this->_listThread.begin(); it != this->_listThread.end(); ++it)
+      for (typename std::vector<AQThread*>::iterator it = this->_listThread.begin(); it != this->_listThread.end(); ++it)
         if ((*it)->threadOver() == false || (*it)->isThreading() == true)
           this->_ready = false;
       return this->_ready;
@@ -238,7 +238,7 @@ namespace aq
       this->presentation(os, indent);
       if (this->_listThread.size() > 0)
         os << indent << "<child>" << std::endl;
-      for (std::vector<AQThread*>::const_iterator it = this->_listThread.begin(); it != this->_listThread.end(); ++it)
+      for (typename std::vector<AQThread*>::const_iterator it = this->_listThread.begin(); it != this->_listThread.end(); ++it)
         (*it)->dump(os, indent + "  ");
       if (this->_listThread.size() > 0)
         os << indent << "</child>" << std::endl;

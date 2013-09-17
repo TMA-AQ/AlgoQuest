@@ -6,7 +6,7 @@
 # include <aq/parser/JeqParser.h>
 # include <aq/Logger.h>
 # include <aq/Settings.h>
-# include <aq/base.h>
+# include <aq/Base.h>
 
 namespace aq
 {

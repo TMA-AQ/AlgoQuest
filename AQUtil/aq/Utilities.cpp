@@ -335,7 +335,10 @@ char* strtoupr( char* pszStr ) {
 
 	psz = pszStr;
 	while ( *psz != '\0' )
-		*psz++ = toupper( *psz );
+	{
+		*psz = toupper( *psz );
+		psz += 1;
+	}
 	return pszStr;
 }
 
@@ -556,13 +559,13 @@ void FileWriteEnreg( aq::ColumnType col_type, const int col_size, char *my_field
 	switch (  col_type )
 	{
 	case COL_TYPE_INT :
-		if ( strcmp ( my_field, "NULL")  ==   0 )  *my_int = 'NULL'; // ****
+		if ( strcmp ( my_field, "NULL")  ==   0 )  *my_int = 'NULL'; // FIXME
 		else  *my_int = atoi ( my_field );
 		fwrite( my_int , sizeof(int), 1, fcol  );
 		break;
 
 	case COL_TYPE_BIG_INT :
-		if ( strcmp ( my_field, "NULL")  ==   0 )  *my_long_long  = 'NULL'; // ****  
+		if ( strcmp ( my_field, "NULL")  ==   0 )  *my_long_long  = 'NULL'; // FIXME
 #ifdef WIN32
 		else  *my_long_long  = _atoi64 (my_field );   
 #else
@@ -572,7 +575,7 @@ void FileWriteEnreg( aq::ColumnType col_type, const int col_size, char *my_field
 		break;
 
 	case COL_TYPE_DOUBLE :
-		if (  strcmp ( my_field, "NULL")  ==   0 )  *my_double = 'NULL'; // ****  
+		if (  strcmp ( my_field, "NULL")  ==   0 )  *my_double = 'NULL'; // FIXME
 		else
 		{
 			// step 1 convert ',' in '.'
@@ -587,7 +590,7 @@ void FileWriteEnreg( aq::ColumnType col_type, const int col_size, char *my_field
 		{
 			if ( (strcmp ( my_field, "NULL")  ==   0) ||	(strcmp( my_field, "" ) == 0) )
       {
-        *my_long_long  = 'NULL'; // ****
+        *my_long_long  = 'NULL'; // FIXME
       }
       else
 			{

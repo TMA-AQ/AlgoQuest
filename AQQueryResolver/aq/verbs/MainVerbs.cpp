@@ -203,7 +203,6 @@ void SelectVerb::changeResult(	Table::Ptr table,
 	}
 
 	std::vector<Column::Ptr> newColumns;
-	size_t tableIdx = 0;
 	std::deque<VerbResult::Ptr>& params = resArray->Results;
 	assert( params.size() == this->Columns.size() );
 	Column::Ptr foundColumn = NULL;

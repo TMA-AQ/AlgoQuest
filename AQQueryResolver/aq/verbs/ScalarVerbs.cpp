@@ -246,7 +246,6 @@ bool ToDateVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode
 	if( pNode->right )
 	{
 		assert( pNode->right->tag == K_STRING );
-		char *strval = pNode->right->getData().val_str;
 	}
 	return false;
 }

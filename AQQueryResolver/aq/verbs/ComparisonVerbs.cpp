@@ -3,8 +3,15 @@
 #include <aq/ExprTransform.h>
 #include <aq/Exceptions.h>
 #include <aq/Logger.h>
-#include <aq/WIN32FileMapper.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
+
+#if defined(WIN32)
+# include <aq/WIN32FileMapper.h>
+typedef aq::WIN32FileMapper FileMapper;
+#else
+# include <aq/FileMapper.h>
+typedef aq::FileMapper FileMapper;
+#endif
 
 using namespace std;
 
@@ -34,8 +41,8 @@ bool ComparisonVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 	if( this->Context == K_WHERE )
 	{
 		boost::posix_time::ptime begin(boost::posix_time::microsec_clock::local_time());
-    aq::ExpressionTransform expTrans(*this->m_baseDesc, *this->m_settings);
-		newNode = expTrans.transform<aq::WIN32FileMapper>(pNodeClone);
+                aq::ExpressionTransform expTrans(*this->m_baseDesc, *this->m_settings);
+		newNode = expTrans.transform<FileMapper>(pNodeClone);
 		boost::posix_time::ptime end(boost::posix_time::microsec_clock::local_time());
 		std::ostringstream oss;
 		oss << "expression_transform elapsed time: " << (end - begin) << " ms";

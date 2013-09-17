@@ -21,7 +21,7 @@ namespace
 	struct inner_column_cmp_t
 	{
 	public:
-		inner_column_cmp_t(const std::vector<uint64_t>& lessThanColumn)
+		inner_column_cmp_t(const std::vector<size_t>& lessThanColumn)
 			: m_lessThanColumn(lessThanColumn)
 		{
 		}
@@ -30,7 +30,7 @@ namespace
 			return m_lessThanColumn[idx1] < m_lessThanColumn[idx2];
 		}
 	private:
-		const std::vector<uint64_t>& m_lessThanColumn;
+		const std::vector<size_t>& m_lessThanColumn;
 	};
 
 	struct row_cmp_t
@@ -321,7 +321,7 @@ void AQMatrix::computeUniqueRow(std::vector<std::vector<size_t> >& mapToUniqueIn
 		if( this->matrix[idx].indexes.size() < 1 )
 			continue;
 
-		inner_column_cmp_t cmp(this->matrix[idx].indexes);
+		::inner_column_cmp_t cmp(this->matrix[idx].indexes);
 
 		std::vector<size_t> index;
 		index.reserve(this->matrix[idx].indexes.size());
@@ -373,8 +373,6 @@ void AQMatrix::writeTemporaryTable()
   FILE * fd;
   std::vector<std::map<uint64_t, FILE*> > fds(this->matrix.size());
   uint32_t status = 11;
-  uint32_t garbage1 = 0;
-  uint64_t garbage2 = 0;
   uint32_t invalid = 0;
   uint32_t pos = 0;
   uint64_t grpIndex = 1;
@@ -406,17 +404,17 @@ void AQMatrix::writeTemporaryTable()
         fd = it->second;
       }
       
-      // fwrite(&garbage2, sizeof(uint64_t), 1, fd);
-      // fwrite(&grpIndex, sizeof(uint64_t), 1, fd);
       fwrite(&invalid, sizeof(uint32_t), 1, fd);
       fwrite(&pos, sizeof(uint32_t), 1, fd);
-      // fwrite(&garbage1, sizeof(uint32_t), 1, fd);
     }
   }
   
   for (size_t c = 0; c < this->matrix.size(); ++c)
   {
-    std::for_each(fds[c].begin(), fds[c].end(), [] (std::pair<uint64_t, FILE*> v) { fclose(v.second); });
+    for (auto& v : fds[c])
+    {
+      fclose(v.second);
+    }
   }
   
   // FIXME : generate empty file => this is temporary

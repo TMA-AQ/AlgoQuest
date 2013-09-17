@@ -270,7 +270,7 @@ void check_args (const char * iniFilename, size_t table, size_t column)
 				strcpy( k_batch_loader , rside);
 				size_t len = strlen( k_batch_loader );
 				if (len > 0)
-					for( int idx = 1; idx < len - 1; ++idx )
+					for( unsigned int idx = 1; idx < len - 1; ++idx )
 						if( k_batch_loader[idx-1] == '"' && 
 							k_batch_loader[idx] == ',' &&
 							k_batch_loader[idx+1] == '"' )

@@ -3,6 +3,7 @@
 
 #include <string>
 #include <sstream>
+#include <boost/lexical_cast.hpp>
 
 namespace aq
 {
@@ -23,7 +24,7 @@ public:
   bool eos() { return this->queriesStream.eof(); }
 
   static void extract(const std::string& line, const std::string& key, std::string& result);
-  template <typename T> T extract_value(const std::string& key, const T default) const;
+  template <typename T> T extract_value(const std::string& key, const T default_value) const;
 
 private:
   std::istream& queriesStream;
@@ -34,9 +35,9 @@ private:
 };
 
 template <typename T> 
-T QueryReader::extract_value(const std::string& key, const T default) const
+T QueryReader::extract_value(const std::string& key, const T default_value) const
 {
-  T value = default;
+  T value = default_value;
   std::string::size_type b = this->expected.find(key + ":");
   if (b != std::string::npos)
   {

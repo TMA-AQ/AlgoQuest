@@ -37,8 +37,8 @@ void *safecalloc(size_t nb, size_t size)
 
 void remove_double_quote(std::string& s)
 {
-  if (s[0] = '\"') s.erase(0, 1);
-  if (s[s.size() - 1] = '\"') s.erase(s.size() - 1, 1);
+  if (s[0] == '\"') s.erase(0, 1);
+  if (s[s.size() - 1] == '\"') s.erase(s.size() - 1, 1);
 }
 
 void clean(base_t& base)
@@ -61,10 +61,9 @@ const char * type_to_string(symbole type)
   case t_char: return "VARCHAR"; break;
   case t_double: return "REAL"; break;
   case t_raw: return "RAW"; break;
-  default:
-    return "unknown";
-    break;
+  default: break;
   }
+  return "unknown";
 }
 
 void fill_column_type(base_t::table_t::col_t * colonne, const char * type_aux)

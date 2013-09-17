@@ -38,8 +38,9 @@ std::string generic_error::typeToString(generic_error::EType type)
     case aq::generic_error::COULD_NOT_OPEN_FILE: return "COULD_NOT_OPEN_FILE"; break;
     case aq::generic_error::INVALID_TABLE: return "INVALID_TABLE"; break;
     case aq::generic_error::TABLE_ALREADY_EXISTS: return "TABLE_ALREADY_EXISTS"; break;
-		case aq::generic_error::AQ_ENGINE: return "AQ_ENGINE"; break;
+	case aq::generic_error::AQ_ENGINE: return "AQ_ENGINE"; break;
     case aq::generic_error::INVALID_FILE: return "INVALID_FILE"; break;
+    case aq::generic_error::INVALID_DATE_FORMAT: return "INVALID_DATE_FORMAT"; break;
   }
 	return "UNKNOWN_EXCEPTION";
 }

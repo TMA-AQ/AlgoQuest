@@ -86,7 +86,8 @@ void CaseVerb::changeResult(	Table::Ptr table,
 				break;
 			}
 		}
-		if( resultColumn->Items.size() != idx + 1 )
+		if( resultColumn->Items.size() != (idx + 1) )
+		{
 			if( hasElse )
 			{
 				ColumnItem::Ptr resItem = NULL;
@@ -98,6 +99,7 @@ void CaseVerb::changeResult(	Table::Ptr table,
 			}
 			else
 				resultColumn->Items.push_back( NULL ); //no element was found
+		}
 	}
 	this->Result = resultColumn;
 }

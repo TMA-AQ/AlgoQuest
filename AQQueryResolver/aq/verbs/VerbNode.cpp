@@ -241,7 +241,7 @@ VerbNode::Ptr VerbNode::BuildVerbsTree( aq::tnode* pStart, const boost::array<un
 	for( size_t idx = 0; idx < categories_order.size(); ++idx )
 	{
 		aq::tnode* pNode = pStart;
-		while( pNode && pNode->tag != categories_order[idx] ) 
+		while( pNode && (pNode->tag != categories_order[idx]) )
 			pNode = pNode->next;
 		if( !pNode )
 			continue;

@@ -144,15 +144,15 @@ void ColumnVerb::addResult(aq::Row& row)
   {
     row.computedRow.push_back(row_item);
     (*row.computedRow.rbegin()).item.reset(new ColumnItem);
-    assert(row.computedRow.size() <= std::numeric_limits<int>::max());
+    assert(row.computedRow.size() <= std::numeric_limits<size_t>::max());
     this->computed_index = static_cast<int>(row.computedRow.size()) - 1;
   }
   
-  if (this->computed_index >= row.computedRow.size())
+  if (static_cast<size_t>(this->computed_index) >= row.computedRow.size())
   {
     row.computedRow.push_back(row_item);
     (*row.computedRow.rbegin()).item.reset(new ColumnItem);
-    assert(this->computed_index == (row.computedRow.size() - 1));
+    assert(static_cast<size_t>(this->computed_index) == (row.computedRow.size() - 1));
   }
 
   // this->Result.reset(new Scalar(row_item.type, row_item.size, *row_item.item.get()));

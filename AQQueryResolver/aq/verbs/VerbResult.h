@@ -76,11 +76,11 @@ public:
 	virtual int getType() const { return VerbResult::TABLE_PARTITION; }
 
 	TablePartition()
-		: FrameUnits(ROWS), 
-			FrameStartType(AQ_UNBOUNDED),
-			FrameEndType(AQ_UNBOUNDED), 
-			// FrameEndType(RELATIVE), 
-			FrameStart(0), FrameEnd(0)
+		: FrameUnits(ROWS),
+			FrameStart(0), FrameEnd(0),
+	FrameStartType(AQ_UNBOUNDED),
+	FrameEndType(AQ_UNBOUNDED),
+	FrameUnitsInitialized(false)
 	{
 	}
 
@@ -98,9 +98,11 @@ public:
 		ROWS,
 		RANGE
 	};
-	FrameUnitsType		FrameUnits;
-	long long	FrameStart, FrameEnd;
-	FrameBoundType	FrameStartType, FrameEndType;
+	FrameUnitsType FrameUnits;
+	long long FrameStart;
+	long long FrameEnd;
+	FrameBoundType FrameStartType;
+	FrameBoundType FrameEndType;
 	bool FrameUnitsInitialized;
 };
 
