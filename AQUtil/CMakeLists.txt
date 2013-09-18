@@ -37,6 +37,18 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
+    # Linux specific code
+    SET(OperatingSystem "Darwin")
+
+    set(CMAKE_CXX_FLAGS "-O0 -ggdb -std=c++11")
+
+    file(GLOB exclude_files "aq/WIN32FileMapper.*")
+    list(REMOVE_ITEM source_files ${exclude_files})
+
+ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
 add_library(
   aq_util
   STATIC

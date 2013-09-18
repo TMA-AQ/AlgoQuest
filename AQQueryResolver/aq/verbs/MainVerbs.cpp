@@ -195,7 +195,7 @@ void SelectVerb::changeResult(	Table::Ptr table,
 		return;
 	}
 	//either one column or one K_COMMA operator
-	VerbResultArray::Ptr resArray = dynamic_pointer_cast<VerbResultArray>( resLeft );
+	VerbResultArray::Ptr resArray = boost::dynamic_pointer_cast<VerbResultArray>( resLeft );
 	if( !resArray )
 	{
 		resArray = new VerbResultArray();
@@ -218,7 +218,7 @@ void SelectVerb::changeResult(	Table::Ptr table,
 		Column::Ptr column;
 		if( params[idx]->getType() == VerbResult::COLUMN )
 		{
-			column = static_pointer_cast<Column>( params[idx] );
+		  column = boost::static_pointer_cast<Column>( params[idx] );
 			newColumns.push_back( column );
 			if( !foundColumn )
 				foundColumn = column;
@@ -226,7 +226,7 @@ void SelectVerb::changeResult(	Table::Ptr table,
 		else
 		{
 			assert( params[idx]->getType() == VerbResult::SCALAR );
-			Scalar::Ptr scalar = static_pointer_cast<Scalar>( params[idx] );
+			Scalar::Ptr scalar = boost::static_pointer_cast<Scalar>( params[idx] );
 			column = new Column(scalar->Type);
 			column->Items.push_back(new ColumnItem(scalar->Item));
 			newColumns.push_back( column );
@@ -454,7 +454,7 @@ void WhereVerb::changeResult( Table::Ptr table,
 
 	if( resLeft->getType() != VerbResult::ROW_VALIDATION )
 		throw verb_error(verb_error::VERB_BAD_SYNTAX, this->getVerbType());
-	RowValidation::Ptr rv = dynamic_pointer_cast<RowValidation>( resLeft );
+	RowValidation::Ptr rv = boost::dynamic_pointer_cast<RowValidation>( resLeft );
 	
 	//recreate table
 	vector<Column::Ptr> newColumns = table->getColumnsTemplate();
@@ -545,7 +545,7 @@ void OrderVerb::changeResult(	Table::Ptr table,
 								VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext )
 {
 	assert( resLeft );
-	VerbResultArray::Ptr resArray = dynamic_pointer_cast<VerbResultArray>( resLeft );
+	VerbResultArray::Ptr resArray = boost::dynamic_pointer_cast<VerbResultArray>( resLeft );
 	if( !resArray )
 	{
 		resArray = new VerbResultArray();
@@ -566,11 +566,11 @@ void OrderVerb::changeResult(	Table::Ptr table,
 		switch( result->getType() )
 		{
 		case VerbResult::COLUMN:
-			columns.push_back( static_pointer_cast<Column>( result ) );
+		  columns.push_back( boost::static_pointer_cast<Column>( result ) );
 			break;
 		case VerbResult::SCALAR:
 			{
-				Scalar::Ptr scalar = static_pointer_cast<Scalar>( result );
+			  Scalar::Ptr scalar = boost::static_pointer_cast<Scalar>( result );
 				if( scalar->Type != COL_TYPE_INT &&
 					scalar->Type != COL_TYPE_BIG_INT )
 					throw verb_error(generic_error::INVALID_QUERY, this->getVerbType());
@@ -592,7 +592,7 @@ void OrderVerb::changeResult(	Table::Ptr table,
 		if( resRight )
 		{
 			assert( resRight->getType() == VerbResult::TABLE_PARTITION );
-			partition = static_pointer_cast<TablePartition>( resRight );
+			partition = boost::static_pointer_cast<TablePartition>( resRight );
 		}
 	}
 	
@@ -773,12 +773,12 @@ void GroupVerb::changeResult(	Table::Ptr table,
 	vector<Column::Ptr> columns;
 	if( resLeft->getType() == VerbResult::ARRAY )
 	{
-		VerbResultArray::Ptr resArray = static_pointer_cast<VerbResultArray>( resLeft );
+	  VerbResultArray::Ptr resArray = boost::static_pointer_cast<VerbResultArray>( resLeft );
 		for( size_t idx = 0; idx < resArray->Results.size(); ++idx )
-			columns.push_back( static_pointer_cast<Column>( resArray->Results[idx] ) );
+		  columns.push_back( boost::static_pointer_cast<Column>( resArray->Results[idx] ) );
 	}
 	else
-		columns.push_back( static_pointer_cast<Column>( resLeft ) );
+	  columns.push_back( boost::static_pointer_cast<Column>( resLeft ) );
 
 	table->groupBy();
 	table->Partition = new TablePartition();
@@ -927,7 +927,7 @@ void HavingVerb::changeResult(	Table::Ptr table,
 
 	if( resLeft->getType() != VerbResult::ROW_VALIDATION )
 		throw verb_error(verb_error::VERB_BAD_SYNTAX, this->getVerbType());
-	RowValidation::Ptr rv = dynamic_pointer_cast<RowValidation>( resLeft );
+	RowValidation::Ptr rv = boost::dynamic_pointer_cast<RowValidation>( resLeft );
 
 	//recreate table
 	vector<Column::Ptr> newColumns = table->getColumnsTemplate();

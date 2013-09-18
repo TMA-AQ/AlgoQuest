@@ -1,7 +1,7 @@
 #include "LIKE_PatternMatching.h"
-#include <stdio.h>
-#include <malloc.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 //------------------------------------------------------------------------------
 TPatternDescription create_pattern_description( void ) {

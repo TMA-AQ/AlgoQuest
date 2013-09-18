@@ -1,7 +1,7 @@
 #ifndef __AQ_DATE_CONVERSION_H__
 #define __AQ_DATE_CONVERSION_H__
 
-#include <cstdint>
+#include <stdint.h>
 #include <string>
 #include <boost/date_time/posix_time/posix_time.hpp>
 

@@ -1,4 +1,7 @@
-#include "stdafx.h"
+#if defined(WIN32)
+# include "stdafx.h"
+# include <codecvt>
+#endif
 
 #include <aq/Exceptions.h>
 #include <aq/Logger.h>
@@ -14,9 +17,8 @@
 #include <list>
 #include <fstream>
 #include <string>
-#include <codecvt>
 #include <boost/thread.hpp>
-#include <boost/program_options.hpp>
+// #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
@@ -30,8 +32,20 @@
 // fixme
 #include "Link.h"
 
-namespace po = boost::program_options;
 namespace fs = boost::filesystem;
+
+char const * greet()
+{
+  return "hello world !";
+}
+
+#include <boost/python.hpp>
+
+BOOST_PYTHON_MODULE(aq_manager)
+{
+  using namespace boost::python;
+  def("greet", greet);
+}
 
 extern int yylineno;
 int yyerror( const char *pszMsg ) 
@@ -318,12 +332,15 @@ int load_db(const char * propertiesFile, unsigned int tableId)
   //
   // read ini file
   aq::TProjectSettings settings;
-  if (propertiesFile != "")
+  if (strcmp(propertiesFile, "") == 0)
   {
-    aq::Logger::getInstance().log(AQ_INFO, "read %s\n", propertiesFile);
-    settings.load(propertiesFile);
+    aq::Logger::getInstance().log(AQ_INFO, "no properties file");
+    return -1;
   }
 
+  aq::Logger::getInstance().log(AQ_INFO, "read %s\n", propertiesFile);
+  settings.load(propertiesFile);
+  
   //
   // Load DB Schema
   aq::Base baseDesc;

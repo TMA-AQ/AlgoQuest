@@ -46,7 +46,7 @@ int functional_tests(const std::string& dbPath, std::string& queryIdent, const s
     aq::generate_working_directories(dbPath, queryIdent, iniFilename);
 
     // for each query read in queries file
-    std::ofstream queryFile(dbPath + "calculus/" + queryIdent + "/New_Request.txt");
+    std::ofstream queryFile(std::string(dbPath + "calculus/" + queryIdent + "/New_Request.txt").c_str());
     queryFile << query ;
     queryFile.close();
 

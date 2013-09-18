@@ -626,7 +626,7 @@ int main(int argc, char**argv)
 			if (sqlQueriesFile != "")
 			{
 				std::string line;
-				std::ifstream fin(sqlQueriesFile, std::ifstream::in);
+				std::ifstream fin(sqlQueriesFile.c_str(), std::ifstream::in);
 				std::string currentQuery = "";
 				while (std::getline(fin, line))
 				{

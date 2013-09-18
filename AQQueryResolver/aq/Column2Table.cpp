@@ -2,7 +2,6 @@
 #include "Base.h"
 #include "parser/sql92_grm_tab.hpp"
 #include <stdio.h>
-#include <malloc.h>
 #include <string.h>
 #include <stdlib.h>		// One of this required by "toupper()"
 #include <ctype.h>		// One of this required by "toupper()"

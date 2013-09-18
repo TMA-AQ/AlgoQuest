@@ -13,11 +13,10 @@
 #define YYDEBUG 1
 
 #include "SQLParser.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <malloc.h>
-#include <string.h>
-#include <assert.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cassert>
 
 // Forward Definitions
 int yyerror( const char *pszMsg );

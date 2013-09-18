@@ -1,10 +1,13 @@
-#ifdef AQLIB_EXPORTS
-#define AQLIB_API __declspec(dllexport)
-#else
-#define AQLIB_API __declspec(dllimport)
-#endif
+#if defined(WIN32)
+# ifdef AQLIB_EXPORTS
+#  define AQLIB_API __declspec(dllexport)
+# else
+#  define AQLIB_API __declspec(dllimport)
+# endif
+  
+# define CALLBACK __stdcall
 
-#define CALLBACK __stdcall
+#endif
 
 #include <string>
 

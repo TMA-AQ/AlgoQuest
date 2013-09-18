@@ -22,15 +22,15 @@ void CaseVerb::changeResult(	Table::Ptr table,
 								VerbResult::Ptr resNext )
 {
 	assert( resLeft->getType() == VerbResult::COLUMN );
-	Column::Ptr testColumn = static_pointer_cast<Column>(resLeft);
+	Column::Ptr testColumn = boost::static_pointer_cast<Column>(resLeft);
 	assert( resRight->getType() == VerbResult::ARRAY );
-	VerbResultArray::Ptr testArray = static_pointer_cast<VerbResultArray>(resRight);
+	VerbResultArray::Ptr testArray = boost::static_pointer_cast<VerbResultArray>(resRight);
 	assert( testArray->Results.size() == 2 );
 	assert( testArray->Results[0]->getType() == VerbResult::ARRAY );
 	assert( testArray->Results[1]->getType() == VerbResult::ARRAY );
 
-	deque<VerbResult::Ptr>& conditions = static_pointer_cast<VerbResultArray>(testArray->Results[0])->Results;
-	deque<VerbResult::Ptr>& results = static_pointer_cast<VerbResultArray>(testArray->Results[1])->Results;
+	deque<VerbResult::Ptr>& conditions = boost::static_pointer_cast<VerbResultArray>(testArray->Results[0])->Results;
+	deque<VerbResult::Ptr>& results = boost::static_pointer_cast<VerbResultArray>(testArray->Results[1])->Results;
 	assert( conditions.size() == results.size() );
 	assert( conditions.size() > 0 );
 	//remember that the when list is retrieved from end to start
@@ -128,7 +128,7 @@ void WhenVerb::changeResult(	Table::Ptr table,
 	if( resNext )
 	{
 		assert( resNext->getType() == VerbResult::ARRAY );
-		resArray = static_pointer_cast<VerbResultArray>(resNext);
+		resArray = boost::static_pointer_cast<VerbResultArray>(resNext);
 		
 	}
 	else
@@ -139,9 +139,9 @@ void WhenVerb::changeResult(	Table::Ptr table,
 	}
 	assert( resArray->Results.size() == 2 );
 	assert( resArray->Results[0]->getType() == VerbResult::ARRAY );
-	static_pointer_cast<VerbResultArray>(resArray->Results[0])->Results.push_back( resLeft );
+	boost::static_pointer_cast<VerbResultArray>(resArray->Results[0])->Results.push_back( resLeft );
 	assert( resArray->Results[1]->getType() == VerbResult::ARRAY );
-	static_pointer_cast<VerbResultArray>(resArray->Results[1])->Results.push_back( resRight );
+	boost::static_pointer_cast<VerbResultArray>(resArray->Results[1])->Results.push_back( resRight );
 	this->Result = resArray;
 }
 

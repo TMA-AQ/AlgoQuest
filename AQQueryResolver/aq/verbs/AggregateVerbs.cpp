@@ -36,12 +36,12 @@ void AggregateVerb::changeResult(	Table::Ptr table,
 {
 	if( this->Result )
 		return;
-	Column::Ptr column = dynamic_pointer_cast<Column>(resLeft);
+	Column::Ptr column = boost::dynamic_pointer_cast<Column>(resLeft);
 	TablePartition::Ptr partition = NULL;
 	if( resRight )
 	{
 		assert( resRight->getType() == VerbResult::TABLE_PARTITION );
-		partition = static_pointer_cast<TablePartition>(resRight);
+		partition = boost::static_pointer_cast<TablePartition>(resRight);
 	}
 
 	bool oldGroupByApplied = table->GroupByApplied;
@@ -746,9 +746,9 @@ void FirstValueVerb::changeResult(	Table::Ptr table,
 									VerbResult::Ptr resLeft, 
 									VerbResult::Ptr resRight, VerbResult::Ptr resNext )
 {
-	Column::Ptr column = dynamic_pointer_cast<Column>(resLeft);
+  Column::Ptr column = boost::dynamic_pointer_cast<Column>(resLeft);
 	assert( column );
-	TablePartition::Ptr partition = dynamic_pointer_cast<TablePartition>(resRight);
+	TablePartition::Ptr partition = boost::dynamic_pointer_cast<TablePartition>(resRight);
 	assert( partition );
 	if( partition->FrameStartType == TablePartition::AQ_RELATIVE )
 	{
@@ -830,11 +830,11 @@ void LagVerb::changeResult(	Table::Ptr table,
 							VerbResult::Ptr resLeft, 
 							VerbResult::Ptr resRight, VerbResult::Ptr resNext )
 {
-	VerbResultArray::Ptr params = dynamic_pointer_cast<VerbResultArray>(resLeft);
+  VerbResultArray::Ptr params = boost::dynamic_pointer_cast<VerbResultArray>(resLeft);
 	assert(params && params->Results.size() > 0);
-	Column::Ptr column = dynamic_pointer_cast<Column>(params->Results[0]);
+	Column::Ptr column = boost::dynamic_pointer_cast<Column>(params->Results[0]);
 	assert( column );
-	TablePartition::Ptr partition = dynamic_pointer_cast<TablePartition>(resRight);
+	TablePartition::Ptr partition = boost::dynamic_pointer_cast<TablePartition>(resRight);
 	assert( partition );
 
 	ColumnItem::Ptr defaultValue = NULL;
@@ -875,7 +875,7 @@ void RowNumberVerb::changeResult(	Table::Ptr table,
 									VerbResult::Ptr resNext )
 {
 	assert( resRight->getType() == VerbResult::TABLE_PARTITION );
-	TablePartition::Ptr partition = static_pointer_cast<TablePartition>( resRight );
+	TablePartition::Ptr partition = boost::static_pointer_cast<TablePartition>( resRight );
 	assert( partition );
 
 	Column::Ptr count = table->Columns[table->Columns.size() - 1];

@@ -23,8 +23,8 @@ void BinaryVerb::computeResult( VerbResult::Ptr param1, VerbResult::Ptr param2 )
 	if( param1->getType() == VerbResult::SCALAR &&
 		param2->getType() == VerbResult::SCALAR )
 	{
-		Scalar::Ptr scalar1 = static_pointer_cast<Scalar>( param1 );
-		Scalar::Ptr scalar2 = static_pointer_cast<Scalar>( param2 );
+	  Scalar::Ptr scalar1 = boost::static_pointer_cast<Scalar>( param1 );
+	  Scalar::Ptr scalar2 = boost::static_pointer_cast<Scalar>( param2 );
 		
 		ColumnType type = this->outputType(scalar1->Type, scalar2->Type);
 		Scalar::Ptr result = new Scalar( type, scalar1->Size );
@@ -44,8 +44,8 @@ void BinaryVerb::computeResult( VerbResult::Ptr param1, VerbResult::Ptr param2 )
 	if( param1->getType() == VerbResult::COLUMN &&
 		param2->getType() == VerbResult::SCALAR )
 	{
-		Column::Ptr column = static_pointer_cast<Column>( param1 );
-		Scalar::Ptr scalar = static_pointer_cast<Scalar>( param2 );
+	  Column::Ptr column = boost::static_pointer_cast<Column>( param1 );
+	  Scalar::Ptr scalar = boost::static_pointer_cast<Scalar>( param2 );
 
 		ColumnType type = this->outputType(column->Type, scalar->Type);
 
@@ -72,8 +72,8 @@ void BinaryVerb::computeResult( VerbResult::Ptr param1, VerbResult::Ptr param2 )
 	if( param1->getType() == VerbResult::COLUMN &&
 		param2->getType() == VerbResult::COLUMN )
 	{
-		Column::Ptr column1 = static_pointer_cast<Column>( param1 );
-		Column::Ptr column2 = static_pointer_cast<Column>( param2 );
+	  Column::Ptr column1 = boost::static_pointer_cast<Column>( param1 );
+	  Column::Ptr column2 = boost::static_pointer_cast<Column>( param2 );
 
 		ColumnType type = this->outputType(column1->Type, column2->Type);
 
@@ -111,7 +111,7 @@ bool BinaryVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 		resRight->getType() == VerbResult::SCALAR) )
 		return false;
 	this->computeResult( resLeft, resRight );
-	Scalar::Ptr scalar = dynamic_pointer_cast<Scalar>( this->Result );
+	Scalar::Ptr scalar = boost::dynamic_pointer_cast<Scalar>( this->Result );
 	assert( scalar );
 	pNode->inf = 1;
 	this->Disabled = true;

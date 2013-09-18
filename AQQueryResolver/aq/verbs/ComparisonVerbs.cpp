@@ -101,14 +101,14 @@ void ComparisonVerb::changeResult(	Table::Ptr table,
 	{
 		if( resRight->getType() != VerbResult::COLUMN )
 			throw verb_error(generic_error::VERB_BAD_SYNTAX, this->getVerbType());
-		column = dynamic_pointer_cast<Column>( resRight );
+		column = boost::dynamic_pointer_cast<Column>( resRight );
 		other = resLeft;
 	}
 	else
 	{
 		if( resLeft->getType() != VerbResult::COLUMN )
 			throw verb_error(generic_error::VERB_BAD_SYNTAX, this->getVerbType());
-		column = dynamic_pointer_cast<Column>( resLeft );
+		column = boost::dynamic_pointer_cast<Column>( resLeft );
 		other = resRight;
 	}
 	RowValidation::Ptr rowValidation = new RowValidation();
@@ -116,7 +116,7 @@ void ComparisonVerb::changeResult(	Table::Ptr table,
 	validRows.resize( column->Items.size(), false );
 	if( other->getType() == VerbResult::SCALAR )
 	{
-		Scalar::Ptr scalar = dynamic_pointer_cast<Scalar>( other );
+	  Scalar::Ptr scalar = boost::dynamic_pointer_cast<Scalar>( other );
 		for( size_t idx = 0; idx < column->Items.size(); ++idx )
 			validRows[idx] = this->compare(	column->Items[idx].get(), 
 											&scalar->Item, 
@@ -124,7 +124,7 @@ void ComparisonVerb::changeResult(	Table::Ptr table,
 	}
 	else
 	{
-		Column::Ptr column2 = dynamic_pointer_cast<Column>( other );
+	  Column::Ptr column2 = boost::dynamic_pointer_cast<Column>( other );
 		if( column->Items.size() != column2->Items.size() )
 			throw verb_error(generic_error::VERB_BAD_SYNTAX, this->getVerbType());
 		
@@ -364,7 +364,7 @@ void IsVerb::changeResult(	Table::Ptr table,
 	Column::Ptr column;
 	if( resLeft->getType() != VerbResult::COLUMN )
 		throw verb_error(generic_error::VERB_BAD_SYNTAX, this->getVerbType());
-	column = dynamic_pointer_cast<Column>( resLeft );
+	column = boost::dynamic_pointer_cast<Column>( resLeft );
 	RowValidation::Ptr rowValidation = new RowValidation();
 	vector<bool>& validRows = rowValidation->ValidRows;
 	validRows.resize( column->Items.size(), false );

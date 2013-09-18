@@ -20,7 +20,7 @@ ScalarVerb::ScalarVerb()
 void ScalarVerb::computeResult( VerbResult::Ptr param )
 {
 	assert( param );
-	Scalar::Ptr scalar = dynamic_pointer_cast<Scalar>( param );
+	Scalar::Ptr scalar = boost::dynamic_pointer_cast<Scalar>( param );
 
 	if( scalar )
 	{
@@ -32,15 +32,15 @@ void ScalarVerb::computeResult( VerbResult::Ptr param )
 	}
 
 	//debug13 - there should be an easier way to do this
-	VerbResultArray::Ptr resArray = dynamic_pointer_cast<VerbResultArray>(param);
+	VerbResultArray::Ptr resArray = boost::dynamic_pointer_cast<VerbResultArray>(param);
 	Column::Ptr column = NULL;
 	if( resArray )
 	{
 		assert(resArray->Results.size() > 0);
-		column = dynamic_pointer_cast<Column>(resArray->Results[0]);
+		column = boost::dynamic_pointer_cast<Column>(resArray->Results[0]);
 	}
 	else
-		column = dynamic_pointer_cast<Column>( param );
+	  column = boost::dynamic_pointer_cast<Column>( param );
 	assert( column );
 	
 	ColumnType type = this->outputType(column->Type);
@@ -67,19 +67,19 @@ bool ScalarVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 								VerbResult::Ptr resNext )
 {
 	//debug13 - there should be an easier way to do this
-	VerbResultArray::Ptr resArray = dynamic_pointer_cast<VerbResultArray>(resLeft);
+  VerbResultArray::Ptr resArray = boost::dynamic_pointer_cast<VerbResultArray>(resLeft);
 	Scalar::Ptr scalar = NULL;
 	if( resArray )
 	{
 		assert(resArray->Results.size() > 0);
-		scalar = dynamic_pointer_cast<Scalar>(resArray->Results[0]);
+		scalar = boost::dynamic_pointer_cast<Scalar>(resArray->Results[0]);
 	}
 	else
-		scalar = dynamic_pointer_cast<Scalar>( resLeft );
+	  scalar = boost::dynamic_pointer_cast<Scalar>( resLeft );
 	if( !scalar )
 		return false;
 	this->computeResult( scalar );
-	scalar = dynamic_pointer_cast<Scalar>( this->Result );
+	scalar = boost::dynamic_pointer_cast<Scalar>( this->Result );
 	assert( scalar );
 	pNode->inf = 1;
 	this->Disabled = true;
@@ -375,7 +375,7 @@ bool ToCharVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 	{
 		if( resRight->getType() != VerbResult::SCALAR )
 			throw verb_error(generic_error::INVALID_QUERY, this->getVerbType());
-		Scalar::Ptr scalar = dynamic_pointer_cast<Scalar>( resRight );
+		Scalar::Ptr scalar = boost::dynamic_pointer_cast<Scalar>( resRight );
 		if( scalar->Type != COL_TYPE_VARCHAR )
 			throw verb_error(generic_error::INVALID_QUERY, this->getVerbType());
 		this->Format = scalar->Item.strval;

@@ -1,7 +1,7 @@
 #include "FileMapper.h"
 #include "Logger.h"
 #include <iostream>
-#include <cstdint>
+#include <stdint.h>
 
 using namespace aq;
 

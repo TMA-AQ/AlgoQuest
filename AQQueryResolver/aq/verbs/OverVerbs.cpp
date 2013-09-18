@@ -43,7 +43,7 @@ void PartitionVerb::changeResult(	Table::Ptr table,
 									VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext )
 {
 	assert( resLeft );
-	VerbResultArray::Ptr resArray = dynamic_pointer_cast<VerbResultArray>( resLeft );
+	VerbResultArray::Ptr resArray = boost::dynamic_pointer_cast<VerbResultArray>( resLeft );
 	if( !resArray )
 	{
 		resArray = new VerbResultArray();
@@ -53,7 +53,7 @@ void PartitionVerb::changeResult(	Table::Ptr table,
 	vector<Column::Ptr> columns;
 	for( size_t idx = 0; idx < resArray->Results.size(); ++idx )
 	{
-		Column::Ptr column = dynamic_pointer_cast<Column>( resArray->Results[idx] );
+	  Column::Ptr column = boost::dynamic_pointer_cast<Column>( resArray->Results[idx] );
 		assert( column );
 		columns.push_back( column );
 	}
@@ -64,7 +64,7 @@ void PartitionVerb::changeResult(	Table::Ptr table,
 	if( resRight )
 	{
 		assert( resRight->getType() == VerbResult::TABLE_PARTITION );
-		partition = static_pointer_cast<TablePartition>( resRight );
+		partition = boost::static_pointer_cast<TablePartition>( resRight );
 	}
 	else
 		partition = new TablePartition();

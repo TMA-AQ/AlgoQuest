@@ -113,7 +113,7 @@ void CastVerb::solve( VerbResult::Ptr resLeft )
 	{
 	case VerbResult::COLUMN:
 		{
-			Column::Ptr column = static_pointer_cast<Column>( resLeft );
+		  Column::Ptr column = boost::static_pointer_cast<Column>( resLeft );
 			Column::Ptr newColumn = new Column( this->ConvertType );
 			for( size_t idx = 0; idx < column->Items.size(); ++idx )
 			{
@@ -127,7 +127,7 @@ void CastVerb::solve( VerbResult::Ptr resLeft )
 		break;
 	case VerbResult::SCALAR:
 		{
-			Scalar::Ptr scalar = static_pointer_cast<Scalar>( resLeft );
+		  Scalar::Ptr scalar = boost::static_pointer_cast<Scalar>( resLeft );
 			Scalar::Ptr newScalar = new Scalar( this->ConvertType );
 			Convert( newScalar->Item, newScalar->Type, scalar->Item, scalar->Type );
 			this->Result = newScalar;
@@ -202,7 +202,7 @@ void NvlVerb::changeResult( Table::Ptr table,
 		break;
 	case VerbResult::COLUMN:
 		{
-			Column::Ptr column = static_pointer_cast<Column>( resLeft );
+		  Column::Ptr column = boost::static_pointer_cast<Column>( resLeft );
 			Column::Ptr newColumn = new Column( "",
 				static_cast<unsigned int>(column->ID), static_cast<unsigned int>(column->Size), column->Type );
 
@@ -210,7 +210,7 @@ void NvlVerb::changeResult( Table::Ptr table,
 			{
 			case VerbResult::SCALAR:
 				{
-					Scalar::Ptr scalar = static_pointer_cast<Scalar>( resRight );
+				  Scalar::Ptr scalar = boost::static_pointer_cast<Scalar>( resRight );
 					for( size_t idx = 0; idx < column->Items.size(); ++idx )
 						if( !column->Items[idx] )
 							newColumn->Items.push_back( new ColumnItem( scalar->Item ) );
@@ -220,7 +220,7 @@ void NvlVerb::changeResult( Table::Ptr table,
 				break;
 			case VerbResult::COLUMN:
 				{
-					Column::Ptr column2 = static_pointer_cast<Column>( resRight );
+				  Column::Ptr column2 = boost::static_pointer_cast<Column>( resRight );
 					for( size_t idx = 0; idx < column->Items.size(); ++idx )
 						if( !column->Items[idx] )
 							newColumn->Items.push_back( column2->Items[idx] );
@@ -271,7 +271,7 @@ void DecodeVerb::changeResult( Table::Ptr table,
 	{
 	case VerbResult::SCALAR:
 		{
-			Scalar::Ptr scalar = static_pointer_cast<Scalar>( resLeft );
+		  Scalar::Ptr scalar = boost::static_pointer_cast<Scalar>( resLeft );
 			sourceCol = new Column();
 			sourceCol->Type = scalar->Type;
 			sourceCol->Items.push_back( new ColumnItem( scalar->Item ) );
@@ -280,14 +280,14 @@ void DecodeVerb::changeResult( Table::Ptr table,
 		}
 		break;
 	case VerbResult::COLUMN:
-		sourceCol = static_pointer_cast<Column>( resLeft );
+	  sourceCol = boost::static_pointer_cast<Column>( resLeft );
 		break;
 	default:
 		assert( 0 );
 	}
 
 	assert( resRight->getType() == VerbResult::ARRAY );
-	VerbResultArray::Ptr searchList = static_pointer_cast<VerbResultArray>( resRight );
+	VerbResultArray::Ptr searchList = boost::static_pointer_cast<VerbResultArray>( resRight );
 	if( searchList->Results.size() == 0 )
 		throw verb_error( generic_error::VERB_BAD_SYNTAX, this->getVerbType() );
 	
@@ -298,7 +298,7 @@ void DecodeVerb::changeResult( Table::Ptr table,
 		nrResults > 2 &&
 		searchList->Results[nrResults-1]->getType() == VerbResult::SCALAR )
 	{
-		defaultResult = static_pointer_cast<Scalar>( searchList->Results[nrResults-1] );
+	  defaultResult = boost::static_pointer_cast<Scalar>( searchList->Results[nrResults-1] );
 		searchList->Results.pop_back();
 	}
 
@@ -308,16 +308,16 @@ void DecodeVerb::changeResult( Table::Ptr table,
 	{
 		assert( searchList->Results[0]->getType() == VerbResult::SCALAR );
 		assert( searchList->Results[1]->getType() == VerbResult::SCALAR );
-		search.push_back( static_pointer_cast<Scalar>( searchList->Results[0] ) );
-		result.push_back( static_pointer_cast<Scalar>( searchList->Results[1] ) );
+		search.push_back( boost::static_pointer_cast<Scalar>( searchList->Results[0] ) );
+		result.push_back( boost::static_pointer_cast<Scalar>( searchList->Results[1] ) );
 		for( size_t idx = 2; idx < searchList->Results.size(); ++idx )
 		{
 			assert( searchList->Results[idx]->getType() == VerbResult::ARRAY );
-			VerbResultArray::Ptr searchResultPair = static_pointer_cast<VerbResultArray>( searchList->Results[idx] );
+			VerbResultArray::Ptr searchResultPair = boost::static_pointer_cast<VerbResultArray>( searchList->Results[idx] );
 			assert( searchResultPair->Results[0]->getType() == VerbResult::SCALAR );
 			assert( searchResultPair->Results[1]->getType() == VerbResult::SCALAR );
-			search.push_back( static_pointer_cast<Scalar>( searchResultPair->Results[0] ) );
-			result.push_back( static_pointer_cast<Scalar>( searchResultPair->Results[1] ) );
+			search.push_back( boost::static_pointer_cast<Scalar>( searchResultPair->Results[0] ) );
+			result.push_back( boost::static_pointer_cast<Scalar>( searchResultPair->Results[1] ) );
 		}
 	}
 	

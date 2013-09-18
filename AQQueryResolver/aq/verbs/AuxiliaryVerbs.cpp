@@ -186,14 +186,14 @@ bool CommaVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 	VerbResultArray::Ptr resArray = NULL;
 	if( resLeft && resLeft->getType() == VerbResult::ARRAY )
 	{
-		resArray = static_pointer_cast<VerbResultArray>( resLeft );
+	  resArray = boost::static_pointer_cast<VerbResultArray>( resLeft );
 		resArray->Results.push_back( resRight );
 	}
 	else
   {
 		if( resRight && resRight->getType() == VerbResult::ARRAY )
 		{
-			resArray = static_pointer_cast<VerbResultArray>( resRight );
+		  resArray = boost::static_pointer_cast<VerbResultArray>( resRight );
 			resArray->Results.push_front( resLeft );
 		}
 		else
@@ -213,7 +213,7 @@ void CommaVerb::changeResult(	Table::Ptr table,
 {
 	if( resLeft && resLeft->getType() == VerbResult::ARRAY )
 	{
-		VerbResultArray::Ptr resArray = static_pointer_cast<VerbResultArray>( resLeft );
+	  VerbResultArray::Ptr resArray = boost::static_pointer_cast<VerbResultArray>( resLeft );
 		resArray->Results.push_back( resRight );
     this->Result = resArray;
 	}
@@ -221,7 +221,7 @@ void CommaVerb::changeResult(	Table::Ptr table,
   {
 		if( resRight && resRight->getType() == VerbResult::ARRAY )
 		{
-			VerbResultArray::Ptr resArray = static_pointer_cast<VerbResultArray>( resRight );
+		  VerbResultArray::Ptr resArray = boost::static_pointer_cast<VerbResultArray>( resRight );
 			resArray->Results.push_front( resLeft );
       this->Result = resArray;
 		}
@@ -282,11 +282,11 @@ void AndVerb::changeResult(	Table::Ptr table,
 	//combine row validations
 	if( resLeft->getType() != VerbResult::ROW_VALIDATION )
 		throw verb_error(verb_error::VERB_BAD_SYNTAX, this->getVerbType());
-	RowValidation::Ptr rv1 = dynamic_pointer_cast<RowValidation>( resLeft );
+	RowValidation::Ptr rv1 = boost::dynamic_pointer_cast<RowValidation>( resLeft );
 
 	if( resRight->getType() != VerbResult::ROW_VALIDATION )
 		throw verb_error(verb_error::VERB_BAD_SYNTAX, this->getVerbType());
-	RowValidation::Ptr rv2 = dynamic_pointer_cast<RowValidation>( resRight );
+	RowValidation::Ptr rv2 = boost::dynamic_pointer_cast<RowValidation>( resRight );
 
 	if( rv1->ValidRows.size() != rv2->ValidRows.size() )
 		throw verb_error(verb_error::VERB_BAD_SYNTAX, this->getVerbType());

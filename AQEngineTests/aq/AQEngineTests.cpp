@@ -4,7 +4,7 @@
 #include "Util.h"
 #include <aq/Logger.h>
 #include <string>
-#include <cstdint>
+#include <stdint.h>
 #include <fstream>
 #include <vector>
 #include <iostream>

@@ -2,7 +2,6 @@
 #define __AQ_SETTINGS_H__
 
 #include <string>
-#include <cstdint>
 #include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
 

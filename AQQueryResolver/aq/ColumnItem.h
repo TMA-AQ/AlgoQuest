@@ -4,7 +4,6 @@
 #include <aq/Object.h>
 #include <aq/DBTypes.h>
 #include <string>
-#include <cstdint>
 
 namespace aq
 {

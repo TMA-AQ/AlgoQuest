@@ -66,7 +66,7 @@ int generate_database(const char * path, const char * name)
   boost::filesystem::create_directory(p);
   
   // generate empty base struct
-  std::ofstream baseStruct(dbPath.string() + "base_struct/base.");
+  std::ofstream baseStruct(std::string(dbPath.string() + "base_struct/base.").c_str());
   baseStruct << "EMPTY_DB" << std::endl;
   baseStruct << "1" << std::endl;
   baseStruct << std::endl;
@@ -86,15 +86,10 @@ int generate_working_directories(const std::string& dbPath, std::string& queryId
   p = boost::filesystem::path(dbPath + "data_orga/tmp/" + queryIdent);
   std::string tmp = dbPath + "data_orga/tmp/";
   std::string tmp2 = queryIdent;
-  for (int i =  0; boost::filesystem::exists(p); ++i)
+  if (boost::filesystem::exists(p))
   {
-    queryIdent = tmp2 + std::to_string(i);
-    p = tmp + queryIdent;
-    if (i == 10)
-    {
-      std::cerr << p << " already exist : STOP" << std::endl;
-      exit(-1);
-    }
+    std::cerr << p << " already exist : STOP" << std::endl;
+    exit(-1);
   }
   boost::filesystem::create_directory(p);
   p = boost::filesystem::path(dbPath + "data_orga/tmp/" + queryIdent + "/dpy");
