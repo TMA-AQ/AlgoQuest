@@ -249,6 +249,7 @@ void AQMatrix::loadData(const char * filePath)
     FILE * fd = fopen(answerData, "rb");
     if (fd == NULL)
     {
+      free(answerData);
       throw aq::generic_error(aq::generic_error::AQ_ENGINE, "cannot find aq matrix data file %s", answerData);
     }
     uint64_t value;
@@ -265,8 +266,10 @@ void AQMatrix::loadData(const char * filePath)
     fclose(fd);
   }
   free(answerData);
-  assert(this->totalCount == this->count.size());
-	assert(this->nbRows == this->count.size());
+  if ((this->totalCount != this->count.size()) || (this->nbRows != this->count.size()))
+  {
+    throw aq::generic_error(aq::generic_error::AQ_ENGINE, "bad matrix data file");
+  }
 }
 
 void AQMatrix::prepareData(const char * filePath)

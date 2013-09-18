@@ -19,5 +19,5 @@ AQLIB_API int solve_query(const char * query, const char * iniFilename, const ch
 
 AQLIB_API int load_db(const char * propertiesFile, unsigned int tableId);
 
-AQLIB_API int test_aq_lib(const char * query);
+AQLIB_API const char * aql2sql(const char * aql_query);
 }

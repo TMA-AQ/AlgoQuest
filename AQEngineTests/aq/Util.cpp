@@ -78,21 +78,19 @@ int generate_database(const char * path, const char * name)
 }
 
 // ------------------------------------------------------------------------------
-int generate_working_directories(const std::string& dbPath, std::string& queryIdent, std::string& iniFilename)
+int generate_working_directories(const std::string& dbPath, const std::string& workingPath, std::string& queryIdent, std::string& iniFilename)
 {
   boost::filesystem::path p;
   p = boost::filesystem::path(dbPath + "calculus/" + queryIdent);
   boost::filesystem::create_directory(p);
-  p = boost::filesystem::path(dbPath + "data_orga/tmp/" + queryIdent);
-  std::string tmp = dbPath + "data_orga/tmp/";
-  std::string tmp2 = queryIdent;
+  p = boost::filesystem::path(workingPath + "data_orga/tmp/" + queryIdent);
   if (boost::filesystem::exists(p))
   {
     std::cerr << p << " already exist : STOP" << std::endl;
     exit(-1);
   }
   boost::filesystem::create_directory(p);
-  p = boost::filesystem::path(dbPath + "data_orga/tmp/" + queryIdent + "/dpy");
+  p = boost::filesystem::path(workingPath + "data_orga/tmp/" + queryIdent + "/dpy");
   boost::filesystem::create_directory(p);
   p = boost::filesystem::path(dbPath + "calculus/" + queryIdent);
   boost::filesystem::create_directory(p);
@@ -102,7 +100,7 @@ int generate_working_directories(const std::string& dbPath, std::string& queryId
   ini << "export.filename.final=" << dbPath << "base_struct/base." << std::endl;
   ini << "step1.field.separator=;" << std::endl;
   ini << "k_rep_racine=" << dbPath << std::endl;
-  ini << "k_rep_racine_tmp=" << dbPath << std::endl;
+  ini << "k_rep_racine_tmp=" << workingPath << std::endl;
   ini.close();
 
   return 0;
@@ -121,7 +119,7 @@ int run_aq_engine(const std::string& aq_engine, const std::string& iniFilename, 
 }
 
 // ------------------------------------------------------------------------------
-int check_answer_validity(const char * dbPath, const char * queryIdent, aq::AQMatrix& matrix, const uint64_t nbRows, const uint64_t nbGroups)
+int check_answer_validity(const char * dbPath, const char * queryIdent, aq::AQMatrix& matrix, const uint64_t count, const uint64_t nbRows, const uint64_t nbGroups)
 {
   int rc = 0;
   try
@@ -132,6 +130,14 @@ int check_answer_validity(const char * dbPath, const char * queryIdent, aq::AQMa
     iniFilename += "/calculus/" + std::string(queryIdent) + "/aq_engine.ini";
     std::vector<long long> tablesIds;
     matrix.load(answerFile.c_str(), tablesIds);
+    if (count != 0)
+    {
+      if (matrix.getTotalCount() != count)
+      {
+        std::cerr << "ERROR: expected " << count << " count, get " << matrix.getTotalCount() << std::endl;
+        rc = -1;
+      }
+    }
     if (nbRows != 0)
     {
       if (matrix.getNbRows() != nbRows)
@@ -218,12 +224,14 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
   std::vector<long long> tableIDs;
   matrix.load(answerPath.c_str(), tableIDs);
 
-  std::cout << "AQMatrix: " << std::endl;
-  std::cout << "\t" << tableIDs.size() << " tables: [ ";
-  std::for_each(tableIDs.begin(), tableIDs.end(), [&] (long long id) { std::cout << id << " "; });
-  std::cout << "]" << std::endl;
-  std::cout << "\t" << matrix.getNbRows() << " results" << std::endl;
-  std::cout << "\t" << matrix.getGroupBy().size() << " groups" << std::endl;
+  aq::Logger::getInstance().log(AQ_LOG_INFO, "AQMatrix: \n");
+  std::stringstream ss;
+  ss << tableIDs.size() << " tables: [ ";
+  std::for_each(tableIDs.begin(), tableIDs.end(), [&] (long long id) { ss << id << " "; });
+  ss << "]";
+  aq::Logger::getInstance().log(AQ_LOG_INFO, "\t%s", ss.str().c_str());
+  aq::Logger::getInstance().log(AQ_LOG_INFO, "\t%u results", matrix.getNbRows());
+  aq::Logger::getInstance().log(AQ_LOG_INFO, "\t%u groups", matrix.getGroupBy().size());
   
   const aq::AQMatrix::matrix_t& m = matrix.getMatrix();
 
@@ -248,8 +256,6 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
     std::map<size_t, boost::shared_ptr<aq::ColumnMapper_Intf> > tableColumnMappers;
     const aq::AQMatrix::matrix_t::value_type t = *it;
     aq::Table::Ptr table = baseDesc.getTable(t.table_id);
-    if (aq::verbose)
-      std::cout << table->getName() << ".index ; ";
     for (auto itCol = table->Columns.begin(); itCol != table->Columns.end(); ++itCol)
     {
       boost::shared_ptr<aq::ColumnMapper_Intf> cm;
@@ -308,15 +314,25 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
     auto itOrdered = isOrdered.begin();
     for (auto& t : m)
     {
-      if (aq::verbose)
-        std::cout << t.table_id << "[" << t.indexes[i] << "] => ";
+      //if (aq::verbose)
+      //  std::cout << t.table_id << "[" << t.indexes[i] << "] => ";
       for (auto& cm : columnMappers[t.table_id])
       {
         aq::ColumnItem::Ptr item(new aq::ColumnItem);
         cm.second->loadValue(t.indexes[i] - 1, *item);
-        item->toString(buf, cm.second->getType());
+        
         if (aq::verbose && *itSelected)
-          std::cout << buf << " ; ";
+        {
+          if (t.indexes[i] > 0)
+          {
+            item->toString(buf, cm.second->getType());
+            std::cout << buf << " ; ";
+          }
+          else
+          {
+            std::cout << "NULL ; ";
+          }
+        }
 
         assert(itGrouped != isGrouped.end());
         if (itGrouped->second)
@@ -354,8 +370,6 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
         ++itOrdered;
       }
 
-      if (aq::verbose)
-        std::cout << " | ";
     }
     
     if (aq::verbose)

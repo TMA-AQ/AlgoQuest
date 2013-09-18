@@ -14,7 +14,7 @@
 %}
 
 %{
-/* %option yylineno debug */
+// %option yylineno debug 
 // %option reentrant
 %}
 

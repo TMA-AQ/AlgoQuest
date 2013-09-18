@@ -33,7 +33,7 @@ std::string QueryReader::next()
     pos = line.find(";");
     if (pos != std::string::npos)
     {
-      query += " " + line.substr(0, pos) + "\n";
+      query += " " + line.substr(0, pos + 1) + "\n";
       fullQuery = true;
     }
     else
