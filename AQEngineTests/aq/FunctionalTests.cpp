@@ -23,6 +23,12 @@ int functional_tests(struct opt& o)
 
   std::fstream log(o.logFilename.c_str(), std::ifstream::out);
 
+  boost::filesystem::path p(o.queriesFilename);
+  if (!boost::filesystem::exists(p)) {
+    std::cerr << "cannot find file " << p << std::endl;
+    return -1;
+  }
+
   // generate working directories and aqengine ini
   std::fstream fqueries(o.queriesFilename.c_str(), std::ifstream::in);
   aq::QueryReader reader(fqueries);
@@ -45,14 +51,6 @@ int functional_tests(struct opt& o)
       }
     }
 
-    std::string iniFilename;
-    aq::generate_working_directories(dbPath, queryIdent, iniFilename);
-
-    // for each query read in queries file
-    std::ofstream queryFile(std::string(dbPath + "calculus/" + queryIdent + "/New_Request.txt").c_str());
-    queryFile << query ;
-    queryFile.close();
-    
     // parse query
     aq::core::SelectStatement ss;
     if (o.aql2sql)
@@ -81,7 +79,7 @@ int functional_tests(struct opt& o)
       aq::generate_working_directories(o.dbPath, o.workingPath, o.queryIdent, iniFilename);
 
       // for each query read in queries file
-      std::ofstream queryFile(o.dbPath + "calculus/" + o.queryIdent + "/New_Request.txt");
+      std::ofstream queryFile(std::string(o.dbPath + "calculus/" + o.queryIdent + "/New_Request.txt").c_str());
       queryFile << query ;
       queryFile.close();
 

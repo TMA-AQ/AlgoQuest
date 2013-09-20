@@ -170,12 +170,12 @@ void TProjectSettings::load(const std::string& iniFile)
     if (!boost::filesystem::exists(bdf))
     {
       strcpy( this->szDBDescFN, this->szRootPath.c_str() );
-      strcat( this->szDBDescFN, "base_struct/base." );
+      strcat( this->szDBDescFN, "base_struct/base" );
     }
 
     // FIXME
     strcpy( this->szDBDescFN, this->szRootPath.c_str() );
-    strcat( this->szDBDescFN, "base_struct/base." );
+    strcat( this->szDBDescFN, "base_struct/base" );
 
 		//
 		// thesaurus path

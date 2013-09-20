@@ -8,6 +8,7 @@
 #include <map>
 #include <vector>
 #include <boost/shared_ptr.hpp>
+#include <boost/filesystem.hpp>
 
 namespace aq
 {
@@ -77,6 +78,13 @@ int ColumnMapper<T,M>::loadValue(size_t index, ColumnItem& value)
 
 			aq::Logger::getInstance().log(AQ_DEBUG, "open %s\n", prmFilename.c_str());
 			aq::Logger::getInstance().log(AQ_DEBUG, "open %s\n", thesaurusFilename.c_str());
+
+			boost::filesystem::path p1(prmFilename);
+			boost::filesystem::path p2(thesaurusFilename);
+			if (!boost::filesystem::exists(p1) || !boost::filesystem::exists(p2))
+			{
+			  return -1; // FIXME
+			}
 
 			this->prmMapper.reset(new M(prmFilename.c_str()));
 			this->thesaurusMapper.reset(new M(thesaurusFilename.c_str()));

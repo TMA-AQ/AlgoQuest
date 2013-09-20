@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(AQTools)
+project(AQEngineTests)
 
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib/${CMAKE_BUILD_TYPE})
 set(EXECUTABLE_OUTPUT_PATH bin/${CMAKE_BUILD_TYPE})

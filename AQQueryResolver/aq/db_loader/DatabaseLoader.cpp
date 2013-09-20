@@ -145,7 +145,7 @@ int cut_in_col (const char * iniFilename, size_t num_table, size_t num_column)
 
 	fwrite("export.filename.final=", 1, 22, fini);
 	fwrite(k_rep_racine, 1, strlen(k_rep_racine), fini);
-	fwrite("base_struct/base.", 1, 17, fini);
+	fwrite("base_struct/base", 1, 17, fini);
 	fwrite("\n", 1, 1, fini);
 	fwrite("step1.field.separator=", 1, 22, fini);
 	fwrite(&end_of_field, 1, 1, fini);
@@ -328,7 +328,7 @@ int cut_in_col (const char * iniFilename, size_t num_table, size_t num_column)
 				// loader part
 				// ------------------
 				// construct loader parameters
-				sprintf( a_message, "\"%s %s %d %d %d\"\n", k_batch_loader, ini_filename, num_table , num_column , n_paquet );
+				sprintf( a_message, "%s %s %d %d %d", k_batch_loader, ini_filename, num_table , num_column , n_paquet );
 				// loader 
 				system( a_message );
 
@@ -435,7 +435,7 @@ int cut_in_col (const char * iniFilename, size_t num_table, size_t num_column)
 		// loader part
 		// ------------------
 		// construct loader parameters
-		sprintf( a_message, "\"%s %s %d %d %d\"\n", k_batch_loader, ini_filename, num_table , num_column , n_paquet );
+		sprintf( a_message, "%s %s %d %d %d", k_batch_loader, ini_filename, num_table , num_column , n_paquet );
 		// loader 
 
 		rc = system( a_message );

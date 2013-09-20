@@ -38,16 +38,16 @@ int main(int argc, char ** argv)
     bool generate = false;
 
     po::options_description desc("Allowed options");
-		desc.add_options()
-			("help,h", "produce help message")
-			("log-output", po::value<std::string>(&logMode)->default_value("STDOUT"), "[STDOUT|LOCALFILE|SYSLOG]")
-			("log-level", po::value<unsigned int>(&logLevel)->default_value(AQ_LOG_NOTICE), "CRITICAL(2), ERROR(3), WARNING(4), NOTICE(5), INFO(6), DEBUG(7)")
-      ("root-path,r", po::value<std::string>(&rootPath)->default_value("E:/AQ_DATABASES/DB/"), "")
+    desc.add_options()
+      ("help,h", "produce help message")
+      ("log-output", po::value<std::string>(&logMode)->default_value("STDOUT"), "[STDOUT|LOCALFILE|SYSLOG]")
+      ("log-level", po::value<unsigned int>(&logLevel)->default_value(AQ_LOG_NOTICE), "CRITICAL(2), ERROR(3), WARNING(4), NOTICE(5), INFO(6), DEBUG(7)")
+      ("root-path,r", po::value<std::string>(&rootPath), "root databases path (mandatory)")
       ("db-name,n", po::value<std::string>(&dbName)->default_value("MSALGOQUEST"), "")
       ("working-path", po::value<std::string>(&o.workingPath)->default_value(""), "")
-      ("limit,l", po::value<size_t>(&o.limit)->default_value(0), "0 -> no limit")
+      ("limit,l", po::value<uint64_t>(&o.limit)->default_value(0), "0 -> no limit")
       ("query-ident,i", po::value<std::string>(&o.queryIdent)->default_value("test_aq_engine"), "")
-      ("aq-engine,e", po::value<std::string>(&o.aqEngine)->default_value("E:/AQ_Bin/AQ_Engine.exe"), "")
+      ("aq-engine,e", po::value<std::string>(&o.aqEngine), "aq engine path (mandatory)")
       ("queries,q", po::value<std::string>(&o.queriesFilename)->default_value("query.aql"), "")
       ("query", po::value<std::string>(&query)->default_value(""), "")
       ("filter,f", po::value<std::string>(&o.filter)->default_value(""), "")
@@ -60,16 +60,16 @@ int main(int argc, char ** argv)
       ("aql-2-sql", po::bool_switch(&o.aql2sql), "")
       ("stop-on-error,s", po::bool_switch(&o.stopOnError), "")
       ("verbose,v", po::bool_switch(&aq::verbose), "set verbosity")
-			;
-
-		po::positional_options_description p;
-		p.add("backward-compatibility", -1);
-
-		po::variables_map vm;
-		po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
-		po::notify(vm);    
-
-    if (vm.count("help"))
+      ;
+    
+    po::positional_options_description p;
+    p.add("backward-compatibility", -1);
+    
+    po::variables_map vm;
+    po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
+    po::notify(vm);    
+    
+    if (vm.count("help") || (rootPath == "")  || (o.aqEngine == ""))
     {
       std::cout << desc << "\n";
       return 0;
