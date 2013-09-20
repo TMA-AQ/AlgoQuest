@@ -176,7 +176,10 @@ void AQMatrix::write(const char * filePath)
 void AQMatrix::load(const char * filePath, std::vector<long long>& tableIDs)
 {
   this->loadHeader(filePath, tableIDs);
-  this->loadData(filePath);
+  if (this->nbRows > 0)
+  {
+    this->loadData(filePath);
+  }
 }
 
 void AQMatrix::loadHeader(const char * filePath, std::vector<long long>& tableIDs)
