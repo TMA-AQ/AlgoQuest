@@ -246,6 +246,7 @@ void AQMatrix::loadData(const char * filePath)
   this->answerFormat += "/AnswerData%.5u.a";
   uint64_t nbPacket = (this->nbRows / aq::packet_size) + 1; 
   char * answerData = (char*)::malloc(strlen(filePath) + 18 + 1);
+  size_t count_tmp = 0;
   for (uint64_t packet = 0; packet < nbPacket; ++packet)
   {
     sprintf(answerData, this->answerFormat.c_str(), packet);
@@ -265,11 +266,12 @@ void AQMatrix::loadData(const char * filePath)
       }
       fread(&value, sizeof(uint64_t), 1, fd);
       this->count.push_back(value);
+      count_tmp += value;
     }
     fclose(fd);
   }
   free(answerData);
-  if ((this->totalCount != this->count.size()) || (this->nbRows != this->count.size()))
+  if ((this->totalCount != count_tmp) || (this->nbRows != this->count.size()))
   {
     throw aq::generic_error(aq::generic_error::AQ_ENGINE, "bad matrix data file");
   }

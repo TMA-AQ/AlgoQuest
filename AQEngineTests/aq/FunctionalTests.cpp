@@ -163,7 +163,7 @@ int functional_tests(struct opt& o)
   }
 
   //std::cerr << nb_queries_tested << " queries tested: [ success : " << nb_success << " ; failed : " << nb_errors << " ]" << std::endl;
-  aq::Logger::getInstance().log(AQ_LOG_INFO, "%u queries tested: [ success : %u ; failed : %u ; \n", nb_success, nb_errors);
+  aq::Logger::getInstance().log(AQ_LOG_INFO, "%u queries tested: [ success : %u ; failed : %u ; \n", nb_queries_tested, nb_success, nb_errors);
 
   log.close();
 

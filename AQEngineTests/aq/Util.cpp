@@ -66,7 +66,7 @@ int generate_database(const char * path, const char * name)
   boost::filesystem::create_directory(p);
   
   // generate empty base struct
-  std::ofstream baseStruct(std::string(dbPath.string() + "base_struct/base.").c_str());
+  std::ofstream baseStruct(std::string(dbPath.string() + "base_struct/base.aqb").c_str());
   baseStruct << "EMPTY_DB" << std::endl;
   baseStruct << "1" << std::endl;
   baseStruct << std::endl;
@@ -97,7 +97,7 @@ int generate_working_directories(const std::string& dbPath, const std::string& w
   
   iniFilename = dbPath + "calculus/" + queryIdent + "/aq_engine.ini";
   std::ofstream ini(iniFilename.c_str());
-  ini << "export.filename.final=" << dbPath << "base_struct/base." << std::endl;
+  ini << "export.filename.final=" << dbPath << "base_struct/base.aqb" << std::endl;
   ini << "step1.field.separator=;" << std::endl;
   ini << "k_rep_racine=" << dbPath << std::endl;
   ini << "k_rep_racine_tmp=" << workingPath << std::endl;
@@ -207,7 +207,7 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
                       WhereValidator& whereValidator)
 {
   std::string baseFilename(dbPath);
-  baseFilename += "/base_struct/base";
+  baseFilename += "/base_struct/base.aqb";
   std::string vdgPath(dbPath);
   vdgPath += "/data_orga/vdg/data/";
 
@@ -370,6 +370,9 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
         ++itOrdered;
       }
 
+      if (aq::verbose)
+	std::cout << matrix.getCount()[i];
+      
     }
     
     if (aq::verbose)

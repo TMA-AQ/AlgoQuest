@@ -292,7 +292,7 @@ void check_args (const char * iniFilename, size_t table, size_t column)
 	}
 	fclose(fp);
 	
-	sprintf(base_desc_file, "%sbase_struct/base", k_rep_racine);
+	sprintf(base_desc_file, "%sbase_struct/base.aqb", k_rep_racine);
 	if( csv_format  )  end_of_field = ',';
 }
 //-------------------------------------------------------------------------------

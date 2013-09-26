@@ -145,7 +145,7 @@ int cut_in_col (const char * iniFilename, size_t num_table, size_t num_column)
 
 	fwrite("export.filename.final=", 1, 22, fini);
 	fwrite(k_rep_racine, 1, strlen(k_rep_racine), fini);
-	fwrite("base_struct/base", 1, 17, fini);
+	fwrite("base_struct/base.aqb", 1, 20, fini);
 	fwrite("\n", 1, 1, fini);
 	fwrite("step1.field.separator=", 1, 22, fini);
 	fwrite(&end_of_field, 1, 1, fini);
@@ -175,9 +175,9 @@ int cut_in_col (const char * iniFilename, size_t num_table, size_t num_column)
 	sprintf( name_log, "%sdata_orga/Cut_in_col_log_%s.txt", k_rep_racine, name_log_file );
 
 	fclose( stdout );
-	FILE    *f_out = NULL;   // output file
-	
+	FILE    *f_out = NULL;   // output file	
 	redirect_std_out  ( name_log,  f_out );
+
 	// answer_size : nb of lines in each file
 	// display exec date and hour
 	t = time ( NULL );
@@ -330,6 +330,7 @@ int cut_in_col (const char * iniFilename, size_t num_table, size_t num_column)
 				// construct loader parameters
 				sprintf( a_message, "%s %s %d %d %d", k_batch_loader, ini_filename, num_table , num_column , n_paquet );
 				// loader 
+        printf( a_message );
 				system( a_message );
 
 				// next packet
@@ -438,6 +439,7 @@ int cut_in_col (const char * iniFilename, size_t num_table, size_t num_column)
 		sprintf( a_message, "%s %s %d %d %d", k_batch_loader, ini_filename, num_table , num_column , n_paquet );
 		// loader 
 
+    printf( a_message );
 		rc = system( a_message );
 		if (rc != 0)
 		{
