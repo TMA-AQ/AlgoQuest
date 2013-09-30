@@ -20,13 +20,13 @@ public:
 	~WIN32FileMapper();
 
 	int read(void * buffer, size_t offset, size_t len);
-  size_t size() { return this->cbFile; }
+  size_t size() { return (size_t)this->cbFile; }
 
 private:
 	WIN32FileMapper(const WIN32FileMapper&);
 	WIN32FileMapper& operator=(const WIN32FileMapper&);
 
-	void remap(size_t offset);
+	void remap(unsigned long long offset);
 
 	const std::string filename;
 

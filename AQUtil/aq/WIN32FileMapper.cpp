@@ -98,7 +98,7 @@ int WIN32FileMapper::read(void * buffer, size_t offset, size_t len)
 	return 0;
 }
 
-void WIN32FileMapper::remap(size_t offset)
+void WIN32FileMapper::remap(unsigned long long offset)
 {
 	this->nbRemap++;
 	DWORD high = static_cast<DWORD>((offset >> 32) & 0xFFFFFFFFul);
