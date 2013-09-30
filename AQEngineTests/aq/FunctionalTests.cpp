@@ -144,8 +144,8 @@ int functional_tests(struct opt& o)
         log << "query '" << reader.getFullIdent() << "' :" << std::endl;
         log << query << std::endl;
         log << aq::Timer::getString(timer.getTimeElapsed()) << std::endl;
-        std::cerr << "aq engine error on '" << reader.getFullIdent() << "'" << std::endl;
-        std::cerr << query << std::endl;
+        aq::Logger::getInstance().log(AQ_ERROR, "aq engine error on '%s'\n", reader.getFullIdent().c_str());
+        aq::Logger::getInstance().log(AQ_ERROR, "%s\n", query.c_str());
         ++nb_errors;
         if (o.stopOnError)
           break;
@@ -157,17 +157,15 @@ int functional_tests(struct opt& o)
 
       }
       
-      std::cout << std::endl;
     }
     
   }
 
-  //std::cerr << nb_queries_tested << " queries tested: [ success : " << nb_success << " ; failed : " << nb_errors << " ]" << std::endl;
   aq::Logger::getInstance().log(AQ_LOG_INFO, "%u queries tested: [ success : %u ; failed : %u ; \n", nb_queries_tested, nb_success, nb_errors);
 
   log.close();
 
-  return EXIT_SUCCESS;
+  return nb_errors;
 }
 
 }

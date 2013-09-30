@@ -113,7 +113,7 @@ int run_aq_engine(const std::string& aq_engine, const std::string& iniFilename, 
   int rc = system((aq_engine + " " + args).c_str());
   if (rc != 0)
   {
-    std::cerr << "error running: '" << aq_engine << " " << args << "'" << std::endl;
+    aq::Logger::getInstance().log(AQ_ERROR, "error running: '%s %s'\n", aq_engine.c_str(), args.c_str());
   }
   return rc;
 }
@@ -134,7 +134,7 @@ int check_answer_validity(const char * dbPath, const char * queryIdent, aq::AQMa
     {
       if (matrix.getTotalCount() != count)
       {
-        std::cerr << "ERROR: expected " << count << " count, get " << matrix.getTotalCount() << std::endl;
+        aq::Logger::getInstance().log(AQ_ERROR, "ERROR: expected %u count, get %u\n", count, matrix.getTotalCount());
         rc = -1;
       }
     }
@@ -142,30 +142,30 @@ int check_answer_validity(const char * dbPath, const char * queryIdent, aq::AQMa
     {
       if (matrix.getNbRows() != nbRows)
       {
-        std::cerr << "ERROR: expected " << nbRows << " rows, get " << matrix.getNbRows() << std::endl;
+        aq::Logger::getInstance().log(AQ_ERROR, "ERROR: expected %u rows, get %u\n", nbRows, matrix.getNbRows());
         rc = -1;
       }
       else
       {
-        std::cout << "\t" << "rows match [" << matrix.getNbRows() << "]" << std::endl;
+        aq::Logger::getInstance().log(AQ_INFO, "rows match [%u]\n", matrix.getNbRows());
       }
     }
     if (nbGroups != 0)
     {
       if (matrix.getGroupBy().size() != nbGroups)
       {
-        std::cerr << "ERROR: expected " << nbGroups << " groups, get " << matrix.getGroupBy().size() << std::endl;
+        aq::Logger::getInstance().log(AQ_INFO, "ERROR: expected %u groups, get %u\n", nbGroups, matrix.getGroupBy().size());
         rc = -1;
       }
       else
       {
-        std::cout << "\t" << "groups match [" << matrix.getGroupBy().size() << "]" << std::endl;
+        aq::Logger::getInstance().log(AQ_INFO, "groups match [%u]\n", matrix.getGroupBy().size());
       }
     }
   } 
   catch (const aq::generic_error& ge)
   {
-    std::cerr << "ERROR: " << ge.what() << std::endl;
+    aq::Logger::getInstance().log(AQ_ERROR, "ERROR: %s", ge.what());
     rc = -1;
   }
   return rc;
@@ -249,7 +249,7 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
     }
     else if (size != (*it).indexes.size())
     {
-      std::cerr << "ERROR: indexes size of table differs" << std::endl;
+      std::cerr << "FATAL ERROR: indexes size of table differs" << std::endl;
       exit(-1);
     }
     
@@ -290,6 +290,7 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
     columnMappers.insert(std::make_pair(t.table_id, tableColumnMappers));
   }
   if (aq::verbose)
+  //  std::cout << "COUNT" << std::endl;
     std::cout << std::endl;
 
   // print data and check group
@@ -344,7 +345,7 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
           }
           else if (!aq::ColumnItem::equal(item.get(), itGrouped->first.get(), cm.second->getType()))
           {
-            std::cerr << std::endl << "BAD GROUPING: get '" << item->toString(cm.second->getType()) << "', expect '" << itGrouped->first->toString(cm.second->getType()) << "'" << std::endl;
+            aq::Logger::getInstance().log(AQ_ERROR, "BAD GROUPING: get '%s', expect '%s'\n", item->toString(cm.second->getType()), itGrouped->first->toString(cm.second->getType()));
             return -1;
           }
         }
@@ -360,7 +361,7 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
             !aq::ColumnItem::equal(item.get(), itGrouped->first.get(), cm.second->getType()) && 
             !aq::ColumnItem::lessThan(itGrouped->first.get(), item.get(), cm.second->getType()))
           {
-            std::cerr << std::endl << "BAD ORDERING: get '" << item->toString(cm.second->getType()) << "', expect '" << itGrouped->first->toString(cm.second->getType()) << "'" << std::endl;
+            aq::Logger::getInstance().log(AQ_ERROR, "BAD ORDERING: get '%s', expect '%s'\n", item->toString(cm.second->getType()), itGrouped->first->toString(cm.second->getType()));
             return -1;
           }
         }
@@ -370,8 +371,8 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
         ++itOrdered;
       }
 
-      if (aq::verbose)
-	std::cout << matrix.getCount()[i];
+      //if (aq::verbose)
+      //  std::cout << matrix.getCount()[i];
       
     }
     
@@ -390,14 +391,14 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
           group += g.first->toString(g.second) + " ";
         }
         group += "]" ;
-        std::cerr << std::endl << "BAD GROUPING: group " << group << " already insert" << std::endl;
+        aq::Logger::getInstance().log(AQ_ERROR, "BAD GROUPING: group %s already insert\n", group);
         return -1;
       }
     }
 
     if (whereValidator.check(matrix, columnMappers, i) == false)
     {
-      std::cerr << std::endl << "WHERE VALIDATOR FAILED" << std::endl;
+      aq::Logger::getInstance().log(AQ_ERROR, "WHERE VALIDATOR FAILED\n");
       return -1;
     }
 
