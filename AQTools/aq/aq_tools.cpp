@@ -279,18 +279,18 @@ int processQuery(const std::string& query, aq::TProjectSettings& settings, aq::B
 			aq::Timer timer;
 			result->saveToAnswer(settings.szAnswerFN, settings.fieldSeparator);
 			aq::Logger::getInstance().log(AQ_INFO, "Save Answer: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
-		}
-
-		if (display)
-		{
-			std::ifstream fin(settings.szAnswerFN);
-			std::string line;
-			while (std::getline(fin, line))
-			{
-				std::cout << line << std::endl;
-			}
-			fin.close();
-		}
+		
+      if (display)
+      {
+        std::ifstream fin(settings.szAnswerFN);
+        std::string line;
+        while (std::getline(fin, line))
+        {
+          std::cout << line << std::endl;
+        }
+        fin.close();
+      }
+    }
 
 		if (clean)
 		{
@@ -435,7 +435,7 @@ int main(int argc, char**argv)
 			("log-pid", po::bool_switch(&pid_mode), "add thread id to log")
 			("log-ident", po::value<std::string>(&ident)->default_value("aq_query_resolver"), "")
 			("aq-ini,s", po::value<std::string>(&propertiesFile), "")
-			("query-ident", po::value<std::string>(&queryIdent), "")
+			("query-ident,i", po::value<std::string>(&queryIdent), "")
       ("force", po::bool_switch(&force), "force use of directory if it already exists")
 			("simulate-aq-engine,z", po::bool_switch(&simulateAQEngine), "")
 			("sql-query,q", po::value<std::string>(&sqlQuery), "")
