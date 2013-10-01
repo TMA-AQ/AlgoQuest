@@ -5,6 +5,7 @@
 #include <aq/Base.h>
 #include <aq/Timer.h>
 #include <aq/Exceptions.h>
+#include <iostream>
 #include <fstream>
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
@@ -13,7 +14,7 @@
 namespace aq
 {
 
-int functional_tests(struct opt& o)
+uint64_t functional_tests(const struct opt& o)
 {
   int rc = 0;
   uint64_t nb_queries_tested = 0;
@@ -73,10 +74,10 @@ int functional_tests(struct opt& o)
     aq::get_columns(orderedColumns, query, "ORDER");
 
     // execute query
-    if (o.execute || o.checkCondition || o.checkResult)
+    if (o.execute || o.checkCondition || o.checkResult || o.display)
     {
       std::string iniFilename;
-      aq::generate_working_directories(o.dbPath, o.workingPath, o.queryIdent, iniFilename);
+      aq::generate_working_directories(o, iniFilename);
 
       // for each query read in queries file
       std::ofstream queryFile(std::string(o.dbPath + "calculus/" + o.queryIdent + "/New_Request.txt").c_str());
@@ -105,23 +106,29 @@ int functional_tests(struct opt& o)
       std::string aq_engine_time_elapsed = aq::Timer::getString(timer.getTimeElapsed());
       aq::Logger::getInstance().log(AQ_LOG_INFO, "aq engine performed on '%s' in %s\n", reader.getFullIdent().c_str(), aq_engine_time_elapsed.c_str());
 
-      if (o.checkResult)
+      if (rc == 0 && (o.checkResult || o.display))
       {
         // check answer validity
-        if (rc == 0)
+        if (o.checkResult)
         {
           uint64_t count = reader.extract_value<uint64_t>("count", 0);
           uint64_t nbRows = reader.extract_value<uint64_t>("rows", 0);
           uint64_t nbGroups = reader.extract_value<uint64_t>("groups", 0);
-          rc = aq::check_answer_validity(o.dbPath.c_str(), o.queryIdent.c_str(), matrix, count, nbRows, nbGroups);
+          rc = aq::check_answer_validity(o, matrix, count, nbRows, nbGroups);
         }
 
         // check data validity
-        if (rc == 0)
+        if (o.checkResult)
         {
           std::string answerPath(o.dbPath);
           answerPath += "/data_orga/tmp/" + std::string(o.queryIdent) + "/dpy/";
-          rc = aq::check_answer_data(answerPath, o.dbPath, o.limit, aq::packet_size, selectedColumns, groupedColumns, orderedColumns, whereValidator);
+          rc = aq::check_answer_data(std::cout, answerPath, o, selectedColumns, groupedColumns, orderedColumns, whereValidator);
+        }
+        else
+        {
+          std::string answerPath(o.dbPath);
+          answerPath += "/data_orga/tmp/" + std::string(o.queryIdent) + "/dpy/";
+          rc = aq::display(std::cout, answerPath, o, selectedColumns);
         }
       }
       

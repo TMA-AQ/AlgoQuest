@@ -13,8 +13,6 @@
 
 namespace po = boost::program_options;
 
-bool aq::verbose = false;
-
 void yyerror(char const *)
 {
 
@@ -29,7 +27,7 @@ int main(int argc, char ** argv)
 
   try
   {
-    aq::opt o = { "", "", "", "", "", "", "", 0, false, false, false, false, false };
+    aq::opt o = { "", "", "", "", "", "", "", aq::packet_size, 0, false, false, false, false, false, false, false, false };
     std::string logMode;
     std::string rootPath;
     std::string dbName;
@@ -41,7 +39,7 @@ int main(int argc, char ** argv)
     desc.add_options()
       ("help,h", "produce help message")
       ("log-output", po::value<std::string>(&logMode)->default_value("STDOUT"), "[STDOUT|LOCALFILE|SYSLOG]")
-      ("log-level", po::value<unsigned int>(&logLevel)->default_value(AQ_LOG_NOTICE), "CRITICAL(2), ERROR(3), WARNING(4), NOTICE(5), INFO(6), DEBUG(7)")
+      ("log-level", po::value<unsigned int>(&logLevel)->default_value(AQ_LOG_WARNING), "CRITICAL(2), ERROR(3), WARNING(4), NOTICE(5), INFO(6), DEBUG(7)")
       ("root-path,r", po::value<std::string>(&rootPath), "root databases path (mandatory)")
       ("db-name,n", po::value<std::string>(&dbName)->default_value("MSALGOQUEST"), "")
       ("working-path", po::value<std::string>(&o.workingPath)->default_value(""), "")
@@ -59,7 +57,9 @@ int main(int argc, char ** argv)
       ("check-condition", po::bool_switch(&o.checkCondition), "")
       ("aql-2-sql", po::bool_switch(&o.aql2sql), "")
       ("stop-on-error,s", po::bool_switch(&o.stopOnError), "")
-      ("verbose,v", po::bool_switch(&aq::verbose), "set verbosity")
+      ("verbose,v", po::bool_switch(&o.display), "set verbosity")
+      ("with-count,c", po::bool_switch(&o.withCount), "display count")
+      ("with-index", po::bool_switch(&o.withIndex), "display table index")
       ;
     
     po::positional_options_description p;
@@ -90,12 +90,13 @@ int main(int argc, char ** argv)
     else
     {
       if (o.workingPath == "") o.workingPath = o.dbPath;
-      return functional_tests(o);
+      return static_cast<int>(functional_tests(o));
     }
   }
   catch (const std::exception& e)
   {
     std::cerr << e.what() << std::endl;
+    return EXIT_FAILURE;
   }
   
   return EXIT_SUCCESS;

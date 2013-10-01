@@ -3,7 +3,6 @@
 #include <aq/Base.h>
 #include <aq/Timer.h>
 #include <aq/Exceptions.h>
-#include <iostream>
 #include <algorithm>
 #include <fstream>
 #include <boost/filesystem.hpp>
@@ -20,7 +19,8 @@ typedef aq::FileMapper FileMapper;
 
 namespace aq
 {
-
+  
+  // ----------------------------------------------------------------------------
   typedef std::vector<std::pair<aq::ColumnItem::Ptr, aq::ColumnType> > v_item_t;
   struct grp_cmp
   {
@@ -78,29 +78,29 @@ int generate_database(const char * path, const char * name)
 }
 
 // ------------------------------------------------------------------------------
-int generate_working_directories(const std::string& dbPath, const std::string& workingPath, std::string& queryIdent, std::string& iniFilename)
+int generate_working_directories(const struct opt& o, std::string& iniFilename)
 {
   boost::filesystem::path p;
-  p = boost::filesystem::path(dbPath + "calculus/" + queryIdent);
+  p = boost::filesystem::path(o.dbPath + "calculus/" + o.queryIdent);
   boost::filesystem::create_directory(p);
-  p = boost::filesystem::path(workingPath + "data_orga/tmp/" + queryIdent);
+  p = boost::filesystem::path(o.workingPath + "data_orga/tmp/" + o.queryIdent);
   if (boost::filesystem::exists(p))
   {
     std::cerr << p << " already exist : STOP" << std::endl;
     exit(-1);
   }
   boost::filesystem::create_directory(p);
-  p = boost::filesystem::path(workingPath + "data_orga/tmp/" + queryIdent + "/dpy");
+  p = boost::filesystem::path(o.workingPath + "data_orga/tmp/" + o.queryIdent + "/dpy");
   boost::filesystem::create_directory(p);
-  p = boost::filesystem::path(dbPath + "calculus/" + queryIdent);
+  p = boost::filesystem::path(o.dbPath + "calculus/" + o.queryIdent);
   boost::filesystem::create_directory(p);
   
-  iniFilename = dbPath + "calculus/" + queryIdent + "/aq_engine.ini";
+  iniFilename = o.dbPath + "calculus/" + o.queryIdent + "/aq_engine.ini";
   std::ofstream ini(iniFilename.c_str());
-  ini << "export.filename.final=" << dbPath << "base_struct/base.aqb" << std::endl;
+  ini << "export.filename.final=" << o.dbPath << "base_struct/base.aqb" << std::endl;
   ini << "step1.field.separator=;" << std::endl;
-  ini << "k_rep_racine=" << dbPath << std::endl;
-  ini << "k_rep_racine_tmp=" << workingPath << std::endl;
+  ini << "k_rep_racine=" << o.dbPath << std::endl;
+  ini << "k_rep_racine_tmp=" << o.workingPath << std::endl;
   ini.close();
 
   return 0;
@@ -119,15 +119,15 @@ int run_aq_engine(const std::string& aq_engine, const std::string& iniFilename, 
 }
 
 // ------------------------------------------------------------------------------
-int check_answer_validity(const char * dbPath, const char * queryIdent, aq::AQMatrix& matrix, const uint64_t count, const uint64_t nbRows, const uint64_t nbGroups)
+int check_answer_validity(const struct opt& o, aq::AQMatrix& matrix, const uint64_t count, const uint64_t nbRows, const uint64_t nbGroups)
 {
   int rc = 0;
   try
   {
-    std::string answerFile(dbPath);
-    answerFile += "/data_orga/tmp/" + std::string(queryIdent) + "/dpy/";
-    std::string iniFilename(dbPath);
-    iniFilename += "/calculus/" + std::string(queryIdent) + "/aq_engine.ini";
+    std::string answerFile(o.dbPath);
+    answerFile += "/data_orga/tmp/" + std::string(o.queryIdent) + "/dpy/";
+    std::string iniFilename(o.dbPath);
+    iniFilename += "/calculus/" + std::string(o.queryIdent) + "/aq_engine.ini";
     std::vector<long long> tablesIds;
     matrix.load(answerFile.c_str(), tablesIds);
     if (count != 0)
@@ -200,15 +200,18 @@ void get_columns(std::vector<std::string>& columns, const std::string& query, co
   }
 }
 
-int check_answer_data(const std::string& answerPath, const std::string& dbPath, const size_t limit, const size_t packetSize, 
+// ------------------------------------------------------------------------------
+int check_answer_data(std::ostream& os,
+                      const std::string& answerPath,
+                      const struct opt& o,
                       const std::vector<std::string>& selectedColumns,
                       const std::vector<std::string>& groupedColumns, 
                       const std::vector<std::string>& orderedColumns,
                       WhereValidator& whereValidator)
 {
-  std::string baseFilename(dbPath);
+  std::string baseFilename(o.dbPath);
   baseFilename += "/base_struct/base.aqb";
-  std::string vdgPath(dbPath);
+  std::string vdgPath(o.dbPath);
   vdgPath += "/data_orga/vdg/data/";
 
   aq::TProjectSettings settings;
@@ -262,17 +265,17 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
       switch((*itCol)->Type)
       {
       case aq::ColumnType::COL_TYPE_INT:
-        cm.reset(new aq::ColumnMapper<int32_t, FileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, 1/*(*itCol)->Size*/, packetSize));
+        cm.reset(new aq::ColumnMapper<int32_t, FileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, 1/*(*itCol)->Size*/, o.packetSize));
         break;
       case aq::ColumnType::COL_TYPE_BIG_INT:
       case aq::ColumnType::COL_TYPE_DATE:
-        cm.reset(new aq::ColumnMapper<int64_t, FileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, 1/*(*itCol)->Size*/, packetSize));
+        cm.reset(new aq::ColumnMapper<int64_t, FileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, 1/*(*itCol)->Size*/, o.packetSize));
         break;
       case aq::ColumnType::COL_TYPE_DOUBLE:
-        cm.reset(new aq::ColumnMapper<double, FileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, 1/*(*itCol)->Size*/, packetSize));
+        cm.reset(new aq::ColumnMapper<double, FileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, 1/*(*itCol)->Size*/, o.packetSize));
         break;
       case aq::ColumnType::COL_TYPE_VARCHAR:
-        cm.reset(new aq::ColumnMapper<char, FileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, (*itCol)->Size, packetSize));
+        cm.reset(new aq::ColumnMapper<char, FileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, (*itCol)->Size, o.packetSize));
         break;
       }
       tableColumnMappers[(*itCol)->ID] = cm;
@@ -283,22 +286,26 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
       bool isOrdering = std::find(orderedColumns.begin(), orderedColumns.end(), std::string(table->getName() + "." + (*itCol)->getName())) != orderedColumns.end();
       isOrdered.push_back(std::make_pair(new aq::ColumnItem, isOrdering));
 
-      if (aq::verbose && isSelecting)
-        std::cout << table->getName() << "." << (*itCol)->getName() << " ; ";
+      if (o.display && isSelecting)
+        os << table->getName() << "." << (*itCol)->getName() << " ; ";
     }
     
     columnMappers.insert(std::make_pair(t.table_id, tableColumnMappers));
   }
-  if (aq::verbose)
-  //  std::cout << "COUNT" << std::endl;
-    std::cout << std::endl;
+  if (o.display)
+  {
+    if (o.withCount)
+      os << "COUNT" << std::endl;
+    else
+      os << std::endl;
+  }
 
   // print data and check group
   char buf[128];
   size_t groupIndex = 0;
   std::set<v_item_t, grp_cmp> groups;
   std::vector<size_t> groupCount(matrix.getGroupBy().size(), 0);
-  for (size_t i = 0; i < size && ((limit == 0) || (i < limit)); ++i)
+  for (size_t i = 0; i < size && ((o.limit == 0) || (i < o.limit)); ++i)
   {
     v_item_t v;
     bool new_group = false;
@@ -315,23 +322,23 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
     auto itOrdered = isOrdered.begin();
     for (auto& t : m)
     {
-      //if (aq::verbose)
-      //  std::cout << t.table_id << "[" << t.indexes[i] << "] => ";
+      if (o.display && o.withIndex)
+        os << t.table_id << "[" << t.indexes[i] << "] => ";
       for (auto& cm : columnMappers[t.table_id])
       {
         aq::ColumnItem::Ptr item(new aq::ColumnItem);
         cm.second->loadValue(t.indexes[i] - 1, *item);
         
-        if (aq::verbose && *itSelected)
+        if (o.display && *itSelected)
         {
           if (t.indexes[i] > 0)
           {
             item->toString(buf, cm.second->getType());
-            std::cout << buf << " ; ";
+            os << buf << " ; ";
           }
           else
           {
-            std::cout << "NULL ; ";
+            os << "NULL ; ";
           }
         }
 
@@ -370,14 +377,13 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
         ++itGrouped;
         ++itOrdered;
       }
-
-      //if (aq::verbose)
-      //  std::cout << matrix.getCount()[i];
-      
     }
-    
-    if (aq::verbose)
-      std::cout << std::endl;
+
+    if (o.display && o.withCount)
+      os << matrix.getCount()[i];
+
+    if (o.display)
+      os << std::endl;
 
     if (!v.empty())
     {
@@ -404,6 +410,139 @@ int check_answer_data(const std::string& answerPath, const std::string& dbPath, 
 
   }
 
+  return 0;
+}
+
+// ------------------------------------------------------------------------------
+int display(std::ostream& os,
+            const std::string& answerPath,
+            const struct opt& o,
+            const std::vector<std::string>& selectedColumns)
+{
+  std::string baseFilename(o.dbPath);
+  baseFilename += "/base_struct/base.aqb";
+  std::string vdgPath(o.dbPath);
+  vdgPath += "/data_orga/vdg/data/";
+
+  aq::TProjectSettings settings;
+  aq::Base baseDesc;
+  baseDesc.loadFromRawFile(baseFilename.c_str());
+
+  aq::AQMatrix matrix(settings, baseDesc);
+  
+  std::vector<long long> tableIDs;
+  matrix.load(answerPath.c_str(), tableIDs);
+
+  aq::Logger::getInstance().log(AQ_LOG_INFO, "AQMatrix: \n");
+  std::stringstream ss;
+  ss << tableIDs.size() << " tables: [ ";
+  std::for_each(tableIDs.begin(), tableIDs.end(), [&] (long long id) { ss << id << " "; });
+  ss << "]";
+  aq::Logger::getInstance().log(AQ_LOG_INFO, "\t%s", ss.str().c_str());
+  aq::Logger::getInstance().log(AQ_LOG_INFO, "\t%u results", matrix.getNbRows());
+  aq::Logger::getInstance().log(AQ_LOG_INFO, "\t%u groups", matrix.getGroupBy().size());
+  
+  const aq::AQMatrix::matrix_t& m = matrix.getMatrix();
+
+  // check size, print column name and prepare column mapping
+  size_t size = 0;
+  std::vector<bool> isSelected;
+  std::map<size_t, std::map<size_t, boost::shared_ptr<aq::ColumnMapper_Intf> > > columnMappers;
+  for (auto it = m.begin(); it != m.end(); ++it)
+  {
+    if (size == 0)
+    {
+      size = (*it).indexes.size();
+    }
+    else if (size != (*it).indexes.size())
+    {
+      std::cerr << "FATAL ERROR: indexes size of table differs" << std::endl;
+      exit(-1);
+    }
+    
+    std::map<size_t, boost::shared_ptr<aq::ColumnMapper_Intf> > tableColumnMappers;
+    const aq::AQMatrix::matrix_t::value_type t = *it;
+    aq::Table::Ptr table = baseDesc.getTable(t.table_id);
+    for (auto itCol = table->Columns.begin(); itCol != table->Columns.end(); ++itCol)
+    {
+      bool selected = std::find(selectedColumns.begin(), selectedColumns.end(), std::string(table->getName() + "." + (*itCol)->getName())) != selectedColumns.end();
+      if (selected)
+      {
+        boost::shared_ptr<aq::ColumnMapper_Intf> cm;
+        switch((*itCol)->Type)
+        {
+        case aq::ColumnType::COL_TYPE_INT:
+          cm.reset(new aq::ColumnMapper<int32_t, FileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, 1/*(*itCol)->Size*/, o.packetSize));
+          break;
+        case aq::ColumnType::COL_TYPE_BIG_INT:
+        case aq::ColumnType::COL_TYPE_DATE:
+          cm.reset(new aq::ColumnMapper<int64_t, FileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, 1/*(*itCol)->Size*/, o.packetSize));
+          break;
+        case aq::ColumnType::COL_TYPE_DOUBLE:
+          cm.reset(new aq::ColumnMapper<double, FileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, 1/*(*itCol)->Size*/, o.packetSize));
+          break;
+        case aq::ColumnType::COL_TYPE_VARCHAR:
+          cm.reset(new aq::ColumnMapper<char, FileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, (*itCol)->Size, o.packetSize));
+          break;
+        }
+        tableColumnMappers[(*itCol)->ID] = cm;
+        isSelected.push_back(selected);
+        os << table->getName() << "." << (*itCol)->getName() << " ; ";
+      }
+    }
+    
+    columnMappers.insert(std::make_pair(t.table_id, tableColumnMappers));
+  }
+  if (o.display)
+  {
+    if (o.withCount)
+      os << "COUNT" << std::endl;
+    else
+      os << std::endl;
+  }
+
+  // print data
+  char buf[128];
+  std::set<v_item_t, grp_cmp> groups;
+  std::vector<size_t> groupCount(matrix.getGroupBy().size(), 0);
+  for (size_t i = 0; i < size && ((o.limit == 0) || (i < o.limit)); ++i)
+  {
+    v_item_t v;
+    bool new_group = false;
+    auto itSelected = isSelected.begin();
+    for (auto& t : m)
+    {
+      if (o.withIndex)
+        os << t.table_id << "[" << t.indexes[i] << "] => ";
+
+      for (auto& cm : columnMappers[t.table_id])
+      {
+        aq::ColumnItem::Ptr item(new aq::ColumnItem);
+        cm.second->loadValue(t.indexes[i] - 1, *item);
+        
+        if (o.display && *itSelected)
+        {
+          if (t.indexes[i] > 0)
+          {
+            item->toString(buf, cm.second->getType());
+            os << buf << " ; ";
+          }
+          else
+          {
+            os << "NULL ; " << std::endl;
+          }
+        }
+        ++itSelected;
+      }
+    }
+
+    if (o.withCount)
+    {
+      os << matrix.getCount()[i];
+    }
+    os << std::endl;
+
+  }
   return 0;
 }
 
