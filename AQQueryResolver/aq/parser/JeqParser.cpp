@@ -35,18 +35,39 @@ struct kjeqConnection
 	std::string tableDestination;
 };
 
-//------------------------------------------------------------------------------
+///
 void ReadJeq(	std::string& inputString, 
 				std::vector<connectionLine>& connectionArray, 
 				std::map<std::string, int>& tablesListAndOccurrence );
 
+
+/// AssembleJeq will construct a table with the path to follow.
+/// it uses the connectionArray
+/// and stores the result as 'kjeqConnection' (lineId, tableSource, tableDestination) in a list : orederedConnections
+/// 
+/// ======================================================
+/// |    lineId  |   tableSource |   tableDestination    |
+/// ======================================================
+/// |    2       |   person      |   car                 |
+/// ------------------------------------------------------
+/// |    3       |   car         |   brand               |
+/// ------------------------------------------------------
+/// |    0       |   brand       |   car                 |
+/// ------------------------------------------------------
+/// |    1       |   car         |   motor               |
+/// ======================================================
+/// 
+/// the lineId represents the Id of the connectionLine in connectionsArray where tableSource and tableDestination are both presented
 void AssembleJeq(	std::vector<connectionLine>& connectionArray,
 					std::map<std::string, int>& tablesListAndOccurrence,
 					std::vector<kjeqConnection>& orderedC );
+
+///
 void WriteJeq(	std::string& inputString,
 				const std::vector<kjeqConnection>& orderedConnections,
 				const std::vector<connectionLine>& connectionArray );
 
+//------------------------------------------------------------------------------
 void ParseJeq( std::string& inputString )
 {
 	std::vector<connectionLine> connectionArray;
@@ -96,9 +117,13 @@ connectionLine nextConnectionLine( std::string& inputString )
 		findJoin( inputString, connectionType, nextPosition );
 
 	if( nextPosition != std::string::npos )
+  {
 		inputString = inputString.substr( nextPosition );
+  }
 	else
+  {
 		return CL;
+  }
 
 	CL.connectionType.push_back( connectionType );
 
@@ -123,8 +148,10 @@ connectionLine nextConnectionLine( std::string& inputString )
 	CL.table2 = inputString.substr(0, nextPosition);
 
 	nextPosition = inputString.find(' ', nextPosition + 1);
-	if (nextPosition == std::string::npos)         
+	if (nextPosition == std::string::npos)  
+  {
 		CL.tableAndCol2.push_back( inputString );
+  }
 	else
 	{
 		CL.tableAndCol2.push_back( inputString.substr(0, nextPosition) );
@@ -149,14 +176,11 @@ void getConnectionArray(std::string inputString,
 	{
 		assert( CL.tableAndCol1.size() == 1 );
 		assert( CL.tableAndCol2.size() == 1 );
-		if( CL.table1 > CL.table2 )
-		{
-			swap( CL.table1, CL.table2 );
-			swap( CL.tableAndCol1, CL.tableAndCol2 );
-		}
+
 		bool found = false;
 		for( size_t idx = 0; idx < CA.size(); ++idx )
-			if( CA[idx].table1 == CL.table1 && CA[idx].table2 == CL.table2 )
+    {
+      if ( (CA[idx].table1 == CL.table1) && (CA[idx].table2 == CL.table2) )
 			{
 				CA[idx].tableAndCol1.push_back( CL.tableAndCol1[0] );
 				CA[idx].tableAndCol2.push_back( CL.tableAndCol2[0] );
@@ -164,6 +188,15 @@ void getConnectionArray(std::string inputString,
 				found = true;
 				break;
 			}
+      else if ( (CA[idx].table1 == CL.table2) && (CA[idx].table2 == CL.table1) )
+			{
+				CA[idx].tableAndCol1.push_back( CL.tableAndCol2[0] );
+				CA[idx].tableAndCol2.push_back( CL.tableAndCol1[0] );
+				CA[idx].connectionType.push_back( invertJoin(CL.connectionType[0]) );
+				found = true;
+				break;
+			}
+    }
 		if( !found )
 		{
 			CL.lineId = static_cast<int>(CA.size());
@@ -171,6 +204,21 @@ void getConnectionArray(std::string inputString,
 		}
 		CL = nextConnectionLine( inputString );
 	}
+
+  //if (CA.size() > 1)
+  //{
+  //  for (auto& cl : CA)
+  //  {    
+  //    if (cl.table1 < cl.table2)
+  //    {
+  //      swap(cl.table1, cl.table2);
+  //      swap(cl.tableAndCol1, CL.tableAndCol2);
+  //      for (auto& ct : cl.connectionType)
+  //        ct = invertJoin(ct) ;
+  //    }
+  //  }
+  //}
+
 }
 
 //------------------------------------------------------------------------------
@@ -209,26 +257,6 @@ void ReadJeq(std::string& inputString,
 	//with the help of the connectionArray, fill a dictionary key:table / value:occurrence
 	getTablesListAndOccurence( connectionArray, tablesListAndOccurrence );
 }
-
-/*
-         * AssembleJeq will construct a table with the path to follow.
-         * it uses the connectionArray
-         * and stores the result as 'kjeqConnection' (lineId, tableSource, tableDestination) in a list : orederedConnections
-         * 
-         * ======================================================
-         * |    lineId  |   tableSource |   tableDestination    |
-         * ======================================================
-         * |    2       |   person      |   car                 |
-         * ------------------------------------------------------
-         * |    3       |   car         |   brand               |
-         * ------------------------------------------------------
-         * |    0       |   brand       |   car                 |
-         * ------------------------------------------------------
-         * |    1       |   car         |   motor               |
-         * ======================================================
-         * 
-         * the lineId represents the Id of the connectionLine in connectionsArray where tableSource and tableDestination are both presented
-        */
 
 //------------------------------------------------------------------------------
 bool ContainsUnused( const std::vector<connectionLine>& connectionArray )
@@ -290,11 +318,13 @@ std::string getFirstTableName(std::map<std::string, int>& dictionary)
 	int minValue = (*dictionary.begin()).second;
 
 	for(std::map<std::string, int>::iterator idx = dictionary.begin(); idx != dictionary.end(); ++idx )
+  {
 		if ((*idx).second < minValue)
 		{
 			minValue = (*idx).second;
 			firstTable = (*idx).first;
 		}
+  }
 
 	return firstTable;
 }
@@ -387,9 +417,8 @@ void WriteJeq(std::string& inputString,
 	connectionLine cL;
 	std::string output;
 
-	// Step 1 : add K_JEQ conditions in the right order
+	// Step 1 : Add as many 'AND' as needed
 
-	//Edit : Add as many 'AND' as needed
 	size_t currentNrCon = 0;
 	for( size_t idx = 0; idx < connectionArray.size(); ++idx )
 		currentNrCon += connectionArray[idx].tableAndCol1.size();
@@ -404,6 +433,8 @@ void WriteJeq(std::string& inputString,
 	for( size_t idx = currentNrCon; idx < totalNrCon; ++idx )
 		output += andClause;
   
+	// Step 2 : add K_JEQ conditions in the right order
+
   output += '\n';
 	for( size_t idx = 0; idx < orderedConnections.size(); ++idx )
 	{
@@ -411,7 +442,9 @@ void WriteJeq(std::string& inputString,
 		cL = findConnection( connectionArray, kC );
 		for( size_t idx2 = 0; idx2 < cL.tableAndCol1.size(); ++idx2 )
 		{
-			if (kC.tableSource != cL.table1)
+      assert(((kC.tableSource == cL.table1) && (kC.tableDestination == cL.table2)) || ((kC.tableSource == cL.table2) && (kC.tableDestination == cL.table1)));
+      bool invert = (kC.tableSource != cL.table2) && ((connectionArray.size() > 1) || (cL.connectionType.size() > 1));
+			if (!invert)
 			{
 				output += cL.connectionType[idx2] + " ";
 				output += cL.tableAndCol1[idx2];
@@ -429,7 +462,7 @@ void WriteJeq(std::string& inputString,
 		}
 	}
 
-	// Step 2 : localize the conditions from the input request and delete them
+	// Step 3 : localize the conditions from the input request and delete them
 	// each one is caught between the 'firstIndex' and the 'lastindex'
 	
 	std::string::size_type firstIndex = std::string::npos, lastIndex;

@@ -5,6 +5,7 @@
 namespace aq
 {
 
-void ParseJeq( std::string& inputString );
+  ///
+  void ParseJeq( std::string& inputString );
 
 }
