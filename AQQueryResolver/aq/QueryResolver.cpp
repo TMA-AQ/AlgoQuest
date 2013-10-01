@@ -78,15 +78,15 @@ Table::Ptr QueryResolver::solve()
 
   this->preProcess();
 
-	// this->solveNested(this->sqlStatement, this->level, NULL, false, false);
-  this->solveNested();
+	this->solveNested(this->sqlStatement, this->level, NULL, false, false);
+  // this->solveNested();
 
   aq::verb::VerbNode::Ptr spTree = this->postProcess();
 
 	// if post Process solve the result we don't need to call AQ Engine
   if (!this->result)
   {
-    // this->resolve(spTree);
+    this->resolve(spTree);
   }
 
 	return this->result;
@@ -203,7 +203,9 @@ aq::verb::VerbNode::Ptr QueryResolver::postProcess()
   aq::verb::VerbNode::Ptr spTree;
 
 #ifdef _DEBUG
-  std::string sql_query;
+	sql_query = "";
+  std::cout << *this->sqlStatement << std::endl;
+  std::cout << aq::multiline_query(aq::syntax_tree_to_sql_form(this->sqlStatement, sql_query)) << std::endl;
 #endif
 
   aq::dateNodeToBigInt(this->sqlStatement);
@@ -336,7 +338,7 @@ void QueryResolver::resolve(aq::verb::VerbNode::Ptr spTree)
     group_and_order = query.substr(pos);
     query = query.substr(0, pos);
   }
-  ParseJeq(query);
+  ParseJeq(query); // FIXME : should be done on tree, and even should be useless !!!
 
   if (!this->groupBy.empty())
   {

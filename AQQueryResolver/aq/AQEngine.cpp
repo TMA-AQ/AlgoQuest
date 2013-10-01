@@ -67,7 +67,7 @@ namespace aq
       tableIDs.clear();
       aqMatrix.reset(new aq::AQMatrix(settings, baseDesc));
 
-#ifdef __LOAD_FULL_AQ_MATRIX__
+#ifndef __NO_LOAD_FULL_AQ_MATRIX__
       aqMatrix->load(settings.szTempPath2, this->tableIDs);
       aq::Logger::getInstance().log(AQ_NOTICE, "Load From Binary AQ Matrix: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
       if (mode == REGULAR)

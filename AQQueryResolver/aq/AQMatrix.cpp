@@ -353,6 +353,7 @@ void AQMatrix::compress()
 {
   size_t p = 0;
   size_t index = 0;
+  assert(this->count.size() >= this->groupByIndex.size());
   for (auto it = this->groupByIndex.begin(); it != this->groupByIndex.end(); ++it, ++index)
   {
     this->count[index] = 1;

@@ -229,7 +229,7 @@ void solve(boost::shared_ptr<aq::AQMatrix> aqMatrix,
 
   // FIXME
   // load aqMatrix packet if needed
-  aqMatrix->loadNextPacket();
+  // aqMatrix->loadNextPacket();
 
   size_t index;
   for (size_t i = indexes.first; i < indexes.second; ++i)
@@ -247,7 +247,7 @@ void solve(boost::shared_ptr<aq::AQMatrix> aqMatrix,
       aq::row_item_t& item_tmp = row.initialRow[c];
       boost::lock_guard<boost::mutex> lock(mutex); // FIXME
       index = aqMatrix->getColumn(columns[c].table_index)[i];
-      assert(index > 0); // FIXME : when outer is used, index can be 0
+      // assert(index > 0); // FIXME : when outer is used, index can be 0
       index -= 1;
       columns[c].mapper->loadValue(index, *item_tmp.item);
       if (item_tmp.columnName == "")

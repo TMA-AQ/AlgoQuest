@@ -88,6 +88,10 @@ private:
   // helper
 	aq::Timer timer;
 	char szBuffer[STR_BUF_SIZE];
+  
+#ifdef _DEBUG
+  std::string sql_query;
+#endif
 
   // query
 	aq::tnode * sqlStatement;
