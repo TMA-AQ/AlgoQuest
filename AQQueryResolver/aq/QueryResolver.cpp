@@ -328,7 +328,7 @@ void QueryResolver::resolve(aq::verb::VerbNode::Ptr spTree)
   std::string group;
   std::string order;
   std::string group_and_order;
-  aq::syntax_tree_to_prefix_form(this->sqlStatement, query);
+  aq::syntax_tree_to_aql_form(this->sqlStatement, query);
 
   std::string::size_type posOrder = query.find("ORDER");
   std::string::size_type posGroup = query.find("GROUP");
@@ -338,7 +338,7 @@ void QueryResolver::resolve(aq::verb::VerbNode::Ptr spTree)
     group_and_order = query.substr(pos);
     query = query.substr(0, pos);
   }
-  ParseJeq(query); // FIXME : should be done on tree, and even should be useless !!!
+  ParseJeq(query);
 
   if (!this->groupBy.empty())
   {
@@ -347,7 +347,7 @@ void QueryResolver::resolve(aq::verb::VerbNode::Ptr spTree)
       group += " , ";
     for (auto it = this->groupBy.begin(); it != this->groupBy.end(); ++it)
     {
-      aq::syntax_tree_to_prefix_form(*it, group);
+      aq::syntax_tree_to_aql_form(*it, group);
     }
   }
 
@@ -358,7 +358,7 @@ void QueryResolver::resolve(aq::verb::VerbNode::Ptr spTree)
       order += " , ";
     for (auto it = this->orderBy.begin(); it != this->orderBy.end(); ++it)
     {
-      aq::syntax_tree_to_prefix_form(*it, order);
+      aq::syntax_tree_to_aql_form(*it, order);
     }
   }
 
@@ -369,7 +369,7 @@ void QueryResolver::resolve(aq::verb::VerbNode::Ptr spTree)
       group += " , ";
     for (auto it = this->partitions[0].begin(); it != this->partitions[0].end(); ++it)
     {
-      aq::syntax_tree_to_prefix_form(*it, group);
+      aq::syntax_tree_to_aql_form(*it, group);
     }
   }
 
@@ -792,12 +792,12 @@ void QueryResolver::changeTemporaryTableName(aq::tnode * pNode)
     assert((column != NULL) && (table->tag == K_IDENT) && (table->getDataType() == aq::tnode::tnodeDataType::NODE_DATA_STRING));
 
     // !!!!!!!!!!! FIXME !!!!!!!!!!!!! Hacking for testing (DEMO July 4 2013) !!!!!!!!!!!!!!!
-    if ((strcmp("B", table->getData().val_str) == 0) &&
-      (strcmp("MIN_SEM_COURT", column->getData().val_str) == 0))
-    {
-      column->set_string_data("SEQ_SEM_COURT");
-      table->set_string_data("B001REG0001TMP0003P000000000007");
-    }
+    //if ((strcmp("B", table->getData().val_str) == 0) &&
+    //  (strcmp("MIN_SEM_COURT", column->getData().val_str) == 0))
+    //{
+    //  column->set_string_data("SEQ_SEM_COURT");
+    //  table->set_string_data("B001REG0001TMP0003P000000000007");
+    //}
 
     for (auto& nestedTable : this->nestedTables) 
     {
@@ -1041,7 +1041,7 @@ boost::shared_ptr<QueryResolver> QueryResolver::SolveSelectFromSelect(	aq::tnode
 #endif
 
   std::string str;
-  aq::syntax_tree_to_prefix_form( pExteriorSelect, str );
+  aq::syntax_tree_to_aql_form( pExteriorSelect, str );
   aq::SaveFile( pSettings->szOutputFN, str.c_str() );
   aq::MakeBackupFile( pSettings->szOutputFN, aq::backup_type_t::Exterior_Before, this->level, this->id );
 
@@ -1064,7 +1064,7 @@ boost::shared_ptr<QueryResolver> QueryResolver::SolveSelectFromSelect(	aq::tnode
 
   if( trivialSelectFromSelect(pInteriorSelect) )
 	{
-		aq::syntax_tree_to_prefix_form( pInteriorSelect, str );
+		aq::syntax_tree_to_aql_form( pInteriorSelect, str );
 		aq::SaveFile( pSettings->szOutputFN, str.c_str() );
 		aq::MakeBackupFile( pSettings->szOutputFN, aq::backup_type_t::Empty, this->level, this->id );
 		aq::mark_as_deleted( pIntSelectAs );
@@ -1085,7 +1085,7 @@ boost::shared_ptr<QueryResolver> QueryResolver::SolveSelectFromSelect(	aq::tnode
 	aq::addInnerOuterNodes( intWhereNode->left, K_INNER, K_INNER );
 
 // #ifdef OUTPUT_NESTED_QUERIES
-	aq::syntax_tree_to_prefix_form( pExteriorSelect, str );
+	aq::syntax_tree_to_aql_form( pExteriorSelect, str );
 	aq::SaveFile( pSettings->szOutputFN, str.c_str() );
 	aq::MakeBackupFile( pSettings->szOutputFN, aq::backup_type_t::Exterior, this->level, this->id );
 // #endif
@@ -1094,9 +1094,9 @@ boost::shared_ptr<QueryResolver> QueryResolver::SolveSelectFromSelect(	aq::tnode
   std::string queryInterior;
   std::string queryExterior;
   std::cout << "--- Interior select ---" << std::endl;
-  std::cout << aq::syntax_tree_to_prefix_form(pInteriorSelect, queryInterior) << std::endl;
+  std::cout << aq::syntax_tree_to_aql_form(pInteriorSelect, queryInterior) << std::endl;
   std::cout << "--- Exterior select ---" << std::endl;
-  std::cout << aq::syntax_tree_to_prefix_form(pExteriorSelect, queryExterior) << std::endl;
+  std::cout << aq::syntax_tree_to_aql_form(pExteriorSelect, queryExterior) << std::endl;
 #endif
 
   boost::array<uint32_t, 6> categories_order = { K_FROM, K_WHERE, K_SELECT, K_GROUP, K_HAVING, K_ORDER };

@@ -97,7 +97,7 @@ namespace aq
   void AQEngine::call(aq::tnode *pNode, mode_t mode, int selectLevel)
   {
     std::string query;
-    aq::syntax_tree_to_prefix_form( pNode, query );
+    aq::syntax_tree_to_aql_form( pNode, query );
 
     // a group is an order in aq engine => change ORDER by GROUP
     std::string::size_type pos = query.find("GROUP");

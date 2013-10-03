@@ -44,7 +44,7 @@ std::string transform(const char * ini, const char * query, int tag)
   aq::expression_transform::transform<aq::WIN32FileMapper>(base, settings, cmpNode);
 
   std::string queryTransformed;
-  aq::syntax_tree_to_prefix_form(tree, queryTransformed);
+  aq::syntax_tree_to_aql_form(tree, queryTransformed);
   boost::trim(queryTransformed);
   boost::replace_all(queryTransformed, "\n", " ");
   std::string::size_type pos = queryTransformed.find("  ");

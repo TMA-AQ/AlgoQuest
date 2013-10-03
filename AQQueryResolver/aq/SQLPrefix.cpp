@@ -179,68 +179,139 @@ void getTableAlias(aq::tnode *pNode, std::map<std::string, std::string>& tablesA
 }
 
 //------------------------------------------------------------------------------
-std::string syntax_tree_to_prefix_form(aq::tnode * pNode)
+std::string syntax_tree_to_aql_form(aq::tnode * pNode)
 {
   std::string query;
-  syntax_tree_to_prefix_form(pNode, query);
+  syntax_tree_to_aql_form(pNode, query);
   return query;
 }
 
+////------------------------------------------------------------------------------
+//std::string& syntax_tree_to_aql_form( aq::tnode *sqlStatement, std::string& str )
+//{
+//	if ( sqlStatement == NULL )
+//		return str;
+//  
+//  aq::tnode * pNode = aq::clone_subtree(sqlStatement);
+//
+//  if (pNode->tag == K_SELECT)
+//    aq::setOneColumnByTableOnSelect(pNode);
+//
+//	// str.clear();
+//	char szTmpBuf[1000];
+//	char szBuffer[STR_BUF_SIZE];
+//	stack<aq::tnode*> nodes;
+//	nodes.push( pNode );
+//	while( nodes.size() > 0 )
+//	{
+//		aq::tnode* pTop = nodes.top();
+//		assert(pTop != NULL);
+//		nodes.pop();
+//		// Enforce K_JEQ instead of K_EQ !
+//		if ( pTop->tag == K_EQ ) {
+//			if ( IsColumnReference( pTop->left ) && IsColumnReference( pTop->right ) )
+//				pTop->tag = K_JEQ;
+//		}
+//#if defined (K_JAUTO_ACTIVATED)
+//		if ( pTop->tag == K_JEQ ) {
+//			if ( IsColumnReference( pTop->left ) && IsColumnReference( pTop->right ) ) {
+//				if ( SameTableAndColumn(pTop->left, pTop->right, tablesAlias) ) {
+//					pTop->tag = K_JAUTO;
+//				}
+//			}
+//		}
+//#endif
+//		if( pTop->tag == K_SELECT && !pTop->left ) {
+//			//do not show node
+//		}
+//		else {
+//			show_node( pTop, str, szTmpBuf, szBuffer );
+//#if defined (K_JAUTO_ACTIVATED)
+//			if (pTop->tag == K_FROM) {
+//				getTableAlias(pTop, tablesAlias);
+//			}
+//#endif
+//		}
+//		if( pTop->next )
+//			nodes.push( pTop->next );
+//		if( pTop->right )
+//			nodes.push( pTop->right );
+//		if( pTop->left )
+//			nodes.push( pTop->left );
+//	}
+//
+//  return str;
+//}
+
 //------------------------------------------------------------------------------
-std::string& syntax_tree_to_prefix_form( aq::tnode *sqlStatement, std::string& str )
+std::string& syntax_tree_to_aql_form( aq::tnode *pNode, std::string& query )
 {
-	if ( sqlStatement == NULL )
-		return str;
-  
-  aq::tnode * pNode = aq::clone_subtree(sqlStatement);
+  if ( pNode == NULL ) return query;
 
-  if (pNode->tag == K_SELECT)
-    aq::setOneColumnByTableOnSelect(pNode);
-
-	// str.clear();
-	char szTmpBuf[1000];
-	char szBuffer[STR_BUF_SIZE];
-	stack<aq::tnode*> nodes;
-	nodes.push( pNode );
-	while( nodes.size() > 0 )
+	if (	pNode->tag == K_SELECT || pNode->tag == K_FROM 
+		 || pNode->tag == K_WHERE  || pNode->tag == K_GROUP
+		 || pNode->tag == K_HAVING || pNode->tag == K_ORDER )
 	{
-		aq::tnode* pTop = nodes.top();
-		assert(pTop != NULL);
-		nodes.pop();
-		// Enforce K_JEQ instead of K_EQ !
-		if ( pTop->tag == K_EQ ) {
-			if ( IsColumnReference( pTop->left ) && IsColumnReference( pTop->right ) )
-				pTop->tag = K_JEQ;
-		}
-#if defined (K_JAUTO_ACTIVATED)
-		if ( pTop->tag == K_JEQ ) {
-			if ( IsColumnReference( pTop->left ) && IsColumnReference( pTop->right ) ) {
-				if ( SameTableAndColumn(pTop->left, pTop->right, tablesAlias) ) {
-					pTop->tag = K_JAUTO;
-				}
-			}
-		}
-#endif
-		if( pTop->tag == K_SELECT && !pTop->left ) {
-			//do not show node
-		}
-		else {
-			show_node( pTop, str, szTmpBuf, szBuffer );
-#if defined (K_JAUTO_ACTIVATED)
-			if (pTop->tag == K_FROM) {
-				getTableAlias(pTop, tablesAlias);
-			}
-#endif
-		}
-		if( pTop->next )
-			nodes.push( pTop->next );
-		if( pTop->right )
-			nodes.push( pTop->right );
-		if( pTop->left )
-			nodes.push( pTop->left );
+    if (pNode->tag != K_SELECT)
+      query += "\n";
+    query += std::string(id_to_string(pNode->tag));
+		aq::syntax_tree_to_aql_form(pNode->left, query);
+		aq::syntax_tree_to_aql_form(pNode->right, query);
+	  aq::syntax_tree_to_aql_form(pNode->next, query);
 	}
+	else
+	{
+		std::ostringstream stmp;
 
-  return str;
+    if ((pNode->tag == K_EQ) && IsColumnReference(pNode->left) && IsColumnReference(pNode->right))
+    {
+      pNode->tag = K_JEQ;
+    }
+
+    if (pNode->tag == K_JNO) 
+    {
+      assert(pNode->left);
+      query += " " + std::string(id_to_string(pNode->tag));
+      aq::syntax_tree_to_aql_form(pNode->left->left, query);
+    }
+    else if ((pNode->tag == K_JEQ) || (pNode->tag == K_JINF) || (pNode->tag == K_JIEQ) || (pNode->tag == K_JSEQ) || (pNode->tag == K_JSUP))
+    {
+      assert(pNode->left);
+      assert(pNode->right);
+      query += " " + std::string(id_to_string(pNode->tag));
+      aq::syntax_tree_to_aql_form(pNode->right, query);
+      aq::syntax_tree_to_aql_form(pNode->left, query);
+    }
+    else
+    {
+      switch ( pNode->tag ) {
+      case K_INTEGER:
+        stmp << pNode->getData().val_int;
+        break;
+      case K_REAL:
+        stmp << pNode->getData().val_number;
+        break;
+      case K_DATE_VALUE:
+        {
+          DateConversion dateConverter;
+          stmp << dateConverter.bigIntToDate(pNode->getData().val_int);
+        }
+        break;
+      case K_STRING:
+      case K_IDENT:
+      case K_COLUMN:
+        stmp << pNode->getData().val_str;
+        break;
+      default:
+        stmp << id_to_string( pNode->tag );
+        break;
+      }
+      query += " " + stmp.str();
+      aq::syntax_tree_to_aql_form(pNode->left, query);
+      aq::syntax_tree_to_aql_form(pNode->right, query);
+    }
+	}
+  return query;
 }
 
 //------------------------------------------------------------------------------
