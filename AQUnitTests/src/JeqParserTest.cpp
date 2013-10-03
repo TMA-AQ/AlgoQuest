@@ -293,4 +293,28 @@ BOOST_AUTO_TEST_CASE(test_4_tables_circular)
   BOOST_CHECK(cmp_string(query, expected));
 }
 
+BOOST_AUTO_TEST_CASE(test_4_tables_misc)
+{
+  std::string from, query, expected;
+    
+  from = " FROM , , , T1 T2 T3 T4 ";
+    
+  query  = from ;
+  query += " WHERE AND AND ";
+  query += " K_JSEQ K_OUTER . T2 VAL_1 K_OUTER . T1 VAL_1 ";
+  query += " K_JSEQ K_OUTER . T3 VAL_1 K_OUTER . T1 VAL_1 ";
+  query += " K_JSEQ K_OUTER . T4 VAL_1 K_INNER . T1 VAL_1 " ;
+  
+  expected  = from;
+  expected += " WHERE AND AND AND ";
+  expected += " K_JIEQ K_OUTER . T1 VAL_1 K_OUTER . T2 VAL_1 ";
+  expected += " K_JSEQ K_OUTER . T3 VAL_1 K_OUTER . T1 VAL_1 ";
+  expected += " K_JIEQ K_OUTER . T1 VAL_1 K_OUTER . T3 VAL_1 ";
+  expected += " K_JSEQ K_OUTER . T4 VAL_1 K_INNER . T1 VAL_1 ";
+
+  aq::ParseJeq(query);
+  
+  BOOST_CHECK(cmp_string(query, expected));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
