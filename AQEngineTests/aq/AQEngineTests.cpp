@@ -3,6 +3,7 @@
 
 #include "Util.h"
 #include <aq/Logger.h>
+#include <aq/parser/JeqParser.h>
 #include <string>
 #include <stdint.h>
 #include <fstream>
@@ -13,9 +14,9 @@
 
 namespace po = boost::program_options;
 
-void yyerror(char const *)
+int yyerror(char const *)
 {
-
+  return 0;
 }
 
 extern int functional_tests(const std::string& dbPath, std::string& queryIdent, const std::string& aqEngine, 
@@ -48,6 +49,7 @@ int main(int argc, char ** argv)
       ("aq-engine,e", po::value<std::string>(&o.aqEngine), "aq engine path (mandatory)")
       ("queries,q", po::value<std::string>(&o.queriesFilename)->default_value("query.aql"), "")
       ("query", po::value<std::string>(&query)->default_value(""), "")
+      ("parse", "")
       ("filter,f", po::value<std::string>(&o.filter)->default_value(""), "")
       ("log,o", po::value<std::string>(&o.logFilename)->default_value("./test_aq_engine.log"), "")
 
@@ -57,7 +59,7 @@ int main(int argc, char ** argv)
       ("check-condition", po::bool_switch(&o.checkCondition), "")
       ("aql-2-sql", po::bool_switch(&o.aql2sql), "")
       ("stop-on-error,s", po::bool_switch(&o.stopOnError), "")
-      ("verbose,v", po::bool_switch(&o.display), "set verbosity")
+      ("display,d", po::bool_switch(&o.display), "display rows")
       ("with-count,c", po::bool_switch(&o.withCount), "display count")
       ("with-index", po::bool_switch(&o.withIndex), "display table index")
       ;
@@ -69,7 +71,7 @@ int main(int argc, char ** argv)
     po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
     po::notify(vm);    
     
-    if (vm.count("help") || (rootPath == "")  || (o.aqEngine == ""))
+    if (vm.count("help") || (((rootPath == "")  || (o.aqEngine == "")) && !vm.count("parse") && !vm.count("query")))
     {
       std::cout << desc << "\n";
       return 0;
@@ -82,7 +84,12 @@ int main(int argc, char ** argv)
     
     o.dbPath = rootPath + "/" + dbName + "/";
 
-    if (generate)
+    if (vm.count("parse"))
+    {
+      aq::ParseJeq(query);
+      std::cout << query << std::endl;
+    }
+    else if (generate)
     {
       //aq::QueryGenerator queryGen(query);
       //queryGen.generate(std::cout);
