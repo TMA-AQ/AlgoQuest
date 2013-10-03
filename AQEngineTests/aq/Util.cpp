@@ -352,7 +352,7 @@ int check_answer_data(std::ostream& os,
           }
           else if (!aq::ColumnItem::equal(item.get(), itGrouped->first.get(), cm.second->getType()))
           {
-            aq::Logger::getInstance().log(AQ_ERROR, "BAD GROUPING: get '%s', expect '%s'\n", item->toString(cm.second->getType()), itGrouped->first->toString(cm.second->getType()));
+            aq::Logger::getInstance().log(AQ_ERROR, "BAD GROUPING: get '%s', expect '%s'\n", item->toString(cm.second->getType()).c_str(), itGrouped->first->toString(cm.second->getType()).c_str());
             return -1;
           }
         }
@@ -368,7 +368,7 @@ int check_answer_data(std::ostream& os,
             !aq::ColumnItem::equal(item.get(), itGrouped->first.get(), cm.second->getType()) && 
             !aq::ColumnItem::lessThan(itGrouped->first.get(), item.get(), cm.second->getType()))
           {
-            aq::Logger::getInstance().log(AQ_ERROR, "BAD ORDERING: get '%s', expect '%s'\n", item->toString(cm.second->getType()), itGrouped->first->toString(cm.second->getType()));
+            aq::Logger::getInstance().log(AQ_ERROR, "BAD ORDERING: get '%s', expect '%s'\n", item->toString(cm.second->getType()).c_str(), itGrouped->first->toString(cm.second->getType()).c_str());
             return -1;
           }
         }
@@ -397,7 +397,7 @@ int check_answer_data(std::ostream& os,
           group += g.first->toString(g.second) + " ";
         }
         group += "]" ;
-        aq::Logger::getInstance().log(AQ_ERROR, "BAD GROUPING: group %s already insert\n", group);
+        aq::Logger::getInstance().log(AQ_ERROR, "BAD GROUPING: group %s already insert\n", group.c_str());
         return -1;
       }
     }
@@ -508,7 +508,6 @@ int display(std::ostream& os,
   for (size_t i = 0; i < size && ((o.limit == 0) || (i < o.limit)); ++i)
   {
     v_item_t v;
-    bool new_group = false;
     auto itSelected = isSelected.begin();
     for (auto& t : m)
     {
