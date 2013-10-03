@@ -446,93 +446,77 @@ int display(std::ostream& os,
 
   // check size, print column name and prepare column mapping
   size_t size = 0;
-  std::vector<bool> isSelected;
-  std::map<size_t, std::map<size_t, boost::shared_ptr<aq::ColumnMapper_Intf> > > columnMappers;
-  for (auto it = m.begin(); it != m.end(); ++it)
+  std::vector<std::pair<size_t, boost::shared_ptr<aq::ColumnMapper_Intf> > > display_order(selectedColumns.size());
+  for (size_t tindex = 0; tindex < m.size(); tindex++)
   {
+    auto& t = m[tindex];
     if (size == 0)
     {
-      size = (*it).indexes.size();
+      size = t.indexes.size();
     }
-    else if (size != (*it).indexes.size())
+    else if (size != t.indexes.size())
     {
       std::cerr << "FATAL ERROR: indexes size of table differs" << std::endl;
       exit(-1);
     }
     
-    std::map<size_t, boost::shared_ptr<aq::ColumnMapper_Intf> > tableColumnMappers;
-    const aq::AQMatrix::matrix_t::value_type t = *it;
     aq::Table::Ptr table = baseDesc.getTable(t.table_id);
-    for (auto itCol = table->Columns.begin(); itCol != table->Columns.end(); ++itCol)
+    for (auto& col : table->Columns)
     {
-      bool selected = std::find(selectedColumns.begin(), selectedColumns.end(), std::string(table->getName() + "." + (*itCol)->getName())) != selectedColumns.end();
-      if (selected)
+      auto it = std::find(selectedColumns.begin(), selectedColumns.end(), std::string(table->getName() + "." + col->getName()));
+      if (it != selectedColumns.end())
       {
         boost::shared_ptr<aq::ColumnMapper_Intf> cm;
-        switch((*itCol)->Type)
+        switch(col->Type)
         {
         case aq::ColumnType::COL_TYPE_INT:
-          cm.reset(new aq::ColumnMapper<int32_t, FileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, 1/*(*itCol)->Size*/, o.packetSize));
+          cm.reset(new aq::ColumnMapper<int32_t, FileMapper>(vdgPath.c_str(), t.table_id, col->ID, 1/*(*itCol)->Size*/, o.packetSize));
           break;
         case aq::ColumnType::COL_TYPE_BIG_INT:
         case aq::ColumnType::COL_TYPE_DATE:
-          cm.reset(new aq::ColumnMapper<int64_t, FileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, 1/*(*itCol)->Size*/, o.packetSize));
+          cm.reset(new aq::ColumnMapper<int64_t, FileMapper>(vdgPath.c_str(), t.table_id, col->ID, 1/*(*itCol)->Size*/, o.packetSize));
           break;
         case aq::ColumnType::COL_TYPE_DOUBLE:
-          cm.reset(new aq::ColumnMapper<double, FileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, 1/*(*itCol)->Size*/, o.packetSize));
+          cm.reset(new aq::ColumnMapper<double, FileMapper>(vdgPath.c_str(), t.table_id, col->ID, 1/*(*itCol)->Size*/, o.packetSize));
           break;
         case aq::ColumnType::COL_TYPE_VARCHAR:
-          cm.reset(new aq::ColumnMapper<char, FileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, (*itCol)->Size, o.packetSize));
+          cm.reset(new aq::ColumnMapper<char, FileMapper>(vdgPath.c_str(), t.table_id, col->ID, col->Size, o.packetSize));
           break;
         }
-        tableColumnMappers[(*itCol)->ID] = cm;
-        isSelected.push_back(selected);
-        os << table->getName() << "." << (*itCol)->getName() << " ; ";
+        display_order[std::distance(selectedColumns.begin(), it)] = std::make_pair(tindex, cm);
       }
     }
-    
-    columnMappers.insert(std::make_pair(t.table_id, tableColumnMappers));
   }
-  if (o.display)
-  {
-    if (o.withCount)
-      os << "COUNT" << std::endl;
-    else
-      os << std::endl;
-  }
-
+  
+  for (auto& sc : selectedColumns)
+    os << sc << " ; ";
+  if (o.withCount)
+    os << "COUNT" << std::endl;
+  else
+    os << std::endl;
+  
   // print data
   char buf[128];
   std::set<v_item_t, grp_cmp> groups;
   std::vector<size_t> groupCount(matrix.getGroupBy().size(), 0);
   for (size_t i = 0; i < size && ((o.limit == 0) || (i < o.limit)); ++i)
   {
-    v_item_t v;
-    bool new_group = false;
-    auto itSelected = isSelected.begin();
-    for (auto& t : m)
-    {
-      if (o.withIndex)
-        os << t.table_id << "[" << t.indexes[i] << "] => ";
 
-      for (auto& cm : columnMappers[t.table_id])
+    for (auto& c : display_order)
+    {
+      auto& tindex = c.first;
+      auto& cm = c.second;
+      auto index = m[tindex].indexes[i];
+      if (index == 0)
+      {
+          os << "NULL ; " ;
+      }
+      else
       {
         aq::ColumnItem::Ptr item(new aq::ColumnItem);
-        cm.second->loadValue(t.indexes[i] - 1, *item);
-        
-        if (o.display && *itSelected)
-        {
-          if (t.indexes[i] > 0)
-          {
-            item->toString(buf, cm.second->getType());
-            os << buf << " ; ";
-          }
-          else
-          {
-            os << "NULL ; " << std::endl;
-          }
-        }
-        ++itSelected;
+        cm->loadValue(index - 1, *item);
+        item->toString(buf, cm->getType());
+        os << buf << " ; ";
       }
     }
 
