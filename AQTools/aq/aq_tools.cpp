@@ -147,7 +147,7 @@ int transformQuery(const std::string& query, aq::TProjectSettings& settings, aq:
 	aq::cleanQuery( pNode );
 	
 	std::string str;
-	aq::syntax_tree_to_prefix_form(pNode, str);
+	aq::syntax_tree_to_aql_form(pNode, str);
   aq::ParseJeq( str );
 
 	return 0;
@@ -182,16 +182,15 @@ int prepareQuery(const std::string& query, const aq::TProjectSettings& settingsB
 	{
 		if (fs::exists(*dir))
 		{
-			aq::Logger::getInstance().log(AQ_ERROR, "directory already exist '%s'\n", (*dir).c_str());
+      aq::Logger::getInstance().log(AQ_ERROR, "directory already exist '%s'\n", (*dir).string().c_str());
       if (!force)
       {
         return EXIT_FAILURE;
       }
 		}
-
-		if (!fs::create_directory(*dir))
+		else if (!fs::create_directory(*dir))
 		{
-			aq::Logger::getInstance().log(AQ_ERROR, "cannot create directory '%s'\n", (*dir).c_str());
+			aq::Logger::getInstance().log(AQ_ERROR, "cannot create directory '%s'\n", (*dir).string().c_str());
       if (!force)
       {
         return EXIT_FAILURE;
@@ -429,7 +428,7 @@ int main(int argc, char**argv)
 		desc.add_options()
 			("help,h", "produce help message")
 			("log-output", po::value<std::string>(&mode)->default_value("STDOUT"), "[STDOUT|LOCALFILE|SYSLOG]")
-			("log-level,v", po::value<unsigned int>(&level)->default_value(AQ_LOG_NOTICE), "CRITICAL(2), ERROR(3), WARNING(4), NOTICE(5), INFO(6), DEBUG(7)")
+			("log-level,v", po::value<unsigned int>(&level)->default_value(AQ_LOG_WARNING), "CRITICAL(2), ERROR(3), WARNING(4), NOTICE(5), INFO(6), DEBUG(7)")
 			("log-lock", po::bool_switch(&lock_mode), "for multithread program")
 			("log-date", po::bool_switch(&date_mode), "add date to log")
 			("log-pid", po::bool_switch(&pid_mode), "add thread id to log")
