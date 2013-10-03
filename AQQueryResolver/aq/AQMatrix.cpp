@@ -88,7 +88,10 @@ AQMatrix::AQMatrix(const TProjectSettings& _settings, const Base& _baseDesc)
 	: settings(_settings),
     baseDesc(_baseDesc),
 		totalCount(0),
-		nbRows(0),
+    nbRows(0),
+    nbRowsParsed(0),
+    nbPacket(0),
+    packet(0),
 		hasCount(false)
 {
   uid = ++AQMatrix::uid_generator;
@@ -99,6 +102,9 @@ AQMatrix::AQMatrix(const AQMatrix& source)
     baseDesc(source.baseDesc),
 		totalCount(source.totalCount),
 		nbRows(source.nbRows),
+    nbRowsParsed(0),
+    nbPacket(0),
+    packet(0),
 		hasCount(source.hasCount)
 {
 }
@@ -114,6 +120,9 @@ AQMatrix& AQMatrix::operator=(const AQMatrix& source)
 		totalCount = source.totalCount;
 		nbRows = source.nbRows;
 		hasCount = source.hasCount;
+    nbRowsParsed = source.nbRowsParsed;
+    nbPacket = source.nbPacket;
+    packet = source.packet;
 	}
 	return *this;
 }
