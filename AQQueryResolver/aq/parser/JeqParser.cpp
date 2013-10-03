@@ -19,10 +19,12 @@ struct connectionLine
 	int lineId;
 	std::string table1;
 	std::string table2;
+  std::string table1JoinType; ///< k_inner / k_outer
+  std::string table2JoinType; ///< k_inner / k_outer
 	std::vector<std::string> tableAndCol1;
 	std::vector<std::string> tableAndCol2;
 	bool isUsed;
-	std::vector<std::string> connectionType;
+	std::vector<std::string> connectionType; ///< operator (k_jeq, k_jneq, k_jinf, k_jieq, k_jseq, k_jsup)
 
 	connectionLine(): isUsed(false){}
 };
@@ -111,6 +113,7 @@ std::string invertJoin( std::string& join )
 connectionLine nextConnectionLine( std::string& inputString )
 {
 	connectionLine CL;
+  std::string::size_type pos = std::string::npos;
 	std::string::size_type nextPosition = std::string::npos;
 	std::string connectionType;
 	if( inputString.length() > 0 )
@@ -133,7 +136,13 @@ connectionLine nextConnectionLine( std::string& inputString )
 	nextPosition = inputString.find(' ') + 1;
 	nextPosition = inputString.find(' ', nextPosition) + 1;
 	nextPosition = inputString.find(' ', nextPosition);
-	CL.table1 = inputString.substr(0, nextPosition);
+  CL.table1 = inputString.substr(0, nextPosition);
+
+  pos = CL.table1.find('.');
+  if (pos == std::string::npos)
+    throw std::exception(); // TODO
+  CL.table1JoinType = CL.table1.substr(0, pos);
+  CL.table1 = CL.table1.substr(pos);
 
 	nextPosition = inputString.find(' ', nextPosition + 1);
 	CL.tableAndCol1.push_back( inputString.substr(0, nextPosition) );
@@ -146,6 +155,12 @@ connectionLine nextConnectionLine( std::string& inputString )
 	nextPosition = inputString.find(' ', nextPosition) + 1;
 	nextPosition = inputString.find(' ', nextPosition);
 	CL.table2 = inputString.substr(0, nextPosition);
+  
+  pos = CL.table2.find('.');
+  if (pos == std::string::npos)
+    throw std::exception(); // TODO
+  CL.table2JoinType = CL.table2.substr(0, pos);
+  CL.table2 = CL.table2.substr(pos);
 
 	nextPosition = inputString.find(' ', nextPosition + 1);
 	if (nextPosition == std::string::npos)  
@@ -204,21 +219,6 @@ void getConnectionArray(std::string inputString,
 		}
 		CL = nextConnectionLine( inputString );
 	}
-
-  //if (CA.size() > 1)
-  //{
-  //  for (auto& cl : CA)
-  //  {    
-  //    if (cl.table1 < cl.table2)
-  //    {
-  //      swap(cl.table1, cl.table2);
-  //      swap(cl.tableAndCol1, CL.tableAndCol2);
-  //      for (auto& ct : cl.connectionType)
-  //        ct = invertJoin(ct) ;
-  //    }
-  //  }
-  //}
-
 }
 
 //------------------------------------------------------------------------------
