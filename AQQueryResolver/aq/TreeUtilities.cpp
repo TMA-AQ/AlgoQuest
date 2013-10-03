@@ -566,7 +566,7 @@ void moveFromJoinToWhere( aq::tnode* pStart, Base& BaseDesc )
 		pInner->left = tablesNodes->left;
 		pInner->right = tablesNodes->right;
 		
-    std::swap(condNodes->left, condNodes->right);
+    // std::swap(condNodes->left, condNodes->right);
 		addInnerOuterNodes( condNodes, K_INNER, K_INNER );
 		condNodes->inf = 1;
 
