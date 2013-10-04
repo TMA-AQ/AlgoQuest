@@ -33,7 +33,7 @@ namespace aq
     std::string str;
 
     aq::generate_parent( pNode, NULL );
-    aq::syntax_tree_to_prefix_form( pNode, str );
+    aq::syntax_tree_to_aql_form( pNode, str );
 
     aq::Logger::getInstance().log(AQ_INFO, "---\n");
     aq::Logger::getInstance().log(AQ_INFO, "Get prefix form of query\n");
