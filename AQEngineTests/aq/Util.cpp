@@ -501,6 +501,15 @@ int display(std::ostream& os,
   std::vector<size_t> groupCount(matrix.getGroupBy().size(), 0);
   for (size_t i = 0; i < size && ((o.limit == 0) || (i < o.limit)); ++i)
   {
+    
+    if (o.withIndex)
+    {
+      for (auto& t : m)
+      {
+        os << t.table_id << "[" << t.indexes[i] << "] ; ";
+      }
+      os << " => ";
+    }
 
     for (auto& c : display_order)
     {
