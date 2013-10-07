@@ -11,6 +11,8 @@
 
 #include <string>
 
+#include <boost/python.hpp>
+
 extern "C"
 {
 AQLIB_API int solve_query(const char * query, const char * iniFilename, const char * workingDirectory, 

@@ -18,7 +18,6 @@
 #include <fstream>
 #include <string>
 #include <boost/thread.hpp>
-// #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
@@ -34,12 +33,11 @@
 
 namespace fs = boost::filesystem;
 
+// -------------------------------------------------------------------------------------------------
 char const * greet()
 {
   return "hello world !";
 }
-
-#include <boost/python.hpp>
 
 BOOST_PYTHON_MODULE(aq_manager)
 {
@@ -47,6 +45,7 @@ BOOST_PYTHON_MODULE(aq_manager)
   def("greet", greet);
 }
 
+// -------------------------------------------------------------------------------------------------
 extern int yylineno;
 int yyerror( const char *pszMsg ) 
 {

@@ -14,6 +14,23 @@
 namespace aq
 {
 
+struct stream_cb : public display_cb
+{
+public:
+  stream_cb(std::ostream& _os) : os(_os)
+  {
+  }
+  void push(const std::string& value)
+  {
+    os << value << " ; ";
+  }
+  void next()
+  {
+    os << std::endl;
+  }
+  std::ostream& os;
+};
+
 uint64_t functional_tests(const struct opt& o)
 {
   int rc = 0;
@@ -122,13 +139,14 @@ uint64_t functional_tests(const struct opt& o)
         {
           std::string answerPath(o.dbPath);
           answerPath += "/data_orga/tmp/" + std::string(o.queryIdent) + "/dpy/";
-          rc = aq::check_answer_data(std::cout, answerPath, o, selectedColumns, groupedColumns, orderedColumns, whereValidator);
+          rc = aq::check_answer_data(std::cout, answerPath, o, selectedColumns, groupedColumns, orderedColumns /*, whereValidator*/);
         }
         else
         {
+          display_cb * cb = new stream_cb(std::cout); 
           std::string answerPath(o.dbPath);
           answerPath += "/data_orga/tmp/" + std::string(o.queryIdent) + "/dpy/";
-          rc = aq::display(std::cout, answerPath, o, selectedColumns);
+          rc = aq::display(cb, answerPath, o, selectedColumns);
         }
       }
       

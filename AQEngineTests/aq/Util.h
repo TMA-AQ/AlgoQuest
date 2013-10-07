@@ -1,8 +1,9 @@
 #ifndef __UTIL_H__
 #define __UTIL_H__
 
-#include "WhereValidator.h"
+// #include "WhereValidator.h"
 
+# include <aq/Base.h>
 #include <aq/AQMatrix.h>
 #include <string>
 #include <vector>
@@ -31,6 +32,12 @@ struct opt
   bool withIndex;
 };
 
+struct display_cb
+{
+  virtual void push(const std::string& value) = 0;
+  virtual void next() = 0;
+};
+
 uint64_t functional_tests(const struct opt& o);
 
 int generate_database(const char * path, const char * name);
@@ -45,9 +52,10 @@ int check_answer_data(std::ostream& os,
                       const struct opt& o,
                       const std::vector<std::string>& selectedColumns,
                       const std::vector<std::string>& groupedColumns,
-                      const std::vector<std::string>& orderedColumns,
-                      WhereValidator& whereValidator);
-int display(std::ostream& os,
+                      const std::vector<std::string>& orderedColumns
+                      // WhereValidator& whereValidator
+                      );
+int display(display_cb *,
             const std::string& answerPath,
             const struct opt& o,
             const std::vector<std::string>& selectedColumns);

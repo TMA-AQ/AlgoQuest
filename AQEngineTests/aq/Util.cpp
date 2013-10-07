@@ -206,8 +206,9 @@ int check_answer_data(std::ostream& os,
                       const struct opt& o,
                       const std::vector<std::string>& selectedColumns,
                       const std::vector<std::string>& groupedColumns, 
-                      const std::vector<std::string>& orderedColumns,
-                      WhereValidator& whereValidator)
+                      const std::vector<std::string>& orderedColumns
+                      // WhereValidator& whereValidator
+                      )
 {
   std::string baseFilename(o.dbPath);
   baseFilename += "/base_struct/base.aqb";
@@ -219,7 +220,7 @@ int check_answer_data(std::ostream& os,
   baseDesc.loadFromRawFile(baseFilename.c_str());
 
   // Set the baseDesc for the Where Conditions
-  whereValidator.setBaseDesc(baseDesc);
+  // whereValidator.setBaseDesc(baseDesc);
 
 
   aq::AQMatrix matrix(settings, baseDesc);
@@ -402,11 +403,11 @@ int check_answer_data(std::ostream& os,
       }
     }
 
-    if (whereValidator.check(matrix, columnMappers, i) == false)
-    {
-      aq::Logger::getInstance().log(AQ_ERROR, "WHERE VALIDATOR FAILED\n");
-      return -1;
-    }
+    //if (whereValidator.check(matrix, columnMappers, i) == false)
+    //{
+    //  aq::Logger::getInstance().log(AQ_ERROR, "WHERE VALIDATOR FAILED\n");
+    //  return -1;
+    //}
 
   }
 
@@ -414,11 +415,12 @@ int check_answer_data(std::ostream& os,
 }
 
 // ------------------------------------------------------------------------------
-int display(std::ostream& os,
+int display(display_cb * cb,
             const std::string& answerPath,
             const struct opt& o,
             const std::vector<std::string>& selectedColumns)
 {
+  std::stringstream ss;
   std::string baseFilename(o.dbPath);
   baseFilename += "/base_struct/base.aqb";
   std::string vdgPath(o.dbPath);
@@ -434,7 +436,6 @@ int display(std::ostream& os,
   matrix.load(answerPath.c_str(), tableIDs);
 
   aq::Logger::getInstance().log(AQ_LOG_INFO, "AQMatrix: \n");
-  std::stringstream ss;
   ss << tableIDs.size() << " tables: [ ";
   std::for_each(tableIDs.begin(), tableIDs.end(), [&] (long long id) { ss << id << " "; });
   ss << "]";
@@ -487,13 +488,21 @@ int display(std::ostream& os,
       }
     }
   }
-  
+
+  if (o.withIndex)
+  {
+    for (auto& t : m)
+    {
+      ss.str("");
+      ss << "TABLE " << t.table_id; // FIXME : put table's name
+      cb->push(ss.str());
+    }
+  }
+
   for (auto& sc : selectedColumns)
-    os << sc << " ; ";
+    cb->push(sc);
   if (o.withCount)
-    os << "COUNT" << std::endl;
-  else
-    os << std::endl;
+    cb->push("COUNT");
   
   // print data
   char buf[128];
@@ -502,13 +511,16 @@ int display(std::ostream& os,
   for (size_t i = 0; i < size && ((o.limit == 0) || (i < o.limit)); ++i)
   {
     
+    cb->next();
+
     if (o.withIndex)
     {
       for (auto& t : m)
       {
-        os << t.table_id << "[" << t.indexes[i] << "] ; ";
+        ss.str("");
+        ss << t.indexes[i];
+        cb->push(ss.str());
       }
-      os << " => ";
     }
 
     for (auto& c : display_order)
@@ -518,22 +530,23 @@ int display(std::ostream& os,
       auto index = m[tindex].indexes[i];
       if (index == 0)
       {
-          os << "NULL ; " ;
+          cb->push("NULL");
       }
       else
       {
         aq::ColumnItem::Ptr item(new aq::ColumnItem);
         cm->loadValue(index - 1, *item);
         item->toString(buf, cm->getType());
-        os << buf << " ; ";
+        cb->push(buf);
       }
     }
 
     if (o.withCount)
     {
-      os << matrix.getCount()[i];
+      ss.str("");
+      ss << matrix.getCount()[i];
+      cb->push(ss.str());
     }
-    os << std::endl;
 
   }
   return 0;
