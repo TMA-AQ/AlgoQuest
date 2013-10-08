@@ -251,36 +251,12 @@ void AQMatrix::loadHeader(const char * filePath, std::vector<long long>& tableID
 
 void AQMatrix::loadData(const char * filePath)
 {
-  this->answerFormat = std::string(filePath);
-  this->answerFormat += "/AnswerData%.5u.a";
-  uint64_t nbPacket = (this->nbRows / aq::packet_size) + 1; 
-  char * answerData = (char*)::malloc(strlen(filePath) + 18 + 1);
-  size_t count_tmp = 0;
-  for (uint64_t packet = 0; packet < nbPacket; ++packet)
+  this->prepareData(filePath);
+  for (uint64_t packet = 0; packet < this->nbPacket; ++packet)
   {
-    sprintf(answerData, this->answerFormat.c_str(), packet);
-    FILE * fd = fopen(answerData, "rb");
-    if (fd == NULL)
-    {
-      free(answerData);
-      throw aq::generic_error(aq::generic_error::AQ_ENGINE, "cannot find aq matrix data file %s", answerData);
-    }
-    uint64_t value;
-    for (size_t i = 0; (i < aq::packet_size) && this->count.size() < nbRows; ++i)
-    {
-      for (size_t c = 0; c < this->matrix.size(); ++c)
-      {
-        fread(&value, sizeof(uint64_t), 1, fd);
-        this->matrix[c].indexes.push_back(value);
-      }
-      fread(&value, sizeof(uint64_t), 1, fd);
-      this->count.push_back(value);
-      count_tmp += value;
-    }
-    fclose(fd);
+    this->loadNextPacket();
   }
-  free(answerData);
-  if ((this->totalCount != count_tmp) || (this->nbRows != this->count.size()))
+  if (this->nbRows != this->count.size())
   {
     throw aq::generic_error(aq::generic_error::AQ_ENGINE, "bad matrix data file");
   }
@@ -290,7 +266,7 @@ void AQMatrix::prepareData(const char * filePath)
 {
   this->nbRowsParsed = 0;
   this->packet = 0;
-  this->nbPacket = this->nbRows / aq::packet_size; 
+  this->nbPacket = (this->nbRows / aq::packet_size) + 1; 
   this->answerFormat = std::string(filePath);
   this->answerFormat += "/AnswerData%.5u.a";
 }
@@ -322,6 +298,10 @@ void AQMatrix::loadNextPacket()
   {
     assert(this->totalCount == this->count.size());
     assert(this->nbRows == this->count.size());
+    if ((this->totalCount != this->count.size()) || (this->nbRows != this->count.size()))
+    {
+      throw aq::generic_error(aq::generic_error::AQ_ENGINE, "bad matrix data file");
+    }
   }
 }
 

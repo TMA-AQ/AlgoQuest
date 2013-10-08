@@ -49,7 +49,8 @@ public:
   void loadData(const char * filePath);
   void prepareData(const char * filePath);
   void loadNextPacket();
-  
+  template <class CB> void readData(CB& cb);
+
 	/// Each column in the table holds a list of row indexes.
 	/// Compute a column containing unique and sorted row indexes.
 	/// Also compute a mapping between the original row indexes and the sorted and unique indexes
@@ -92,6 +93,33 @@ private:
   size_t packet;
 	bool hasCount;
 };
+
+template <class CB>
+void AQMatrix::readData(CB& cb)
+{
+  char * answerData = (char*)::malloc(this->answerFormat.size() + 1);
+  sprintf(answerData, this->answerFormat.c_str(), this->packet);
+  FILE * fd = fopen(answerData, "rb");
+  if (fd == NULL)
+  {
+    throw aq::generic_error(aq::generic_error::AQ_ENGINE, "cannot find aq matrix data file %s", answerData);
+  }
+  uint64_t value;
+  std::vector<size_t> rows(this->matrix.size() + 1, 0);
+  for (size_t i = 0; (i < aq::packet_size) && (i < nbRows); ++i)
+  {
+    for (size_t c = 0; c < this->matrix.size(); ++c)
+    {
+      fread(&value, sizeof(uint64_t), 1, fd);
+      rows[c] = value;
+    }
+    fread(&value, sizeof(uint64_t), 1, fd);
+    rows[this->matrix.size()] = value;
+    cb.handle(rows);
+  }
+  fclose(fd);
+  this->packet += 1;
+}
 
 }
 

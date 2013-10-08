@@ -415,6 +415,65 @@ int check_answer_data(std::ostream& os,
 }
 
 // ------------------------------------------------------------------------------
+class print_data
+{
+public:
+  print_data(
+    const struct opt& _o,
+    display_cb * _cb, 
+    std::vector<std::pair<size_t, boost::shared_ptr<aq::ColumnMapper_Intf> > >& _display_order) 
+    : o(_o), cb(_cb), display_order(_display_order)
+  {
+  }
+  void handle(std::vector<size_t>& rows)
+  {
+    cb->next();
+
+    if (o.withIndex)
+    {
+      for (size_t i = 0; i < rows.size() - 1; i++)
+      {
+        ss.str("");
+        ss << rows[i];
+        cb->push(ss.str());
+      }
+    }
+
+    for (auto& c : display_order)
+    {
+      auto& tindex = c.first;
+      auto& cm = c.second;
+      auto index = rows[tindex];
+      if (index == 0)
+      {
+          cb->push("NULL");
+      }
+      else
+      {
+        aq::ColumnItem::Ptr item(new aq::ColumnItem);
+        cm->loadValue(index - 1, *item);
+        item->toString(buf, cm->getType());
+        cb->push(buf);
+      }
+    }
+
+    if (o.withCount)
+    {
+      ss.str("");
+      ss << *(rows.rbegin());
+      cb->push(ss.str());
+    }
+
+  }
+private:
+  char buf[128];
+  std::stringstream ss;
+  const struct opt& o;
+  display_cb * cb;
+  std::vector<std::pair<size_t, boost::shared_ptr<aq::ColumnMapper_Intf> > >& display_order;
+};
+
+// ------------------------------------------------------------------------------
 int display(display_cb * cb,
             const std::string& answerPath,
             const struct opt& o,
@@ -430,27 +489,30 @@ int display(display_cb * cb,
   aq::Base baseDesc;
   baseDesc.loadFromRawFile(baseFilename.c_str());
 
-  aq::AQMatrix matrix(settings, baseDesc);
+  aq::AQMatrix aqMatrix(settings, baseDesc);
   
   std::vector<long long> tableIDs;
-  matrix.load(answerPath.c_str(), tableIDs);
+  //matrix.load(answerPath.c_str(), tableIDs);
+  aqMatrix.loadHeader(answerPath.c_str(), tableIDs);
+  aqMatrix.prepareData(answerPath.c_str());
+  //matrix.loadNextPacket();
 
   aq::Logger::getInstance().log(AQ_LOG_INFO, "AQMatrix: \n");
   ss << tableIDs.size() << " tables: [ ";
   std::for_each(tableIDs.begin(), tableIDs.end(), [&] (long long id) { ss << id << " "; });
   ss << "]";
   aq::Logger::getInstance().log(AQ_LOG_INFO, "\t%s", ss.str().c_str());
-  aq::Logger::getInstance().log(AQ_LOG_INFO, "\t%u results", matrix.getNbRows());
-  aq::Logger::getInstance().log(AQ_LOG_INFO, "\t%u groups", matrix.getGroupBy().size());
+  aq::Logger::getInstance().log(AQ_LOG_INFO, "\t%u results", aqMatrix.getNbRows());
+  aq::Logger::getInstance().log(AQ_LOG_INFO, "\t%u groups", aqMatrix.getGroupBy().size());
   
-  const aq::AQMatrix::matrix_t& m = matrix.getMatrix();
+  const aq::AQMatrix::matrix_t& matrix = aqMatrix.getMatrix();
 
   // check size, print column name and prepare column mapping
   size_t size = 0;
   std::vector<std::pair<size_t, boost::shared_ptr<aq::ColumnMapper_Intf> > > display_order(selectedColumns.size());
-  for (size_t tindex = 0; tindex < m.size(); tindex++)
+  for (size_t tindex = 0; tindex < matrix.size(); tindex++)
   {
-    auto& t = m[tindex];
+    auto& t = matrix[tindex];
     if (size == 0)
     {
       size = t.indexes.size();
@@ -491,7 +553,7 @@ int display(display_cb * cb,
 
   if (o.withIndex)
   {
-    for (auto& t : m)
+    for (auto& t : matrix)
     {
       ss.str("");
       ss << "TABLE " << t.table_id; // FIXME : put table's name
@@ -505,49 +567,54 @@ int display(display_cb * cb,
     cb->push("COUNT");
   
   // print data
-  char buf[128];
-  std::set<v_item_t, grp_cmp> groups;
-  std::vector<size_t> groupCount(matrix.getGroupBy().size(), 0);
-  for (size_t i = 0; i < size && ((o.limit == 0) || (i < o.limit)); ++i)
+  if (size == 0)
   {
-    
-    cb->next();
-
-    if (o.withIndex)
+    print_data pd_cb(o, cb, display_order);
+    aqMatrix.readData<print_data>(pd_cb);
+  }
+  else
+  {
+    char buf[128];
+    for (size_t i = 0; i < size && ((o.limit == 0) || (i < o.limit)); ++i)
     {
-      for (auto& t : m)
+
+      cb->next();
+
+      if (o.withIndex)
+      {
+        for (auto& t : matrix)
+        {
+          ss.str("");
+          ss << t.indexes[i];
+          cb->push(ss.str());
+        }
+      }
+
+      for (auto& c : display_order)
+      {
+        auto& tindex = c.first;
+        auto& cm = c.second;
+        auto index = matrix[tindex].indexes[i];
+        if (index == 0)
+        {
+          cb->push("NULL");
+        }
+        else
+        {
+          aq::ColumnItem::Ptr item(new aq::ColumnItem);
+          cm->loadValue(index - 1, *item);
+          item->toString(buf, cm->getType());
+          cb->push(buf);
+        }
+      }
+
+      if (o.withCount)
       {
         ss.str("");
-        ss << t.indexes[i];
+        ss << aqMatrix.getCount()[i];
         cb->push(ss.str());
       }
     }
-
-    for (auto& c : display_order)
-    {
-      auto& tindex = c.first;
-      auto& cm = c.second;
-      auto index = m[tindex].indexes[i];
-      if (index == 0)
-      {
-          cb->push("NULL");
-      }
-      else
-      {
-        aq::ColumnItem::Ptr item(new aq::ColumnItem);
-        cm->loadValue(index - 1, *item);
-        item->toString(buf, cm->getType());
-        cb->push(buf);
-      }
-    }
-
-    if (o.withCount)
-    {
-      ss.str("");
-      ss << matrix.getCount()[i];
-      cb->push(ss.str());
-    }
-
   }
   return 0;
 }
