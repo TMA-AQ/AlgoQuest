@@ -2,6 +2,7 @@
 #include "ID2Str.h"
 #include <vector>
 #include <map>
+#include <set>
 #include <cassert>
 #include <boost/bind.hpp>
 #include <boost/algorithm/string.hpp>
@@ -67,10 +68,11 @@ void AssembleJeq(	std::vector<connectionLine>& connectionArray,
 ///
 void WriteJeq(	std::string& inputString,
 				const std::vector<kjeqConnection>& orderedConnections,
-				const std::vector<connectionLine>& connectionArray );
+				const std::vector<connectionLine>& connectionArray,
+        bool add_active_neutral_filter );
 
 //------------------------------------------------------------------------------
-void ParseJeq( std::string& inputString )
+void ParseJeq( std::string& inputString, bool add_active_neutral_filter )
 {
 	std::vector<connectionLine> connectionArray;
 	std::map<std::string, int> tablesListAndOccurrence;
@@ -79,7 +81,7 @@ void ParseJeq( std::string& inputString )
 		return;
 	std::vector<kjeqConnection> orderedConnections;
 	AssembleJeq( connectionArray, tablesListAndOccurrence, orderedConnections );
-	WriteJeq( inputString, orderedConnections, connectionArray );
+	WriteJeq( inputString, orderedConnections, connectionArray, add_active_neutral_filter );
 }
 
 //------------------------------------------------------------------------------
@@ -98,7 +100,7 @@ void findJoin( const std::string& inputString, std::string& joinType, std::strin
 }
 
 //------------------------------------------------------------------------------
-std::string invertJoin( std::string& join )
+std::string invertJoin( const std::string& join )
 {
 	int idx = 0;
 	for( ; idx < nrJoinTypes; ++idx )
@@ -409,9 +411,29 @@ connectionLine findConnection(const std::vector<connectionLine>& connectionArray
 }
 
 //------------------------------------------------------------------------------
+connectionLine invertConnection(const connectionLine& cL)
+{
+  connectionLine cli;
+  for (auto& ct : cL.connectionType)
+  {
+    cli.connectionType.push_back(invertJoin(ct));
+  }
+  cli.isUsed = cL.isUsed;
+  cli.lineId = cL.lineId;
+  cli.table1 = cL.table2;
+  cli.table1JoinType = cL.table2JoinType;
+  cli.table2 = cL.table1;
+  cli.table2JoinType = cL.table1JoinType;
+  cli.tableAndCol1 = cL.tableAndCol2;
+  cli.tableAndCol2 = cL.tableAndCol1;
+  return cli;
+}
+
+//------------------------------------------------------------------------------
 void WriteJeq(std::string& inputString,
               const std::vector<kjeqConnection>& orderedConnections,
-              const std::vector<connectionLine>& connectionArray )
+              const std::vector<connectionLine>& connectionArray,
+              bool add_active_neutral_filter)
 {
 	std::string andClause = "AND ";
 	connectionLine cL;
@@ -436,30 +458,59 @@ void WriteJeq(std::string& inputString,
 	// Step 2 : add K_JEQ conditions in the right order
 
   output += '\n';
+  bool table_prc_is_neutral = false;
+  std::string table_src_prec;
+  std::set<std::string> tables;
 	for( size_t idx = 0; idx < orderedConnections.size(); ++idx )
 	{
 		const kjeqConnection& kC = orderedConnections[idx];
 		cL = findConnection( connectionArray, kC );
+    
+    assert(((kC.tableSource == cL.table1) && (kC.tableDestination == cL.table2)) || ((kC.tableSource == cL.table2) && (kC.tableDestination == cL.table1)));
+    bool invert = (kC.tableSource != cL.table2) && ((connectionArray.size() > 1) || (cL.connectionType.size() > 1));
+    if (invert)
+    {
+      cL = invertConnection(cL);
+    }
+
 		for( size_t idx2 = 0; idx2 < cL.tableAndCol1.size(); ++idx2 )
 		{
-      assert(((kC.tableSource == cL.table1) && (kC.tableDestination == cL.table2)) || ((kC.tableSource == cL.table2) && (kC.tableDestination == cL.table1)));
-      bool invert = (kC.tableSource != cL.table2) && ((connectionArray.size() > 1) || (cL.connectionType.size() > 1));
-			if (!invert)
-			{
-				output += cL.connectionType[idx2] + " ";
-				output += cL.tableAndCol1[idx2];
-				output += " ";
-				output += cL.tableAndCol2[idx2];
-			}
-			else
-			{
-				output += invertJoin( cL.connectionType[idx2] ) + " ";
-				output += cL.tableAndCol2[idx2];
-				output += " ";
-				output += cL.tableAndCol1[idx2];
-			}
-			output += '\n';
+      std::string source, destination;
+      
+      if (add_active_neutral_filter)
+        source = table_prc_is_neutral ? "K_NEUTRAL" : "K_ACTIVE";
+      source += " " + cL.tableAndCol2[idx2];
+      
+      if (add_active_neutral_filter)
+      {
+        if (tables.find(cL.table1) != tables.end())
+        {
+          if (cL.table1 == table_src_prec)
+          {
+            destination = "K_NEUTRAL";
+            table_prc_is_neutral = true;
+          }
+          else
+          {
+            destination = "K_FILTER ";
+            table_prc_is_neutral = false;
+          }
+        }
+        else
+        {
+          destination = "K_ACTIVE";
+          table_prc_is_neutral = false;
+        }
+      }
+      destination += " ";
+      destination += cL.tableAndCol1[idx2];
+
+      output += cL.connectionType[idx2] + " " + destination + " " + source + "\n";
 		}
+
+    table_src_prec = cL.table2;
+    tables.insert(cL.table1);
+    tables.insert(cL.table2);
 	}
 
 	// Step 3 : localize the conditions from the input request and delete them
@@ -492,6 +543,11 @@ void WriteJeq(std::string& inputString,
 		firstIndex += andClause.length();
 
 	inputString.insert( firstIndex, output );
+}
+
+
+void AddActiveNeutralFilter(std::string&)
+{
 }
 
 }
