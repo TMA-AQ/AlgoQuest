@@ -86,8 +86,15 @@ int generate_working_directories(const struct opt& o, std::string& iniFilename)
   p = boost::filesystem::path(o.workingPath + "data_orga/tmp/" + o.queryIdent);
   if (boost::filesystem::exists(p))
   {
-    std::cerr << p << " already exist : STOP" << std::endl;
-    exit(-1);
+    if (o.force)
+    {
+      boost::filesystem::remove_all(p);
+    }
+    else
+    {
+      // std::cerr << p << " already exist" << std::endl;
+      throw std::exception(std::string(p.string() + " already exist").c_str());
+    }
   }
   boost::filesystem::create_directory(p);
   p = boost::filesystem::path(o.workingPath + "data_orga/tmp/" + o.queryIdent + "/dpy");
@@ -439,23 +446,27 @@ public:
       }
     }
 
-    for (auto& c : display_order)
+    unsigned int i = o.withCount ? 1 : *(rows.rbegin());
+    do
     {
-      auto& tindex = c.first;
-      auto& cm = c.second;
-      auto index = rows[tindex];
-      if (index == 0)
+      for (auto& c : display_order)
       {
+        auto& tindex = c.first;
+        auto& cm = c.second;
+        auto index = rows[tindex];
+        if (index == 0)
+        {
           cb->push("NULL");
+        }
+        else
+        {
+          aq::ColumnItem::Ptr item(new aq::ColumnItem);
+          cm->loadValue(index - 1, *item);
+          item->toString(buf, cm->getType());
+          cb->push(buf);
+        }
       }
-      else
-      {
-        aq::ColumnItem::Ptr item(new aq::ColumnItem);
-        cm->loadValue(index - 1, *item);
-        item->toString(buf, cm->getType());
-        cb->push(buf);
-      }
-    }
+    } while (--i > 0);
 
     if (o.withCount)
     {
@@ -492,10 +503,9 @@ int display(display_cb * cb,
   aq::AQMatrix aqMatrix(settings, baseDesc);
   
   std::vector<long long> tableIDs;
-  //matrix.load(answerPath.c_str(), tableIDs);
-  aqMatrix.loadHeader(answerPath.c_str(), tableIDs);
-  aqMatrix.prepareData(answerPath.c_str());
-  //matrix.loadNextPacket();
+  aqMatrix.load(answerPath.c_str(), tableIDs);
+  //aqMatrix.loadHeader(answerPath.c_str(), tableIDs);
+  //aqMatrix.prepareData(answerPath.c_str());
 
   aq::Logger::getInstance().log(AQ_LOG_INFO, "AQMatrix: \n");
   ss << tableIDs.size() << " tables: [ ";
@@ -602,9 +612,15 @@ int display(display_cb * cb,
         else
         {
           aq::ColumnItem::Ptr item(new aq::ColumnItem);
-          cm->loadValue(index - 1, *item);
-          item->toString(buf, cm->getType());
-          cb->push(buf);
+          if (cm->loadValue(index - 1, *item) == 0)
+          {
+            item->toString(buf, cm->getType());
+            cb->push(buf);
+          }
+          else
+          {
+            throw aq::generic_error(aq::generic_error::INVALID_TABLE, "");
+          }
         }
       }
 

@@ -30,6 +30,7 @@ struct opt
   bool display;
   bool withCount;
   bool withIndex;
+  bool force;
 };
 
 struct display_cb
