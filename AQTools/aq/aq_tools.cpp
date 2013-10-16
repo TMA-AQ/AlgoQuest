@@ -10,7 +10,10 @@
 #include <aq/TreeUtilities.h>
 #include <aq/db_loader/DatabaseLoader.h>
 #include <aq/Logger.h>
+#include <aq/QueryReader.h>
 #include "AQEngineSimulate.h"
+#include <io.h>
+#include <cstdio>
 #include <iostream>
 #include <list>
 #include <fstream>
@@ -34,6 +37,8 @@
 
 // fixme
 #include "Link.h"
+
+#define AQ_TOOLS_VERSION "0.1.0"
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
@@ -243,7 +248,7 @@ int processQuery(const std::string& query, aq::TProjectSettings& settings, aq::B
 				return EXIT_FAILURE;
 			}
 
-#if defined(_DEBUG)
+#if defined(_DEBUG) && defined(_TRACE)
 			std::cout << *pNode << std::endl;
 #endif
 
@@ -320,60 +325,47 @@ int processQuery(const std::string& query, aq::TProjectSettings& settings, aq::B
 }
 
 // -------------------------------------------------------------------------------------------------
-int processSQLQueries(std::list<std::string>::const_iterator itBegin, std::list<std::string>::const_iterator itEnd, 
+int processSQLQueries(const std::string& query, 
                       const aq::TProjectSettings& settingsBase, aq::Base& baseDesc, bool simulateAQEngine,
                       bool display, bool clean, const std::string queryIdent, bool force)
 {
 
-	unsigned int i = 1;
-	std::list<std::string> queriesKO;
-	for (std::list<std::string>::const_iterator it = itBegin; it != itEnd; ++it)
-	{
+  aq::Logger::getInstance().log(AQ_INFO, "%s\n", query.c_str());
+  boost::posix_time::ptime begin(boost::posix_time::microsec_clock::local_time());
 
-		aq::Logger::getInstance().log(AQ_INFO, "'%s'\n", (*it).c_str());
-		boost::posix_time::ptime begin(boost::posix_time::microsec_clock::local_time());
+  //
+  // Settings
+  aq::TProjectSettings settings(settingsBase);
 
-    //
-    // Settings
-		aq::TProjectSettings settings(settingsBase);
+  //
+  // Load AQ engine
+  aq::AQEngine_Intf * aq_engine;
+  if (simulateAQEngine)
+  {
+    aq::Logger::getInstance().log(AQ_INFO, "Do not use aq engine\n");
+    aq_engine = new aq::AQEngineSimulate(baseDesc, settings);
+  }
+  else
+  {
+    aq::Logger::getInstance().log(AQ_INFO, "Use aq engine: '%s'\n", settings.szEnginePath.c_str());
+    aq_engine = new aq::AQEngineSystem(baseDesc, settings);
+  }
 
-		//
-		// Load AQ engine
-		aq::AQEngine_Intf * aq_engine;
-		if (simulateAQEngine)
-		{
-			aq::Logger::getInstance().log(AQ_INFO, "Do not use aq engine\n");
-			aq_engine = new aq::AQEngineSimulate(baseDesc, settings);
-		}
-		else
-		{
-			aq::Logger::getInstance().log(AQ_INFO, "Use aq engine: '%s'\n", settings.szEnginePath.c_str());
-			aq_engine = new aq::AQEngineSystem(baseDesc, settings);
-		}
-    
-		//
-		// prepare and process query
-		std::string answer;
+  //
+  // prepare and process query
+  std::string answer;
 
-		if (!((prepareQuery(*it, settingsBase, baseDesc, settings, answer, queryIdent, force) == EXIT_SUCCESS) &&
-				  (processQuery(*it, settings, baseDesc, aq_engine, answer, display, clean) == EXIT_SUCCESS)))
-		{
-			queriesKO.push_back(*it);
-		}
-
-		boost::posix_time::ptime end(boost::posix_time::microsec_clock::local_time());
-		std::ostringstream oss;
-		oss << "Query Time elapsed: " << (end - begin);
-		aq::Logger::getInstance().log(AQ_NOTICE, "%s\n", oss.str().c_str());
-	}
-
-	if (queriesKO.size())
-	{
-		aq::Logger::getInstance().log(AQ_DEBUG, "BAD QUERIES:\n");
-		std::for_each(queriesKO.begin(), queriesKO.end(), [] (const std::string& q) {
-			aq::Logger::getInstance().log(AQ_DEBUG, "%s\n", q.c_str());
-		});
-    failedQueries += queriesKO.size();
+  if (!((prepareQuery(query, settingsBase, baseDesc, settings, answer, queryIdent, force) == EXIT_SUCCESS) &&
+    (processQuery(query, settings, baseDesc, aq_engine, answer, display, clean) == EXIT_SUCCESS)))
+  {
+    aq::Logger::getInstance().log(AQ_DEBUG, "QUERY FAILED:\n%s\n", query.c_str());
+  }
+  else
+  {
+    boost::posix_time::ptime end(boost::posix_time::microsec_clock::local_time());
+    std::ostringstream oss;
+    oss << "Query Time elapsed: " << (end - begin);
+    aq::Logger::getInstance().log(AQ_NOTICE, "%s\n", oss.str().c_str());
   }
 
 	return EXIT_SUCCESS;
@@ -464,7 +456,7 @@ int main(int argc, char**argv)
 		po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
 		po::notify(vm);    
 
-		if (vm.count("help") || (argc <= 1) || ((oldArgs.size() != 0 ) && (oldArgs.size() != 2)))
+		if (vm.count("help"))
 		{
 			std::cout << desc << "\n";
 			return 1;
@@ -505,15 +497,6 @@ int main(int argc, char**argv)
     }
 
 		//
-		// Check old args
-		// std::copy(oldArgs.begin(), oldArgs.end(), std::ostream_iterator<std::string>(std::cout, " "));
-		if (oldArgs.size() == 2)
-		{
-			propertiesFile = oldArgs[0];
-			queryIdent = oldArgs[1];
-		}
-		
-		//
 		// read ini file
 		if (propertiesFile != "")
 		{
@@ -537,7 +520,12 @@ int main(int argc, char**argv)
 		aq::Base baseDesc;
 		if (baseDescr == "")
 			baseDescr = settings.szDBDescFN;
-		aq::Logger::getInstance().log(AQ_INFO, "load base %s\n", baseDescr.c_str());
+    if (baseDescr == "")
+    {
+      std::cerr << "no database specify" << std::endl;
+      return EXIT_FAILURE;
+    }
+    aq::Logger::getInstance().log(AQ_INFO, "load base %s\n", baseDescr.c_str());
     std::fstream bdFile(baseDescr.c_str());
     aq::base_t baseDescHolder;
     if (baseDescr.substr(baseDescr.size() - 4) == ".xml")
@@ -571,129 +559,59 @@ int main(int argc, char**argv)
 			return EXIT_SUCCESS;
 		}
 
-		//
-		// keep backward compatibility
-		if (oldArgs.size() == 2)
-		{
-			//
-			// Log file
-			 std::string logFilename = settings.szRootPath + "/calculus/" + queryIdent + "/aq_query_resolver.log";
-			 aq::Logger::getInstance().setLocalFile(logFilename.c_str());
-			 aq::Logger::getInstance().setLevel(AQ_LOG_DEBUG);
+    //
+    // print info if use as command line tool
+    if (_isatty(_fileno(stdin)) && (sqlQueriesFile == ""))
+    {
+      std::cout << "Welcome to AlgoQuest Monitor version " << AQ_TOOLS_VERSION << std::endl;
+      std::cout << "Copyright (c) 2013, AlgoQuest System. All rights reserved." << std::endl;
+      std::cout << std::endl;
+      std::cout << "Connected to database " << settings.szRootPath << std::endl;
+      std::cout << std::endl;
+    }
 
-			 std::cout << "log in " << logFilename << std::endl;
+    //
+    // parse inpout
+    aq::QueryReader * reader = 0;
+    std::fstream * fqueries = 0;
 
-			//
-			// read sql query
-			settings.changeIdent(queryIdent);
-			settings.computeAnswer = true;
-			std::ifstream queryFile(settings.szSQLReqFN);
-			std::string query;
-			std::string line;
-			while (std::getline(queryFile, line))
-			{
-				query += " ";
-				std::size_t pos = line.find("--");
-				if (pos != std::string::npos)
-					line = line.erase(pos);
-				boost::algorithm::trim(line);
-				if (((char)line[0] == (char)0xEF) && ((char)line[1] == (char)0xBB) && ((char)line[2] == (char)0xBF))
-					query += line.substr(3);
-				else
-					query += line;
-			}
+    if (sqlQueriesFile != "")
+    {
+      boost::filesystem::path p(sqlQueriesFile);
+      if (!boost::filesystem::exists(p)) 
+      {
+        std::cerr << "cannot find file " << p << std::endl;
+        return -1;
+      }
 
-			//
-			// write ini file (it is needed for now by AQEngine)
-			std::ofstream iniFile(settings.iniFile.c_str());
-			settings.writeAQEngineIni(iniFile);
-			iniFile.close();
+      fqueries = new std::fstream(sqlQueriesFile.c_str(), std::ifstream::in);
+      reader = new aq::QueryReader(*fqueries);
+    }
+    else
+    {
+      if (_isatty(_fileno(stdin)))
+        reader = new aq::QueryReader(std::cin, "aq");
+      else
+        reader = new aq::QueryReader(std::cin);
+    }
 
-			//
-			// process
-			std::string answer;
-      aq::AQEngine_Intf * aq_engine = new aq::AQEngineSystem(baseDesc, settings);
-			processQuery(query, settings, baseDesc, aq_engine, answer, false, false);
-
-		}
-		else // new version
-		{
-
-			//
-			// load sql queries
-			std::list<std::string> queries;
-			if (sqlQueriesFile != "")
-			{
-				std::string line;
-				std::ifstream fin(sqlQueriesFile.c_str(), std::ifstream::in);
-				std::string currentQuery = "";
-				while (std::getline(fin, line))
-				{
-					boost::algorithm::trim(line);
-					std::string::size_type pos = line.find("--");
-					if (pos != std::string::npos)
-						line.erase(pos);
-					if ((line == ""))
-						continue;
-					currentQuery += " " + line;
-					pos = line.find(";");
-					if (pos != std::string::npos)
-					{
-            boost::trim(currentQuery);
-            if (currentQuery == "exit;") 
-              break;
-						queries.push_back(currentQuery);
-						currentQuery = "";
-					}
-				}
-			}
-			else if (sqlQuery != "")
-			{
-				queries.push_back(sqlQuery);
-			}
-			else
-			{
-				aq::Logger::getInstance().log(AQ_ERROR, "you need to specify a sql query\n");
-			}
-
-			if (transform)
-			{
-				std::for_each(queries.begin(), queries.end(), [&] (const std::string& query) {
-					transformQuery(query, settings, baseDesc);
-				});
-				return 0;
-			}
-
-			if (aqMatrixFileName != "")
-			{
-				std::for_each(queries.begin(), queries.end(), [&] (const std::string& query) {
-					processAQMatrix(query, aqMatrixFileName, answerFileName, settings, baseDesc);
-				});
-				return 0;
-			}
-
-			//
-			// distribute bunch of sql queries to each thread fo pool
-			unsigned int i = 1;
-			boost::posix_time::ptime fullBegin(boost::posix_time::microsec_clock::local_time());
-			boost::thread_group grp;
-			std::list<std::string>::const_iterator itBegin = queries.begin();
-			std::list<std::string>::const_iterator itEnd = queries.begin();
-			while (itBegin != queries.end())
-			{
-				// std::advance(itEnd, queries.size() / worker); // fixme: doesn't work under visual !!!
-				for (unsigned int i = 0; (i < queries.size() / worker) && (itEnd != queries.end()); i++) ++itEnd;
-				grp.create_thread(boost::bind(processSQLQueries, itBegin, itEnd, settings, baseDesc, simulateAQEngine, display, clean, queryIdent, force));
-				itBegin = itEnd;
-			}
-			grp.join_all();
-			boost::posix_time::ptime fullEnd(boost::posix_time::microsec_clock::local_time());
-			std::ostringstream oss;
-			oss << "Full Time elapsed: " << (fullEnd - fullBegin);
-			aq::Logger::getInstance().log(AQ_NOTICE, "%s\n", oss.str().c_str());
-
-		}
-	}
+    std::string query;
+    while ((query = reader->next()) != "")
+    {
+      if (transform)
+      {
+        transformQuery(query, settings, baseDesc);
+      }
+      else if (aqMatrixFileName != "")
+      {
+        processAQMatrix(query, aqMatrixFileName, answerFileName, settings, baseDesc);
+      }
+      else 
+      {
+        processSQLQueries(query, settings, baseDesc, simulateAQEngine, display, clean, queryIdent, force);
+      }
+    }
+  }
 	catch (const aq::generic_error& error)
 	{
 		std::cerr << "generic error: " << error.what() << std::endl;

@@ -71,13 +71,14 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <TargetName>aqe</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>aq-engine-tests</TargetName>
+    <TargetName>aqe</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -151,7 +152,6 @@
   <ItemGroup>
     <ClCompile Include="aq\FunctionalTests.cpp" />
     <ClCompile Include="aq\AQEngineTests.cpp" />
-    <ClCompile Include="aq\QueryReader.cpp" />
     <ClCompile Include="aq\Util.cpp" />
     <ClCompile Include="aq\WhereComparator.cpp" />
     <ClCompile Include="aq\WhereIn.cpp" />
@@ -159,7 +159,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aq\AWhereCondition.h" />
-    <ClInclude Include="aq\QueryReader.h" />
     <ClInclude Include="aq\Util.h" />
     <ClInclude Include="aq\WhereComparator.h" />
     <ClInclude Include="aq\WhereIn.h" />

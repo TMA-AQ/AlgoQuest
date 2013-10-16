@@ -1,6 +1,6 @@
 #include "Util.h"
-#include "QueryReader.h"
 #include "WhereValidator.h"
+#include <aq/QueryReader.h>
 #include <aq/AQLParser.h>
 #include <aq/Base.h>
 #include <aq/Timer.h>

@@ -81,6 +81,9 @@
     <ClInclude Include="aq\AQLQuery.h">
       <Filter>Fichiers d%27en-tête\aq</Filter>
     </ClInclude>
+    <ClInclude Include="aq\QueryReader.h">
+      <Filter>Fichiers d%27en-tête\aq</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="aq\Logger.cpp">
@@ -123,6 +126,9 @@
       <Filter>Fichiers sources\aq</Filter>
     </ClCompile>
     <ClCompile Include="aq\AQLSpiritParser.cpp">
+      <Filter>Fichiers sources\aq</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\QueryReader.cpp">
       <Filter>Fichiers sources\aq</Filter>
     </ClCompile>
   </ItemGroup>

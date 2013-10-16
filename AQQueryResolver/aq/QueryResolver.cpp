@@ -105,7 +105,7 @@ void QueryResolver::preProcess()
   aq::generate_parent(this->sqlStatement, NULL);
   aq::addAlias(this->sqlStatement->left);
 
-#ifdef _DEBUG
+#if defined(_DEBUG) && defined(_TRACE)
   std::string sql_query;
   std::cout << *this->sqlStatement << std::endl;
   std::cout << aq::syntax_tree_to_sql_form(this->sqlStatement, sql_query) << std::endl;
@@ -179,7 +179,6 @@ void QueryResolver::preProcess()
     aq::getColumnsList(orderNode->left->left, orderByNodes);
     for (auto& n : orderByNodes)
     {
-      std::cout << *n << std::endl;
       this->orderBy.push_back(aq::clone_subtree(n));
     }
   }
@@ -202,7 +201,7 @@ aq::verb::VerbNode::Ptr QueryResolver::postProcess()
 {
   aq::verb::VerbNode::Ptr spTree;
 
-#ifdef _DEBUG
+#if defined(_DEBUG) && defined(_TRACE)
 	sql_query = "";
   std::cout << *this->sqlStatement << std::endl;
   std::cout << aq::multiline_query(aq::syntax_tree_to_sql_form(this->sqlStatement, sql_query)) << std::endl;
@@ -211,7 +210,7 @@ aq::verb::VerbNode::Ptr QueryResolver::postProcess()
   aq::dateNodeToBigInt(this->sqlStatement);
   aq::transformExpression(this->BaseDesc, *this->pSettings, this->sqlStatement);
 
-#ifdef _DEBUG
+#if defined(_DEBUG) && defined(_TRACE)
 	sql_query = "";
   std::cout << *this->sqlStatement << std::endl;
   std::cout << aq::multiline_query(aq::syntax_tree_to_sql_form(this->sqlStatement, sql_query)) << std::endl;
@@ -234,7 +233,7 @@ aq::verb::VerbNode::Ptr QueryResolver::postProcess()
     }
   }
   
-#ifdef _DEBUG
+#if defined(_DEBUG) && defined(_TRACE)
   sql_query = "";
   std::cout << "---" << std::endl;
   std::cout << aq::multiline_query(aq::syntax_tree_to_sql_form(this->sqlStatement, sql_query)) << std::endl;
@@ -248,7 +247,7 @@ aq::verb::VerbNode::Ptr QueryResolver::postProcess()
 	//aq::MakeBackupFile( pSettings->szOutputFN, aq::backup_type_t::Before, this->level, this->id );
 // #endif
 
-#ifdef _DEBUG
+#if defined(_DEBUG) && defined(_TRACE)
   std::ostringstream oss;
   oss << *this->sqlStatement << std::endl;
   std::cout << oss.str() << std::endl;
@@ -270,16 +269,10 @@ aq::verb::VerbNode::Ptr QueryResolver::postProcess()
 	spTree = aq::verb::VerbNode::BuildVerbsTree( this->sqlStatement, categories_order, this->BaseDesc, this->pSettings );
 	spTree->changeQuery();
   
-#ifdef _DEBUG
-  {
-    std::cout << "nodes tree:" << std::endl;
-    std::cout << *this->sqlStatement << std::endl;
-    std::cout << "verbs tree:" << std::endl;
-    // aq::verb::VerbNode::dump(std::cout, spTree);
-    // DumpVisitor printer;
-    // spTree->apply(&printer);
-    // std::cout << std::endl << printer.getQuery() << std::endl;
-  }
+#if defined(_DEBUG) && defined(_TRACE)
+  std::cout << "nodes tree:" << std::endl;
+  std::cout << *this->sqlStatement << std::endl;
+  std::cout << "verbs tree:" << std::endl;
 #endif
   
   std::set<aq::tnode*> nodes;
@@ -539,7 +532,9 @@ void QueryResolver::executeNested(aq::tnode * pNode)
   }
   else
   {
+#if defined(_DEBUG) && defined(_TRACE)
     std::cout << *pNode << std::endl;
+#endif
     throw aq::generic_error(aq::generic_error::INVALID_QUERY, "bad nested query: missing as keyword");
   }
 
@@ -1036,7 +1031,7 @@ boost::shared_ptr<QueryResolver> QueryResolver::SolveSelectFromSelect(	aq::tnode
   this->id_generator += 1;
   boost::shared_ptr<QueryResolver> query(new QueryResolver(pInteriorSelect, this->pSettings, this->aq_engine, this->BaseDesc, this->id_generator, this->level + 1));
 
-#if _DEBUG
+#if defined(_DEBUG) && defined(_TRACE)
   std::cout << *pInteriorSelect << std::endl;
 #endif
 
@@ -1090,7 +1085,7 @@ boost::shared_ptr<QueryResolver> QueryResolver::SolveSelectFromSelect(	aq::tnode
 	aq::MakeBackupFile( pSettings->szOutputFN, aq::backup_type_t::Exterior, this->level, this->id );
 // #endif
   
-#if _DEBUG
+#if defined(_DEBUG) && defined(_TRACE)
   std::string queryInterior;
   std::string queryExterior;
   std::cout << "--- Interior select ---" << std::endl;

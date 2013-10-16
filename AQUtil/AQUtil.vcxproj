@@ -170,6 +170,7 @@
     <ClInclude Include="aq\ParallelProcess.h" />
     <ClInclude Include="aq\AQLParser.h" />
     <ClInclude Include="aq\AQLQuery.h" />
+    <ClInclude Include="aq\QueryReader.h" />
     <ClInclude Include="aq\Symbole.h" />
     <ClInclude Include="aq\Timer.h" />
     <ClInclude Include="aq\Utilities.h" />
@@ -186,6 +187,7 @@
     <ClCompile Include="aq\Logger.cpp" />
     <ClCompile Include="aq\AQLQuery.cpp" />
     <ClCompile Include="aq\AQLSpiritParser.cpp" />
+    <ClCompile Include="aq\QueryReader.cpp" />
     <ClCompile Include="aq\Timer.cpp" />
     <ClCompile Include="aq\Utilities.cpp" />
     <ClCompile Include="aq\WIN32FileMapper.cpp" />
