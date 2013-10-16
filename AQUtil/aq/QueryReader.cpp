@@ -1,5 +1,6 @@
 #include "QueryReader.h"
 
+#include <iostream>
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 #include <boost/algorithm/string.hpp>
@@ -17,8 +18,27 @@ std::string QueryReader::next()
   std::string line;
   std::string query;
   bool fullQuery = false;
-  while (!fullQuery && std::getline(this->queriesStream, line))
+  do
   {
+
+    if (this->prompt != "")
+    {
+      if (query == "")
+      {
+        std::cout << this->prompt << "> ";
+      }
+      else
+      {
+        for (size_t i = 0; i < this->prompt.size() - 1; i++)
+          std::cout << " ";
+        std::cout << "-> ";
+      }
+    }
+
+    if (!std::getline(this->queriesStream, line))
+    {
+      break;
+    }
     boost::algorithm::trim(line);
     std::string::size_type pos = line.find("--");
     if (pos != std::string::npos)
@@ -41,6 +61,7 @@ std::string QueryReader::next()
       query += " " + line + "\n";
     }
   }
+  while (!fullQuery);
 
   if (ident == "")
   {
@@ -48,8 +69,13 @@ std::string QueryReader::next()
     identSS << "query " << n;
     ident = identSS.str();
   }
-
-  n++;
+  
+  boost::trim(query);
+  boost::to_upper(query); // FIXME : this can have a bad side effect on characters values
+  if (query.substr(0, 4) == "QUIT")
+    query = "";
+  else
+    n++;
   return query;
 }
 

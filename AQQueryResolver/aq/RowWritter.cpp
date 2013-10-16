@@ -26,7 +26,7 @@ RowWritter::RowWritter(const RowWritter& o)
 RowWritter::~RowWritter()
 {
 	free(value);
-  if (pFOut)
+  if (pFOut && (pFOut != stdout))
     fclose(pFOut);
 }
 

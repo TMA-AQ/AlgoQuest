@@ -11,7 +11,7 @@ namespace aq
 class QueryReader
 {
 public:
-  QueryReader(std::istream& stream) : queriesStream(stream), n(1)
+  QueryReader(std::istream& stream, std::string _prompt = "") : queriesStream(stream), prompt(_prompt), n(1)
   {
   }
 
@@ -28,6 +28,7 @@ public:
 
 private:
   std::istream& queriesStream;
+  std::string prompt;
   std::string suite;
   std::string ident;
   std::string expected;

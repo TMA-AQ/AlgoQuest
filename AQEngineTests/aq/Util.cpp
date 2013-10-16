@@ -86,8 +86,15 @@ int generate_working_directories(const struct opt& o, std::string& iniFilename)
   p = boost::filesystem::path(o.workingPath + "data_orga/tmp/" + o.queryIdent);
   if (boost::filesystem::exists(p))
   {
-    std::cerr << p << " already exist : STOP" << std::endl;
-    exit(-1);
+    if (o.force)
+    {
+      boost::filesystem::remove_all(p);
+    }
+    else
+    {
+      // std::cerr << p << " already exist" << std::endl;
+      throw std::exception(std::string(p.string() + " already exist").c_str());
+    }
   }
   boost::filesystem::create_directory(p);
   p = boost::filesystem::path(o.workingPath + "data_orga/tmp/" + o.queryIdent + "/dpy");
@@ -228,15 +235,6 @@ int check_answer_data(std::ostream& os,
   std::vector<long long> tableIDs;
   matrix.load(answerPath.c_str(), tableIDs);
 
-  aq::Logger::getInstance().log(AQ_LOG_INFO, "AQMatrix: \n");
-  std::stringstream ss;
-  ss << tableIDs.size() << " tables: [ ";
-  std::for_each(tableIDs.begin(), tableIDs.end(), [&] (long long id) { ss << id << " "; });
-  ss << "]";
-  aq::Logger::getInstance().log(AQ_LOG_INFO, "\t%s", ss.str().c_str());
-  aq::Logger::getInstance().log(AQ_LOG_INFO, "\t%u results", matrix.getNbRows());
-  aq::Logger::getInstance().log(AQ_LOG_INFO, "\t%u groups", matrix.getGroupBy().size());
-  
   const aq::AQMatrix::matrix_t& m = matrix.getMatrix();
 
   // check size, print column name and prepare column mapping
@@ -439,23 +437,27 @@ public:
       }
     }
 
-    for (auto& c : display_order)
+    unsigned int i = o.withCount ? 1 : *(rows.rbegin());
+    do
     {
-      auto& tindex = c.first;
-      auto& cm = c.second;
-      auto index = rows[tindex];
-      if (index == 0)
+      for (auto& c : display_order)
       {
+        auto& tindex = c.first;
+        auto& cm = c.second;
+        auto index = rows[tindex];
+        if (index == 0)
+        {
           cb->push("NULL");
+        }
+        else
+        {
+          aq::ColumnItem::Ptr item(new aq::ColumnItem);
+          cm->loadValue(index - 1, *item);
+          item->toString(buf, cm->getType());
+          cb->push(buf);
+        }
       }
-      else
-      {
-        aq::ColumnItem::Ptr item(new aq::ColumnItem);
-        cm->loadValue(index - 1, *item);
-        item->toString(buf, cm->getType());
-        cb->push(buf);
-      }
-    }
+    } while (--i > 0);
 
     if (o.withCount)
     {
@@ -492,18 +494,12 @@ int display(display_cb * cb,
   aq::AQMatrix aqMatrix(settings, baseDesc);
   
   std::vector<long long> tableIDs;
-  //matrix.load(answerPath.c_str(), tableIDs);
-  aqMatrix.loadHeader(answerPath.c_str(), tableIDs);
-  aqMatrix.prepareData(answerPath.c_str());
-  //matrix.loadNextPacket();
+  aqMatrix.load(answerPath.c_str(), tableIDs);
+  //aqMatrix.loadHeader(answerPath.c_str(), tableIDs);
+  //aqMatrix.prepareData(answerPath.c_str());
 
-  aq::Logger::getInstance().log(AQ_LOG_INFO, "AQMatrix: \n");
-  ss << tableIDs.size() << " tables: [ ";
-  std::for_each(tableIDs.begin(), tableIDs.end(), [&] (long long id) { ss << id << " "; });
-  ss << "]";
-  aq::Logger::getInstance().log(AQ_LOG_INFO, "\t%s", ss.str().c_str());
-  aq::Logger::getInstance().log(AQ_LOG_INFO, "\t%u results", aqMatrix.getNbRows());
-  aq::Logger::getInstance().log(AQ_LOG_INFO, "\t%u groups", aqMatrix.getGroupBy().size());
+  for (auto& tid : tableIDs) { ss << tid << " "; };
+  aq::Logger::getInstance().log(AQ_INFO, "AQMatrix's Tables: [ %s]", ss.str().c_str());
   
   const aq::AQMatrix::matrix_t& matrix = aqMatrix.getMatrix();
 
@@ -571,6 +567,7 @@ int display(display_cb * cb,
   {
     print_data pd_cb(o, cb, display_order);
     aqMatrix.readData<print_data>(pd_cb);
+    cb->next();
   }
   else
   {
@@ -602,9 +599,15 @@ int display(display_cb * cb,
         else
         {
           aq::ColumnItem::Ptr item(new aq::ColumnItem);
-          cm->loadValue(index - 1, *item);
-          item->toString(buf, cm->getType());
-          cb->push(buf);
+          if (cm->loadValue(index - 1, *item) == 0)
+          {
+            item->toString(buf, cm->getType());
+            cb->push(buf);
+          }
+          else
+          {
+            throw aq::generic_error(aq::generic_error::INVALID_TABLE, "");
+          }
         }
       }
 
@@ -615,6 +618,8 @@ int display(display_cb * cb,
         cb->push(ss.str());
       }
     }
+    
+    cb->next();
   }
   return 0;
 }

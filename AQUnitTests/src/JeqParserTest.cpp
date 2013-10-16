@@ -317,4 +317,104 @@ BOOST_AUTO_TEST_CASE(test_4_tables_misc)
   BOOST_CHECK(cmp_string(query, expected));
 }
 
+BOOST_AUTO_TEST_CASE(test_3_tables_active_filter_neutral_1)
+{
+  std::string from, query, expected;
+  
+  from = " FROM , , T1 T2 T3 ";
+  
+  query  = from;
+  query += " WHERE AND AND AND ";
+  query += " K_JEQ K_INNER . T2 V1 K_INNER . T1 V1 ";
+  query += " K_JEQ K_INNER . T3 V2 K_INNER . T2 V2 ";
+  query += " K_JEQ K_INNER . T1 V3 K_INNER . T3 V3 ";
+
+  expected  = from;
+  expected += " WHERE AND AND AND \n";
+  expected += " K_JEQ K_ACTIVE K_INNER . T2 V1 K_ACTIVE K_INNER . T1 V1 \n";
+  expected += " K_JEQ K_ACTIVE K_INNER . T3 V2 K_ACTIVE K_INNER . T2 V2 \n";
+  expected += " K_JEQ K_FILTER K_INNER . T1 V3 K_ACTIVE K_INNER . T3 V3 \n";
+
+  aq::ParseJeq(query, true);
+
+  BOOST_CHECK(cmp_string(query, expected));
+}
+
+BOOST_AUTO_TEST_CASE(test_3_tables_active_filter_neutral_2)
+{
+  std::string from, query, expected;
+  
+  from = " FROM , , T1 T2 T3 \n";
+  
+  query  = from;
+  query += " WHERE AND AND AND \n";
+  query += " K_JEQ K_INNER . T2 V1 K_INNER . T1 V1 \n";
+  query += " K_JEQ K_INNER . T3 V2 K_INNER . T2 V2 \n";
+  query += " K_JEQ K_INNER . T2 V3 K_INNER . T3 V3 \n";
+  query += " K_JEQ K_INNER . T1 V4 K_INNER . T2 V4 \n";
+
+  expected  = from;
+  expected += " WHERE AND AND AND \n";
+  expected += " K_JEQ K_ACTIVE K_INNER . T2 V1 K_ACTIVE K_INNER . T1 V1 \n";
+  expected += " K_JEQ K_ACTIVE K_INNER . T2 V4 K_ACTIVE K_INNER . T1 V4 \n";
+  expected += " K_JEQ K_ACTIVE K_INNER . T3 V2 K_ACTIVE K_INNER . T2 V2 \n";
+  expected += " K_JEQ K_ACTIVE K_INNER . T3 V3 K_ACTIVE K_INNER . T2 V3 \n";
+
+  aq::ParseJeq(query, true);
+
+  BOOST_CHECK(cmp_string(query, expected));
+}
+
+BOOST_AUTO_TEST_CASE(test_3_tables_active_filter_neutral_3)
+{
+  std::string from, query, expected;
+  
+  from = " FROM , , , T1 T2 T3 T4 \n";
+  
+  query  = from;
+  query += " WHERE AND AND \n";
+  query += " K_JEQ K_INNER . T1 V1 K_INNER . T2 V1 \n";
+  query += " K_JEQ K_INNER . T1 V2 K_INNER . T3 V2 \n";
+  query += " K_JEQ K_INNER . T1 V3 K_INNER . T4 V3 \n";
+
+  expected  = from;
+  expected += " WHERE AND AND AND \n";
+  expected += " K_JEQ K_ACTIVE K_INNER  . T1 V1 K_ACTIVE  K_INNER . T2 V1 \n";
+  expected += " K_JEQ K_ACTIVE K_INNER  . T3 V2 K_ACTIVE  K_INNER . T1 V2 \n";
+  expected += " K_JEQ K_NEUTRAL K_INNER . T1 V2 K_ACTIVE  K_INNER . T3 V2 \n";
+  expected += " K_JEQ K_ACTIVE K_INNER  . T4 V3 K_NEUTRAL K_INNER . T1 V3 \n";
+
+  aq::ParseJeq(query, true);
+
+  BOOST_CHECK(cmp_string(query, expected));
+}
+
+BOOST_AUTO_TEST_CASE(test_3_tables_active_filter_neutral_4)
+{
+  std::string from, query, expected;
+  
+  from = " FROM , , , , T1 T2 T3 T4 T5 \n";
+  
+  query  = from;
+  query += " WHERE AND AND AND AND \n";
+  query += " K_JEQ K_INNER . T1 V1 K_INNER . T2 V1 \n";
+  query += " K_JEQ K_INNER . T1 V2 K_INNER . T3 V2 \n";
+  query += " K_JEQ K_INNER . T3 V3 K_INNER . T4 V3 \n";
+  query += " K_JEQ K_INNER . T4 V4 K_INNER . T1 V4 \n";
+  query += " K_JEQ K_INNER . T1 V5 K_INNER . T5 V5 \n";
+
+  expected  = from;
+  expected += " WHERE AND AND AND AND AND \n";
+  expected += " K_JEQ K_ACTIVE  K_INNER  . T1 V1 K_ACTIVE  K_INNER . T2 V1 \n";
+  expected += " K_JEQ K_ACTIVE  K_INNER  . T5 V5 K_ACTIVE  K_INNER . T1 V5 \n";
+  expected += " K_JEQ K_NEUTRAL K_INNER  . T1 V5 K_ACTIVE  K_INNER . T5 V5 \n";
+  expected += " K_JEQ K_ACTIVE  K_INNER  . T3 V2 K_NEUTRAL K_INNER . T1 V2 \n";
+  expected += " K_JEQ K_ACTIVE  K_INNER  . T4 V3 K_ACTIVE  K_INNER . T3 V3 \n";
+  expected += " K_JEQ K_FILTER  K_INNER  . T1 V4 K_ACTIVE  K_INNER . T4 V4 \n";
+
+  aq::ParseJeq(query, true);
+
+  BOOST_CHECK(cmp_string(query, expected));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

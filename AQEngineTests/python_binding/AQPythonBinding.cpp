@@ -1,9 +1,10 @@
 // AQPythonBinding.cpp : définit les fonctions exportées pour l'application DLL.
 //
 
-#include "aq/Logger.h"
-#include "aq/Util.h"
+#include "../aq/Util.h"
+#include <aq/Logger.h>
 #include <aq/Timer.h>
+#include <aq/Exceptions.h>
 #include <iostream>
 #include <vector>
 #include <fstream>
@@ -27,9 +28,9 @@ namespace aq
 typedef std::vector<std::string> row_t;
 typedef std::vector<row_t> result_t;
 
-void initialize_log()
+void set_log_level(unsigned int level)
 {
-  aq::Logger::getInstance().setLevel(AQ_LOG_WARNING);
+  aq::Logger::getInstance().setLevel(level);
 }
 
 struct cb_rows : public display_cb
@@ -54,30 +55,39 @@ const result_t execute(aq::opt cfg, const std::string& query)
   int rc = 0;
   cb_rows * cb = new cb_rows;
 
-  if (cfg.workingPath == "")
-    cfg.workingPath = cfg.dbPath;
+  try
+  {
+    if (cfg.workingPath == "")
+      cfg.workingPath = cfg.dbPath;
 
-  std::vector<std::string> selectedColumns;
-  aq::get_columns(selectedColumns, query, "SELECT");
+    std::vector<std::string> selectedColumns;
+    aq::get_columns(selectedColumns, query, "SELECT");
 
-  std::string iniFilename;
-  aq::generate_working_directories(cfg, iniFilename);
+    std::string iniFilename;
+    cfg.force = true;
+    aq::generate_working_directories(cfg, iniFilename);
 
-  std::ofstream queryFile(std::string(cfg.dbPath + "calculus/" + cfg.queryIdent + "/New_Request.txt").c_str());
-  queryFile << query ;
-  queryFile.close();
-  
-  aq::Timer timer;
-  rc = aq::run_aq_engine(cfg.aqEngine, iniFilename, cfg.queryIdent);
-  std::string aq_engine_time_elapsed = aq::Timer::getString(timer.getTimeElapsed());
-  //std::cout << "aq engine performed in " << aq_engine_time_elapsed << std::endl;
+    std::ofstream queryFile(std::string(cfg.dbPath + "calculus/" + cfg.queryIdent + "/New_Request.txt").c_str());
+    queryFile << query ;
+    queryFile.close();
 
-  std::stringstream ss;
-  std::string matrix_path = cfg.workingPath + "/data_orga/tmp/" + cfg.queryIdent + "/dpy/";
-  rc = aq::display(cb, matrix_path, cfg, selectedColumns);
-  
-  boost::filesystem::path tmpPath(cfg.workingPath + "/data_orga/tmp/" + cfg.queryIdent + "/");
-  boost::filesystem::remove_all(tmpPath);
+    aq::Timer timer;
+    rc = aq::run_aq_engine(cfg.aqEngine, iniFilename, cfg.queryIdent);
+    std::string aq_engine_time_elapsed = aq::Timer::getString(timer.getTimeElapsed());
+    // std::cout << "aq engine performed in " << aq_engine_time_elapsed << std::endl;
+
+    std::stringstream ss;
+    std::string matrix_path = cfg.workingPath + "/data_orga/tmp/" + cfg.queryIdent + "/dpy/";
+    cfg.packetSize = aq::packet_size; // FIXME
+    rc = aq::display(cb, matrix_path, cfg, selectedColumns);
+
+    boost::filesystem::path tmpPath(cfg.workingPath + "/data_orga/tmp/" + cfg.queryIdent + "/");
+    boost::filesystem::remove_all(tmpPath);
+  }
+  catch (const aq::generic_error& ex)
+  {
+    aq::Logger::getInstance().log(AQ_ERROR, ex.what());
+  }
 
   return cb->result;
 }
@@ -97,7 +107,6 @@ BOOST_PYTHON_MODULE(AlgoQuestDB)
   class_<aq::result_t>("AQResult").def(vector_indexing_suite<aq::result_t>());
 
   class_<aq::opt>("Settings", init<>())
-    // .def(init<std::string, std::string, std::string, std::string, std::string, unsigned int>())
     .def_readwrite("dbPath", &aq::opt::dbPath)
     .def_readwrite("workingPath", &aq::opt::workingPath)
     .def_readwrite("engine", &aq::opt::aqEngine)
@@ -107,7 +116,7 @@ BOOST_PYTHON_MODULE(AlgoQuestDB)
     ;
 
   def("Version", aq::version);
-  def("InitLog", aq::initialize_log);
+  def("SetLogLevel", aq::set_log_level);
   def("Execute", aq::execute);
 
 }
