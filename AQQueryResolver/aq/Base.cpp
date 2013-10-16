@@ -229,7 +229,7 @@ void Base::loadFromRawFile( const char* pszDataBaseFile ) {
       {
 				eColumnType = COL_TYPE_DATE;
       }
-			else if ( strcmp( szColumnType, "VARCHAR2" ) == 0 )	// Same for CHAR
+			else if ((strcmp(szColumnType, "VARCHAR") == 0) || (strcmp( szColumnType, "VARCHAR2") == 0))
       {
 				eColumnType = COL_TYPE_VARCHAR;
       }
