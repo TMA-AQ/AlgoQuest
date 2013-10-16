@@ -6,6 +6,7 @@
 #include <aq/Timer.h>
 #include <iostream>
 #include <vector>
+#include <fstream>
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 

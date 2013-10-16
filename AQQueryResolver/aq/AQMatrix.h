@@ -4,6 +4,8 @@
 #include "Settings.h"
 #include "ColumnMapper.h"
 
+#include <aq/Exceptions.h>
+#include <aq/BaseDesc.h>
 #include <aq/DBTypes.h>
 
 #include <string.h>
