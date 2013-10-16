@@ -13,6 +13,11 @@ namespace aq
 {
 struct opt
 {
+  opt() : 
+    packetSize(aq::packet_size), limit(0), execute(false), stopOnError(false), checkResult(false), checkCondition(false),
+    jeqParserActivated(true), aql2sql(false), display(true), withCount(false), withIndex(false), force(false)
+  {
+  }
   std::string dbPath;
   std::string workingPath;
   std::string queryIdent;
@@ -26,6 +31,7 @@ struct opt
   bool stopOnError;
   bool checkResult;
   bool checkCondition;
+  bool jeqParserActivated;
   bool aql2sql;
   bool display;
   bool withCount;

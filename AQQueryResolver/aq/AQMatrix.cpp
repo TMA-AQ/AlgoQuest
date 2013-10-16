@@ -222,7 +222,7 @@ void AQMatrix::loadHeader(const char * filePath, std::vector<long long>& tableID
   fread(&this->nbRows, sizeof(uint64_t), 1, fd);
   fread(&nbGroups, sizeof(uint64_t), 1, fd);
 
-  aq::Logger::getInstance().log(AQ_NOTICE, "aq matrix: [count:%u;rows:%u;groups:%u]\n", this->totalCount, nbRows, nbGroups);
+  aq::Logger::getInstance().log(AQ_NOTICE, "aq matrix: [table:%u;count:%u;rows:%u;groups:%u]\n", nbTable, this->totalCount, nbRows, nbGroups);
 
   uint64_t countCheck = 0;
   uint64_t rowCheck = 0;
@@ -296,7 +296,7 @@ void AQMatrix::loadNextPacket()
 
   if (this->packet == nbPacket)
   {
-    assert(this->totalCount == this->count.size());
+    // assert(this->totalCount == this->count.size());
     assert(this->nbRows == this->count.size());
     if ((this->totalCount != this->count.size()) || (this->nbRows != this->count.size()))
     {

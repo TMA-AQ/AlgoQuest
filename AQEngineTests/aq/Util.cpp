@@ -235,15 +235,6 @@ int check_answer_data(std::ostream& os,
   std::vector<long long> tableIDs;
   matrix.load(answerPath.c_str(), tableIDs);
 
-  aq::Logger::getInstance().log(AQ_LOG_INFO, "AQMatrix: \n");
-  std::stringstream ss;
-  ss << tableIDs.size() << " tables: [ ";
-  std::for_each(tableIDs.begin(), tableIDs.end(), [&] (long long id) { ss << id << " "; });
-  ss << "]";
-  aq::Logger::getInstance().log(AQ_LOG_INFO, "\t%s", ss.str().c_str());
-  aq::Logger::getInstance().log(AQ_LOG_INFO, "\t%u results", matrix.getNbRows());
-  aq::Logger::getInstance().log(AQ_LOG_INFO, "\t%u groups", matrix.getGroupBy().size());
-  
   const aq::AQMatrix::matrix_t& m = matrix.getMatrix();
 
   // check size, print column name and prepare column mapping
@@ -507,13 +498,8 @@ int display(display_cb * cb,
   //aqMatrix.loadHeader(answerPath.c_str(), tableIDs);
   //aqMatrix.prepareData(answerPath.c_str());
 
-  aq::Logger::getInstance().log(AQ_LOG_INFO, "AQMatrix: \n");
-  ss << tableIDs.size() << " tables: [ ";
-  std::for_each(tableIDs.begin(), tableIDs.end(), [&] (long long id) { ss << id << " "; });
-  ss << "]";
-  aq::Logger::getInstance().log(AQ_LOG_INFO, "\t%s", ss.str().c_str());
-  aq::Logger::getInstance().log(AQ_LOG_INFO, "\t%u results", aqMatrix.getNbRows());
-  aq::Logger::getInstance().log(AQ_LOG_INFO, "\t%u groups", aqMatrix.getGroupBy().size());
+  for (auto& tid : tableIDs) { ss << tid << " "; };
+  aq::Logger::getInstance().log(AQ_INFO, "AQMatrix's Tables: [ %s]", ss.str().c_str());
   
   const aq::AQMatrix::matrix_t& matrix = aqMatrix.getMatrix();
 
@@ -581,6 +567,7 @@ int display(display_cb * cb,
   {
     print_data pd_cb(o, cb, display_order);
     aqMatrix.readData<print_data>(pd_cb);
+    cb->next();
   }
   else
   {
@@ -631,6 +618,8 @@ int display(display_cb * cb,
         cb->push(ss.str());
       }
     }
+    
+    cb->next();
   }
   return 0;
 }

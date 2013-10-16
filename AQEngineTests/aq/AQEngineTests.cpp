@@ -3,7 +3,6 @@
 
 #include "Util.h"
 #include <aq/Logger.h>
-#include <aq/parser/JeqParser.h>
 #include <string>
 #include <stdint.h>
 #include <fstream>
@@ -11,6 +10,7 @@
 #include <iostream>
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
 
 namespace po = boost::program_options;
 
@@ -25,10 +25,11 @@ extern int functional_tests(const std::string& dbPath, std::string& queryIdent, 
 
 int main(int argc, char ** argv)
 {
+  int rc = EXIT_SUCCESS;
 
   try
   {
-    aq::opt o = { "", "", "", "", "", "", "", aq::packet_size, 0, false, false, false, false, false, false, false, false };
+    aq::opt o;
     std::string logMode;
     std::string rootPath;
     std::string dbName;
@@ -40,26 +41,23 @@ int main(int argc, char ** argv)
     desc.add_options()
       ("help,h", "produce help message")
       ("log-output", po::value<std::string>(&logMode)->default_value("STDOUT"), "[STDOUT|LOCALFILE|SYSLOG]")
-      ("log-level", po::value<unsigned int>(&logLevel)->default_value(AQ_LOG_WARNING), "CRITICAL(2), ERROR(3), WARNING(4), NOTICE(5), INFO(6), DEBUG(7)")
+      ("log-level,v", po::value<unsigned int>(&logLevel)->default_value(AQ_LOG_WARNING), "CRITICAL(2), ERROR(3), WARNING(4), NOTICE(5), INFO(6), DEBUG(7)")
       ("root-path,r", po::value<std::string>(&rootPath)->default_value("E:/AQ_DATABASES/DB/"), "root databases path (mandatory)")
       ("db-name,n", po::value<std::string>(&dbName)->default_value("algoquest"), "")
       ("working-path", po::value<std::string>(&o.workingPath)->default_value(""), "")
       ("limit,l", po::value<uint64_t>(&o.limit)->default_value(0), "0 -> no limit")
       ("query-ident,i", po::value<std::string>(&o.queryIdent)->default_value("test_aq_engine"), "")
       ("aq-engine,e", po::value<std::string>(&o.aqEngine)->default_value("aq-engine"), "aq engine path (mandatory)")
-      ("queries,q", po::value<std::string>(&o.queriesFilename)->default_value("query.aql"), "")
-      ("query", po::value<std::string>(&query)->default_value(""), "")
+      ("queries,q", po::value<std::string>(&o.queriesFilename)->default_value(""), "")
       ("parse", "")
       ("filter,f", po::value<std::string>(&o.filter)->default_value(""), "")
       ("log,o", po::value<std::string>(&o.logFilename)->default_value("./test_aq_engine.log"), "")
-
       ("execute", po::bool_switch(&o.execute), "")
       ("generate", po::bool_switch(&generate), "")
       ("check-result", po::bool_switch(&o.checkResult), "")
       ("check-condition", po::bool_switch(&o.checkCondition), "")
       ("aql-2-sql", po::bool_switch(&o.aql2sql), "")
       ("stop-on-error,s", po::bool_switch(&o.stopOnError), "")
-      ("display,d", po::bool_switch(&o.display), "display rows")
       ("with-count,c", po::bool_switch(&o.withCount), "display count")
       ("with-index", po::bool_switch(&o.withIndex), "display table index")
       ("force", po::bool_switch(&o.force), "force creation of working directories even if already present")
@@ -72,7 +70,7 @@ int main(int argc, char ** argv)
     po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
     po::notify(vm);    
     
-    if (vm.count("help") || (((rootPath == "")  || (o.aqEngine == "")) && !vm.count("parse") && !vm.count("query")))
+    if (vm.count("help") && !vm.count("parse") && !vm.count("query"))
     {
       std::cout << desc << "\n";
       return 0;
@@ -84,22 +82,16 @@ int main(int argc, char ** argv)
 		aq::Logger::getInstance().setLevel(logLevel);
     
     o.dbPath = rootPath + "/" + dbName + "/";
-
-    if (vm.count("parse"))
-    {
-      aq::ParseJeq(query);
-      std::cout << query << std::endl;
-    }
-    else if (generate)
+    
+    if (generate)
     {
       //aq::QueryGenerator queryGen(query);
       //queryGen.generate(std::cout);
     }
-    else
-    {
-      if (o.workingPath == "") o.workingPath = o.dbPath;
-      return static_cast<int>(functional_tests(o));
-    }
+
+    if (o.workingPath == "") o.workingPath = o.dbPath;
+    rc = static_cast<int>(functional_tests(o));
+
   }
   catch (const std::exception& e)
   {
@@ -107,5 +99,5 @@ int main(int argc, char ** argv)
     return EXIT_FAILURE;
   }
   
-  return EXIT_SUCCESS;
+  return rc;
 }

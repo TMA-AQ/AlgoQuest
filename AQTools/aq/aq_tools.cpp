@@ -182,7 +182,7 @@ int prepareQuery(const std::string& query, const aq::TProjectSettings& settingsB
 	{
 		if (fs::exists(*dir))
 		{
-      aq::Logger::getInstance().log(AQ_ERROR, "directory already exist '%s'\n", (*dir).string().c_str());
+      aq::Logger::getInstance().log(AQ_WARNING, "directory already exist '%s'\n", (*dir).string().c_str());
       if (!force)
       {
         return EXIT_FAILURE;
@@ -190,7 +190,7 @@ int prepareQuery(const std::string& query, const aq::TProjectSettings& settingsB
 		}
 		else if (!fs::create_directory(*dir))
 		{
-			aq::Logger::getInstance().log(AQ_ERROR, "cannot create directory '%s'\n", (*dir).string().c_str());
+			aq::Logger::getInstance().log(AQ_WARNING, "cannot create directory '%s'\n", (*dir).string().c_str());
       if (!force)
       {
         return EXIT_FAILURE;
