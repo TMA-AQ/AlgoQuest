@@ -507,13 +507,13 @@ void ChangeCommaToDot (  char *string )
 }
 
 //------------------------------------------------------------------------------
-int MakeBackupFile( char *pszPath, backup_type_t type, int level, int id )
+int MakeBackupFile( const std::string& pszPath, backup_type_t type, int level, int id )
 {
 	char szBuffer[STR_BUF_SIZE];
 	memset(szBuffer, 0, STR_BUF_SIZE);
 	char szDstPath[_MAX_PATH];
 	size_t	len = 0;
-	strcpy( szBuffer, pszPath );
+	strcpy( szBuffer, pszPath.c_str() );
 	len = strlen(szBuffer);
 	if( len < 3 )
 	{
@@ -532,7 +532,7 @@ int MakeBackupFile( char *pszPath, backup_type_t type, int level, int id )
 	default: ;
 	}
 	sprintf( szDstPath, "%s_%.2d_%.2d%s.%s", szBuffer, level, id, typeChar.c_str(), &pszPath[len - 3] );
-	if( FileRename( pszPath, szDstPath ) != 0 )
+	if( FileRename( pszPath.c_str(), szDstPath ) != 0 )
 	{
 		aq::Logger::getInstance().log(AQ_DEBUG, "MakeBackupFile : Error renaming file %s to %s !\n", pszPath, szDstPath );
 		return -1;
