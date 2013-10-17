@@ -424,7 +424,7 @@ void processNot( aq::tnode*& pNode, bool applyNot )
 		else throw generic_error(generic_error::NOT_IMPLEMENTED, "");
 		break;
 	default:
-		throw generic_error(generic_error::NOT_IMPLEMENTED, "");
+		throw generic_error(generic_error::NOT_IMPLEMENTED, "operator doesn't support NOT");
 	}	
 }
 

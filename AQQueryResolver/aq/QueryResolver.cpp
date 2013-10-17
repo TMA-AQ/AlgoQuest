@@ -86,9 +86,7 @@ Table::Ptr QueryResolver::solve()
   // this->solveNested();
 
   aq::verb::VerbNode::Ptr spTree = this->postProcess();
-
-	// if post Process solve the result we don't need to call AQ Engine
-  if (!this->result)
+  if (spTree != NULL)
   {
     this->resolve(spTree);
   }
@@ -207,8 +205,8 @@ aq::verb::VerbNode::Ptr QueryResolver::postProcess()
 
 #if defined(AQ_TRACE)
 	sql_query = "";
-   std::cout << *this->sqlStatement << std::endl;
-   std::cout << aq::multiline_query(aq::syntax_tree_to_sql_form(this->sqlStatement, sql_query)) << std::endl;
+  std::cout << *this->sqlStatement << std::endl;
+  std::cout << aq::multiline_query(aq::syntax_tree_to_sql_form(this->sqlStatement, sql_query)) << std::endl;
 #endif
 
   aq::dateNodeToBigInt(this->sqlStatement);
@@ -216,9 +214,16 @@ aq::verb::VerbNode::Ptr QueryResolver::postProcess()
 
 #if defined(AQ_TRACE)
 	sql_query = "";
-   std::cout << *this->sqlStatement << std::endl;
-   std::cout << aq::multiline_query(aq::syntax_tree_to_sql_form(this->sqlStatement, sql_query)) << std::endl;
+  std::cout << *this->sqlStatement << std::endl;
+  std::cout << aq::multiline_query(aq::syntax_tree_to_sql_form(this->sqlStatement, sql_query)) << std::endl;
 #endif
+
+  // if transform expression result to a K_FALSE in WHERE statement => the query answer is empty
+  aq::tnode * whereNode = aq::find_main_node(this->sqlStatement, K_WHERE);
+  if ((whereNode != NULL) && (whereNode->left->tag == K_FALSE))
+  {
+    return spTree;
+  }
 
   this->changeTemporaryTableName(this->sqlStatement);
   for (auto& n : this->groupBy) 
@@ -239,9 +244,8 @@ aq::verb::VerbNode::Ptr QueryResolver::postProcess()
   
 #if defined(AQ_TRACE)
   sql_query = "";
-  std::cout << "---" << std::endl;
+  std::cout << *this->sqlStatement << std::endl;
   std::cout << aq::multiline_query(aq::syntax_tree_to_sql_form(this->sqlStatement, sql_query)) << std::endl;
-  std::cout << "---" << std::endl;
 #endif
 
 // #ifdef OUTPUT_NESTED_QUERIES
@@ -250,11 +254,6 @@ aq::verb::VerbNode::Ptr QueryResolver::postProcess()
 	//aq::SaveFile( pSettings->szOutputFN, str.c_str() );
 	//aq::MakeBackupFile( pSettings->szOutputFN, aq::backup_type_t::Before, this->level, this->id );
 // #endif
-
-#if defined(AQ_TRACE)
-  std::ostringstream oss;
-  std::cout << *this->sqlStatement << std::endl;
-#endif
   
   //
   // processing order of main verb of the request depends of the resolution mode ('by row' or 'by column')
@@ -267,8 +266,9 @@ aq::verb::VerbNode::Ptr QueryResolver::postProcess()
 	spTree->changeQuery();
   
 #if defined(AQ_TRACE)
-  std::cout << "nodes tree:" << std::endl;
+  sql_query = "";
   std::cout << *this->sqlStatement << std::endl;
+  std::cout << aq::multiline_query(aq::syntax_tree_to_sql_form(this->sqlStatement, sql_query)) << std::endl;
 #endif
   
   std::set<aq::tnode*> nodes;
@@ -283,6 +283,7 @@ aq::verb::VerbNode::Ptr QueryResolver::postProcess()
   if (this->result)
   {
     aq::Logger::getInstance().log(AQ_INFO, "Solve Optimal Min/Max: Time elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
+    return NULL;
   }
 
   return spTree;
@@ -636,8 +637,7 @@ void QueryResolver::solveAQMatrix(aq::verb::VerbNode::Ptr spTree)
     }
     else
     {
-      std::string path = this->pSettings->rootPath + this->pSettings->queryIdent;
-      rowWritter.reset(new aq::RowTemporaryWritter(static_cast<unsigned>(BaseDesc.getTables().size() + 1), path.c_str(), pSettings->packSize));
+      rowWritter.reset(new aq::RowTemporaryWritter(static_cast<unsigned>(BaseDesc.getTables().size() + 1), this->pSettings->tmpPath.c_str(), pSettings->packSize));
       processes->addProcess(rowWritter);
     }
   }

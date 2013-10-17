@@ -298,7 +298,7 @@ std::string& syntax_tree_to_aql_form( aq::tnode *pNode, std::string& query )
         }
         break;
       case K_STRING:
-        stmp << "K_VALUE " <<  pNode->getData().val_str;
+        stmp << "K_VALUE '" <<  pNode->getData().val_str << "'";
         break;
       case K_IDENT:
       case K_COLUMN:

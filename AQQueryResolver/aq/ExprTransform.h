@@ -90,8 +90,7 @@ namespace
 
     if (items.size() < 2)
     {
-      assert(false);
-      throw aq::generic_error(aq::generic_error::INVALID_QUERY, "");
+      pNode->right = itemToNode(items[0], type);
     }
     else
     {
@@ -139,10 +138,6 @@ namespace
     if (result.empty()) 
     {
       return new aq::tnode( K_FALSE );
-    } 
-    else if (result.size() == 1) 
-    {
-      return ::create_eq_subtree(result[0], type);
     } 
     else 
     {
@@ -205,7 +200,7 @@ namespace
       return (n.left) && ::check_cmp_op_for_transform(*n.left);
     } 
      
-    return (((n.tag == K_LT) || (n.tag == K_GT) || (n.tag == K_LEQ) || (n.tag == K_GEQ)) && 
+    return (((n.tag == K_EQ) || (n.tag == K_NEQ) || (n.tag == K_LT) || (n.tag == K_GT) || (n.tag == K_LEQ) || (n.tag == K_GEQ)) && 
       ((is_column_reference(n.left)) && ((n.right) && ((n.right->tag == K_STRING) || (n.right->tag == K_INTEGER) || (n.right->tag == K_REAL))) ||
        (is_column_reference(n.right)) && ((n.left) && ((n.left->tag == K_STRING) || (n.left->tag == K_INTEGER) || (n.left->tag == K_REAL)))));
   }

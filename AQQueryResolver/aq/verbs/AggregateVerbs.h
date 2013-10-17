@@ -66,7 +66,7 @@ class CountVerb: public AggregateVerb
 	VERB_DECLARE( CountVerb );
 public:
 	virtual int getVerbType() const { return K_COUNT; };
-	virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
+	// virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
   // void accept(VerbVisitor* visitor);
 protected:
 	virtual Scalar::Ptr computeResultRegular(	Column::Ptr column, 

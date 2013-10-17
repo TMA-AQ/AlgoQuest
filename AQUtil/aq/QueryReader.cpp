@@ -71,7 +71,7 @@ std::string QueryReader::next()
   }
   
   boost::trim(query);
-  boost::to_upper(query); // FIXME : this can have a bad side effect on characters values
+  // boost::to_upper(query); // FIXME : this can have a bad side effect on characters values
   if (query.substr(0, 4) == "QUIT")
     query = "";
   else

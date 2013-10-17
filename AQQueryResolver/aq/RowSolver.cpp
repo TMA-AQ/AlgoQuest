@@ -33,7 +33,7 @@ typedef std::vector<column_infos_t> columns_infos_t;
 void matched_index(const boost::shared_ptr<aq::AQMatrix> aqMatrix, const Base& BaseDesc, column_infos_t& infos)
 {
   Table::Ptr table = BaseDesc.getTable(infos.column->TableID);
-  while (table->isTemporary())
+  while (table->isTemporary() && (table->getReferenceTable() != ""))
   {
     table = BaseDesc.getTable(table->getReferenceTable());
   }

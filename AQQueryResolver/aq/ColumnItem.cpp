@@ -209,6 +209,7 @@ void apply_aggregate(aggregate_function_t aggFunc, ColumnType type, ColumnItem& 
     break;
   case COUNT:
     throw aq::generic_error(aq::generic_error::NOT_IMPLEMENTED, "aggregate count function is not implemented");
+    // i1.numval += i2_count;
     break;
   }
 }

@@ -92,7 +92,7 @@ TID2String g_id2str[] = {
 	{ K_GT,				">"		},
 	{ K_COMMA,			","				},
 	{ K_SEMICOLON,		";"				},
-	{ K_NEQ,			"K_NEQ"/*"<>"*/	},
+	{ K_NEQ,			"<>"/*"<>"*/	},
 	{ K_LEQ,			"<="/*"<="*/	},
 	{ K_GEQ,			">="/*">="*/	},
 	{ K_CONCAT,			"K_CONCAT"/*"||"*/	},

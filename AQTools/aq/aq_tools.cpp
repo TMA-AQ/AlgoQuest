@@ -212,7 +212,7 @@ int prepareQuery(const std::string& query, const aq::TProjectSettings& settingsB
 
 // -------------------------------------------------------------------------------------------------
 int processQuery(const std::string& query, aq::TProjectSettings& settings, aq::Base& baseDesc, aq::AQEngine_Intf * aq_engine,
-                 const std::string& answer, bool clean)
+                 const std::string& answer, bool keepFiles)
 {
 	try
 	{
@@ -265,8 +265,10 @@ int processQuery(const std::string& query, aq::TProjectSettings& settings, aq::B
 		aq::QueryResolver queryResolver(pNode, &settings, aq_engine, baseDesc, id_generator);
 		aq::Table::Ptr result = queryResolver.solve();
 
-		if (clean)
+		if (!keepFiles)
 		{
+			aq::Logger::getInstance().log(AQ_NOTICE, "remove temporary directory '%s'\n", settings.tmpPath.c_str());
+			aq::DeleteFolder(settings.tmpPath.c_str());
 			aq::Logger::getInstance().log(AQ_NOTICE, "remove working directory '%s'\n", settings.workingPath.c_str());
 			aq::DeleteFolder(settings.workingPath.c_str());
 		}
@@ -295,7 +297,7 @@ int processQuery(const std::string& query, aq::TProjectSettings& settings, aq::B
 // -------------------------------------------------------------------------------------------------
 int processSQLQueries(const std::string& query, 
                       const aq::TProjectSettings& settingsBase, aq::Base& baseDesc, bool simulateAQEngine,
-                      bool clean, const std::string queryIdent, bool force)
+                      bool keepFiles, const std::string queryIdent, bool force)
 {
 
   aq::Logger::getInstance().log(AQ_INFO, "%s\n", query.c_str());
@@ -324,7 +326,7 @@ int processSQLQueries(const std::string& query,
   std::string answer;
 
   if (!((prepareQuery(query, settingsBase, baseDesc, settings, answer, queryIdent, force) == EXIT_SUCCESS) &&
-    (processQuery(query, settings, baseDesc, aq_engine, answer, clean) == EXIT_SUCCESS)))
+    (processQuery(query, settings, baseDesc, aq_engine, answer, keepFiles) == EXIT_SUCCESS)))
   {
     aq::Logger::getInstance().log(AQ_DEBUG, "QUERY FAILED:\n%s\n", query.c_str());
   }
@@ -373,7 +375,7 @@ int main(int argc, char**argv)
     unsigned int tableIdToLoad;
 		bool simulateAQEngine = false;
 		bool multipleAnswerFiles = false;
-		bool clean = false;
+		bool keepFiles = false;
 		bool display = false;
 		bool transform = false;
 		bool skipNestedQuery = false;
@@ -404,7 +406,7 @@ int main(int argc, char**argv)
 			("base-descr", po::value<std::string>(&baseDescr), "")
 			("worker", po::value<unsigned int>(&worker)->default_value(1), "number of thread assigned to resolve the bunch of sql queries")
 			("query-worker,w", po::value<unsigned int>(&queryWorker)->default_value(1), "number of thread assigned resolve one sql queries")
-			("clean,c", po::bool_switch(&clean), "")
+			("keep-file,k", po::bool_switch(&keepFiles), "")
 			("output,o", po::value<std::string>(), "") // TODO
 			("transform", po::bool_switch(&transform), "")
 			("skip-nested-query", po::bool_switch(&skipNestedQuery), "")
@@ -561,7 +563,7 @@ int main(int argc, char**argv)
       }
       else 
       {
-        processSQLQueries(query, settings, baseDesc, simulateAQEngine, clean, queryIdent, force);
+        processSQLQueries(query, settings, baseDesc, simulateAQEngine, keepFiles, queryIdent, force);
       }
     }
   }

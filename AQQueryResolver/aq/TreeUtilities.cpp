@@ -1403,7 +1403,7 @@ void transformExpression(const aq::Base& baseDesc, const aq::TProjectSettings& s
   aq::tnode * whereNode = aq::find_main_node(tree, K_WHERE);
   if (whereNode)
   {
-    unsigned int tags[] = { K_LT, K_LEQ, K_GT, K_GEQ, K_BETWEEN, K_NOT_BETWEEN, K_LIKE, K_NOT_LIKE };
+    unsigned int tags[] = { K_EQ, K_NEQ, K_LT, K_LEQ, K_GT, K_GEQ, K_BETWEEN, K_NOT_BETWEEN, K_LIKE, K_NOT_LIKE };
     for (auto& tag : tags)
     {
       aq::tnode * cmpNode = NULL;

@@ -281,13 +281,13 @@ CountVerb::CountVerb()
 {}
 
 //------------------------------------------------------------------------------
-bool CountVerb::preprocessQuery(	aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
-{
-	//count parameter is irrelevant
-	delete_subtree( pNode->left );
-	pNode->left = NULL;
-	return false;
-}
+//bool CountVerb::preprocessQuery(	aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
+//{
+//	//count parameter is irrelevant
+//	delete_subtree( pNode->left );
+//	pNode->left = NULL;
+//	return false;
+//}
 
 //------------------------------------------------------------------------------
 llong computeCount( Table::Ptr table, llong start, llong end )

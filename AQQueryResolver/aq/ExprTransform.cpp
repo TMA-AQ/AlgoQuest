@@ -76,6 +76,12 @@ bool check_cmp_op::check(const aq::ColumnItem& item, const aq::ColumnType& cType
 {    
   switch (op_tag)
   {
+  case K_EQ:
+    return !aq::ColumnItem::lessThan(&item, &reference, cType) && !aq::ColumnItem::lessThan(&reference, &item, cType);
+    break;
+  case K_NEQ:
+    return aq::ColumnItem::lessThan(&item, &reference, cType) || aq::ColumnItem::lessThan(&reference, &item, cType);
+    break;
   case K_LT:
     return aq::ColumnItem::lessThan(&item, &reference, cType);
     break;
