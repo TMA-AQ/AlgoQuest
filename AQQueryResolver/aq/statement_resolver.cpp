@@ -58,7 +58,7 @@
 //	//	break;
 //
 //	default:
-//		throw aq::generic_error(aq::generic_error::NOT_IMPLEMENED, "");
+//		throw aq::generic_error(aq::generic_error::NOT_IMPLEMENTED, "");
 //	}
 //	return 0; //debug13 should throw instead of returning
 //}

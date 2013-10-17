@@ -744,7 +744,7 @@ void Column::dumpRaw( std::ostream& os )
   size_t pos = colName.find('.');
   if( pos != std::string::npos )
     colName = colName.substr( pos + 1 );
-  os << colName << "\" " << this->ID << " " << this->Size << " ";
+  os << "\""<< colName << "\" " << this->ID << " " << this->Size << " ";
   switch( this->Type )
   {
   case COL_TYPE_INT: os << "INT"; break;
@@ -753,7 +753,7 @@ void Column::dumpRaw( std::ostream& os )
   case COL_TYPE_DATE: os << "DATE"; break;
   case COL_TYPE_VARCHAR: os << "VARCHAR2"; break;
   default:
-    throw generic_error(generic_error::NOT_IMPLEMENED, "");
+    throw generic_error(generic_error::NOT_IMPLEMENTED, "");
   }
   os << std::endl;
 }
@@ -774,7 +774,7 @@ void Column::dumpXml( std::ostream& os )
   case COL_TYPE_DATE: os << "DATE"; break;
   case COL_TYPE_VARCHAR: os << "VARCHAR2"; break;
   default:
-    throw generic_error(generic_error::NOT_IMPLEMENED, "");
+    throw generic_error(generic_error::NOT_IMPLEMENTED, "");
   }
   os << "\"/>" << std::endl;
 }

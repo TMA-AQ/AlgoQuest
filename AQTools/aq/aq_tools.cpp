@@ -74,16 +74,11 @@ int processAQMatrix(const std::string& query, const std::string& aqMatrixFileNam
 	}
 	
   boost::array<uint32_t, 6> categories_order = { K_FROM, K_WHERE, K_SELECT, K_GROUP, K_HAVING, K_ORDER };
-  if (!settings.useRowResolver)
-  {
-    boost::array<uint32_t, 6> new_order = { K_FROM, K_WHERE, K_GROUP, K_HAVING, K_SELECT, K_ORDER };
-    categories_order = new_order;
-  }
 	aq::verb::VerbNode::Ptr spTree = aq::verb::VerbNode::BuildVerbsTree(pNode, categories_order, baseDesc, &settings );
 	spTree->changeQuery();
 	aq::cleanQuery( pNode );
 
-	strcpy(settings.szAnswerFN, aqMatrixFileName.c_str());
+	settings.answerFile = aqMatrixFileName;
 
 	boost::shared_ptr<aq::AQMatrix> aqMatrix(new aq::AQMatrix(settings, baseDesc));
 	std::vector<llong> tableIDs;
@@ -106,11 +101,7 @@ int processAQMatrix(const std::string& query, const std::string& aqMatrixFileNam
   
   unsigned int id_generator = 1;
 	aq::QueryResolver queryResolver(pNode, &settings, &aqEngine, baseDesc, id_generator);
-	if (settings.useRowResolver)
-		queryResolver.solveAQMatriceByRows(spTree);
-	else
-		queryResolver.solveAQMatriceByColumns(spTree);
-		
+  queryResolver.solveAQMatrix(spTree);
 
 	aq::Table::Ptr result = queryResolver.getResult();
 	if (result)
@@ -142,11 +133,6 @@ int transformQuery(const std::string& query, aq::TProjectSettings& settings, aq:
 	}
   
   boost::array<uint32_t, 6> categories_order = { K_FROM, K_WHERE, K_SELECT, K_GROUP, K_HAVING, K_ORDER };
-  if (!settings.useRowResolver)
-  {
-    boost::array<uint32_t, 6> new_order = { K_FROM, K_WHERE, K_GROUP, K_HAVING, K_SELECT, K_ORDER };
-    categories_order = new_order;
-  }
 	aq::verb::VerbNode::Ptr spTree = aq::verb::VerbNode::BuildVerbsTree(pNode, categories_order, baseDesc, &settings );
 	spTree->changeQuery();
 	aq::cleanQuery( pNode );
@@ -180,9 +166,9 @@ int prepareQuery(const std::string& query, const aq::TProjectSettings& settingsB
 	//
 	// create directories
 	std::list<fs::path> lpaths;
-	lpaths.push_back(fs::path(settings.szRootPath + "/calculus/" + queryIdentTmp));
-	lpaths.push_back(fs::path(settings.szTempPath1));
-	lpaths.push_back(fs::path(settings.szTempPath2));
+	lpaths.push_back(fs::path(settings.rootPath + "calculus/" + queryIdentTmp));
+	lpaths.push_back(fs::path(settings.tmpPath));
+	lpaths.push_back(fs::path(settings.dpyPath));
 	for (std::list<fs::path>::const_iterator dir = lpaths.begin(); dir != lpaths.end(); ++dir)
 	{
 		if (fs::exists(*dir))
@@ -205,7 +191,7 @@ int prepareQuery(const std::string& query, const aq::TProjectSettings& settingsB
 
   //
   // write request file
-  std::string queryFilename(settings.szRootPath + "/calculus/" + queryIdentTmp + "/Request.sql");
+  std::string queryFilename(settings.rootPath + "calculus/" + queryIdentTmp + "/Request.sql");
   std::ofstream queryFile(queryFilename.c_str());
   queryFile << query;
   queryFile.close();
@@ -218,7 +204,7 @@ int prepareQuery(const std::string& query, const aq::TProjectSettings& settingsB
 
 	// generate answer file
 	// displayFile = settings.szRootPath + "/calculus/" + queryIdentStr + "/display.txt"; // TODO
-	displayFile = settings.szRootPath + "/calculus/" + queryIdentStr + "/answer.txt"; // TODO
+	displayFile = settings.rootPath + "calculus/" + queryIdentStr + "/answer.txt"; // TODO
 	aq::Logger::getInstance().log(AQ_INFO, "save answer to %s\n", displayFile.c_str());
 
 	return EXIT_SUCCESS;
@@ -226,7 +212,7 @@ int prepareQuery(const std::string& query, const aq::TProjectSettings& settingsB
 
 // -------------------------------------------------------------------------------------------------
 int processQuery(const std::string& query, aq::TProjectSettings& settings, aq::Base& baseDesc, aq::AQEngine_Intf * aq_engine,
-                 const std::string& answer, bool display, bool clean)
+                 const std::string& answer, bool clean)
 {
 	try
 	{
@@ -278,29 +264,11 @@ int processQuery(const std::string& query, aq::TProjectSettings& settings, aq::B
     unsigned int id_generator = 1;
 		aq::QueryResolver queryResolver(pNode, &settings, aq_engine, baseDesc, id_generator);
 		aq::Table::Ptr result = queryResolver.solve();
-		if (!settings.useRowResolver && result)
-		{
-			aq::Timer timer;
-			result->saveToAnswer(settings.szAnswerFN, settings.fieldSeparator);
-			aq::Logger::getInstance().log(AQ_INFO, "Save Answer: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
-		
-      if (display)
-      {
-        std::ifstream fin(settings.szAnswerFN);
-        std::string line;
-        while (std::getline(fin, line))
-        {
-          std::cout << line << std::endl;
-        }
-        fin.close();
-      }
-    }
 
 		if (clean)
 		{
-			std::string workingDirectory = settings.szRootPath + "/calculus/" + settings.queryIdent;
-			aq::Logger::getInstance().log(AQ_NOTICE, "remove working directory '%s'\n", workingDirectory.c_str());
-			aq::DeleteFolder(workingDirectory.c_str());
+			aq::Logger::getInstance().log(AQ_NOTICE, "remove working directory '%s'\n", settings.workingPath.c_str());
+			aq::DeleteFolder(settings.workingPath.c_str());
 		}
 
 		delete pNode;
@@ -327,7 +295,7 @@ int processQuery(const std::string& query, aq::TProjectSettings& settings, aq::B
 // -------------------------------------------------------------------------------------------------
 int processSQLQueries(const std::string& query, 
                       const aq::TProjectSettings& settingsBase, aq::Base& baseDesc, bool simulateAQEngine,
-                      bool display, bool clean, const std::string queryIdent, bool force)
+                      bool clean, const std::string queryIdent, bool force)
 {
 
   aq::Logger::getInstance().log(AQ_INFO, "%s\n", query.c_str());
@@ -347,7 +315,7 @@ int processSQLQueries(const std::string& query,
   }
   else
   {
-    aq::Logger::getInstance().log(AQ_INFO, "Use aq engine: '%s'\n", settings.szEnginePath.c_str());
+    aq::Logger::getInstance().log(AQ_INFO, "Use aq engine: '%s'\n", settings.aqEngine.c_str());
     aq_engine = new aq::AQEngineSystem(baseDesc, settings);
   }
 
@@ -356,7 +324,7 @@ int processSQLQueries(const std::string& query,
   std::string answer;
 
   if (!((prepareQuery(query, settingsBase, baseDesc, settings, answer, queryIdent, force) == EXIT_SUCCESS) &&
-    (processQuery(query, settings, baseDesc, aq_engine, answer, display, clean) == EXIT_SUCCESS)))
+    (processQuery(query, settings, baseDesc, aq_engine, answer, clean) == EXIT_SUCCESS)))
   {
     aq::Logger::getInstance().log(AQ_DEBUG, "QUERY FAILED:\n%s\n", query.c_str());
   }
@@ -379,7 +347,8 @@ int main(int argc, char**argv)
 	{
 
 		// Settings
-		aq::TProjectSettings settings;
+		aq::TProjectSettings settings;      
+    settings.outputFile = "stdout";
 
 		// log options
 		std::string mode;
@@ -410,7 +379,6 @@ int main(int argc, char**argv)
 		bool skipNestedQuery = false;
 		bool loadDatabase = false;
     bool force = false;
-    bool useColumnResolver = false;
     bool useTextAQMatrix = false;
 
 		// old args for backward compatibility
@@ -426,6 +394,7 @@ int main(int argc, char**argv)
 			("log-pid", po::bool_switch(&pid_mode), "add thread id to log")
 			("log-ident", po::value<std::string>(&ident)->default_value("aq_query_resolver"), "")
 			("aq-ini,s", po::value<std::string>(&propertiesFile), "")
+      ("aq-engine,e", po::value<std::string>(&settings.aqEngine))
 			("query-ident,i", po::value<std::string>(&queryIdent), "")
       ("force", po::bool_switch(&force), "force use of directory if it already exists")
 			("simulate-aq-engine,z", po::bool_switch(&simulateAQEngine), "")
@@ -436,13 +405,12 @@ int main(int argc, char**argv)
 			("worker", po::value<unsigned int>(&worker)->default_value(1), "number of thread assigned to resolve the bunch of sql queries")
 			("query-worker,w", po::value<unsigned int>(&queryWorker)->default_value(1), "number of thread assigned resolve one sql queries")
 			("clean,c", po::bool_switch(&clean), "")
-			("display,d", po::bool_switch(&display), "")
+			("output,o", po::value<std::string>(), "") // TODO
 			("transform", po::bool_switch(&transform), "")
 			("skip-nested-query", po::bool_switch(&skipNestedQuery), "")
 			("aq-matrix", po::value<std::string>(&aqMatrixFileName), "")
 			("answer-file", po::value<std::string>(&answerFileName)->default_value("answer.txt"), "")
       ("use-dll-function", po::value<std::string>(&DLLFunction), "Choise your own .dll to use your function")
-			("use-column-resolver", po::bool_switch(&useColumnResolver), "")
       ("use-bin-aq-matrix", po::bool_switch(&useTextAQMatrix), "")
 			("load-db", po::bool_switch(&loadDatabase), "")
       ("load-table", po::value<unsigned int>(&tableIdToLoad)->default_value(0), "")
@@ -471,19 +439,6 @@ int main(int argc, char**argv)
 		aq::Logger::getInstance().setPidMode(pid_mode);
 
     //
-    // Column Resolver (old manner)
-    if (useColumnResolver)
-    {
-      aq::Logger::getInstance().log(AQ_INFO, "use column resolver mode\n");
-      settings.useRowResolver = false;
-    }
-    else
-    {
-      aq::Logger::getInstance().log(AQ_INFO, "use row resolver mode\n");
-      settings.useRowResolver = true;
-    }
-    
-    //
     // Column Binary AQ Matrix (next feature to come)
     if (!useTextAQMatrix)
     {
@@ -503,8 +458,6 @@ int main(int argc, char**argv)
 			aq::Logger::getInstance().log(AQ_INFO, "read %s\n", propertiesFile.c_str());
 			settings.load(propertiesFile);
 			settings.executeNestedQuery = !skipNestedQuery;
-			if (display)
-				settings.output = "stdout";
 		}
 
 		//
@@ -519,7 +472,7 @@ int main(int argc, char**argv)
 		// Load DB Schema
 		aq::Base baseDesc;
 		if (baseDescr == "")
-			baseDescr = settings.szDBDescFN;
+			baseDescr = settings.dbDesc;
     if (baseDescr == "")
     {
       std::cerr << "no database specify" << std::endl;
@@ -566,7 +519,7 @@ int main(int argc, char**argv)
       std::cout << "Welcome to AlgoQuest Monitor version " << AQ_TOOLS_VERSION << std::endl;
       std::cout << "Copyright (c) 2013, AlgoQuest System. All rights reserved." << std::endl;
       std::cout << std::endl;
-      std::cout << "Connected to database " << settings.szRootPath << std::endl;
+      std::cout << "Connected to database " << settings.rootPath << std::endl;
       std::cout << std::endl;
     }
 
@@ -608,7 +561,7 @@ int main(int argc, char**argv)
       }
       else 
       {
-        processSQLQueries(query, settings, baseDesc, simulateAQEngine, display, clean, queryIdent, force);
+        processSQLQueries(query, settings, baseDesc, simulateAQEngine, clean, queryIdent, force);
       }
     }
   }

@@ -286,18 +286,20 @@ std::string& syntax_tree_to_aql_form( aq::tnode *pNode, std::string& query )
     {
       switch ( pNode->tag ) {
       case K_INTEGER:
-        stmp << pNode->getData().val_int;
+        stmp << "K_VALUE "  << pNode->getData().val_int;
         break;
       case K_REAL:
-        stmp << pNode->getData().val_number;
+        stmp << "K_VALUE "  << pNode->getData().val_number;
         break;
       case K_DATE_VALUE:
         {
           DateConversion dateConverter;
-          stmp << dateConverter.bigIntToDate(pNode->getData().val_int);
+          stmp << "K_VALUE " << dateConverter.bigIntToDate(pNode->getData().val_int);
         }
         break;
       case K_STRING:
+        stmp << "K_VALUE " <<  pNode->getData().val_str;
+        break;
       case K_IDENT:
       case K_COLUMN:
         stmp << pNode->getData().val_str;
@@ -436,6 +438,8 @@ std::string& syntax_tree_to_sql_form_nonext(aq::tnode * pNode, std::string& quer
 		}
 			break;
 		case K_STRING:
+      stmp <<  pNode->getData().val_str;
+      break;
 		case K_IDENT:
 		case K_COLUMN:
 			stmp << pNode->getData().val_str;

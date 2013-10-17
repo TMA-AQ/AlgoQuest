@@ -5,6 +5,7 @@
 #include <aq/Utilities.h>
 #include <aq/Logger.h>
 #include <aq/DBTypes.h>
+#include <aq/Exceptions.h>
 #include <map>
 #include <vector>
 #include <boost/shared_ptr.hpp>
@@ -83,7 +84,7 @@ int ColumnMapper<T,M>::loadValue(size_t index, ColumnItem& value)
 			boost::filesystem::path p2(thesaurusFilename);
 			if (!boost::filesystem::exists(p1) || !boost::filesystem::exists(p2))
 			{
-			  return -1; // FIXME
+        throw aq::generic_error(aq::generic_error::COULD_NOT_OPEN_FILE, "");
 			}
 
 			this->prmMapper.reset(new M(prmFilename.c_str()));

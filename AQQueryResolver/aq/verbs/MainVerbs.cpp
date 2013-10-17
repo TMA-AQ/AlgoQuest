@@ -407,7 +407,7 @@ void processNot( aq::tnode*& pNode, bool applyNot )
 		break;
 	case K_IS:
 		if( !pNode->right )
-			throw generic_error(generic_error::NOT_IMPLEMENED, "");
+			throw generic_error(generic_error::NOT_IMPLEMENTED, "");
 		if( pNode->right->tag == K_NOT && 
 			pNode->right->left && pNode->right->left->tag == K_NULL )
 		{
@@ -421,10 +421,10 @@ void processNot( aq::tnode*& pNode, bool applyNot )
 			auxNode->left = pNode->right;
 			pNode->right = auxNode;
 		}
-		else throw generic_error(generic_error::NOT_IMPLEMENED, "");
+		else throw generic_error(generic_error::NOT_IMPLEMENTED, "");
 		break;
 	default:
-		throw generic_error(generic_error::NOT_IMPLEMENED, "");
+		throw generic_error(generic_error::NOT_IMPLEMENTED, "");
 	}	
 }
 

@@ -113,7 +113,7 @@ void Table::load(const char * path, uint64_t packetSize)
   }
   else
   {
-    throw aq::generic_error(aq::generic_error::NOT_IMPLEMENED, "table load not implemented");
+    throw aq::generic_error(aq::generic_error::NOT_IMPLEMENTED, "table load not implemented");
   }
 }
 
@@ -386,7 +386,7 @@ void Table::loadColumn(Column::Ptr col, const std::vector<size_t>& uniqueIndex, 
 
 		if( numPack != currentNumPack )
 		{
-			std::string dataPath = pSettings.szRootPath;
+			std::string dataPath = pSettings.rootPath;
 			sprintf( szBuffer, "data_orga\\vdg\\data\\B001T%.4uC%.4uV01P%.12u", tableID, columnType->ID, numPack );
 			dataPath += szBuffer;
 
@@ -967,7 +967,10 @@ void Table::dumpRaw( std::ostream& os )
   if( this->HasCount )
     --nrColumns;
   os << "\"" << this->getOriginalName() << "\" " << this->ID << " " << this->TotalCount << " " << nrColumns << std::endl;
-  std::for_each(Columns.begin(), Columns.end(), boost::bind(&Column::dumpRaw, _1, boost::ref(os)));
+  for (auto& col : Columns)
+  {
+    col->dumpRaw(os);
+  }
   os << std::endl;
 }
 
@@ -979,7 +982,10 @@ void Table::dumpXml( std::ostream& os )
   size_t nrColumns = this->Columns.size();
   os << "<Table Name=\"" << this->getOriginalName() << "\" ID=\"" << this->ID << "\" NbRows=\"" << this->TotalCount << "\">" << std::endl;
   os << "<Columns>" << std::endl;
-  std::for_each(Columns.begin(), Columns.end(), boost::bind(&Column::dumpXml, _1, boost::ref(os)));
+  for (auto& col : Columns)
+  {
+    col->dumpXml(os);
+  }
   os << "</Columns>" << std::endl;
   os << "</Table>" << std::endl;
 }

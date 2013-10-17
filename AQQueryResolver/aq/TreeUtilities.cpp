@@ -14,10 +14,10 @@
 
 #if defined(WIN32)
 # include <aq/WIN32FileMapper.h>
-typedef aq::WIN32FileMapper FileMapper;
+typedef aq::WIN32FileMapper _FileMapper_;
 #else
 # include <aq/FileMapper.h>
-typedef aq::FileMapper FileMapper;
+typedef aq::FileMapper _FileMapper_;
 #endif
 
 
@@ -1409,7 +1409,7 @@ void transformExpression(const aq::Base& baseDesc, const aq::TProjectSettings& s
       aq::tnode * cmpNode = NULL;
       while ((cmpNode = aq::find_first_node(whereNode, tag)) != NULL)
       {
-        aq::expression_transform::transform<aq::FileMapper>(baseDesc, settings, cmpNode);
+        aq::expression_transform::transform<_FileMapper_>(baseDesc, settings, cmpNode);
       }
     }
   }

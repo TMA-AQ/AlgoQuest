@@ -118,7 +118,7 @@ void prepareColumnAndColumnMapper(const boost::shared_ptr<aq::AQMatrix> aqMatrix
     ColumnMapper_Intf::Ptr cm;
     if (columnTypes[i]->Temporary)
     {
-      cm.reset(new aq::TemporaryColumnMapper(settings.szTempPath1, columnTypes[i]->TableID, columnTypes[i]->ID, columnTypes[i]->Type, columnTypes[i]->Size, settings.packSize));
+      cm.reset(new aq::TemporaryColumnMapper(settings.tmpPath.c_str(), columnTypes[i]->TableID, columnTypes[i]->ID, columnTypes[i]->Type, columnTypes[i]->Size, settings.packSize));
     }
     else
     {
@@ -130,7 +130,7 @@ void prepareColumnAndColumnMapper(const boost::shared_ptr<aq::AQMatrix> aqMatrix
         table = BaseDesc.getTable(table->getReferenceTable());
       }
 
-      cm = new_column_mapper(c->Type, settings.szThesaurusPath, table->ID, c->ID, c->Size, settings.packSize);
+      cm = new_column_mapper(c->Type, settings.dataPath.c_str(), table->ID, c->ID, c->Size, settings.packSize);
     }
     infos.mapper = cm;
     
@@ -185,11 +185,11 @@ void addGroupColumn(const boost::shared_ptr<aq::AQMatrix> aqMatrix,
           ColumnMapper_Intf::Ptr cm;
           if (column->Temporary)
           {
-            cm.reset(new aq::TemporaryColumnMapper(settings.szTempPath1, column->TableID, column->ID, column->Type, column->Size, settings.packSize));
+            cm.reset(new aq::TemporaryColumnMapper(settings.tmpPath.c_str(), column->TableID, column->ID, column->Type, column->Size, settings.packSize));
           }
           else
           {
-            cm = new_column_mapper(column->Type, settings.szThesaurusPath, column->TableID, column->ID, column->Size, settings.packSize);
+            cm = new_column_mapper(column->Type, settings.dataPath.c_str(), column->TableID, column->ID, column->Size, settings.packSize);
           }
 
           column_infos_t infos;

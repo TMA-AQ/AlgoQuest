@@ -283,6 +283,7 @@ std::string tnode::to_string() const
 		return szBuffer;
 		break;
 	case NODE_DATA_STRING:
+    assert(this->data.val_str);
 		return this->data.val_str;
 		break;
 	default:

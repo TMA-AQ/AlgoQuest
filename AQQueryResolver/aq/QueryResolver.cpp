@@ -36,6 +36,10 @@
 #include <algorithm>
 #include <boost/scoped_array.hpp>
 
+#ifdef AQ_TRACE
+  std::string sql_query; // FIXME : should belong to class QueryResolver
+#endif
+
 namespace aq
 {
 
@@ -105,8 +109,8 @@ void QueryResolver::preProcess()
   aq::generate_parent(this->sqlStatement, NULL);
   aq::addAlias(this->sqlStatement->left);
 
-#if defined(_DEBUG) && defined(_TRACE)
-  std::string sql_query;
+#if defined(AQ_TRACE)
+  sql_query = "";
   std::cout << *this->sqlStatement << std::endl;
   std::cout << aq::syntax_tree_to_sql_form(this->sqlStatement, sql_query) << std::endl;
 #endif
@@ -201,19 +205,19 @@ aq::verb::VerbNode::Ptr QueryResolver::postProcess()
 {
   aq::verb::VerbNode::Ptr spTree;
 
-#if defined(_DEBUG) && defined(_TRACE)
+#if defined(AQ_TRACE)
 	sql_query = "";
-  std::cout << *this->sqlStatement << std::endl;
-  std::cout << aq::multiline_query(aq::syntax_tree_to_sql_form(this->sqlStatement, sql_query)) << std::endl;
+   std::cout << *this->sqlStatement << std::endl;
+   std::cout << aq::multiline_query(aq::syntax_tree_to_sql_form(this->sqlStatement, sql_query)) << std::endl;
 #endif
 
   aq::dateNodeToBigInt(this->sqlStatement);
   aq::transformExpression(this->BaseDesc, *this->pSettings, this->sqlStatement);
 
-#if defined(_DEBUG) && defined(_TRACE)
+#if defined(AQ_TRACE)
 	sql_query = "";
-  std::cout << *this->sqlStatement << std::endl;
-  std::cout << aq::multiline_query(aq::syntax_tree_to_sql_form(this->sqlStatement, sql_query)) << std::endl;
+   std::cout << *this->sqlStatement << std::endl;
+   std::cout << aq::multiline_query(aq::syntax_tree_to_sql_form(this->sqlStatement, sql_query)) << std::endl;
 #endif
 
   this->changeTemporaryTableName(this->sqlStatement);
@@ -233,7 +237,7 @@ aq::verb::VerbNode::Ptr QueryResolver::postProcess()
     }
   }
   
-#if defined(_DEBUG) && defined(_TRACE)
+#if defined(AQ_TRACE)
   sql_query = "";
   std::cout << "---" << std::endl;
   std::cout << aq::multiline_query(aq::syntax_tree_to_sql_form(this->sqlStatement, sql_query)) << std::endl;
@@ -247,21 +251,14 @@ aq::verb::VerbNode::Ptr QueryResolver::postProcess()
 	//aq::MakeBackupFile( pSettings->szOutputFN, aq::backup_type_t::Before, this->level, this->id );
 // #endif
 
-#if defined(_DEBUG) && defined(_TRACE)
+#if defined(AQ_TRACE)
   std::ostringstream oss;
-  oss << *this->sqlStatement << std::endl;
-  std::cout << oss.str() << std::endl;
-  std::string stmp1 = oss.str();
+  std::cout << *this->sqlStatement << std::endl;
 #endif
   
   //
   // processing order of main verb of the request depends of the resolution mode ('by row' or 'by column')
   boost::array<uint32_t, 6> categories_order =  { K_FROM, K_WHERE, K_SELECT, K_GROUP, K_HAVING, K_ORDER };
-  if (!pSettings->useRowResolver)
-  {
-    boost::array<uint32_t, 6> new_order =  { K_FROM, K_WHERE, K_SELECT, K_GROUP, K_HAVING, K_ORDER };
-    categories_order = new_order;
-  }
   
 	//
 	// Query Pre Processing (TODO : optimize tree by detecting identical subtrees)
@@ -269,10 +266,9 @@ aq::verb::VerbNode::Ptr QueryResolver::postProcess()
 	spTree = aq::verb::VerbNode::BuildVerbsTree( this->sqlStatement, categories_order, this->BaseDesc, this->pSettings );
 	spTree->changeQuery();
   
-#if defined(_DEBUG) && defined(_TRACE)
+#if defined(AQ_TRACE)
   std::cout << "nodes tree:" << std::endl;
   std::cout << *this->sqlStatement << std::endl;
-  std::cout << "verbs tree:" << std::endl;
 #endif
   
   std::set<aq::tnode*> nodes;
@@ -380,7 +376,7 @@ void QueryResolver::resolve(aq::verb::VerbNode::Ptr spTree)
 
   // Call AQEngine
   aq_engine->call(query, mode);
-  aq::MakeBackupFile(pSettings->szOutputFN, aq::backup_type_t::Empty, this->level, this->id);
+  // aq::MakeBackupFile(pSettings->szOutputFN, aq::backup_type_t::Empty, this->level, this->id);
 
   // parse result
   if (pSettings->computeAnswer)
@@ -390,7 +386,7 @@ void QueryResolver::resolve(aq::verb::VerbNode::Ptr spTree)
     {
     case analyze::type_t::REGULAR:
     case analyze::type_t::TEMPORARY_COLUMN:
-      this->solveAQMatriceByRows(spTree);
+      this->solveAQMatrix(spTree);
       aq::Logger::getInstance().log(AQ_INFO, "solve aq matrice in %s", aq::Timer::getString(timer.getTimeElapsed()).c_str());
       break;
     case analyze::type_t::FOLD_UP_QUERY:
@@ -491,7 +487,7 @@ void QueryResolver::solveNested(aq::tnode*& pNode, unsigned int nSelectLevel, aq
         pNode = aq::GetTree( *table );
         if (pNode == NULL)
         {
-          throw aq::generic_error(aq::generic_error::NOT_IMPLEMENED, "empty nested result not supported");
+          throw aq::generic_error(aq::generic_error::NOT_IMPLEMENTED, "empty nested result not supported");
         }
       }
     }
@@ -532,7 +528,7 @@ void QueryResolver::executeNested(aq::tnode * pNode)
   }
   else
   {
-#if defined(_DEBUG) && defined(_TRACE)
+#if defined(AQ_TRACE)
     std::cout << *pNode << std::endl;
 #endif
     throw aq::generic_error(aq::generic_error::INVALID_QUERY, "bad nested query: missing as keyword");
@@ -589,9 +585,8 @@ void getSelectVerbs(aq::verb::VerbNode::Ptr spTree, std::vector<aq::verb::VerbNo
 }
 
 //------------------------------------------------------------------------------
-void QueryResolver::solveAQMatriceByRows(aq::verb::VerbNode::Ptr spTree)
+void QueryResolver::solveAQMatrix(aq::verb::VerbNode::Ptr spTree)
 {	
-	assert(pSettings->useRowResolver);
 	aq::Timer timer;
 
 	// Prepare Columns
@@ -641,14 +636,14 @@ void QueryResolver::solveAQMatriceByRows(aq::verb::VerbNode::Ptr spTree)
     }
     else
     {
-      std::string path = this->pSettings->szTempRootPath + "/" + this->pSettings->queryIdent;
+      std::string path = this->pSettings->rootPath + this->pSettings->queryIdent;
       rowWritter.reset(new aq::RowTemporaryWritter(static_cast<unsigned>(BaseDesc.getTables().size() + 1), path.c_str(), pSettings->packSize));
       processes->addProcess(rowWritter);
     }
   }
   else
   {
-    rowWritter.reset(new aq::RowWritter(pSettings->output == "stdout" ? pSettings->output : pSettings->szAnswerFN));
+    rowWritter.reset(new aq::RowWritter(pSettings->outputFile == "stdout" ? pSettings->outputFile : pSettings->answerFile));
     rowWritter->setColumn(columnTypes);
     processes->addProcess(rowWritter);
   }
@@ -1017,152 +1012,6 @@ std::string QueryResolver::getOriginalColumn(const std::string& alias) const
     res = it->second->getOriginalColumn(alias);
   }
   return res;
-}
-
-//------------------------------------------------------------------------------
-// DEPRECATED
-boost::shared_ptr<QueryResolver> QueryResolver::SolveSelectFromSelect(	aq::tnode* pInteriorSelect, aq::tnode* pExteriorSelect, int nSelectLevel )
-{
-	if( !pInteriorSelect || !pExteriorSelect )
-  {
-    throw aq::generic_error(aq::generic_error::INVALID_QUERY, "");
-  }
-  
-  this->id_generator += 1;
-  boost::shared_ptr<QueryResolver> query(new QueryResolver(pInteriorSelect, this->pSettings, this->aq_engine, this->BaseDesc, this->id_generator, this->level + 1));
-
-#if defined(_DEBUG) && defined(_TRACE)
-  std::cout << *pInteriorSelect << std::endl;
-#endif
-
-  std::string str;
-  aq::syntax_tree_to_aql_form( pExteriorSelect, str );
-  aq::SaveFile( pSettings->szOutputFN, str.c_str() );
-  aq::MakeBackupFile( pSettings->szOutputFN, aq::backup_type_t::Exterior_Before, this->level, this->id );
-
-  std::vector<std::string> dummy1;
-  std::vector<std::string> dummy2;
-  aq::solveSelectStar( pInteriorSelect, BaseDesc, dummy1, dummy2 );
-	aq::solveOneTableInFrom( pInteriorSelect, BaseDesc );
-
-	aq::tnode* pIntSelectAs = aq::getLastTag( pExteriorSelect, NULL, pInteriorSelect, K_AS );
-	if( !pIntSelectAs || !pIntSelectAs->right || (pIntSelectAs->right->tag != K_IDENT) )
-		throw aq::generic_error(aq::generic_error::INVALID_QUERY, "");
-
-	aq::SolveMinMaxGroupBy solveMinMaxGroupBy;
-	bool minMaxGroupBy = solveMinMaxGroupBy.checkAndClear( pInteriorSelect );
-
-	aq::changeTableNames( pIntSelectAs, pInteriorSelect, pExteriorSelect );
-	aq::changeColumnNames( pIntSelectAs, pInteriorSelect, pExteriorSelect->left, true );
-	aq::changeColumnNames( pIntSelectAs, pInteriorSelect, pExteriorSelect->next, false );
-	aq::solveSelectStarExterior( pInteriorSelect, pExteriorSelect );
-
-  if( trivialSelectFromSelect(pInteriorSelect) )
-	{
-		aq::syntax_tree_to_aql_form( pInteriorSelect, str );
-		aq::SaveFile( pSettings->szOutputFN, str.c_str() );
-		aq::MakeBackupFile( pSettings->szOutputFN, aq::backup_type_t::Empty, this->level, this->id );
-		aq::mark_as_deleted( pIntSelectAs );
-		return query;
-	}
-
-	aq::eliminateAliases( pInteriorSelect );
-
-	// copy conditions from inner select WHERE into outer select WHERE
-	aq::tnode* intWhereNode = find_main_node( pInteriorSelect, K_WHERE );
-	if( intWhereNode )
-	{
-    // keep only join
-    aq::tnode * joinNode = aq::clone_subtree(intWhereNode->left);
-    joinNode = aq::getJoin(joinNode);
-		aq::addConditionsToWhere( joinNode, pExteriorSelect );
-	}
-	aq::addInnerOuterNodes( intWhereNode->left, K_INNER, K_INNER );
-
-// #ifdef OUTPUT_NESTED_QUERIES
-	aq::syntax_tree_to_aql_form( pExteriorSelect, str );
-	aq::SaveFile( pSettings->szOutputFN, str.c_str() );
-	aq::MakeBackupFile( pSettings->szOutputFN, aq::backup_type_t::Exterior, this->level, this->id );
-// #endif
-  
-#if defined(_DEBUG) && defined(_TRACE)
-  std::string queryInterior;
-  std::string queryExterior;
-  std::cout << "--- Interior select ---" << std::endl;
-  std::cout << aq::syntax_tree_to_aql_form(pInteriorSelect, queryInterior) << std::endl;
-  std::cout << "--- Exterior select ---" << std::endl;
-  std::cout << aq::syntax_tree_to_aql_form(pExteriorSelect, queryExterior) << std::endl;
-#endif
-
-  boost::array<uint32_t, 6> categories_order = { K_FROM, K_WHERE, K_SELECT, K_GROUP, K_HAVING, K_ORDER };
-  if (!pSettings->useRowResolver)
-  {
-    boost::array<uint32_t, 6> new_order = { K_FROM, K_WHERE, K_GROUP, K_HAVING, K_SELECT, K_ORDER };
-    categories_order = new_order;
-  }
-	aq::verb::VerbNode::Ptr spTree = aq::verb::VerbNode::BuildVerbsTree( pInteriorSelect, categories_order, this->BaseDesc, this->pSettings );
-	spTree->changeQuery();
-	aq::cleanQuery( pInteriorSelect );
-
-  aq_engine->call(pInteriorSelect, AQEngine_Intf::NESTED_2, nSelectLevel);
-	// aq_engine->call(	pInteriorSelect, minMaxGroupBy ? 0 : 1, nSelectLevel );
-	// solveMinMaxGroupBy.modifyTmpFiles( pSettings->szTempPath2, nSelectLevel, BaseDesc, *pSettings );
-
-// #ifdef OUTPUT_NESTED_QUERIES
-	aq::MakeBackupFile( pSettings->szOutputFN, aq::backup_type_t::Empty, this->level, this->id );
-// #endif
-	
-	aq::mark_as_deleted( pIntSelectAs );
-  
-  return query;
-}
-
-//------------------------------------------------------------------------------
-Table::Ptr QueryResolver::solveAQMatriceByColumns(aq::verb::VerbNode::Ptr spTree)
-{
-	aq::Timer timer;
-
-	// get select columns from query
-	std::vector<Column::Ptr> columnTypes;
-	aq::getColumnTypes( this->sqlStatement, columnTypes, this->BaseDesc );
-	
-	//
-	// result
-	Table::Ptr table = new Table();
-
-	timer.start();
-	table->loadFromTableAnswerByColumn(*(aq_engine->getAQMatrix()), aq_engine->getTablesIDs(), columnTypes, *pSettings, BaseDesc );
-	aq::Logger::getInstance().log(AQ_INFO, "Load From Answer: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
-
-// #ifdef OUTPUT_NESTED_QUERIES
-	aq::MakeBackupFile( pSettings->szOutputFN, aq::backup_type_t::Empty, this->level, this->id );
-	aq::MakeBackupFile( pSettings->szAnswerFN, aq::backup_type_t::Before, this->level, this->id );
-// #endif
-
-	if( !table->NoAnswer )
-	{
-		timer.start();
-		spTree->changeResult( table );
-		aq::Logger::getInstance().log(AQ_INFO, "Change Result: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
-	}
-	
-	//timer.start();
-	//table->cleanRedundantColumns();
-	//table->groupBy();
-	//aq::Logger::getInstance().log(AQ_INFO, "Group By: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
-
-	if( table->GroupByApplied && table->HasCount )
-	{
-		timer.start();
-		Column::Ptr count = table->Columns[table->Columns.size() - 1];
-		for( size_t idx = 0; idx < count->Items.size(); ++idx )
-			count->Items[idx]->numval = 1;
-		table->TotalCount = count->Items.size();
-		aq::Logger::getInstance().log(AQ_INFO, "Change Count: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
-	}
-
-	this->result = table;
-	return table;
 }
 
 }

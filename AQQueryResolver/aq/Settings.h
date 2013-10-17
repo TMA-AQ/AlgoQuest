@@ -14,26 +14,24 @@
 namespace aq
 {
 
-struct TProjectSettings {
+struct TProjectSettings 
+{
   typedef boost::shared_ptr<TProjectSettings> Ptr;
 
 	std::string iniFile;
-	std::string output;
 	std::string queryIdent;
-  std::string szRootPath;
-	std::string szEnginePath;
-	
-	std::string szTempRootPath;
-	std::string szLoaderPath;
-	char szSQLReqFN[ _MAX_PATH ];
-	char szDBDescFN[ _MAX_PATH ];
-	char szOutputFN[ _MAX_PATH ];
-	char szAnswerFN[ _MAX_PATH ];
-	char szThesaurusPath[ _MAX_PATH ];
-	char szTempPath1[ _MAX_PATH ];
-	char szTempPath2[ _MAX_PATH ];
-	char szEngineParamsDisplay[ STR_BUF_SIZE ];
-	char szEngineParamsNoDisplay[ STR_BUF_SIZE ];
+	std::string outputFile;
+	std::string answerFile;
+	std::string dbDesc;
+	std::string aqEngine;
+	std::string aqLoader;
+  std::string rootPath;
+  std::string workingPath;
+	std::string tmpRootPath;
+  std::string dataPath;
+	std::string tmpPath;
+	std::string dpyPath;
+
 	char fieldSeparator;
 	static const int MAX_COLUMN_NAME_SIZE = 255;
 	
@@ -47,7 +45,6 @@ struct TProjectSettings {
 	bool computeAnswer;
 	bool csvFormat;
 	bool executeNestedQuery;
-	bool useRowResolver;
   bool useBinAQMatrix;
 
 	TProjectSettings();

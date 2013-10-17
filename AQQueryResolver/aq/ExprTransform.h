@@ -242,7 +242,7 @@ public:
   void init();
   const aq::tnode * getColumnRef() const;
   bool check(const aq::ColumnItem& item, const aq::ColumnType& cType) const;
-  void sucess(aq::tnode * node);
+  void success(aq::tnode * node);
 private:
   const aq::Base& baseDesc;
   aq::ColumnItem reference;
@@ -262,7 +262,7 @@ public:
   void init();
   const aq::tnode * getColumnRef() const;
   bool check(const aq::ColumnItem& item, const aq::ColumnType& cType) const;
-  void sucess(aq::tnode * node);
+  void success(aq::tnode * node);
 private:
   const aq::Base& baseDesc;
 	aq::tnode * pNodeTmp;
@@ -282,7 +282,7 @@ public:
   void init();
   const aq::tnode * getColumnRef() const;
   bool check(const aq::ColumnItem& item, const aq::ColumnType& cType) const;
-  void sucess(aq::tnode * node);
+  void success(aq::tnode * node);
 private:
   const aq::Base& baseDesc;
 	aq::tnode * pNodeTmp;
@@ -366,7 +366,7 @@ aq::tnode * ExpressionTransform::transform(aq::tnode * pNode, CMP& cmp) const
   ::getColumnInfos(this->baseDesc, *cmp.getColumnRef(), tId, cId, cSize, cType);
 
   size_t matched = 0;
-  boost::shared_ptr<aq::ColumnMapper_Intf> cm = ::getThesaurusReader<M>(cType, settings.szThesaurusPath, tId, cId, cSize, settings.packSize);
+  boost::shared_ptr<aq::ColumnMapper_Intf> cm = ::getThesaurusReader<M>(cType, settings.dataPath.c_str(), tId, cId, cSize, settings.packSize);
   std::vector<aq::ColumnItem> resultTmp1, resultTmp2, resultTmp3;
   aq::column_cmp_t column_cmp;
   while (cm->loadValue(index++, item) == 0)
@@ -415,7 +415,7 @@ aq::tnode * ExpressionTransform::transform(aq::tnode * pNode, CMP& cmp) const
     throw aq::generic_error(aq::generic_error::INVALID_QUERY, "");
 	}
 
-  cmp.sucess(pNodeRes);
+  cmp.success(pNodeRes);
 
 	delete_subtree(pNode);
 	return pNodeRes;
@@ -438,7 +438,7 @@ namespace expression_transform {
     node->right = newNode->right;
     node->next = newNode->next;
     node->parent = NULL;
-
+    
     return node;
   }
 

@@ -276,7 +276,7 @@ void DecodeVerb::changeResult( Table::Ptr table,
 			sourceCol->Type = scalar->Type;
 			sourceCol->Items.push_back( new ColumnItem( scalar->Item ) );
 			//debug13
-			throw verb_error(generic_error::NOT_IMPLEMENED, this->getVerbType());
+			throw verb_error(generic_error::NOT_IMPLEMENTED, this->getVerbType());
 		}
 		break;
 	case VerbResult::COLUMN:

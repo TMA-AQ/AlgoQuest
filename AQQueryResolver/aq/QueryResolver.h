@@ -34,7 +34,7 @@ public:
   /// There is three case:
 
   /// 1: parse the full aq matrix and apply some verb
-	void solveAQMatriceByRows(aq::verb::VerbNode::Ptr spTree);
+	void solveAQMatrix(aq::verb::VerbNode::Ptr spTree);
 
   /// 2: apply some rules on the result and generate a TEMPORARY table based on REGULAR/BASE table
   void generateTemporaryTable();
@@ -44,9 +44,6 @@ public:
 
   /// \}
 
-  /// deprecated
-	Table::Ptr solveAQMatriceByColumns(aq::verb::VerbNode::Ptr spTree);
-  
 	Table::Ptr getResult() { return this->result; }
   const std::vector<Column::Ptr> getColumns() const { return this->columns; }
   const ColumnItem& getValue(size_t row, size_t column) const;
@@ -74,9 +71,6 @@ private:
   std::string getOriginalColumn(const std::string& alias) const;
   void executeNested(aq::tnode * pInteriorSelect);
 
-  /// deprecated
-	boost::shared_ptr<QueryResolver> SolveSelectFromSelect(	aq::tnode* pInteriorSelect, aq::tnode* pExteriorSelect, int nSelectLevel );
-
   ////////////////////////////////////////////////////////////////////////////
 	// Variables Members
 
@@ -89,10 +83,6 @@ private:
 	aq::Timer timer;
 	char szBuffer[STR_BUF_SIZE];
   
-#ifdef _DEBUG
-  std::string sql_query;
-#endif
-
   // query
 	aq::tnode * sqlStatement;
 	aq::tnode * originalSqlStatement;

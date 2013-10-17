@@ -48,7 +48,6 @@ WIN32FileMapper::~WIN32FileMapper()
 
 int WIN32FileMapper::read(void * buffer, size_t offset, size_t len) 
 {
-
   if (offset >= cbFile)
   {
     return -1;
@@ -73,7 +72,7 @@ int WIN32FileMapper::read(void * buffer, size_t offset, size_t len)
 	if (this->pView == NULL) 
 	{
 		// TODO
-		exit(-1);
+		// exit(-1);
 		return -2;
 	}
 	
@@ -90,7 +89,7 @@ int WIN32FileMapper::read(void * buffer, size_t offset, size_t len)
 	if (this->pView == NULL) 
 	{
 		// TODO
-		exit(-1);
+		// exit(-1);
 		return -2;
 	}
 	

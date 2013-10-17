@@ -282,7 +282,7 @@ void YearVerb::transformItem( const ColumnItem& item, ColumnItem& result )
   // dateToParts( (llong) item.numval, year, month, day, hour, minute, second, millisecond );
 	
   assert(false);
-  throw aq::generic_error(aq::generic_error::NOT_IMPLEMENED, "");
+  throw aq::generic_error(aq::generic_error::NOT_IMPLEMENTED, "YearVerb not supported");
 
   result = ColumnItem(0.0);
 }
@@ -311,7 +311,7 @@ void MonthVerb::transformItem( const ColumnItem& item, ColumnItem& result )
 	// dateToParts( (llong) item.numval, year, month, day, hour, minute, second, millisecond );
 
   assert(false);
-  throw aq::generic_error(aq::generic_error::NOT_IMPLEMENED, "");
+  throw aq::generic_error(aq::generic_error::NOT_IMPLEMENTED, "MonthVerb not supported");
 
 	result = ColumnItem(0.0);
 }
@@ -340,7 +340,7 @@ void DayVerb::transformItem( const ColumnItem& item, ColumnItem& result )
   // dateToParts( (llong) item.numval, year, month, day, hour, minute, second, millisecond );
   
   assert(false);
-  throw aq::generic_error(aq::generic_error::NOT_IMPLEMENED, "");
+  throw aq::generic_error(aq::generic_error::NOT_IMPLEMENTED, "DayVerb not supported");
 
 	result = ColumnItem(0.0);
 }
@@ -422,7 +422,7 @@ void DateVerb::transformItem( const ColumnItem& item, ColumnItem& result )
 	//dateFromParts( intval, year, month, day, hour, minute, second, millisecond );
   
   assert(false);
-  throw aq::generic_error(aq::generic_error::NOT_IMPLEMENED, "");
+  throw aq::generic_error(aq::generic_error::NOT_IMPLEMENTED, "DateVerb not supported");
 
 	result.numval = (double) intval;
 }

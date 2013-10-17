@@ -82,7 +82,7 @@ namespace aq
     {
       // TODO : backward reading is not implemented
       assert(false);
-      throw aq::generic_error(aq::generic_error::NOT_IMPLEMENED, "backward reading of thesaurus is not implemented");
+      throw aq::generic_error(aq::generic_error::NOT_IMPLEMENTED, "backward reading of thesaurus is not implemented");
     }
     return rc;
   }
