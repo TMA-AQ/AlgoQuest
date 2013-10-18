@@ -386,8 +386,8 @@ void Table::loadColumn(Column::Ptr col, const std::vector<size_t>& uniqueIndex, 
 
 		if( numPack != currentNumPack )
 		{
-			std::string dataPath = pSettings.rootPath;
-			sprintf( szBuffer, "data_orga\\vdg\\data\\B001T%.4uC%.4uV01P%.12u", tableID, columnType->ID, numPack );
+			std::string dataPath = pSettings.dataPath;
+			sprintf( szBuffer, "B001T%.4uC%.4uV01P%.12u", tableID, columnType->ID, numPack ); // FIXME : use a function
 			dataPath += szBuffer;
 
 			std::string prmFilePath = dataPath + ".prm";

@@ -145,6 +145,8 @@ uint64_t functional_tests(const struct opt& o)
       }
     }
     
+    boost::to_upper(query); // FIXME : this can have a bad side effect on characters values
+  
     // add eof on each important keyword (FROM, WHERE, GROUP, ORDER, K_JXXX, IN)
     boost::replace_all(query, "\n", " ");
     std::string keywords[] = { 

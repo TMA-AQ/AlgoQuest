@@ -674,6 +674,14 @@ void QueryResolver::solveAQMatrix(aq::verb::VerbNode::Ptr spTree)
 }
 
 //------------------------------------------------------------------------------
+size_t QueryResolver::getNbRows()
+{
+  if (this->aq_engine && this->aq_engine->getAQMatrix())
+    return this->aq_engine->getAQMatrix()->getCount().size();
+  return 0;
+}
+
+//------------------------------------------------------------------------------
 void QueryResolver::generateTemporaryTable()
 {
   boost::shared_ptr<AQMatrix> matrix = aq_engine->getAQMatrix();

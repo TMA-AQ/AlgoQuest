@@ -44,17 +44,20 @@ int RowWritter::process(Row& row)
 	if (this->firstRow)
 	{
 		//write column names
+    bool first = true;
     for (Row::row_t::const_reverse_iterator it = row.computedRow.rbegin(); it != row.computedRow.rend(); ++it)
     {
       if (!(*it).displayed)
         continue;
-      fputs(" ; ", pFOut);
+      if (!first) 
+        fputs(" ; ", pFOut);
       if ((*it).tableName != "")
       {
         fputs((*it).tableName.c_str(), pFOut);
         fputs(".", pFOut);
       }
       fputs((*it).columnName.c_str(), pFOut);
+      first = false;
 		}
 		fputc('\n', pFOut);
 		this->firstRow = false;
@@ -63,14 +66,17 @@ int RowWritter::process(Row& row)
   if (row.completed)
   {
     this->totalCount += 1;
+    bool first = true;
     for (Row::row_t::const_reverse_iterator it = row.computedRow.rbegin(); it != row.computedRow.rend(); ++it)
     {
       if (!(*it).displayed)
         continue;
       assert((*it).item != NULL);
       (*it).item->toString(value, (*it).type);
-      fputs(" ; ", pFOut);
+      if (!first) 
+        fputs(" ; ", pFOut);
       fputs(value, pFOut);
+      first = false;
     }
     //fputs(" ; ", pFOut);
     //sprintf(value, "%u", row.count);

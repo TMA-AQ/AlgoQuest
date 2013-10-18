@@ -43,6 +43,7 @@
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 
+bool interact_cmd_line;
 extern int yylineno;
 int yyerror( const char *pszMsg ) 
 {
@@ -262,8 +263,10 @@ int processQuery(const std::string& query, aq::TProjectSettings& settings, aq::B
     //
 		// Transform SQL request in prefix form, 
     unsigned int id_generator = 1;
+    aq::Timer timer;
 		aq::QueryResolver queryResolver(pNode, &settings, aq_engine, baseDesc, id_generator);
 		aq::Table::Ptr result = queryResolver.solve();
+    timer.stop();
 
 		if (!keepFiles)
 		{
@@ -272,6 +275,12 @@ int processQuery(const std::string& query, aq::TProjectSettings& settings, aq::B
 			aq::Logger::getInstance().log(AQ_NOTICE, "remove working directory '%s'\n", settings.workingPath.c_str());
 			aq::DeleteFolder(settings.workingPath.c_str());
 		}
+
+    if (interact_cmd_line)
+    {
+      std::cout << queryResolver.getNbRows() << " rows processed in " << aq::Timer::getString(timer.getTimeElapsed()) << std::endl;
+      std::cout << std::endl;
+    }
 
 		delete pNode;
 	}
@@ -385,50 +394,88 @@ int main(int argc, char**argv)
 
 		// old args for backward compatibility
 		std::vector<std::string> oldArgs;
+    
+    //
+    // look for properties file in args
+    for (size_t i = 1; i < argc; i++)
+    {
+      //
+      // read ini file
+      if ((strcmp(argv[i], "-s") == 0) || (strcmp(argv[i], "--settings") == 0))
+      {
+        if ((i + 1) < argc)
+        {
+          propertiesFile = argv[i+1];
+          settings.load(propertiesFile);
+        }
+      }
 
-		po::options_description desc("Allowed options");
-		desc.add_options()
+    }
+
+    //
+    // command line arguments are prior to settings file
+    po::options_description all("Allowed options");
+		all.add_options()
 			("help,h", "produce help message")
+      ;
+
+    po::options_description log_options("Logging");
+    log_options.add_options()
 			("log-output", po::value<std::string>(&mode)->default_value("STDOUT"), "[STDOUT|LOCALFILE|SYSLOG]")
 			("log-level,v", po::value<unsigned int>(&level)->default_value(AQ_LOG_WARNING), "CRITICAL(2), ERROR(3), WARNING(4), NOTICE(5), INFO(6), DEBUG(7)")
 			("log-lock", po::bool_switch(&lock_mode), "for multithread program")
 			("log-date", po::bool_switch(&date_mode), "add date to log")
 			("log-pid", po::bool_switch(&pid_mode), "add thread id to log")
 			("log-ident", po::value<std::string>(&ident)->default_value("aq_query_resolver"), "")
-			("aq-ini,s", po::value<std::string>(&propertiesFile), "")
-      ("aq-engine,e", po::value<std::string>(&settings.aqEngine))
-			("query-ident,i", po::value<std::string>(&queryIdent), "")
-      ("force", po::bool_switch(&force), "force use of directory if it already exists")
-			("simulate-aq-engine,z", po::bool_switch(&simulateAQEngine), "")
-			("sql-query,q", po::value<std::string>(&sqlQuery), "")
-			("sql-queries-file,f", po::value<std::string>(&sqlQueriesFile), "")
-			("answer-path", po::value<std::string>(&answerPathStr), "")
-			("base-descr", po::value<std::string>(&baseDescr), "")
-			("worker", po::value<unsigned int>(&worker)->default_value(1), "number of thread assigned to resolve the bunch of sql queries")
-			("query-worker,w", po::value<unsigned int>(&queryWorker)->default_value(1), "number of thread assigned resolve one sql queries")
-			("keep-file,k", po::bool_switch(&keepFiles), "")
-			("output,o", po::value<std::string>(), "") // TODO
-			("transform", po::bool_switch(&transform), "")
-			("skip-nested-query", po::bool_switch(&skipNestedQuery), "")
-			("aq-matrix", po::value<std::string>(&aqMatrixFileName), "")
-			("answer-file", po::value<std::string>(&answerFileName)->default_value("answer.txt"), "")
-      ("use-dll-function", po::value<std::string>(&DLLFunction), "Choise your own .dll to use your function")
-      ("use-bin-aq-matrix", po::bool_switch(&useTextAQMatrix), "")
-			("load-db", po::bool_switch(&loadDatabase), "")
-      ("load-table", po::value<unsigned int>(&tableIdToLoad)->default_value(0), "")
-			("backward-compatibility", po::value< std::vector<std::string> >(&oldArgs), "old arguments")
 			;
 
-		po::positional_options_description p;
-		p.add("backward-compatibility", -1);
+    po::options_description engine("Engine");
+    engine.add_options()
+      ("settings,s", po::value<std::string>(&propertiesFile), "")
+      ("aq-engine,e", po::value<std::string>(&settings.aqEngine))
+			("query-ident,i", po::value<std::string>(&queryIdent), "")
+      ("queries-file,f", po::value<std::string>(&sqlQueriesFile), "")
+			("answer-path", po::value<std::string>(&answerPathStr), "DEPRECATED") // deprecated
+			("answer-file", po::value<std::string>(&answerFileName)->default_value("answer.txt"), "DEPRECATED") // deprecated
+			("output,o", po::value<std::string>(&settings.outputFile), "")
+			("base-descr", po::value<std::string>(&settings.dbDesc), "")
+			("worker", po::value<unsigned int>(&worker), "number of thread assigned to resolve the bunch of sql queries")
+			("query-worker,w", po::value<size_t>(&settings.process_thread)->default_value(settings.process_thread), "number of thread assigned resolve one sql queries")
+			("display-count", po::value<bool>(&settings.displayCount), "")
+      ("force", po::bool_switch(&force), "force use of directory if it already exists")
+			("keep-file,k", po::bool_switch(&keepFiles), "")
+      ;
+
+    po::options_description testing("Testing");
+    testing.add_options()
+      ("simulate-aq-engine,z", po::bool_switch(&simulateAQEngine), "")
+			("transform", po::bool_switch(&transform), "")
+			("skip-nested-query", po::bool_switch(&settings.executeNestedQuery), "")
+			("aq-matrix", po::value<std::string>(&aqMatrixFileName), "")
+      ;
+
+    po::options_description external("External");
+    external.add_options()
+      ("use-dll-function", po::value<std::string>(&DLLFunction), "Choise your own .dll to use your function")
+      ("use-bin-aq-matrix", po::bool_switch(&useTextAQMatrix), "")
+      ;
+
+    po::options_description loader("Loader");
+    loader.add_options()
+      ("aq-loader,l", po::value<std::string>(&settings.aqLoader))
+			("load-db", po::bool_switch(&loadDatabase), "")
+      ("load-table", po::value<unsigned int>(&tableIdToLoad)->default_value(0), "")
+			;
+
+    all.add(log_options).add(engine).add(testing).add(external).add(loader);
 
 		po::variables_map vm;
-		po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
+		po::store(po::command_line_parser(argc, argv).options(all).run(), vm);
 		po::notify(vm);    
 
 		if (vm.count("help"))
 		{
-			std::cout << desc << "\n";
+			std::cout << all << "\n";
 			return 1;
 		}
 		
@@ -439,28 +486,10 @@ int main(int argc, char**argv)
 		aq::Logger::getInstance().setLockMode(lock_mode);
 		aq::Logger::getInstance().setDateMode(date_mode);
 		aq::Logger::getInstance().setPidMode(pid_mode);
-
+    
     //
-    // Column Binary AQ Matrix (next feature to come)
-    if (!useTextAQMatrix)
-    {
-      aq::Logger::getInstance().log(AQ_INFO, "use binary aq matrix\n");
-      settings.useBinAQMatrix = true;
-    }
-    else
-    {
-      aq::Logger::getInstance().log(AQ_INFO, "use text aq matrix\n");
-      settings.useBinAQMatrix = false;
-    }
-
-		//
-		// read ini file
-		if (propertiesFile != "")
-		{
-			aq::Logger::getInstance().log(AQ_INFO, "read %s\n", propertiesFile.c_str());
-			settings.load(propertiesFile);
-			settings.executeNestedQuery = !skipNestedQuery;
-		}
+    // check if aq-tools is used as an interactive cmd line
+    interact_cmd_line = _isatty(_fileno(stdin)) && (sqlQueriesFile == "");
 
 		//
 		// print Project Settings
@@ -469,7 +498,7 @@ int main(int argc, char**argv)
 			settings.dump(oss);
 			aq::Logger::getInstance().log(AQ_DEBUG, "ProjectSettings:\n===========\n%s\n===========\n", oss.str().c_str());
 		}
-
+    
 		//
 		// Load DB Schema
 		aq::Base baseDesc;
@@ -516,7 +545,7 @@ int main(int argc, char**argv)
 
     //
     // print info if use as command line tool
-    if (_isatty(_fileno(stdin)) && (sqlQueriesFile == ""))
+    if (interact_cmd_line)
     {
       std::cout << "Welcome to AlgoQuest Monitor version " << AQ_TOOLS_VERSION << std::endl;
       std::cout << "Copyright (c) 2013, AlgoQuest System. All rights reserved." << std::endl;

@@ -46,6 +46,7 @@ struct TProjectSettings
 	bool csvFormat;
 	bool executeNestedQuery;
   bool useBinAQMatrix;
+  bool displayCount;
 
 	TProjectSettings();
 	TProjectSettings(const TProjectSettings&);

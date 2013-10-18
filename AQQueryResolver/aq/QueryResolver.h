@@ -44,6 +44,7 @@ public:
 
   /// \}
 
+  size_t getNbRows();
 	Table::Ptr getResult() { return this->result; }
   const std::vector<Column::Ptr> getColumns() const { return this->columns; }
   const ColumnItem& getValue(size_t row, size_t column) const;

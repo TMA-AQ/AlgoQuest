@@ -36,7 +36,8 @@ TProjectSettings::TProjectSettings()
   computeAnswer(true),
 	csvFormat(false),
 	executeNestedQuery(true),
-  useBinAQMatrix(true)
+  useBinAQMatrix(true),
+  displayCount(false)
 {
 }
 
@@ -63,7 +64,8 @@ TProjectSettings::TProjectSettings(const TProjectSettings& obj)
 	maxRecordSize(obj.maxRecordSize),
 	computeAnswer(obj.computeAnswer),
 	executeNestedQuery(obj.executeNestedQuery),
-  useBinAQMatrix(obj.useBinAQMatrix)
+  useBinAQMatrix(obj.useBinAQMatrix),
+  displayCount(obj.displayCount)
 {
 }
 
@@ -99,6 +101,7 @@ TProjectSettings& TProjectSettings::operator=(const TProjectSettings& obj)
 		computeAnswer = obj.computeAnswer;
 		executeNestedQuery = obj.executeNestedQuery;
     useBinAQMatrix = obj.useBinAQMatrix;
+    displayCount = obj.displayCount;
 	}
 	return *this;
 }
@@ -133,6 +136,8 @@ void TProjectSettings::load(const std::string& iniFile)
 		if (opt.is_initialized()) this->group_by_process_size = opt.get();
     opt = pt.get_optional<size_t>(boost::property_tree::ptree::path_type("process-thread"));
     if (opt.is_initialized()) this->process_thread = opt.get();
+    boost::optional<bool> o = pt.get_optional<bool>(boost::property_tree::ptree::basic_ptree::path_type("display-count"));
+    if (o.is_initialized()) this->displayCount = o.get();
 
     //
     // Change '\' by '/'
@@ -204,10 +209,11 @@ void TProjectSettings::dump(std::ostream& os) const
 	os << "output:               ['" << outputFile           << "']" << std::endl;
 	os << "answer:               ['" << answerFile           << "']" << std::endl;
 	os << "fieldSeparator:       ['" << fieldSeparator       << "']" << std::endl;
-	os << "MAX_COLUMN_NAME_SIZE: ["  << MAX_COLUMN_NAME_SIZE << "]"  << std::endl;
-	os << "packSize:             ["  << packSize             << "]"  << std::endl;
-	os << "maxRecordSize:        ["  << maxRecordSize        << "]"  << std::endl;
-  os << "computeAnswer:        ["  << computeAnswer        << "]"  << std::endl;
+	os << "MAX_COLUMN_NAME_SIZE: ["  << MAX_COLUMN_NAME_SIZE <<  "]" << std::endl;
+	os << "packSize:             ["  << packSize             <<  "]" << std::endl;
+	os << "maxRecordSize:        ["  << maxRecordSize        <<  "]" << std::endl;
+  os << "computeAnswer:        ["  << computeAnswer        <<  "]" << std::endl;
+  os << "displayCount:         ["  << displayCount         <<  "]" << std::endl;
 }
 
 void TProjectSettings::writeAQEngineIni(std::ostream& os) const
