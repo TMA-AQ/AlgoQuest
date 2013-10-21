@@ -259,6 +259,8 @@ int prepareQuery(const std::string& query, const aq::TProjectSettings& settingsB
 int processQuery(const std::string& query, aq::TProjectSettings& settings, aq::Base& baseDesc, aq::AQEngine_Intf * aq_engine,
                  const std::string& answer, bool keepFiles)
 {
+  int rc = EXIT_SUCCESS;
+
 	try
 	{
 	
@@ -312,14 +314,6 @@ int processQuery(const std::string& query, aq::TProjectSettings& settings, aq::B
 		aq::Table::Ptr result = queryResolver.solve();
     timer.stop();
 
-		if (!keepFiles)
-		{
-			aq::Logger::getInstance().log(AQ_NOTICE, "remove temporary directory '%s'\n", settings.tmpPath.c_str());
-			aq::DeleteFolder(settings.tmpPath.c_str());
-			aq::Logger::getInstance().log(AQ_NOTICE, "remove working directory '%s'\n", settings.workingPath.c_str());
-			aq::DeleteFolder(settings.workingPath.c_str());
-		}
-
     if (interact_cmd_line)
     {
       std::cout << queryResolver.getNbRows() << " rows processed in " << aq::Timer::getString(timer.getTimeElapsed()) << std::endl;
@@ -331,20 +325,28 @@ int processQuery(const std::string& query, aq::TProjectSettings& settings, aq::B
 	catch (const aq::generic_error& ge)
 	{
 		aq::Logger::getInstance().log(AQ_ERROR, "%s\n", ge.what());
-		return EXIT_FAILURE;
+		rc = EXIT_FAILURE;
 	}
 	catch (const std::exception& ex)
 	{
 		aq::Logger::getInstance().log(AQ_ERROR, "%s\n", ex.what());
-		return EXIT_FAILURE;
+		rc = EXIT_FAILURE;
 	}
 	catch (...)
 	{
 		aq::Logger::getInstance().log(AQ_ERROR, "unknown exception\n");
-		return EXIT_FAILURE;
+		rc = EXIT_FAILURE;
 	}
 
-	return EXIT_SUCCESS;
+  if (!keepFiles)
+  {
+    aq::Logger::getInstance().log(AQ_NOTICE, "remove temporary directory '%s'\n", settings.tmpPath.c_str());
+    aq::DeleteFolder(settings.tmpPath.c_str());
+    aq::Logger::getInstance().log(AQ_NOTICE, "remove working directory '%s'\n", settings.workingPath.c_str());
+    aq::DeleteFolder(settings.workingPath.c_str());
+  }
+
+	return rc;
 }
 
 // -------------------------------------------------------------------------------------------------
