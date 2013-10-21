@@ -551,8 +551,9 @@ void moveFromJoinToWhere( aq::tnode* pStart, Base& BaseDesc )
 	aq::tnode* pInner = NULL;
 	do
 	{
-		if ((pInner = find_deeper_node( pNode, K_INNER )) == NULL)
-			return;
+    pInner = find_deeper_node(pNode, K_INNER); // K_OUTER is not managed here
+		if (pInner == NULL)
+      return;
 
 		assert(pInner->left && (pInner->left->tag == K_JOIN));
 		assert(pInner->left->next && (pInner->left->next->tag == K_ON));

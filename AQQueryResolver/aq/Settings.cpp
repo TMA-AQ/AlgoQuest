@@ -20,22 +20,23 @@ TProjectSettings::TProjectSettings()
 	outputFile(""),
 	answerFile(""),
 	dbDesc(""),
-	aqEngine(""),
-  aqLoader(""),
+	aqEngine("aq-engine"),
+  aqLoader("aq-loader"),
 	rootPath(""),
   workingPath(""),
   tmpRootPath(""),
   dataPath(""),
 	tmpPath(""),
 	dpyPath(""),
+  fieldSeparator(';'),
 	worker(1),
 	group_by_process_size(100000),
   process_thread(1),
   packSize(aq::packet_size), 
   maxRecordSize(40960),
   computeAnswer(true),
-	csvFormat(false),
-	executeNestedQuery(true),
+	csvFormat(true),
+	skipNestedQuery(false),
   useBinAQMatrix(true),
   displayCount(false)
 {
@@ -63,7 +64,7 @@ TProjectSettings::TProjectSettings(const TProjectSettings& obj)
 	packSize(obj.packSize),
 	maxRecordSize(obj.maxRecordSize),
 	computeAnswer(obj.computeAnswer),
-	executeNestedQuery(obj.executeNestedQuery),
+	skipNestedQuery(obj.skipNestedQuery),
   useBinAQMatrix(obj.useBinAQMatrix),
   displayCount(obj.displayCount)
 {
@@ -99,7 +100,7 @@ TProjectSettings& TProjectSettings::operator=(const TProjectSettings& obj)
 		computeAnswer = obj.computeAnswer;
 		maxRecordSize = obj.maxRecordSize;
 		computeAnswer = obj.computeAnswer;
-		executeNestedQuery = obj.executeNestedQuery;
+		skipNestedQuery = obj.skipNestedQuery;
     useBinAQMatrix = obj.useBinAQMatrix;
     displayCount = obj.displayCount;
 	}
@@ -112,6 +113,15 @@ void TProjectSettings::load(const std::string& iniFile, const std::string& query
 	this->changeIdent(queryIdent);
 }
 
+template <class T>
+T get_opt_value(boost::property_tree::ptree& pt, const char * key, T default_value)
+{
+  boost::optional<T> opt;
+  pt.get_optional<size_t>(boost::property_tree::ptree::path_type(key));
+  if (opt.is_initialized()) return opt.get();
+  else return default_value;
+}
+
 void TProjectSettings::load(const std::string& iniFile)
 {
 	this->iniFile = iniFile;
@@ -121,23 +131,18 @@ void TProjectSettings::load(const std::string& iniFile)
     boost::property_tree::ptree pt;
     boost::property_tree::ini_parser::read_ini(fin, pt);
 		
+    // only mandatory value
     this->rootPath = pt.get<std::string>(boost::property_tree::ptree::path_type("root-folder"));
-    this->tmpRootPath = pt.get<std::string>(boost::property_tree::ptree::path_type("tmp-folder"));
-    this->fieldSeparator = pt.get<std::string>(boost::property_tree::ptree::path_type("field-separator")).at(0);
-		
-    this->aqEngine = pt.get<std::string>(boost::property_tree::ptree::path_type("aq-engine"));
-    this->aqLoader = pt.get<std::string>(boost::property_tree::ptree::path_type("aq-loader"));
-		
-		// optional
-		boost::optional<size_t> opt;
-    opt = pt.get_optional<size_t>(boost::property_tree::ptree::path_type("worker"));
-		if (opt.is_initialized()) this->worker = opt.get();
-    opt = pt.get_optional<size_t>(boost::property_tree::ptree::path_type("group-by-process-size"));
-		if (opt.is_initialized()) this->group_by_process_size = opt.get();
-    opt = pt.get_optional<size_t>(boost::property_tree::ptree::path_type("process-thread"));
-    if (opt.is_initialized()) this->process_thread = opt.get();
-    boost::optional<bool> o = pt.get_optional<bool>(boost::property_tree::ptree::basic_ptree::path_type("display-count"));
-    if (o.is_initialized()) this->displayCount = o.get();
+    
+    // other are optional
+    this->tmpRootPath = get_opt_value(pt, "tmp-folder", this->rootPath + "data_orga/tmp/");
+    this->fieldSeparator = get_opt_value(pt, "field-separator", ';');
+    this->aqEngine = get_opt_value(pt, "aq-engine", this->aqEngine);
+    this->aqLoader = get_opt_value(pt, "aq-loader", this->aqLoader);
+    this->worker = get_opt_value(pt, "worker", this->worker);
+    this->group_by_process_size = get_opt_value(pt, "group-by-process-size", this->group_by_process_size);
+    this->process_thread = get_opt_value(pt, "process-thread", this->process_thread);
+    this->displayCount = get_opt_value(pt, "display-count", this->displayCount);
 
     //
     // Change '\' by '/'
@@ -214,6 +219,12 @@ void TProjectSettings::dump(std::ostream& os) const
 	os << "maxRecordSize:        ["  << maxRecordSize        <<  "]" << std::endl;
   os << "computeAnswer:        ["  << computeAnswer        <<  "]" << std::endl;
   os << "displayCount:         ["  << displayCount         <<  "]" << std::endl;
+}
+
+std::string TProjectSettings::to_string() const
+{
+  this->dump(this->output);
+  return this->output.str();
 }
 
 void TProjectSettings::writeAQEngineIni(std::ostream& os) const

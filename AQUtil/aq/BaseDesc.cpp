@@ -181,8 +181,9 @@ void construis_table ( FILE* fp, base_t::table_t * table )
 namespace aq
 {
   
-void build_base_from_raw ( const char * fname, base_t& base )
+int build_base_from_raw ( const char * fname, base_t& base )
 {
+  int rc = 0;
   FILE * fp = fopenUTF8(fname, "r");
   if (fp != NULL)
   {
@@ -191,7 +192,9 @@ void build_base_from_raw ( const char * fname, base_t& base )
   else // leave base empty
   {
     clean(base);
+    rc = -1;
   }
+  return rc;
 }
 
 void build_base_from_raw ( FILE* fp, base_t& base )

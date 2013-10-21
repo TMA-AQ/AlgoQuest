@@ -72,10 +72,17 @@ int RowWritter::process(Row& row)
       if (!(*it).displayed)
         continue;
       assert((*it).item != NULL);
-      (*it).item->toString(value, (*it).type);
       if (!first) 
         fputs(" ; ", pFOut);
-      fputs(value, pFOut);
+      if ((*it).null)
+      {
+        fputs("NULL", pFOut);
+      }
+      else
+      {
+        (*it).item->toString(value, (*it).type);
+        fputs(value, pFOut);
+      }
       first = false;
     }
     //fputs(" ; ", pFOut);

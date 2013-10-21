@@ -118,15 +118,13 @@ void Base::loadFromBaseDesc(const aq::base_t& base)
       switch (type)
       {
       case COL_TYPE_VARCHAR: 
-        size = column.taille * sizeof(char); 
+        size = column.taille; 
         break;
       case COL_TYPE_INT: 
-        size = 4; 
-        break;
       case COL_TYPE_BIG_INT:
       case COL_TYPE_DOUBLE:
       case COL_TYPE_DATE: 
-        size = 8; 
+        size = 1; 
         break;
       }
       pTD->Columns.push_back(new Column(column.nom, column.num, size, type));

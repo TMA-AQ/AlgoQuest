@@ -157,6 +157,7 @@ void ColumnVerb::addResult(aq::Row& row)
 
   // this->Result.reset(new Scalar(row_item.type, row_item.size, *row_item.item.get()));
   aq::row_item_t& row_computed_item = row.computedRow[this->computed_index];
+  row_computed_item.null = row.initialRow[this->computed_index].null;
   *row_computed_item.item = *row_item.item; // perform copy
 }
 

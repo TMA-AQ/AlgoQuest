@@ -244,35 +244,31 @@ aq::verb::VerbNode::Ptr QueryResolver::postProcess()
   
 #if defined(AQ_TRACE)
   sql_query = "";
-  std::cout << *this->sqlStatement << std::endl;
+  // std::cout << *this->sqlStatement << std::endl;
   std::cout << aq::multiline_query(aq::syntax_tree_to_sql_form(this->sqlStatement, sql_query)) << std::endl;
 #endif
 
-// #ifdef OUTPUT_NESTED_QUERIES
-	//std::string str;
-	//aq::syntax_tree_to_prefix_form( this->sqlStatement, str );
-	//aq::SaveFile( pSettings->szOutputFN, str.c_str() );
-	//aq::MakeBackupFile( pSettings->szOutputFN, aq::backup_type_t::Before, this->level, this->id );
-// #endif
-  
-  //
-  // processing order of main verb of the request depends of the resolution mode ('by row' or 'by column')
-  boost::array<uint32_t, 6> categories_order =  { K_FROM, K_WHERE, K_SELECT, K_GROUP, K_HAVING, K_ORDER };
-  
 	//
 	// Query Pre Processing (TODO : optimize tree by detecting identical subtrees)
 	timer.start();
+  boost::array<uint32_t, 6> categories_order =  { K_FROM, K_WHERE, K_SELECT, K_GROUP, K_HAVING, K_ORDER };
 	spTree = aq::verb::VerbNode::BuildVerbsTree( this->sqlStatement, categories_order, this->BaseDesc, this->pSettings );
+  
+#if defined(AQ_TRACE)
+  sql_query = "";
+  std::cout << aq::multiline_query(aq::syntax_tree_to_sql_form(this->sqlStatement, sql_query)) << std::endl;
+#endif
+
 	spTree->changeQuery();
   
 #if defined(AQ_TRACE)
   sql_query = "";
-  std::cout << *this->sqlStatement << std::endl;
+  // std::cout << *this->sqlStatement << std::endl;
   std::cout << aq::multiline_query(aq::syntax_tree_to_sql_form(this->sqlStatement, sql_query)) << std::endl;
 #endif
   
   std::set<aq::tnode*> nodes;
-  checkTree( this->sqlStatement, nodes);
+  aq::checkTree( this->sqlStatement, nodes);
 	aq::cleanQuery( this->sqlStatement );
 	aq::Logger::getInstance().log(AQ_INFO, "Query Preprocessing: Time elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
   
@@ -328,7 +324,7 @@ void QueryResolver::resolve(aq::verb::VerbNode::Ptr spTree)
     group_and_order = query.substr(pos);
     query = query.substr(0, pos);
   }
-  ParseJeq(query);
+  aq::ParseJeq(query, true);
 
   if (!this->groupBy.empty())
   {

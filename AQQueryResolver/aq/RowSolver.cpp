@@ -248,8 +248,16 @@ void solve(boost::shared_ptr<aq::AQMatrix> aqMatrix,
       boost::lock_guard<boost::mutex> lock(mutex); // FIXME
       index = aqMatrix->getColumn(columns[c].table_index)[i];
       // assert(index > 0); // FIXME : when outer is used, index can be 0
-      index -= 1;
-      columns[c].mapper->loadValue(index, *item_tmp.item);
+      if (index > 0)
+      {
+        index -= 1;
+        columns[c].mapper->loadValue(index, *item_tmp.item);
+        item_tmp.null = false;
+      }
+      else
+      {
+        item_tmp.null = true;
+      }
       if (item_tmp.columnName == "")
       {
         item_tmp.type = columns[c].column->Type;

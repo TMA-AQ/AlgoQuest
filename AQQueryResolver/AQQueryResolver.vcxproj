@@ -328,7 +328,6 @@
     <ClInclude Include="aq\ColumnMapper_Intf.h" />
     <ClInclude Include="aq\ColumnTemporaryWritter.h" />
     <ClInclude Include="aq\db_loader\DatabaseLoader.h" />
-    <ClInclude Include="aq\db_loader\Util.h" />
     <ClInclude Include="aq\DumpVisitor.h" />
     <ClInclude Include="aq\ExprTransform.h" />
     <ClInclude Include="aq\LIKE_PatternMatching.h" />
@@ -384,7 +383,6 @@
     <ClCompile Include="aq\ColumnItem.cpp" />
     <ClCompile Include="aq\ColumnMapper.cpp" />
     <ClCompile Include="aq\db_loader\DatabaseLoader.cpp" />
-    <ClCompile Include="aq\db_loader\Util.cpp" />
     <ClCompile Include="aq\DumpVisitor.cpp" />
     <ClCompile Include="aq\ExprTransform.cpp" />
     <ClCompile Include="aq\LIKE_PatternMatching.cpp" />

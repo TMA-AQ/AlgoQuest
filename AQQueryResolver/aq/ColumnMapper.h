@@ -81,10 +81,15 @@ int ColumnMapper<T,M>::loadValue(size_t index, ColumnItem& value)
 			aq::Logger::getInstance().log(AQ_DEBUG, "open %s\n", thesaurusFilename.c_str());
 
 			boost::filesystem::path p1(prmFilename);
-			boost::filesystem::path p2(thesaurusFilename);
-			if (!boost::filesystem::exists(p1) || !boost::filesystem::exists(p2))
+			if (!boost::filesystem::exists(p1))
 			{
-        throw aq::generic_error(aq::generic_error::COULD_NOT_OPEN_FILE, "");
+        throw aq::generic_error(aq::generic_error::COULD_NOT_OPEN_FILE, prmFilename.c_str());
+			}
+
+			boost::filesystem::path p2(thesaurusFilename);
+      if (!boost::filesystem::exists(p2))
+      {
+        throw aq::generic_error(aq::generic_error::COULD_NOT_OPEN_FILE, thesaurusFilename.c_str());
 			}
 
 			this->prmMapper.reset(new M(prmFilename.c_str()));

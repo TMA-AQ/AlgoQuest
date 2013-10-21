@@ -619,7 +619,7 @@ int display(display_cb * cb,
       }
     }
     
-    cb->next();
+    // cb->next();
   }
   return 0;
 }

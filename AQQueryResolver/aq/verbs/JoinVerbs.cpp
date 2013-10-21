@@ -23,16 +23,13 @@ bool JoinVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* 
 	assert( pJoin->tag == K_JOIN );
 	if( pJoin->next && pJoin->next->tag == K_ON )
 	{
-		aq::addInnerOuterNodes( pJoin->next->left,
-			this->leftTag(), this->rightTag() );
+		// aq::addInnerOuterNodes( pJoin->next->left, this->leftTag(), this->rightTag() );
+		aq::addInnerOuterNodes( pJoin->next->left, this->rightTag(), this->leftTag() );
 		aq::addConditionsToWhere( pJoin->next->left, pStart );
 	}
-	assert( pJoin->left && (pJoin->left->tag == K_IDENT 
-		|| pJoin->left->tag == K_AS && pJoin->left->left
-		&& pJoin->left->left->tag == K_IDENT ) );
-	assert( pJoin->right && (pJoin->right->tag == K_IDENT
-		|| pJoin->right->tag == K_AS && pJoin->right->left
-		&& pJoin->right->left->tag == K_IDENT ) );
+  // FIXME
+	//assert( pJoin->left && (pJoin->left->tag == K_IDENT || pJoin->left->tag == K_AS && pJoin->left->left && pJoin->left->left->tag == K_IDENT ) );
+	//assert( pJoin->right && (pJoin->right->tag == K_IDENT || pJoin->right->tag == K_AS && pJoin->right->left && pJoin->right->left->tag == K_IDENT ) );
 	aq::tnode* table1 = pJoin->left;
 	pJoin->left = NULL;
 	aq::tnode* table2 = pJoin->right;

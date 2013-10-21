@@ -44,15 +44,15 @@ namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 
 bool interact_cmd_line;
+size_t failedQueries = 0;
+boost::mutex parserMutex;
+
 extern int yylineno;
 int yyerror( const char *pszMsg ) 
 {
-	std::cerr << "SQL Parsing Error : " << pszMsg << " encountered at line number: " << yylineno << std::endl;
+	aq::Logger::getInstance().log(AQ_ERROR, "SQL Parsing Error : %s encountered at line number: %d\n", pszMsg, yylineno);
 	return 0;
 }
-
-size_t failedQueries = 0;
-boost::mutex parserMutex;
 
 // -------------------------------------------------------------------------------------------------
 int processAQMatrix(const std::string& query, const std::string& aqMatrixFileName, const std::string& answerFileName, aq::TProjectSettings& settings, aq::Base& baseDesc)
@@ -143,6 +143,50 @@ int transformQuery(const std::string& query, aq::TProjectSettings& settings, aq:
   aq::ParseJeq( str );
 
 	return 0;
+}
+
+// -------------------------------------------------------------------------------------------------
+int init_base_desc(const std::string& file, aq::Base& bd)
+{
+  if (file == "")
+  {
+    throw aq::generic_error(aq::generic_error::INVALID_BASE_FILE, "no database specify");
+  }
+  aq::Logger::getInstance().log(AQ_INFO, "load base %s\n", file.c_str());
+  std::fstream bdFile(file.c_str());
+  aq::base_t baseDescHolder;
+  if (file.substr(file.size() - 4) == ".xml")
+  {
+    aq::build_base_from_xml(bdFile, baseDescHolder);
+    bd.loadFromBaseDesc(baseDescHolder);
+  }
+  else
+  {
+    // aq::build_base_from_raw(baseDescr.c_str(), baseDescHolder);
+    bd.loadFromRawFile(file.c_str());
+  }
+  // baseDesc.loadFromBaseDesc(baseDescHolder);
+  return 0;
+}
+
+// -------------------------------------------------------------------------------------------------
+int load_database(const aq::TProjectSettings& settings, aq::base_t& baseDesc, const std::string& tableNameToLoad)
+{
+  for (size_t t = 0; t < baseDesc.table.size(); ++t)
+  {
+    if ((tableNameToLoad != "") && (tableNameToLoad != baseDesc.table[t].nom))
+    {
+      continue;
+    }
+    aq::DatabaseLoader loader(baseDesc, settings.aqLoader, settings.rootPath, settings.packSize, ','/*settings.fieldSeparator*/, settings.csvFormat); // FIXME
+    loader.generate_ini();
+    for (size_t c = 0; c < baseDesc.table[t].colonne.size(); ++c)
+    {
+      aq::Logger::getInstance().log(AQ_INFO, "loading column %d of table %d\n", c + 1, t + 1);
+      loader.run(t + 1, c + 1);
+    }
+  }
+  return EXIT_SUCCESS;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -351,6 +395,66 @@ int processSQLQueries(const std::string& query,
 }
 
 // -------------------------------------------------------------------------------------------------
+int parse_queries(aq::TProjectSettings& settings, aq::Base& baseDesc, 
+                  const std::string& queryIdent, const std::string& sqlQueriesFile, const std::string aqMatrixFileName, 
+                  bool transform, bool simulateAQEngine, bool keepFiles, bool force)
+{
+  //
+  // print info if use as command line tool
+  if (interact_cmd_line)
+  {
+    std::cout << "Welcome to AlgoQuest Monitor version " << AQ_TOOLS_VERSION << std::endl;
+    std::cout << "Copyright (c) 2013, AlgoQuest System. All rights reserved." << std::endl;
+    std::cout << std::endl;
+    std::cout << "Connected to database " << settings.rootPath << std::endl;
+    std::cout << std::endl;
+  }
+
+  //
+  // parse inpout
+  aq::QueryReader * reader = 0;
+  std::fstream * fqueries = 0;
+
+  if (sqlQueriesFile != "")
+  {
+    boost::filesystem::path p(sqlQueriesFile);
+    if (!boost::filesystem::exists(p)) 
+    {
+      std::cerr << "cannot find file " << p << std::endl;
+      return -1;
+    }
+
+    fqueries = new std::fstream(sqlQueriesFile.c_str(), std::ifstream::in);
+    reader = new aq::QueryReader(*fqueries);
+  }
+  else
+  {
+    if (_isatty(_fileno(stdin)))
+      reader = new aq::QueryReader(std::cin, "aq");
+    else
+      reader = new aq::QueryReader(std::cin);
+  }
+
+  std::string query;
+  while ((query = reader->next()) != "")
+  {
+    if (transform)
+    {
+      transformQuery(query, settings, baseDesc);
+    }
+    else if (aqMatrixFileName != "")
+    {
+      processAQMatrix(query, aqMatrixFileName, settings.outputFile, settings, baseDesc);
+    }
+    else 
+    {
+      processSQLQueries(query, settings, baseDesc, simulateAQEngine, keepFiles, queryIdent, force);
+    }
+  }
+  return EXIT_SUCCESS;
+}
+
+// -------------------------------------------------------------------------------------------------
 int main(int argc, char**argv)
 {
 
@@ -379,9 +483,8 @@ int main(int argc, char**argv)
 		std::string aqMatrixFileName;
 		std::string answerFileName;
     std::string DLLFunction;
+    std::string tableNameToLoad;
 		unsigned int worker;
-		unsigned int queryWorker;
-    unsigned int tableIdToLoad;
 		bool simulateAQEngine = false;
 		bool multipleAnswerFiles = false;
 		bool keepFiles = false;
@@ -450,7 +553,7 @@ int main(int argc, char**argv)
     testing.add_options()
       ("simulate-aq-engine,z", po::bool_switch(&simulateAQEngine), "")
 			("transform", po::bool_switch(&transform), "")
-			("skip-nested-query", po::bool_switch(&settings.executeNestedQuery), "")
+			("skip-nested-query", po::value<bool>(&settings.skipNestedQuery), "")
 			("aq-matrix", po::value<std::string>(&aqMatrixFileName), "")
       ;
 
@@ -464,7 +567,7 @@ int main(int argc, char**argv)
     loader.add_options()
       ("aq-loader,l", po::value<std::string>(&settings.aqLoader))
 			("load-db", po::bool_switch(&loadDatabase), "")
-      ("load-table", po::value<unsigned int>(&tableIdToLoad)->default_value(0), "")
+      ("load-table", po::value<std::string>(&tableNameToLoad), "")
 			;
 
     all.add(log_options).add(engine).add(testing).add(external).add(loader);
@@ -493,111 +596,37 @@ int main(int argc, char**argv)
 
 		//
 		// print Project Settings
-		{
-			std::stringstream oss;
-			settings.dump(oss);
-			aq::Logger::getInstance().log(AQ_DEBUG, "ProjectSettings:\n===========\n%s\n===========\n", oss.str().c_str());
-		}
+    aq::Logger::getInstance().log(AQ_DEBUG, "Settings:\n%s\n", settings.to_string().c_str());
     
-		//
-		// Load DB Schema
-		aq::Base baseDesc;
-		if (baseDescr == "")
-			baseDescr = settings.dbDesc;
-    if (baseDescr == "")
-    {
-      std::cerr << "no database specify" << std::endl;
-      return EXIT_FAILURE;
-    }
-    aq::Logger::getInstance().log(AQ_INFO, "load base %s\n", baseDescr.c_str());
-    std::fstream bdFile(baseDescr.c_str());
-    aq::base_t baseDescHolder;
-    if (baseDescr.substr(baseDescr.size() - 4) == ".xml")
-    {
-      aq::build_base_from_xml(bdFile, baseDescHolder);
-      baseDesc.loadFromBaseDesc(baseDescHolder);
-    }
-    else
-    {
-      // aq::build_base_from_raw(baseDescr.c_str(), baseDescHolder);
-      baseDesc.loadFromRawFile(baseDescr.c_str());
-    }
-    // baseDesc.loadFromBaseDesc(baseDescHolder);
-		
 		//
 		// If Load database is invoked
 		if (loadDatabase)
 		{
-			for (size_t t = 0; t < baseDesc.getTables().size(); ++t)
-			{
-        if ((tableIdToLoad != 0) && (tableIdToLoad != baseDesc.getTables()[t]->ID))
-        {
-          continue;
-        }
-				for (size_t c = 0; c < baseDesc.getTables()[t]->Columns.size(); ++c)
-				{
-					aq::Logger::getInstance().log(AQ_INFO, "loading column %d of table %d\n", c + 1, t + 1);
-					cut_in_col(propertiesFile.c_str(), t + 1, c + 1);
-				}
-			}
-			return EXIT_SUCCESS;
-		}
-
-    //
-    // print info if use as command line tool
-    if (interact_cmd_line)
-    {
-      std::cout << "Welcome to AlgoQuest Monitor version " << AQ_TOOLS_VERSION << std::endl;
-      std::cout << "Copyright (c) 2013, AlgoQuest System. All rights reserved." << std::endl;
-      std::cout << std::endl;
-      std::cout << "Connected to database " << settings.rootPath << std::endl;
-      std::cout << std::endl;
-    }
-
-    //
-    // parse inpout
-    aq::QueryReader * reader = 0;
-    std::fstream * fqueries = 0;
-
-    if (sqlQueriesFile != "")
-    {
-      boost::filesystem::path p(sqlQueriesFile);
-      if (!boost::filesystem::exists(p)) 
+      aq::base_t bd;
+      if (aq::build_base_from_raw(settings.dbDesc.c_str(), bd) != -1)
       {
-        std::cerr << "cannot find file " << p << std::endl;
-        return -1;
+        return load_database(settings, bd, tableNameToLoad);
       }
-
-      fqueries = new std::fstream(sqlQueriesFile.c_str(), std::ifstream::in);
-      reader = new aq::QueryReader(*fqueries);
-    }
+      else
+      {
+        aq::Logger::getInstance().log(AQ_CRITICAL, "cannot find database desc file '%s'\n", settings.dbDesc.c_str());
+        return EXIT_FAILURE;
+      }
+		}
     else
     {
-      if (_isatty(_fileno(stdin)))
-        reader = new aq::QueryReader(std::cin, "aq");
-      else
-        reader = new aq::QueryReader(std::cin);
+      aq::Base bd;
+      init_base_desc(settings.dbDesc, bd);
+      return parse_queries(
+        settings, bd, 
+        queryIdent, sqlQueriesFile, aqMatrixFileName, 
+        transform, simulateAQEngine, keepFiles, force);
     }
 
-    std::string query;
-    while ((query = reader->next()) != "")
-    {
-      if (transform)
-      {
-        transformQuery(query, settings, baseDesc);
-      }
-      else if (aqMatrixFileName != "")
-      {
-        processAQMatrix(query, aqMatrixFileName, answerFileName, settings, baseDesc);
-      }
-      else 
-      {
-        processSQLQueries(query, settings, baseDesc, simulateAQEngine, keepFiles, queryIdent, force);
-      }
-    }
   }
 	catch (const aq::generic_error& error)
 	{
+    aq::Logger::getInstance().log(AQ_CRITICAL, error.what());
 		std::cerr << "generic error: " << error.what() << std::endl;
 		return error.getType();
 	}

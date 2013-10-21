@@ -42,7 +42,7 @@ namespace aq
 #endif
 
     aq::Timer timer;
-    if ((mode == 0) || (settings.executeNestedQuery))
+    if ((mode == 0) || (!settings.skipNestedQuery))
     {
       int rc = 1;
       std::string prg = settings.aqEngine;

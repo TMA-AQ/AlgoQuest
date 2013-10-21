@@ -2,6 +2,7 @@
 #define __AQ_SETTINGS_H__
 
 #include <string>
+#include <sstream>
 #include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
 
@@ -17,6 +18,8 @@ namespace aq
 struct TProjectSettings 
 {
   typedef boost::shared_ptr<TProjectSettings> Ptr;
+  
+  mutable std::stringstream output;
 
 	std::string iniFile;
 	std::string queryIdent;
@@ -44,7 +47,7 @@ struct TProjectSettings
 
 	bool computeAnswer;
 	bool csvFormat;
-	bool executeNestedQuery;
+	bool skipNestedQuery;
   bool useBinAQMatrix;
   bool displayCount;
 
@@ -57,6 +60,7 @@ struct TProjectSettings
 	void load(const std::string& iniFile);
 	void changeIdent(const std::string& queryIdent);
   void dump(std::ostream& os) const;
+  std::string to_string() const;
   void writeAQEngineIni(std::ostream& os) const;
 };
 
