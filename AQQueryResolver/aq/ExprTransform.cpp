@@ -73,9 +73,16 @@ const aq::tnode * check_cmp_op::getColumnRef() const
 }
 
 bool check_cmp_op::check(const aq::ColumnItem& item, const aq::ColumnType& cType) const
-{    
+{   
+  bool rc = false;
   switch (op_tag)
   {
+  case K_EQ:
+    return !aq::ColumnItem::lessThan(&item, &reference, cType) && !aq::ColumnItem::lessThan(&reference, &item, cType);
+    break;
+  case K_NEQ:
+    return aq::ColumnItem::lessThan(&item, &reference, cType) || aq::ColumnItem::lessThan(&reference, &item, cType);
+    break;
   case K_LT:
     return aq::ColumnItem::lessThan(&item, &reference, cType);
     break;
@@ -93,7 +100,7 @@ bool check_cmp_op::check(const aq::ColumnItem& item, const aq::ColumnType& cType
   return false;
 }
 
-void check_cmp_op::sucess(aq::tnode * node)
+void check_cmp_op::success(aq::tnode * node)
 {
   if (node->tag != K_FALSE) 
   {
@@ -143,7 +150,7 @@ bool check_between::check(const aq::ColumnItem& item, const aq::ColumnType& cTyp
   return ((!bNotBetween && !before && !after) || (bNotBetween && (before || after)));
 }
 
-void check_between::sucess(aq::tnode * node)
+void check_between::success(aq::tnode * node)
 {
   if (node->tag != K_FALSE) 
   {
@@ -200,7 +207,7 @@ bool check_like::check(const aq::ColumnItem& item, const aq::ColumnType& cType) 
   return ((!bNotLike && (nRet == 1)) || (bNotLike && (nRet == 0)));
 }
 
-void check_like::sucess(aq::tnode * node)
+void check_like::success(aq::tnode * node)
 {
   if (node->tag != K_FALSE) 
   {

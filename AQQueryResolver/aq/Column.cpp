@@ -4,6 +4,8 @@
 #include <aq/Utilities.h>
 #include <aq/Exceptions.h>
 #include <boost/scoped_array.hpp>
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
 
 namespace aq
 {
@@ -165,8 +167,8 @@ void Column::setName( const std::string& name )
 {
 	this->OriginalName = name;
 	this->Name = name;
-	strtoupr( this->Name );
-	Trim( this->Name );
+	boost::to_upper(this->Name);
+	boost::trim(this->Name);
 }
 
 //------------------------------------------------------------------------------
@@ -204,8 +206,8 @@ std::string& Column::getDisplayName()
 void Column::setTableName( const std::string& name )
 {
 	this->TableName = name;
-	strtoupr( this->TableName );
-	Trim( this->TableName );
+	boost::to_upper(this->TableName);
+	boost::trim(this->TableName);
 }
 
 //------------------------------------------------------------------------------
@@ -744,7 +746,7 @@ void Column::dumpRaw( std::ostream& os )
   size_t pos = colName.find('.');
   if( pos != std::string::npos )
     colName = colName.substr( pos + 1 );
-  os << colName << "\" " << this->ID << " " << this->Size << " ";
+  os << "\""<< colName << "\" " << this->ID << " " << this->Size << " ";
   switch( this->Type )
   {
   case COL_TYPE_INT: os << "INT"; break;
@@ -753,7 +755,7 @@ void Column::dumpRaw( std::ostream& os )
   case COL_TYPE_DATE: os << "DATE"; break;
   case COL_TYPE_VARCHAR: os << "VARCHAR2"; break;
   default:
-    throw generic_error(generic_error::NOT_IMPLEMENED, "");
+    throw generic_error(generic_error::NOT_IMPLEMENTED, "");
   }
   os << std::endl;
 }
@@ -774,7 +776,7 @@ void Column::dumpXml( std::ostream& os )
   case COL_TYPE_DATE: os << "DATE"; break;
   case COL_TYPE_VARCHAR: os << "VARCHAR2"; break;
   default:
-    throw generic_error(generic_error::NOT_IMPLEMENED, "");
+    throw generic_error(generic_error::NOT_IMPLEMENTED, "");
   }
   os << "\"/>" << std::endl;
 }

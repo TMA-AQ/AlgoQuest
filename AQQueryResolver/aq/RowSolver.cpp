@@ -32,20 +32,18 @@ typedef std::vector<column_infos_t> columns_infos_t;
 
 void matched_index(const boost::shared_ptr<aq::AQMatrix> aqMatrix, const Base& BaseDesc, column_infos_t& infos)
 {
+  auto joinPath = aqMatrix->getJoinPath();
   Table::Ptr table = BaseDesc.getTable(infos.column->TableID);
-  while (table->isTemporary())
-  {
-    table = BaseDesc.getTable(table->getReferenceTable());
-  }
+  assert(joinPath.size() >= aqMatrix->getNbColumn());
   for (size_t j = 0; j < aqMatrix->getNbColumn(); ++j) 
   {
-    if (table->ID == aqMatrix->getMatrix()[j].table_id)
+    if (table->getName() == joinPath[j])
     {
       infos.table_index = j;
       return;
     }
   }
-  throw aq::generic_error(aq::generic_error::INVALID_FILE, "");
+  throw aq::generic_error(aq::generic_error::AQ_ENGINE, "cannot find table [%u] in join Path", infos.column->TableID);
 }
 
 void set_grouped(const std::vector<aq::tnode*>& columnGroup, column_infos_t& infos)
@@ -118,7 +116,7 @@ void prepareColumnAndColumnMapper(const boost::shared_ptr<aq::AQMatrix> aqMatrix
     ColumnMapper_Intf::Ptr cm;
     if (columnTypes[i]->Temporary)
     {
-      cm.reset(new aq::TemporaryColumnMapper(settings.szTempPath1, columnTypes[i]->TableID, columnTypes[i]->ID, columnTypes[i]->Type, columnTypes[i]->Size, settings.packSize));
+      cm.reset(new aq::TemporaryColumnMapper(settings.tmpPath.c_str(), columnTypes[i]->TableID, columnTypes[i]->ID, columnTypes[i]->Type, columnTypes[i]->Size, settings.packSize));
     }
     else
     {
@@ -130,7 +128,7 @@ void prepareColumnAndColumnMapper(const boost::shared_ptr<aq::AQMatrix> aqMatrix
         table = BaseDesc.getTable(table->getReferenceTable());
       }
 
-      cm = new_column_mapper(c->Type, settings.szThesaurusPath, table->ID, c->ID, c->Size, settings.packSize);
+      cm = new_column_mapper(c->Type, settings.dataPath.c_str(), table->ID, c->ID, c->Size, settings.packSize);
     }
     infos.mapper = cm;
     
@@ -185,11 +183,11 @@ void addGroupColumn(const boost::shared_ptr<aq::AQMatrix> aqMatrix,
           ColumnMapper_Intf::Ptr cm;
           if (column->Temporary)
           {
-            cm.reset(new aq::TemporaryColumnMapper(settings.szTempPath1, column->TableID, column->ID, column->Type, column->Size, settings.packSize));
+            cm.reset(new aq::TemporaryColumnMapper(settings.tmpPath.c_str(), column->TableID, column->ID, column->Type, column->Size, settings.packSize));
           }
           else
           {
-            cm = new_column_mapper(column->Type, settings.szThesaurusPath, column->TableID, column->ID, column->Size, settings.packSize);
+            cm = new_column_mapper(column->Type, settings.dataPath.c_str(), column->TableID, column->ID, column->Size, settings.packSize);
           }
 
           column_infos_t infos;
@@ -248,8 +246,16 @@ void solve(boost::shared_ptr<aq::AQMatrix> aqMatrix,
       boost::lock_guard<boost::mutex> lock(mutex); // FIXME
       index = aqMatrix->getColumn(columns[c].table_index)[i];
       // assert(index > 0); // FIXME : when outer is used, index can be 0
-      index -= 1;
-      columns[c].mapper->loadValue(index, *item_tmp.item);
+      if (index > 0)
+      {
+        index -= 1;
+        columns[c].mapper->loadValue(index, *item_tmp.item);
+        item_tmp.null = false;
+      }
+      else
+      {
+        item_tmp.null = true;
+      }
       if (item_tmp.columnName == "")
       {
         item_tmp.type = columns[c].column->Type;

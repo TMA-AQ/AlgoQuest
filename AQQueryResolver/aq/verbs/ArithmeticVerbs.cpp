@@ -136,7 +136,7 @@ void BinaryVerb::changeResult(	Table::Ptr table,
 //------------------------------------------------------------------------------
 void BinaryVerb::addResult(aq::Row& row)
 {
-  throw aq::generic_error(aq::generic_error::NOT_IMPLEMENED, "binary operation are not implemented");
+  throw aq::generic_error(aq::generic_error::NOT_IMPLEMENTED, "binary operation are not implemented");
 	// this->computeResult( resLeft, resRight );
   // this->computeResult(this->getLeftChild()->Result, this->getRightChild()->Result);
 }

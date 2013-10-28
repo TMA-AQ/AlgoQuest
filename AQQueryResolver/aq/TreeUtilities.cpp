@@ -14,16 +14,16 @@
 
 #if defined(WIN32)
 # include <aq/WIN32FileMapper.h>
-typedef aq::WIN32FileMapper FileMapper;
+typedef aq::WIN32FileMapper _FileMapper_;
 #else
 # include <aq/FileMapper.h>
-typedef aq::FileMapper FileMapper;
+typedef aq::FileMapper _FileMapper_;
 #endif
 
 
 //------------------------------------------------------------------------------
-const int nrJoinTypes = 7;
-const int joinTypes[] = { K_JEQ, K_JAUTO, K_JNEQ, K_JINF, K_JIEQ, K_JSUP, K_JSEQ };
+const int nrJoinTypes    = 7;
+const int joinTypes[]    = { K_JEQ, K_JAUTO, K_JNEQ, K_JINF, K_JIEQ, K_JSUP, K_JSEQ };
 const int inverseTypes[] = { K_JEQ, K_JAUTO, K_JNEQ, K_JSUP, K_JSEQ, K_JINF, K_JIEQ };
 
 namespace aq
@@ -190,6 +190,60 @@ void addInnerOuterNodes( aq::tnode* pNode, int leftTag, int rightTag )
 }
 
 //------------------------------------------------------------------------------
+void addInnerOuterNodes( aq::tnode* pNode, int tag, const std::vector<std::string>& tables )
+{
+	if( !pNode || !pNode->left )
+		return;
+	//K_IN_VALUES can have a very deep sub-tree, stack overflow danger
+	//the subtree does not contain any conditions that require K_INNER/K_OUTER
+	if( pNode->tag == K_IN_VALUES )
+		return;
+	bool join = false;
+	for( int idx = 0; (idx < nrJoinTypes) && !join; ++idx )
+		if( pNode->tag == joinTypes[idx] )
+			join = true;
+	if( join )
+	{
+    auto n = pNode->left;
+    if ((n->tag != K_INNER) && (n->tag != K_OUTER))
+    {
+      bool find = false;
+      for (auto& t : tables)
+      {
+        if (strcmp(n->left->getData().val_str, t.c_str()) == 0)
+          find = true;
+      }
+      if (find)
+      {
+        aq::tnode* pAux = pNode->left;
+        pNode->left= new aq::tnode(tag);
+        pNode->left->left = pAux;
+      }
+    }
+
+    n = pNode->right;
+    if ((n->tag != K_INNER) && (n->tag != K_OUTER))
+    {
+      bool find = false;
+      for (auto& t : tables)
+      {
+        if (strcmp(n->left->getData().val_str, t.c_str()) == 0)
+          find = true;
+      }
+      if (find)
+      {
+        aq::tnode* pAux = pNode->right;
+        pNode->right = new aq::tnode(tag);
+        pNode->right->left = pAux;
+      }
+    }
+	}
+	addInnerOuterNodes( pNode->left, tag, tables );
+	addInnerOuterNodes( pNode->right, tag, tables );
+	addInnerOuterNodes( pNode->next, tag, tables );
+}
+
+//------------------------------------------------------------------------------
 void mark_as_deleted( aq::tnode* pNode )
 {
 	if( !pNode )
@@ -213,8 +267,16 @@ void solveSelectStar(aq::tnode* pNode,
   //get all columns from all tables and return
   //the other verbs will have the columns they need
   aq::tnode* fromNode = find_main_node( pNode, K_FROM );
-  std::vector<aq::tnode*> tables;
-  commaListToNodeArray( fromNode->left, tables );
+  std::vector<aq::tnode*> tables, tables2;
+  aq::commaListToNodeArray(fromNode->left, tables);
+  for (auto& n : tables)
+  {
+    aq::joinlistToNodeArray(n, tables2);
+  }
+  for (auto& n : tables2)
+  {
+    tables.push_back(n);
+  }
   std::vector<aq::tnode*> colRefs;
   aq::tnode *column;
   aq::tnode *nextFrom;
@@ -223,9 +285,12 @@ void solveSelectStar(aq::tnode* pNode,
     if ( ( column = find_first_node( tables[idx], K_SELECT ) ) == NULL
       || ( nextFrom = find_main_node( column, K_FROM ) ) == NULL )
       nextFrom = tables[idx];
-    if ( !tables[idx] || ( tables[idx]->getTag() == K_SELECT && ( column = find_first_node( tables[idx], K_AS ) ) == NULL )
-      || !( column = find_first_node( nextFrom, K_IDENT ) ) )
+
+    if ( !tables[idx] || 
+      ( tables[idx]->getTag() == K_SELECT && ( column = find_first_node( tables[idx], K_AS ) ) == NULL ) || 
+      !( column = find_first_node( nextFrom, K_IDENT ) ) )
       throw aq::parsException( "STAR failed, no AS found", pNode, true );
+    
     aq::tnode *column2;
     aq::tnode *alias;
     aq::tnode* colRef;
@@ -551,8 +616,9 @@ void moveFromJoinToWhere( aq::tnode* pStart, Base& BaseDesc )
 	aq::tnode* pInner = NULL;
 	do
 	{
-		if ((pInner = find_deeper_node( pNode, K_INNER )) == NULL)
-			return;
+    pInner = find_deeper_node(pNode, K_INNER); // K_OUTER is not managed here
+		if (pInner == NULL)
+      return;
 
 		assert(pInner->left && (pInner->left->tag == K_JOIN));
 		assert(pInner->left->next && (pInner->left->next->tag == K_ON));
@@ -607,13 +673,13 @@ void getAllColumnNodes( aq::tnode*& pNode, std::vector<aq::tnode*>& columnNodes 
 aq::tnode* findColumn(  std::string columnName, std::vector<aq::tnode*>& interiorColumns,
 					bool keepAlias)
 {
-	strtoupr( columnName );
+	boost::to_upper(columnName);
 	for( size_t idx = 0; idx < interiorColumns.size(); ++idx )
 	{
 		if( !interiorColumns[idx] )
 			continue;
 		std::string column2(interiorColumns[idx]->right->getData().val_str);
-		strtoupr( column2 );
+		boost::to_upper(column2);
 
 		switch( interiorColumns[idx]->tag )
 		{
@@ -875,12 +941,12 @@ void readTmpFile( const char* filePath, std::vector<llong>& vals )
 	FILE *pFIn = fopenUTF8( filePath, "rb" );
 	FileCloser fileCloser( pFIn );
 	if ( pFIn == NULL )
-		throw generic_error( generic_error::COULD_NOT_OPEN_FILE, "" );
+		throw generic_error( generic_error::COULD_NOT_OPEN_FILE, "could not open tmp file [%s]", filePath );
 	llong val1;
 	llong val2;
 	int auxval;
 	if( fread( &auxval, sizeof(int), 1, pFIn ) != 1 )
-		throw generic_error( generic_error::INVALID_FILE, "" );
+		throw generic_error( generic_error::INVALID_FILE, "invalid tmp file %s", filePath );
 
 	while(	fread( &val1, sizeof(llong), 1, pFIn ) == 1 &&
 			fread( &val2, sizeof(llong), 1, pFIn ) == 1 )
@@ -934,7 +1000,7 @@ void getColumnsIds(	const Table& table, std::vector<aq::tnode*>& columns, std::v
 			columnsStr.push_back( std::string(columns[idx]->getData().val_str) );
 		else
 			throw generic_error(generic_error::INVALID_QUERY, "");
-		strtoupr(columnsStr[idx]);
+		boost::to_upper(columnsStr[idx]);
 	}
 	for( size_t idx = 0; idx < columnsStr.size(); ++idx )
 	{
@@ -1403,13 +1469,13 @@ void transformExpression(const aq::Base& baseDesc, const aq::TProjectSettings& s
   aq::tnode * whereNode = aq::find_main_node(tree, K_WHERE);
   if (whereNode)
   {
-    unsigned int tags[] = { K_LT, K_LEQ, K_GT, K_GEQ, K_BETWEEN, K_NOT_BETWEEN, K_LIKE, K_NOT_LIKE };
+    unsigned int tags[] = { K_EQ, K_NEQ, K_LT, K_LEQ, K_GT, K_GEQ, K_BETWEEN, K_NOT_BETWEEN, K_LIKE, K_NOT_LIKE };
     for (auto& tag : tags)
     {
       aq::tnode * cmpNode = NULL;
       while ((cmpNode = aq::find_first_node(whereNode, tag)) != NULL)
       {
-        aq::expression_transform::transform<aq::FileMapper>(baseDesc, settings, cmpNode);
+        aq::expression_transform::transform<_FileMapper_>(baseDesc, settings, cmpNode);
       }
     }
   }

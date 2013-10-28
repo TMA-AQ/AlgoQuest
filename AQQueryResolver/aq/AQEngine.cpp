@@ -32,20 +32,31 @@ namespace aq
 
     //
     //
-    aq::SaveFile( settings.szOutputFN, query.c_str() );
+    if (this->settings.cmdLine && this->settings.trace)
+    {
+      std::cout << std::endl;
+      std::cout << query << std::endl;
+      std::cout << std::endl;
+    }
+
+    //
+    //
+    std::string new_request_file = settings.workingPath + "New_Request.txt";
+    aq::SaveFile(new_request_file.c_str(), query.c_str());
 
 #ifdef WIN32
     // create folders for the engine
     // mkdir( settings.szTempPath1 );
-    mkdir( settings.szTempPath2 );
+    mkdir( settings.dpyPath.c_str() );
 #endif
 
     aq::Timer timer;
-    if ((mode == 0) || (settings.executeNestedQuery))
+    if ((mode == 0) || (!settings.skipNestedQuery))
     {
       int rc = 1;
-      std::string prg = settings.szEnginePath;
-      std::string arg = mode == NESTED_2 ? settings.szEngineParamsNoDisplay : settings.szEngineParamsDisplay;
+      std::string prg = settings.aqEngine;
+      std::string arg = settings.iniFile + " " + settings.queryIdent;
+      arg += mode == NESTED_2 ? " NoDpy" : " Dpy";
       if ((rc = this->run(prg.c_str(), arg.c_str())) != 0)
       {
         aq::Logger::getInstance().log(AQ_ERROR, "call to %s %s failed [ExitCode:%d]\n", prg.c_str(), arg.c_str(), rc);
@@ -68,15 +79,15 @@ namespace aq
       aqMatrix.reset(new aq::AQMatrix(settings, baseDesc));
 
 #ifndef __NO_LOAD_FULL_AQ_MATRIX__
-      aqMatrix->load(settings.szTempPath2, this->tableIDs);
+      aqMatrix->load(settings.dpyPath.c_str(), this->tableIDs);
       aq::Logger::getInstance().log(AQ_NOTICE, "Load From Binary AQ Matrix: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
       if (mode == REGULAR)
       {
-        aq::DeleteFolder( settings.szTempPath2 );
+        aq::DeleteFolder( settings.dpyPath.c_str() );
       }
       else
       {
-        aq::CleanFolder( settings.szTempPath1 );
+        aq::CleanFolder( settings.tmpPath.c_str() );
       }
 #else
       aqMatrix->loadHeader(settings.szTempPath2, this->tableIDs);
@@ -89,7 +100,7 @@ namespace aq
     }
     else
     {
-      throw aq::generic_error(aq::generic_error::NOT_IMPLEMENED, "");
+      throw aq::generic_error(aq::generic_error::NOT_IMPLEMENTED, "aq engine mode not supported");
     }
 
   }
@@ -136,7 +147,7 @@ namespace aq
   void AQEngine::renameResult(unsigned int id, std::vector<std::pair<std::string, std::string> >& resultTables)
   {
     std::vector<std::string> files;
-    if(aq::GetFiles(this->settings.szTempPath1, files) != 0)
+    if(aq::GetFiles(this->settings.tmpPath.c_str(), files) != 0)
       throw aq::generic_error(aq::generic_error::COULD_NOT_OPEN_FILE, "");
 
     size_t reg = 0;
@@ -171,12 +182,12 @@ namespace aq
 
       if (reg != 0)
       {
-        std::string oldFile = std::string(this->settings.szTempPath1) + "/" + file;
+        std::string oldFile = std::string(this->settings.tmpPath.c_str()) + "/" + file;
 
         try
         {
           char newFile[_MAX_PATH];
-          sprintf(newFile, "%s/B001REG%.4uTMP%.4uP%.12u.TMP", this->settings.szTempPath1, reg, id, packet);
+          sprintf(newFile, "%s/B001REG%.4uTMP%.4uP%.12u.TMP", this->settings.tmpPath.c_str(), reg, id, packet);
           ::remove(newFile);
           ::rename(oldFile.c_str(), newFile);
 

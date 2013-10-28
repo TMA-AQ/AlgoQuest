@@ -28,7 +28,8 @@ public:
 
 protected:
   virtual int process(Row& row);
-
+  
+  std::vector<size_t> widths;
   aq::verb::VerbNode::Ptr spTree;
 	std::vector<Column::Ptr> columns;
   unsigned int totalCount;

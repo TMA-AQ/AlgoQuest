@@ -187,7 +187,7 @@ VerbNode::Ptr VerbNode::build( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* p
   
 	if( !verb )
   {
-		// throw aq::generic_error(aq::generic_error::NOT_IMPLEMENED, "Verb Not implemented");
+		// throw aq::generic_error(aq::generic_error::NOT_IMPLEMENTED, "Verb Not implemented");
     aq::Logger::getInstance().log(AQ_DEBUG, "Verb '%s' Not implemented\n");
     return verb;
   }

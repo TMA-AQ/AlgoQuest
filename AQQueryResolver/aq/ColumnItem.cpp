@@ -52,7 +52,7 @@ ColumnItem::ColumnItem( char* str, ColumnType type )
 		this->strval = str; 
 		break;
 	default:
-		throw generic_error(generic_error::NOT_IMPLEMENED, "");
+		throw generic_error(generic_error::NOT_IMPLEMENTED, "type not supported");
 	}
 }
 
@@ -136,10 +136,10 @@ bool ColumnItem::lessThan( const ColumnItem * first, const ColumnItem * second, 
 		return first->numval < second->numval;
 		break;
 	case COL_TYPE_VARCHAR: 
-		return first->strval < second->strval;
+		return strcmp(first->strval.c_str(), second->strval.c_str()) < 0;
 		break;
 	default:
-		throw generic_error(generic_error::NOT_IMPLEMENED, "");
+		throw generic_error(generic_error::NOT_IMPLEMENTED, "type not supported");
 	}
 }
 
@@ -166,7 +166,7 @@ bool ColumnItem::equal( const ColumnItem * first, const ColumnItem * second, Col
 		return first->strval == second->strval;
 		break;
 	default:
-		throw generic_error(generic_error::NOT_IMPLEMENED, "");
+		throw generic_error(generic_error::NOT_IMPLEMENTED, "type not supported");
 	}
 }
 
@@ -208,7 +208,8 @@ void apply_aggregate(aggregate_function_t aggFunc, ColumnType type, ColumnItem& 
     i1.numval = ((i1_count * i1.numval) + (i2_count * i2.numval)) / (i1_count + i2_count);
     break;
   case COUNT:
-    throw aq::generic_error(aq::generic_error::NOT_IMPLEMENED, "aggregate count function is not implemented");
+    throw aq::generic_error(aq::generic_error::NOT_IMPLEMENTED, "aggregate count function is not implemented");
+    // i1.numval += i2_count;
     break;
   }
 }

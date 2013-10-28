@@ -16,7 +16,7 @@ ColumnItem::Ptr getMinMaxFromThesaurus(	size_t tableID, size_t colIdx, size_t pa
     if (BaseDesc.getTables()[tableIdx]->ID == tableID)
       break;
   }
-	std::string fileName = getThesaurusFileName( Settings.szThesaurusPath, tableIdx + 1, colIdx + 1, partIdx );
+	std::string fileName = getThesaurusFileName( Settings.dataPath.c_str(), tableIdx + 1, colIdx + 1, partIdx );
 	FILE* pFIn = fopen( fileName.c_str(), "rb" );
 	if ( pFIn == NULL )
 		return minMax;
@@ -40,7 +40,7 @@ ColumnItem::Ptr getMinMaxFromThesaurus(	size_t tableID, size_t colIdx, size_t pa
 		tmpBufSize = column->Size + 1000;
 		break;
 	default:
-		throw generic_error(generic_error::NOT_IMPLEMENED, "");
+		throw generic_error(generic_error::NOT_IMPLEMENTED, "type not supported");
 	}
 
 	unsigned char *pTmpBuf = new unsigned char[tmpBufSize];
@@ -57,7 +57,7 @@ ColumnItem::Ptr getMinMaxFromThesaurus(	size_t tableID, size_t colIdx, size_t pa
 			assert( 0 );
 	}
 	if( fread( pTmpBuf, 1, binItemSize, pFIn ) != binItemSize )
-		throw generic_error(generic_error::INVALID_FILE, "");
+		throw generic_error(generic_error::INVALID_FILE, "invalid thesaurus file [%s]", fileName.c_str());
 
 	switch( column->Type )
 	{

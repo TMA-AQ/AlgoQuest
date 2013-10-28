@@ -19,9 +19,10 @@ namespace aq
     this->createTableIDs(query);
 
     std::cout << "TableIDs value =" << std::endl;
-    std::for_each(this->tableIDs.begin(), this->tableIDs.end(), [&] (long long v) {
-      std::cout << "[" << v << "]" << std::endl;
-    });
+    for (auto& tid : this->tableIDs) 
+    {
+      std::cout << "[" << tid << "]" << std::endl;
+    }
 
     this->aqMatrix->simulate( rand() % 1000, this->tableIDs );
   }
@@ -52,9 +53,10 @@ namespace aq
     this->createTableIDs( pNode );
 
     std::cout << "TableIDs value =" << std::endl;
-    std::for_each(this->tableIDs.begin(), this->tableIDs.end(), [&] (long long v) {
-      std::cout << "[" << v << "]" << std::endl;
-    });
+    for (auto& tid : this->tableIDs) 
+    {
+      std::cout << "[" << tid << "]" << std::endl;
+    }
 
     this->aqMatrix->simulate( rand() % 1000, this->tableIDs );
 

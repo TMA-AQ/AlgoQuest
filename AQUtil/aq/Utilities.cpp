@@ -308,25 +308,6 @@ int StrToDouble( const char* psz, double* pdVal  )
 }
 
 //------------------------------------------------------------------------------
-void strtoupr( std::string& strval ) {
-	for( size_t idx = 0; idx < strval.length(); ++idx )
-		strval[idx] = toupper( strval[idx] );
-}
-
-//------------------------------------------------------------------------------
-void Trim( std::string& strval )
-{
-	if( strval == "" )
-		return;
-	int start = 0, end = (int) strval.length() - 1;
-	while( (strval[start] <= 32) && (start <= end) ) ++start;
-	while( (strval[end]) <= 32 && (start <= end) ) --end;
-	if( (start == 0) && (end == (int) strval.length() - 1) )
-		return;
-	strval = strval.substr( start, end-start+1 );
-}
-
-//------------------------------------------------------------------------------
 char* strtoupr( char* pszStr ) {
 	char *psz;
 
@@ -507,13 +488,13 @@ void ChangeCommaToDot (  char *string )
 }
 
 //------------------------------------------------------------------------------
-int MakeBackupFile( char *pszPath, backup_type_t type, int level, int id )
+int MakeBackupFile( const std::string& pszPath, backup_type_t type, int level, int id )
 {
 	char szBuffer[STR_BUF_SIZE];
 	memset(szBuffer, 0, STR_BUF_SIZE);
 	char szDstPath[_MAX_PATH];
 	size_t	len = 0;
-	strcpy( szBuffer, pszPath );
+	strcpy( szBuffer, pszPath.c_str() );
 	len = strlen(szBuffer);
 	if( len < 3 )
 	{
@@ -532,9 +513,9 @@ int MakeBackupFile( char *pszPath, backup_type_t type, int level, int id )
 	default: ;
 	}
 	sprintf( szDstPath, "%s_%.2d_%.2d%s.%s", szBuffer, level, id, typeChar.c_str(), &pszPath[len - 3] );
-	if( FileRename( pszPath, szDstPath ) != 0 )
+	if( FileRename( pszPath.c_str(), szDstPath ) != 0 )
 	{
-		aq::Logger::getInstance().log(AQ_DEBUG, "MakeBackupFile : Error renaming file %s to %s !\n", pszPath, szDstPath );
+	  aq::Logger::getInstance().log(AQ_DEBUG, "MakeBackupFile : Error renaming file %s to %s !\n", pszPath.c_str(), szDstPath );
 		return -1;
 	}
 	return 0;

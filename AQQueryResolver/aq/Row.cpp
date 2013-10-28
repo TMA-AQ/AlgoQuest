@@ -12,7 +12,8 @@ row_item_t::row_item_t()
   columnName(""),
   computed(false),
   grouped(false),
-  displayed(false)
+  displayed(false),
+  null(false)
 {
 }
 
@@ -29,7 +30,8 @@ row_item_t::row_item_t(ColumnItem::Ptr _item,
                        columnName(_columnName),
                        computed(_computed),
                        grouped(false),
-                       displayed(false)
+                       displayed(false),
+                       null(false)
 {
 }
 
@@ -42,7 +44,8 @@ row_item_t::row_item_t(const row_item_t& source)
   aggFunc(source.aggFunc),
   computed(source.computed),
   grouped(source.grouped),
-  displayed(source.displayed)
+  displayed(source.displayed),
+  null(source.null)
 {
   if (source.item)
   {
@@ -70,6 +73,7 @@ row_item_t& row_item_t::operator=(const row_item_t& source)
     computed = source.computed;
     grouped = source.grouped;
     displayed = source.displayed;
+    null = source.null;
   }
   return *this;
 }

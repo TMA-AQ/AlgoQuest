@@ -109,9 +109,6 @@
     <ClInclude Include="aq\db_loader\DatabaseLoader.h">
       <Filter>Header Files\aq\db_loader</Filter>
     </ClInclude>
-    <ClInclude Include="aq\db_loader\Util.h">
-      <Filter>Header Files\aq\db_loader</Filter>
-    </ClInclude>
     <ClInclude Include="aq\verbs\AggregateVerbs.h">
       <Filter>Header Files\aq\verbs</Filter>
     </ClInclude>
@@ -280,9 +277,6 @@
       <Filter>Source Files\aq\verbs</Filter>
     </ClCompile>
     <ClCompile Include="aq\db_loader\DatabaseLoader.cpp">
-      <Filter>Source Files\aq\db_loader</Filter>
-    </ClCompile>
-    <ClCompile Include="aq\db_loader\Util.cpp">
       <Filter>Source Files\aq\db_loader</Filter>
     </ClCompile>
     <ClCompile Include="aq\AQEngine.cpp">

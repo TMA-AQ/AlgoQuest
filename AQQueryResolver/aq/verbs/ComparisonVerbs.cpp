@@ -347,7 +347,7 @@ bool IsVerb::preprocessQuery(	aq::tnode* pStart, aq::tnode* pNode,
 		!(pNode->right->tag == K_NOT && pNode->right->left &&
 		pNode->right->left->tag == K_NULL ||
 		pNode->right->tag == K_NULL) )
-		throw generic_error(generic_error::NOT_IMPLEMENED, "");
+		throw generic_error(generic_error::NOT_IMPLEMENTED, "");
 	if( pNode->right->tag == K_NOT && pNode->right->left->tag == K_NULL )
 		this->IsNot = true;
 	return false;

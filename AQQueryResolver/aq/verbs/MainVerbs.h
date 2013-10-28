@@ -108,7 +108,7 @@ public:
   void accept(VerbVisitor* visitor);
   virtual void setSettings(TProjectSettings* settings)
   {
-    this->useRowResolver = settings->useRowResolver;
+    this->useRowResolver = true;
   }
 private:
   aq::Row row_prv;

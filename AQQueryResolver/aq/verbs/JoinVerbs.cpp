@@ -14,6 +14,26 @@ JoinVerb::JoinVerb()
 }
 
 //------------------------------------------------------------------------------
+static void addInnerOuter(aq::tnode * j, aq::tnode * n, int tag)
+{
+  std::vector<std::string> tables;
+  std::vector<aq::tnode*> tablesNodes;
+  if (n->tag == K_IDENT)
+  {
+    tables.push_back(n->getData().val_str);
+  }
+  else
+  {
+    joinlistToNodeArray(n, tablesNodes);
+    for (auto& n : tablesNodes)
+    {
+      tables.push_back(n->getData().val_str);
+    }
+  }
+  aq::addInnerOuterNodes(j->next->left, tag, tables );
+}
+
+//------------------------------------------------------------------------------
 bool JoinVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
 	assert( pNode && pStart );
@@ -23,16 +43,47 @@ bool JoinVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* 
 	assert( pJoin->tag == K_JOIN );
 	if( pJoin->next && pJoin->next->tag == K_ON )
 	{
-		aq::addInnerOuterNodes( pJoin->next->left,
-			this->leftTag(), this->rightTag() );
-		aq::addConditionsToWhere( pJoin->next->left, pStart );
+    addInnerOuter(pJoin, pJoin->left, this->leftTag());
+    addInnerOuter(pJoin, pJoin->right, this->rightTag());
+
+  //  std::vector<std::string> tables;
+  //  std::vector<aq::tnode*> tablesNodes;
+  //  
+  //  if (pJoin->left->tag == K_IDENT)
+  //  {
+  //    tables.push_back(pJoin->left->getData().val_str);
+  //  }
+  //  else
+  //  {
+  //    joinlistToNodeArray(pJoin->left, tablesNodes);
+  //    for (auto& n : tablesNodes)
+  //    {
+  //      tables.push_back(n->getData().val_str);
+  //    }
+  //  }
+  //  aq::addInnerOuterNodes( pJoin->next->left, this->leftTag(), tables );
+
+  //  tables.clear();
+  //  tablesNodes.clear();
+  //  if (pJoin->right->tag == K_IDENT)
+  //  {
+  //    tables.push_back(pJoin->left->getData().val_str);
+  //  }
+  //  else
+  //  {
+  //    joinlistToNodeArray(pJoin->right, tablesNodes);
+  //    for (auto& n : tablesNodes)
+  //    {
+  //      tables.push_back(n->getData().val_str);
+  //    }
+  //  }
+		//aq::addInnerOuterNodes( pJoin->next->left, this->rightTag(), tables );
+		
+    aq::addConditionsToWhere( pJoin->next->left, pStart );
 	}
-	assert( pJoin->left && (pJoin->left->tag == K_IDENT 
-		|| pJoin->left->tag == K_AS && pJoin->left->left
-		&& pJoin->left->left->tag == K_IDENT ) );
-	assert( pJoin->right && (pJoin->right->tag == K_IDENT
-		|| pJoin->right->tag == K_AS && pJoin->right->left
-		&& pJoin->right->left->tag == K_IDENT ) );
+  // FIXME
+	//assert( pJoin->left && (pJoin->left->tag == K_IDENT || pJoin->left->tag == K_AS && pJoin->left->left && pJoin->left->left->tag == K_IDENT ) );
+	//assert( pJoin->right && (pJoin->right->tag == K_IDENT || pJoin->right->tag == K_AS && pJoin->right->left && pJoin->right->left->tag == K_IDENT ) );
 	aq::tnode* table1 = pJoin->left;
 	pJoin->left = NULL;
 	aq::tnode* table2 = pJoin->right;

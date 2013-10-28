@@ -2,6 +2,8 @@
 #include <aq/Exceptions.h>
 #include <boost/bind.hpp>
 #include <boost/scoped_array.hpp>
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
 
 namespace aq
 {
@@ -80,8 +82,8 @@ const Table::Ptr Base::getTable(size_t id) const
 Table::Ptr Base::getTable( const std::string& name )
 {
 	std::string auxName = name;
-	strtoupr( auxName );
-	aq::Trim( auxName );
+	boost::to_upper(auxName);
+	boost::trim(auxName);
 	for( size_t idx = 0; idx < this->Tables.size(); ++idx )
   {
 		if( auxName == this->Tables[idx]->getName() )
@@ -105,6 +107,14 @@ const Table::Ptr Base::getTable( const std::string& name ) const
   return const_cast<Base*>(this)->getTable(name);
 }
 
+
+//------------------------------------------------------------------------------
+void Base::clear()
+{
+  this->Name = "";
+  this->Tables.clear();
+}
+
 //------------------------------------------------------------------------------
 void Base::loadFromBaseDesc(const aq::base_t& base) 
 {
@@ -118,15 +128,13 @@ void Base::loadFromBaseDesc(const aq::base_t& base)
       switch (type)
       {
       case COL_TYPE_VARCHAR: 
-        size = column.taille * sizeof(char); 
+        size = column.taille; 
         break;
       case COL_TYPE_INT: 
-        size = 4; 
-        break;
       case COL_TYPE_BIG_INT:
       case COL_TYPE_DOUBLE:
       case COL_TYPE_DATE: 
-        size = 8; 
+        size = 1; 
         break;
       }
       pTD->Columns.push_back(new Column(column.nom, column.num, size, type));
@@ -235,7 +243,7 @@ void Base::loadFromRawFile( const char* pszDataBaseFile ) {
       }
       else
       {
-        throw aq::generic_error(aq::generic_error::NOT_IMPLEMENED, "type %s not supported", szColumnType);
+        throw aq::generic_error(aq::generic_error::NOT_IMPLEMENTED, "type %s not supported", szColumnType);
       }
 
 			pTD->Columns.push_back( new Column( std::string(szColumnName), nColumnId, nColumnSize, eColumnType ) );
@@ -283,7 +291,7 @@ void Base::saveToRawFile( const char* pszDataBaseFile )
 			case COL_TYPE_DATE: szColumnType = "DATE"; break;
 			case COL_TYPE_VARCHAR: szColumnType = "VARCHAR2"; break;
 			default:
-				throw generic_error(generic_error::NOT_IMPLEMENED, "");
+				throw generic_error(generic_error::NOT_IMPLEMENTED, "");
 			}
 			fprintf( pFOut, "%s\n", szColumnType );
 		}
@@ -291,15 +299,18 @@ void Base::saveToRawFile( const char* pszDataBaseFile )
 }
 
 //------------------------------------------------------------------------------
-void Base::dumpRaw( std::ostream& os )
+void Base::dumpRaw( std::ostream& os ) const
 {
   os << this->Name << std::endl;
   os << this->Tables.size() << std::endl << std::endl;
-  std::for_each(this->Tables.begin(), this->Tables.end(), boost::bind(&Table::dumpRaw, _1, boost::ref(os)));
+  for (auto& table : this->Tables)
+  {
+    table->dumpRaw(os);
+  }
  }
  
 //------------------------------------------------------------------------------
-void Base::dumpXml( std::ostream& os )
+void Base::dumpXml( std::ostream& os ) const
 {
   os << "<Database Name=\"" << this->Name << "\">" << std::endl;
   os << "<Tables>" << std::endl;

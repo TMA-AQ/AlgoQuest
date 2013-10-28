@@ -56,12 +56,13 @@ public:
 	///
 	/// ...
 	///
+  void clear();
 	void loadFromBaseDesc( const aq::base_t& base );
 	void loadFromRawFile( const char* pszDataBaseFile );
 	void saveToRawFile( const char* pszDataBaseFile );
-	void dumpRaw( std::ostream& os );
-	void dumpXml( std::ostream& os );
-  
+	void dumpRaw( std::ostream& os ) const;
+	void dumpXml( std::ostream& os ) const;
+
 private:
 	tables_t Tables;
 	std::string Name;

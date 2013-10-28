@@ -68,12 +68,6 @@ private:
 };
 
 //------------------------------------------------------------------------------
-void strtoupr( std::string& strval );
-
-//------------------------------------------------------------------------------
-void Trim( std::string& strval );
-
-//------------------------------------------------------------------------------
 char* strtoupr( char* pszStr );
 
 //------------------------------------------------------------------------------
@@ -110,7 +104,7 @@ enum backup_type_t
   Exterior_Before,
   Exterior
 };
-int MakeBackupFile( char *pszPath, backup_type_t type, int level, int id );
+int MakeBackupFile( const std::string&, backup_type_t type, int level, int id );
 
 /// write a record
 void FileWriteEnreg( aq::ColumnType col_type, const int col_size, char *my_field, FILE *fcol );

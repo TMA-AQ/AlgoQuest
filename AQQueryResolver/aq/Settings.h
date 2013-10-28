@@ -2,6 +2,7 @@
 #define __AQ_SETTINGS_H__
 
 #include <string>
+#include <sstream>
 #include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
 
@@ -14,26 +15,26 @@
 namespace aq
 {
 
-struct TProjectSettings {
+struct TProjectSettings 
+{
   typedef boost::shared_ptr<TProjectSettings> Ptr;
+  
+  mutable std::stringstream output;
 
 	std::string iniFile;
-	std::string output;
 	std::string queryIdent;
-  std::string szRootPath;
-	std::string szEnginePath;
-	
-	std::string szTempRootPath;
-	std::string szLoaderPath;
-	char szSQLReqFN[ _MAX_PATH ];
-	char szDBDescFN[ _MAX_PATH ];
-	char szOutputFN[ _MAX_PATH ];
-	char szAnswerFN[ _MAX_PATH ];
-	char szThesaurusPath[ _MAX_PATH ];
-	char szTempPath1[ _MAX_PATH ];
-	char szTempPath2[ _MAX_PATH ];
-	char szEngineParamsDisplay[ STR_BUF_SIZE ];
-	char szEngineParamsNoDisplay[ STR_BUF_SIZE ];
+	std::string outputFile;
+	std::string answerFile;
+	std::string dbDesc;
+	std::string aqEngine;
+	std::string aqLoader;
+  std::string rootPath;
+  std::string workingPath;
+	std::string tmpRootPath;
+  std::string dataPath;
+	std::string tmpPath;
+	std::string dpyPath;
+
 	char fieldSeparator;
 	static const int MAX_COLUMN_NAME_SIZE = 255;
 	
@@ -46,19 +47,24 @@ struct TProjectSettings {
 
 	bool computeAnswer;
 	bool csvFormat;
-	bool executeNestedQuery;
-	bool useRowResolver;
+	bool skipNestedQuery;
   bool useBinAQMatrix;
+  bool displayCount;
+  bool cmdLine;
+  bool trace;
 
 	TProjectSettings();
 	TProjectSettings(const TProjectSettings&);
 	~TProjectSettings();
 	TProjectSettings& operator=(const TProjectSettings&);
 
+  void initPath(const std::string& root);
   void load(const std::string& iniFile, const std::string& queryIdent);
 	void load(const std::string& iniFile);
+	void load(std::istream& is);
 	void changeIdent(const std::string& queryIdent);
   void dump(std::ostream& os) const;
+  std::string to_string() const;
   void writeAQEngineIni(std::ostream& os) const;
 };
 

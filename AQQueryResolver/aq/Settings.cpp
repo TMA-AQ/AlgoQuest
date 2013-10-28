@@ -16,41 +16,49 @@ namespace aq
 TProjectSettings::TProjectSettings()
   : 
 	iniFile(""),
-	output(""),
-	szRootPath(""),
-	szEnginePath(""),
-  szTempRootPath(""),
-  szLoaderPath(""),
+  queryIdent(""),
+	outputFile(""),
+	answerFile(""),
+	dbDesc(""),
+	aqEngine("aq-engine"),
+  aqLoader("aq-loader"),
+	rootPath(""),
+  workingPath(""),
+  tmpRootPath(""),
+  dataPath(""),
+	tmpPath(""),
+	dpyPath(""),
+  fieldSeparator(';'),
 	worker(1),
 	group_by_process_size(100000),
   process_thread(1),
   packSize(aq::packet_size), 
   maxRecordSize(40960),
   computeAnswer(true),
-	csvFormat(false),
-	executeNestedQuery(true),
-	useRowResolver(true),
-  useBinAQMatrix(true)
+	csvFormat(true),
+	skipNestedQuery(false),
+  useBinAQMatrix(true),
+  displayCount(false),
+  cmdLine(false),
+  trace(false)
 {
-  ::memset(szSQLReqFN, 0, _MAX_PATH);
-  ::memset(szDBDescFN, 0, _MAX_PATH);
-  ::memset(szOutputFN, 0, _MAX_PATH);
-  ::memset(szAnswerFN, 0, _MAX_PATH);
-  ::memset(szThesaurusPath, 0, _MAX_PATH);
-  ::memset(szTempPath1, 0, _MAX_PATH);
-  ::memset(szTempPath2, 0, _MAX_PATH);
-  ::memset(szEngineParamsDisplay, 0, STR_BUF_SIZE);
-  ::memset(szEngineParamsNoDisplay, 0, STR_BUF_SIZE);
 }
 
 TProjectSettings::TProjectSettings(const TProjectSettings& obj)
 	:
 	iniFile(obj.iniFile),
-	output(obj.output),
-	szRootPath(obj.szRootPath),
-	szEnginePath(obj.szEnginePath),
-  szTempRootPath(obj.szTempRootPath),
-  szLoaderPath(obj.szLoaderPath),
+	outputFile(obj.outputFile),
+	answerFile(obj.answerFile),
+  queryIdent(obj.queryIdent),
+	dbDesc(obj.dbDesc),
+	aqEngine(obj.aqEngine),
+  aqLoader(obj.aqLoader),
+	rootPath(obj.rootPath),
+  workingPath(obj.workingPath),
+  tmpRootPath(obj.tmpRootPath),
+  dataPath(obj.dataPath),
+	tmpPath(obj.tmpPath),
+	dpyPath(obj.dpyPath),
 	fieldSeparator(obj.fieldSeparator),
 	worker(obj.worker),
 	group_by_process_size(obj.group_by_process_size),
@@ -58,19 +66,12 @@ TProjectSettings::TProjectSettings(const TProjectSettings& obj)
 	packSize(obj.packSize),
 	maxRecordSize(obj.maxRecordSize),
 	computeAnswer(obj.computeAnswer),
-	executeNestedQuery(obj.executeNestedQuery),
-	useRowResolver(obj.useRowResolver),
-  useBinAQMatrix(obj.useBinAQMatrix)
+	skipNestedQuery(obj.skipNestedQuery),
+  useBinAQMatrix(obj.useBinAQMatrix),
+  displayCount(obj.displayCount),
+  cmdLine(obj.cmdLine),
+  trace(obj.trace)
 {
-  ::strcpy(szSQLReqFN, obj.szSQLReqFN);
-  ::strcpy(szDBDescFN, obj.szDBDescFN);
-  ::strcpy(szOutputFN, obj.szOutputFN);
-  ::strcpy(szAnswerFN, obj.szAnswerFN);
-  ::strcpy(szThesaurusPath, obj.szThesaurusPath);
-  ::strcpy(szTempPath1, obj.szTempPath1);
-  ::strcpy(szTempPath2, obj.szTempPath2);
-  ::strcpy(szEngineParamsDisplay, obj.szEngineParamsDisplay);
-  ::strcpy(szEngineParamsNoDisplay, obj.szEngineParamsNoDisplay);
 }
 
 TProjectSettings::~TProjectSettings()
@@ -81,35 +82,33 @@ TProjectSettings& TProjectSettings::operator=(const TProjectSettings& obj)
 {
 	if (this != &obj)
 	{
-		fieldSeparator = obj.fieldSeparator;
-		packSize = obj.packSize;
-		maxRecordSize = obj.maxRecordSize;
-		computeAnswer = obj.computeAnswer;
 		iniFile = obj.iniFile;
-		output = obj.output;
-		szRootPath = obj.szRootPath;
-		szTempRootPath = obj.szTempRootPath;
-		szLoaderPath = obj.szLoaderPath;
-		szSQLReqFN, obj.szSQLReqFN;
-		::strcpy(szDBDescFN, obj.szDBDescFN);
-		::strcpy(szOutputFN, obj.szOutputFN);
-		::strcpy(szAnswerFN, obj.szAnswerFN);
-		::strcpy(szThesaurusPath, obj.szThesaurusPath);
-		szEnginePath = obj.szEnginePath;
-		fieldSeparator = obj.fieldSeparator;
-		::strcpy(szTempPath1, obj.szTempPath1);
-		::strcpy(szTempPath2, obj.szTempPath2);
-		::strcpy(szEngineParamsDisplay, obj.szEngineParamsDisplay);
-		::strcpy(szEngineParamsNoDisplay, obj.szEngineParamsNoDisplay);
+    queryIdent = obj.queryIdent;
+		outputFile = obj.outputFile;
+    answerFile = obj.answerFile;
+    dbDesc = obj.dbDesc;
+		aqEngine = obj.aqEngine;
+    aqLoader = obj.aqLoader;
+		rootPath = obj.rootPath;
+    workingPath = obj.workingPath;
+		tmpRootPath = obj.tmpRootPath;
+    dataPath = obj.dataPath;
+    tmpPath = obj.tmpPath;
+    dpyPath = obj.dpyPath;
+    fieldSeparator = obj.fieldSeparator;
 		worker = obj.worker;
 		group_by_process_size = obj.group_by_process_size;
     process_thread = obj.process_thread;
 		packSize = obj.packSize;
 		maxRecordSize = obj.maxRecordSize;
 		computeAnswer = obj.computeAnswer;
-		executeNestedQuery = obj.executeNestedQuery;
-		useRowResolver = obj.useRowResolver;
+		maxRecordSize = obj.maxRecordSize;
+		computeAnswer = obj.computeAnswer;
+		skipNestedQuery = obj.skipNestedQuery;
     useBinAQMatrix = obj.useBinAQMatrix;
+    displayCount = obj.displayCount;
+    cmdLine = obj.cmdLine;
+    trace = obj.trace;
 	}
 	return *this;
 }
@@ -120,64 +119,56 @@ void TProjectSettings::load(const std::string& iniFile, const std::string& query
 	this->changeIdent(queryIdent);
 }
 
+template <class T>
+T get_opt_value(boost::property_tree::ptree& pt, const char * key, T default_value)
+{
+  boost::optional<T> opt;
+  pt.get_optional<size_t>(boost::property_tree::ptree::path_type(key));
+  if (opt.is_initialized()) return opt.get();
+  else return default_value;
+}
+
 void TProjectSettings::load(const std::string& iniFile)
 {
 	this->iniFile = iniFile;
+  std::ifstream fin(iniFile.c_str(), std::ifstream::in);
+  if (fin.is_open())
+  {
+    this->load(fin);
+  }
+}
+    
+void TProjectSettings::load(std::istream& is)
+{
   try
   {
-    std::ifstream fin(iniFile.c_str(), std::ifstream::in);
     boost::property_tree::ptree pt;
-    boost::property_tree::ini_parser::read_ini(fin, pt);
-		
-    this->szRootPath = pt.get<std::string>(boost::property_tree::ptree::path_type("root-folder"));
-    this->szTempRootPath = pt.get<std::string>(boost::property_tree::ptree::path_type("tmp-folder"));
-    this->fieldSeparator = pt.get<std::string>(boost::property_tree::ptree::path_type("field-separator")).at(0);
-		
-    this->szEnginePath = pt.get<std::string>(boost::property_tree::ptree::path_type("aq-engine"));
-    this->szLoaderPath = pt.get<std::string>(boost::property_tree::ptree::path_type("aq-loader"));
-		
-		// optional
-		boost::optional<size_t> opt;
-    opt = pt.get_optional<size_t>(boost::property_tree::ptree::path_type("worker"));
-		if (opt.is_initialized()) this->worker = opt.get();
-    opt = pt.get_optional<size_t>(boost::property_tree::ptree::path_type("group-by-process-size"));
-		if (opt.is_initialized()) this->group_by_process_size = opt.get();
-    opt = pt.get_optional<size_t>(boost::property_tree::ptree::path_type("process-thread"));
-    if (opt.is_initialized()) this->process_thread = opt.get();
+    boost::property_tree::ini_parser::read_ini(is, pt);
+
+    std::cout << is << std::endl;
+    
+    // all option are optional
+    this->rootPath = get_opt_value(pt, "root-folder", this->rootPath);
+		if (*this->rootPath.rbegin() != '/') this->rootPath += "/";
+    boost::algorithm::replace_all(this->rootPath, "\\", "/");
+    boost::algorithm::trim(this->rootPath);
+    this->tmpRootPath = get_opt_value(pt, "tmp-folder", this->rootPath + "data_orga/tmp/");
+    this->fieldSeparator = get_opt_value(pt, "field-separator", ';');
+    this->aqEngine = get_opt_value(pt, "aq-engine", this->aqEngine);
+    this->aqLoader = get_opt_value(pt, "aq-loader", this->aqLoader);
+    this->worker = get_opt_value(pt, "worker", this->worker);
+    this->group_by_process_size = get_opt_value(pt, "group-by-process-size", this->group_by_process_size);
+    this->process_thread = get_opt_value(pt, "process-thread", this->process_thread);
+    this->displayCount = get_opt_value(pt, "display-count", this->displayCount);
+    this->trace = get_opt_value(pt, "trace", this->trace);
 
     //
     // Change '\' by '/'
-    boost::algorithm::replace_all(this->szEnginePath, "\\", "/");
-    boost::algorithm::trim(this->szEnginePath);
-    boost::algorithm::replace_all(this->szLoaderPath, "\\", "/");
-    boost::algorithm::trim(this->szLoaderPath);
+    boost::algorithm::replace_all(this->aqEngine, "\\", "/");
+    boost::algorithm::trim(this->aqEngine);
+    boost::algorithm::replace_all(this->aqLoader, "\\", "/");
+    boost::algorithm::trim(this->aqLoader);
 
-    boost::algorithm::replace_all(this->szRootPath, "\\", "/");
-    boost::algorithm::trim(this->szRootPath);
-    boost::algorithm::replace_all(this->szTempRootPath, "\\", "/");
-    boost::algorithm::trim(this->szTempRootPath);
-		
-		//
-		// add '/' at end of directory if needed
-		if (*this->szRootPath.rbegin() != '/') this->szRootPath += "/";
-		if (*this->szTempRootPath.rbegin() != '/') this->szTempRootPath += "/";
-
-		//
-		// base desc file
-		strcpy( this->szDBDescFN, this->szRootPath.c_str() );
-		strcat( this->szDBDescFN, "base_struct/base.xml" );
-    boost::filesystem::path bdf(this->szDBDescFN);
-    if (!boost::filesystem::exists(bdf))
-    {
-      strcpy( this->szDBDescFN, this->szRootPath.c_str() );
-      strcat( this->szDBDescFN, "base_struct/base.aqb" );
-    }
-
-		//
-		// thesaurus path
-		strcpy( this->szThesaurusPath, this->szRootPath.c_str() );
-		strcat( this->szThesaurusPath, "data_orga/vdg/data/" );
-    
 	}
 	catch (const boost::property_tree::ptree_error& e)
 	{
@@ -187,87 +178,92 @@ void TProjectSettings::load(const std::string& iniFile)
 	}
 }
 
+void TProjectSettings::initPath(const std::string& root)
+{
+  this->rootPath = root;
+  if (*this->rootPath.rbegin() != '/') this->rootPath += "/";
+  boost::algorithm::replace_all(this->rootPath, "\\", "/");
+  boost::algorithm::trim(this->rootPath);
+
+  //
+  // tmp
+  this->tmpRootPath = this->rootPath + "data_orga/tmp/";
+
+  //
+  // base desc file
+  this->dbDesc = this->rootPath + "base_struct/base.xml";
+  boost::filesystem::path bdf(this->dbDesc);
+  if (!boost::filesystem::exists(bdf))
+  {
+    this->dbDesc = this->rootPath + "base_struct/base.aqb";
+  }
+
+  //
+  // data path
+  this->dataPath = this->rootPath + "data_orga/vdg/data/";
+
+}
+
 void TProjectSettings::changeIdent(const std::string& _queryIdent)
 {
 	this->queryIdent = _queryIdent;
 	
-	//
-	// request file path (deprecated)
-	strcpy( this->szSQLReqFN, this->szRootPath.c_str() );
-	strcat( this->szSQLReqFN, "/calculus/" );
-	strcat( this->szSQLReqFN, queryIdent.c_str() );
-	strcat( this->szSQLReqFN, "/Request.txt" );
-
-	//
-	// new request path
-	strcpy( this->szOutputFN, this->szRootPath.c_str() );
-	strcat( this->szOutputFN, "/calculus/" );
-	strcat( this->szOutputFN, queryIdent.c_str() );
-	strcat( this->szOutputFN, "/New_Request.txt" );
-
-	//
-	// answer path (deprecated)
-	strcpy( this->szAnswerFN, this->szRootPath.c_str() );
-	strcat( this->szAnswerFN, "/calculus/" );
-	strcat( this->szAnswerFN, queryIdent.c_str() );
-	strcat( this->szAnswerFN, "/Answer.txt" );
+  this->workingPath = this->rootPath + "calculus/" + queryIdent + "/";
+  this->answerFile = this->workingPath + "Answer.txt";
 
 	//
 	// tempory path
-	strcpy( this->szTempPath1, this->szTempRootPath.c_str() );
-	strcat( this->szTempPath1, "/" );
-	strcat( this->szTempPath1, queryIdent.c_str() );
-	strcpy( this->szTempPath2, this->szTempPath1 );
-	strcat( this->szTempPath2, "/dpy" );
+  this->tmpPath = this->tmpRootPath + queryIdent + "/";
+  this->dpyPath = this->tmpPath + "dpy/";
 	
 	//
 	// change ini file
-	iniFile = this->szRootPath + "/calculus/" + queryIdent + "/aqengine.ini";
-
-	//
-	// Prepare engine arguments
-	sprintf( this->szEngineParamsDisplay, "%s %s Dpy", iniFile.c_str(), queryIdent.c_str() );
-	sprintf( this->szEngineParamsNoDisplay, "%s %s NoDpy", iniFile.c_str(), queryIdent.c_str() );
-
+	this->iniFile = this->rootPath + "/calculus/" + queryIdent + "/aqengine.ini";
 }
 
 void TProjectSettings::dump(std::ostream& os) const
 {
-  os << "szRootPath: '" << szRootPath << "'" << std::endl;
-	os << "szTempRootPath: '" << szTempRootPath << "'" << std::endl;
-	os << "szLoaderPath: '" << szLoaderPath << "'" << std::endl;
-	os << "szSQLReqFN: '" << szSQLReqFN << "'" << std::endl;
-	os << "szDBDescFN: '" << szDBDescFN << "'" << std::endl;
-	os << "szOutputFN: '" << szOutputFN << "'" << std::endl;
-	os << "szAnswerFN: '" << szAnswerFN << "'" << std::endl;
-	os << "szThesaurusPath: '" << szThesaurusPath << "'" << std::endl;
-	os << "szEnginePath: '" << szEnginePath << "'" << std::endl;
-	os << "szTempPath1: '" << szTempPath1 << "'" << std::endl;
-	os << "szTempPath2: '" << szTempPath2 << "'" << std::endl;
-	os << "szEngineParamsDisplay: '" << szEngineParamsDisplay << "'" << std::endl;
-	os << "szEngineParamsNoDisplay: '" << szEngineParamsNoDisplay << "'" << std::endl;
-	os << "fieldSeparator: '" << fieldSeparator << "'" << std::endl;
-	os << "MAX_COLUMN_NAME_SIZE: '" << MAX_COLUMN_NAME_SIZE << "'" << std::endl;
-	os << "packSize: '" << packSize << "'" << std::endl;
-	os << "maxRecordSize: '" << maxRecordSize << "'" << std::endl;
-  os << "computeAnswer: '" << computeAnswer << "'" << std::endl;
-  os << "useRowResolver: '" << useRowResolver << "'" << std::endl;
+  os << "root-path:            ['" << rootPath             << "']" << std::endl;
+  os << "working-path:         ['" << workingPath          << "']" << std::endl;
+	os << "tmp-root-path:        ['" << tmpRootPath          << "']" << std::endl;
+	os << "dataPath:             ['" << dataPath             << "']" << std::endl;
+	os << "tmpPath:              ['" << tmpPath              << "']" << std::endl;
+	os << "dpyPath:              ['" << dpyPath              << "']" << std::endl;
+	os << "db-desc:              ['" << dbDesc               << "']" << std::endl;
+	os << "aq-engine:            ['" << aqEngine             << "']" << std::endl;
+	os << "aq-loader:            ['" << aqLoader             << "']" << std::endl;
+	os << "output:               ['" << outputFile           << "']" << std::endl;
+	os << "answer:               ['" << answerFile           << "']" << std::endl;
+	os << "fieldSeparator:       ['" << fieldSeparator       << "']" << std::endl;
+	os << "MAX_COLUMN_NAME_SIZE: ["  << MAX_COLUMN_NAME_SIZE <<  "]" << std::endl;
+	os << "packSize:             ["  << packSize             <<  "]" << std::endl;
+	os << "maxRecordSize:        ["  << maxRecordSize        <<  "]" << std::endl;
+  os << "computeAnswer:        ["  << computeAnswer        <<  "]" << std::endl;
+  os << "displayCount:         ["  << displayCount         <<  "]" << std::endl;
+  os << "cmdLine:              ["  << cmdLine              <<  "]" << std::endl;
+  os << "trace:                ["  << trace                <<  "]" << std::endl; 
+}
+
+std::string TProjectSettings::to_string() const
+{
+  this->dump(this->output);
+  return this->output.str();
 }
 
 void TProjectSettings::writeAQEngineIni(std::ostream& os) const
 {
-	os << "export.filename.final=" << szDBDescFN << std::endl;
+	os << "export.filename.final=" << dbDesc << std::endl;
 	os << "step1.field.separator=" << fieldSeparator << std::endl;
-  os << "k_rep_racine=" << szRootPath << std::endl;
+  os << "k_rep_racine=" << rootPath << std::endl;
   // FIXME
-  std::string::size_type pos = szTempRootPath.find("data_orga/tmp/");
+  std::string::size_type pos = tmpRootPath.find("data_orga/tmp/");
   if (pos != std::string::npos)
   {
-    os << "k_rep_racine_tmp=" << szTempRootPath.substr(0, pos) << std::endl;
+    os << "k_rep_racine_tmp=" << tmpRootPath.substr(0, pos) << std::endl;
   }
   else
   {
-    os << "k_rep_racine_tmp=" << szTempRootPath << std::endl;
+    os << "k_rep_racine_tmp=" << tmpRootPath << std::endl;
   }
 }
 

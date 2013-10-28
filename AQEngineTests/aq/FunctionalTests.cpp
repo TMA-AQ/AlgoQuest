@@ -152,6 +152,12 @@ uint64_t functional_tests(const struct opt& o)
       }
     }
     
+    boost::to_upper(query); // FIXME : this can have a bad side effect on characters values
+  
+    std::string::size_type pos = query.find(";");
+    assert(pos != std::string::npos);
+    query.erase(pos);
+
     // add eof on each important keyword (FROM, WHERE, GROUP, ORDER, K_JXXX, IN)
     boost::replace_all(query, "\n", " ");
     std::string keywords[] = { 
@@ -185,12 +191,9 @@ uint64_t functional_tests(const struct opt& o)
     aq::get_columns(orderedColumns, query, "ORDER");
     
     // FIXME : should be in k_jeq_parser
-    std::string::size_type pos = query.find("WHERE");
+    pos = query.find("WHERE");
     if (pos == std::string::npos)
     {
-      pos = query.find(";");
-      assert(pos != std::string::npos);
-      query.erase(pos);
       std::string group, order;
       pos = query.find("ORDER");
       if (pos != std::string::npos)
@@ -214,11 +217,15 @@ uint64_t functional_tests(const struct opt& o)
         query += "\n" + order;
     }
 
+    boost::trim(query);
+
     // kjeq_parse
     if (o.jeqParserActivated)
     {
-      aq::ParseJeq(query);
+      aq::ParseJeq(query, true);
     }
+
+    boost::trim(query);
     
     aq::Logger::getInstance().log(AQ_INFO, "processing query: \n%s\n", query.c_str());
 
@@ -279,6 +286,7 @@ uint64_t functional_tests(const struct opt& o)
           std::string answerPath(o.dbPath);
           answerPath += "/data_orga/tmp/" + std::string(o.queryIdent) + "/dpy/";
           rc = aq::display(cb, answerPath, o, selectedColumns);
+          std::cout << std::endl << std::endl;
         }
       }
       

@@ -283,6 +283,7 @@ std::string tnode::to_string() const
 		return szBuffer;
 		break;
 	case NODE_DATA_STRING:
+    assert(this->data.val_str);
 		return this->data.val_str;
 		break;
 	default:
@@ -449,6 +450,20 @@ void andListToNodeArray( tnode* pNode, std::vector<tnode*>& nodes )
 tnode* nodeArrayToAndList( const std::vector<tnode*>& nodes )
 {
 	return nodeArrayToTreeList( nodes, K_AND );
+}
+
+//------------------------------------------------------------------------------
+void joinlistToNodeArray(tnode* pNode, std::vector<tnode*>& nodes)
+{
+  aq::tnode * clone = aq::clone_subtree(pNode);
+  aq::tnode * join = aq::find_deeper_node(clone, K_JOIN);
+  while (join != NULL)
+  {
+    nodes.push_back(join->left);
+    nodes.push_back(join->right);
+    join = NULL;
+    aq::tnode * join = aq::find_deeper_node(clone, K_JOIN);
+  }
 }
 
 //------------------------------------------------------------------------------

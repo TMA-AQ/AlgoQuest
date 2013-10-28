@@ -39,6 +39,8 @@ typedef enum
 	file, t_row_id, precision, t_star, last_symbole
 } symbole;
 
+const char * symbole_to_char(aq::symbole sid);
+
 }
 
 #endif
