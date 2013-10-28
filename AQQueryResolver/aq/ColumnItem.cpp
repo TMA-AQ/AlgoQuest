@@ -136,7 +136,7 @@ bool ColumnItem::lessThan( const ColumnItem * first, const ColumnItem * second, 
 		return first->numval < second->numval;
 		break;
 	case COL_TYPE_VARCHAR: 
-		return first->strval < second->strval;
+		return strcmp(first->strval.c_str(), second->strval.c_str()) < 0;
 		break;
 	default:
 		throw generic_error(generic_error::NOT_IMPLEMENTED, "type not supported");
