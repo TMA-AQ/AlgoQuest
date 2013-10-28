@@ -22,7 +22,7 @@
 namespace aq 
 {
 
-class FileMapper;
+// class FileMapper;
 
 //------------------------------------------------------------------------------
 class Base;

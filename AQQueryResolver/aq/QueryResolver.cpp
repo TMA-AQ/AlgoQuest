@@ -656,7 +656,8 @@ void QueryResolver::solveAQMatrix(aq::verb::VerbNode::Ptr spTree)
   //
   // build result from aq matrix
   timer.start();
-  aq::solveAQMatrix(aq_engine->getAQMatrix(), columnTypes, columnNodes, *pSettings, BaseDesc, processes, pSettings->process_thread, this->hasGroupBy || this->hasPartitionBy );
+  aq::RowSolver solver(aq_engine->getAQMatrix(), columnTypes, columnNodes, *pSettings, BaseDesc);
+  solver.solve(processes, pSettings->process_thread, this->hasGroupBy || this->hasPartitionBy);
   aq::Logger::getInstance().log(AQ_INFO, "build result from aq matrix: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
 
   //

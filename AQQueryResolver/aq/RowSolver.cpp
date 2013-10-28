@@ -6,31 +6,61 @@
 #include <aq/Logger.h>
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
+#include <aq/FileMapper.h>
 
-#if defined(WIN32)
-# include <aq/WIN32FileMapper.h>
-typedef aq::WIN32FileMapper FileMapper;
-#else
-# include <aq/FileMapper.h>
-typedef aq::FileMapper FileMapper;
-#endif
+namespace  
+{
 
-boost::mutex mutex;
+void set_grouped(const std::vector<aq::tnode*>& columnGroup, aq::RowSolver::column_infos_t& infos)
+{
+  for (auto& node : columnGroup)
+  {
+    assert(node->left);
+    assert(node->right);
+    if ((strcmp(infos.column->getTableName().c_str(), node->left->getData().val_str) == 0) && 
+      (strcmp(infos.column->getName().c_str(), node->right->getData().val_str) == 0))
+    {
+      infos.grouped = true;
+      return;
+    }
+  }
+}
+
+boost::shared_ptr<aq::ColumnMapper_Intf> new_column_mapper(const aq::ColumnType type, const char * path, const size_t tableId, 
+                                                           const size_t columnId, const size_t size, const size_t packetSize)
+{      
+  boost::shared_ptr<aq::ColumnMapper_Intf> cm;
+  switch(type)
+  {
+  case aq::ColumnType::COL_TYPE_BIG_INT:
+  case aq::ColumnType::COL_TYPE_DATE:
+    cm.reset(new aq::ColumnMapper<int64_t, aq::FileMapper>(path, tableId, columnId, size, packetSize));
+    break;
+  case aq::ColumnType::COL_TYPE_INT:
+    cm.reset(new aq::ColumnMapper<int32_t, aq::FileMapper>(path, tableId, columnId, size, packetSize));
+    break;
+  case aq::ColumnType::COL_TYPE_DOUBLE:
+    cm.reset(new aq::ColumnMapper<double, aq::FileMapper>(path, tableId, columnId, size, packetSize));
+    break;
+  case aq::ColumnType::COL_TYPE_VARCHAR:
+    cm.reset(new aq::ColumnMapper<char, aq::FileMapper>(path, tableId, columnId, size, packetSize));
+    break;
+  }
+  return cm;
+}
+
+}
 
 namespace aq 
 {
-
-struct column_infos_t
+  
+RowSolver::RowSolver(boost::shared_ptr<aq::AQMatrix> _aqMatrix, const std::vector<Column::Ptr>& _columnTypes, 
+                     const std::vector<aq::tnode*> _columnGroup, const TProjectSettings& _settings, const Base& _BaseDesc)
+                     : aqMatrix(_aqMatrix), columnTypes(_columnTypes), columnGroup(_columnGroup), settings(_settings), BaseDesc(_BaseDesc)
 {
-  column_infos_t() : table_index(0), grouped(false) {}
-  Column::Ptr column; 
-  aq::ColumnMapper_Intf::Ptr mapper; 
-  size_t table_index; 
-  bool grouped;
-};
-typedef std::vector<column_infos_t> columns_infos_t;
+}
 
-void matched_index(const boost::shared_ptr<aq::AQMatrix> aqMatrix, const Base& BaseDesc, column_infos_t& infos)
+void RowSolver::matched_index(column_infos_t& infos)
 {
   auto joinPath = aqMatrix->getJoinPath();
   Table::Ptr table = BaseDesc.getTable(infos.column->TableID);
@@ -46,50 +76,9 @@ void matched_index(const boost::shared_ptr<aq::AQMatrix> aqMatrix, const Base& B
   throw aq::generic_error(aq::generic_error::AQ_ENGINE, "cannot find table [%u] in join Path", infos.column->TableID);
 }
 
-void set_grouped(const std::vector<aq::tnode*>& columnGroup, column_infos_t& infos)
-{
-  for (auto& node : columnGroup)
-  {
-    assert(node->left);
-    assert(node->right);
-    if ((strcmp(infos.column->getTableName().c_str(), node->left->getData().val_str) == 0) && 
-      (strcmp(infos.column->getName().c_str(), node->right->getData().val_str) == 0))
-    {
-      infos.grouped = true;
-      return;
-    }
-  }
-}
-
-boost::shared_ptr<ColumnMapper_Intf> new_column_mapper(const aq::ColumnType type, const char * path, const size_t tableId, 
-                                                       const size_t columnId, const size_t size, const size_t packetSize)
-{      
-  boost::shared_ptr<ColumnMapper_Intf> cm;
-  switch(type)
-  {
-  case aq::ColumnType::COL_TYPE_BIG_INT:
-  case aq::ColumnType::COL_TYPE_DATE:
-    cm.reset(new aq::ColumnMapper<int64_t, FileMapper>(path, tableId, columnId, size, packetSize));
-    break;
-  case aq::ColumnType::COL_TYPE_INT:
-    cm.reset(new aq::ColumnMapper<int32_t, FileMapper>(path, tableId, columnId, size, packetSize));
-    break;
-  case aq::ColumnType::COL_TYPE_DOUBLE:
-    cm.reset(new aq::ColumnMapper<double, FileMapper>(path, tableId, columnId, size, packetSize));
-    break;
-  case aq::ColumnType::COL_TYPE_VARCHAR:
-    cm.reset(new aq::ColumnMapper<char, FileMapper>(path, tableId, columnId, size, packetSize));
-    break;
-  }
-  return cm;
-}
-
-void prepareColumnAndColumnMapper(const boost::shared_ptr<aq::AQMatrix> aqMatrix,
-                                  const TProjectSettings& settings,
-                                  const Base& BaseDesc,
-                                  const std::vector<Column::Ptr>& columnTypes, 
-                                  const std::vector<aq::tnode*>& columnGroup,
-                                  columns_infos_t& columns_infos)
+void RowSolver::prepareColumnAndColumnMapper(const std::vector<Column::Ptr>& columnTypes, 
+                                             const std::vector<aq::tnode*>& columnGroup,
+                                             columns_infos_t& columns_infos)
 { 
   // order must be the same that columnsType
   for (size_t i = 0; i < columnTypes.size(); ++i)
@@ -133,7 +122,7 @@ void prepareColumnAndColumnMapper(const boost::shared_ptr<aq::AQMatrix> aqMatrix
     infos.mapper = cm;
     
     // TABLE_INDEX
-    matched_index(aqMatrix, BaseDesc, infos);
+    matched_index(infos);
 
     // GROUPED
     set_grouped(columnGroup, infos);
@@ -142,12 +131,9 @@ void prepareColumnAndColumnMapper(const boost::shared_ptr<aq::AQMatrix> aqMatrix
   }
 }
 
-void addGroupColumn(const boost::shared_ptr<aq::AQMatrix> aqMatrix,
-                    const TProjectSettings& settings,
-                    const Base& BaseDesc,
-                    const std::vector<Column::Ptr>& columnTypes, 
-                    const std::vector<aq::tnode*>& columnGroup,
-                    columns_infos_t& columns_infos)
+void RowSolver::addGroupColumn(const std::vector<Column::Ptr>& columnTypes, 
+                               const std::vector<aq::tnode*>& columnGroup,
+                               columns_infos_t& columns_infos)
 {  
   for (auto it = columnGroup.begin(); it != columnGroup.end(); ++it)
   {
@@ -195,7 +181,7 @@ void addGroupColumn(const boost::shared_ptr<aq::AQMatrix> aqMatrix,
           infos.mapper = cm;
 
           // TABLE_INDEX
-          matched_index(aqMatrix, BaseDesc, infos);
+          matched_index(infos);
 
           // GROUPED
           set_grouped(columnGroup, infos);
@@ -211,11 +197,10 @@ void addGroupColumn(const boost::shared_ptr<aq::AQMatrix> aqMatrix,
   }
 }
 
-void solve(boost::shared_ptr<aq::AQMatrix> aqMatrix,
-           boost::shared_ptr<aq::RowProcess_Intf> rowProcess,
-           const std::pair<size_t, size_t> indexes,
-           const columns_infos_t columns,
-           const bool aggregate)
+void RowSolver::solve_thread(boost::shared_ptr<aq::RowProcess_Intf> rowProcess,
+                             const std::pair<size_t, size_t> indexes,
+                             const columns_infos_t columns,
+                             const bool aggregate)
 {  
   aq::Timer timer;
   std::vector<aq::Row> rows(1);
@@ -304,14 +289,9 @@ void solve(boost::shared_ptr<aq::AQMatrix> aqMatrix,
 
 }
 
-void solveAQMatrix(boost::shared_ptr<aq::AQMatrix> aqMatrix, 
-                   const std::vector<Column::Ptr>& columnTypes, 
-                   const std::vector<aq::tnode*> columnGroup,
-                   const TProjectSettings& settings, 
-                   const Base& BaseDesc, 
-                   boost::shared_ptr<aq::RowProcess_Intf> rowProcess,
-                   uint64_t processThread,
-                   bool aggregate)
+void RowSolver::solve(boost::shared_ptr<aq::RowProcess_Intf> rowProcess,
+                      uint64_t processThread,
+                      bool aggregate)
 {
   aq::Timer timer;
 
@@ -322,11 +302,11 @@ void solveAQMatrix(boost::shared_ptr<aq::AQMatrix> aqMatrix,
   
   //
   // Prepare columns infos
-  prepareColumnAndColumnMapper(aqMatrix, settings, BaseDesc, columnTypes, columnGroup, columns_infos);
+  prepareColumnAndColumnMapper(columnTypes, columnGroup, columns_infos);
 
   //
   // add group columns whose are not in select
-  addGroupColumn(aqMatrix, settings, BaseDesc, columnTypes, columnGroup, columns_infos);
+  addGroupColumn(columnTypes, columnGroup, columns_infos);
 
   //
   // TODO : special case for Count only
@@ -334,7 +314,7 @@ void solveAQMatrix(boost::shared_ptr<aq::AQMatrix> aqMatrix,
 
   if (processThread == 1)
   {
-    solve(aqMatrix, rowProcess, std::make_pair((size_t)0, (size_t)aqMatrix->getNbRows()), columns_infos, aggregate);
+    solve_thread(rowProcess, std::make_pair((size_t)0, (size_t)aqMatrix->getNbRows()), columns_infos, aggregate);
   }
   else
   {
@@ -382,7 +362,7 @@ void solveAQMatrix(boost::shared_ptr<aq::AQMatrix> aqMatrix,
     {
       if (it->first == it->second) 
         continue;
-      threads.create_thread(boost::bind(&solve, aqMatrix, rowProcess, *it, columns_infos, aggregate));
+      threads.create_thread(boost::bind(&RowSolver::solve_thread, this, rowProcess, *it, columns_infos, aggregate));
     }
     threads.join_all();
   }

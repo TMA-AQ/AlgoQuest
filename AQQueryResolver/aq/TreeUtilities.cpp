@@ -10,16 +10,7 @@
 #include <boost/scoped_array.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/array.hpp>
-
-
-#if defined(WIN32)
-# include <aq/WIN32FileMapper.h>
-typedef aq::WIN32FileMapper _FileMapper_;
-#else
-# include <aq/FileMapper.h>
-typedef aq::FileMapper _FileMapper_;
-#endif
-
+#include <aq/FileMapper.h>
 
 //------------------------------------------------------------------------------
 const int nrJoinTypes    = 7;
@@ -1475,7 +1466,7 @@ void transformExpression(const aq::Base& baseDesc, const aq::TProjectSettings& s
       aq::tnode * cmpNode = NULL;
       while ((cmpNode = aq::find_first_node(whereNode, tag)) != NULL)
       {
-        aq::expression_transform::transform<_FileMapper_>(baseDesc, settings, cmpNode);
+        aq::expression_transform::transform<FileMapper>(baseDesc, settings, cmpNode);
       }
     }
   }

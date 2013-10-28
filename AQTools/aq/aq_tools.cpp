@@ -15,15 +15,12 @@
 #include <aq/QueryReader.h>
 #include <aq/Database.h>
 #include <aq/ThesaurusReader.h>
+#include <aq/FileMapper.h>
 #include "CommandHandler.h"
 #include "AQEngineSimulate.h"
 #if defined (WIN32)
-#  include <aq/WIN32FileMapper.h>
-#  define __FILE_MAPPER__ aq::WIN32FileMapper
 #  include <io.h>
 #else
-#  include <aq/FileMapper.h>
-#  define __FILE_MAPPER__ aq::FileMapper
 #  include <unistd.h>
 #  define _isatty isatty
 #  define _fileno fileno
@@ -102,17 +99,17 @@ int check_database(const aq::TProjectSettings& settings)
         switch (c.type)
         {
         case aq::symbole::t_char:
-          tr.reset(new aq::ThesaurusReader<char, __FILE_MAPPER__>(settings.dataPath.c_str(), t.num, c.num, c.taille, settings.packSize, p, false));
+          tr.reset(new aq::ThesaurusReader<char, aq::FileMapper>(settings.dataPath.c_str(), t.num, c.num, c.taille, settings.packSize, p, false));
           break;
         case aq::symbole::t_double: 
-          tr.reset(new aq::ThesaurusReader<double, __FILE_MAPPER__>(settings.dataPath.c_str(), t.num, c.num, c.taille, settings.packSize, p, false));
+          tr.reset(new aq::ThesaurusReader<double, aq::FileMapper>(settings.dataPath.c_str(), t.num, c.num, c.taille, settings.packSize, p, false));
           break;
         case aq::symbole::t_int: 
-          tr.reset(new aq::ThesaurusReader<uint32_t, __FILE_MAPPER__>(settings.dataPath.c_str(), t.num, c.num, c.taille, settings.packSize, p, false));
+          tr.reset(new aq::ThesaurusReader<uint32_t, aq::FileMapper>(settings.dataPath.c_str(), t.num, c.num, c.taille, settings.packSize, p, false));
           break;
         case aq::symbole::t_long_long: 
         case aq::symbole::t_date1: 
-          tr.reset(new aq::ThesaurusReader<uint64_t, __FILE_MAPPER__>(settings.dataPath.c_str(), t.num, c.num, c.taille, settings.packSize, p, false));
+          tr.reset(new aq::ThesaurusReader<uint64_t, aq::FileMapper>(settings.dataPath.c_str(), t.num, c.num, c.taille, settings.packSize, p, false));
           break;
         default:
           aq::Logger::getInstance().log(AQ_ERROR, "type not supported [%s]\n", c.type);
@@ -142,17 +139,17 @@ int check_database(const aq::TProjectSettings& settings)
       switch (c.type)
       {
       case aq::symbole::t_char: 
-        m.reset(new aq::ColumnMapper<char, __FILE_MAPPER__>(settings.dataPath.c_str(), t.num, c.num, c.taille, settings.packSize, false)); 
+        m.reset(new aq::ColumnMapper<char, aq::FileMapper>(settings.dataPath.c_str(), t.num, c.num, c.taille, settings.packSize, false)); 
         break;
       case aq::symbole::t_double: 
-        m.reset(new aq::ColumnMapper<double, __FILE_MAPPER__>(settings.dataPath.c_str(), t.num, c.num, c.taille, settings.packSize, false)); 
+        m.reset(new aq::ColumnMapper<double, aq::FileMapper>(settings.dataPath.c_str(), t.num, c.num, c.taille, settings.packSize, false)); 
         break;
       case aq::symbole::t_int: 
-        m.reset(new aq::ColumnMapper<uint32_t, __FILE_MAPPER__>(settings.dataPath.c_str(), t.num, c.num, c.taille, settings.packSize, false)); 
+        m.reset(new aq::ColumnMapper<uint32_t, aq::FileMapper>(settings.dataPath.c_str(), t.num, c.num, c.taille, settings.packSize, false)); 
         break;
       case aq::symbole::t_long_long: 
       case aq::symbole::t_date1: 
-        m.reset(new aq::ColumnMapper<uint64_t, __FILE_MAPPER__>(settings.dataPath.c_str(), t.num, c.num, c.taille, settings.packSize, false)); 
+        m.reset(new aq::ColumnMapper<uint64_t, aq::FileMapper>(settings.dataPath.c_str(), t.num, c.num, c.taille, settings.packSize, false)); 
         break;
       default:
         aq::Logger::getInstance().log(AQ_ERROR, "type not supported [%s]\n", c.type);
@@ -679,7 +676,6 @@ int parse_queries(aq::TProjectSettings& settings, const std::string& aqHome, con
 // -------------------------------------------------------------------------------------------------
 int main(int argc, char**argv)
 {
-  
 	try
 	{
 
@@ -780,7 +776,7 @@ int main(int argc, char**argv)
     engine.add_options()
       ("settings,s", po::value<std::string>(&propertiesFile), "")
       ("aq-engine,e", po::value<std::string>(&settings.aqEngine))
-      ("aq-home,h", po::value<std::string>(&aqHome)->default_value(aqHome), "")
+      ("aq-home,h", po::value<std::string>(&aqHome)->default_value(aqHome), "set AQ Home (AQ_HOME environment variable)")
       ("aq-name,n", po::value<std::string>(&aqName), "")
 			("query-ident,i", po::value<std::string>(&queryIdent), "")
       ("queries-file,f", po::value<std::string>(&sqlQueriesFile), "")

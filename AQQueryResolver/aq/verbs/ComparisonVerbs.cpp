@@ -4,14 +4,7 @@
 #include <aq/Exceptions.h>
 #include <aq/Logger.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
-
-#if defined(WIN32)
-# include <aq/WIN32FileMapper.h>
-typedef aq::WIN32FileMapper FileMapper;
-#else
-# include <aq/FileMapper.h>
-typedef aq::FileMapper FileMapper;
-#endif
+#include <aq/FileMapper.h>
 
 using namespace std;
 
