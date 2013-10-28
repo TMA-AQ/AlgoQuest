@@ -1,3 +1,5 @@
+#include "AQEngineSimulate.h"
+
 #include <aq/AQEngine.h>
 #include <aq/SQLPrefix.h>
 #include <aq/Column2Table.h>
@@ -11,8 +13,14 @@
 #include <aq/db_loader/DatabaseLoader.h>
 #include <aq/Logger.h>
 #include <aq/QueryReader.h>
-#include "AQEngineSimulate.h"
-#include <io.h>
+
+#if defined (WIN32)
+#  include <io.h>
+#else
+#  include <unistd.h>
+#  define _isatty isatty
+#  define _fileno fileno
+#endif
 #include <cstdio>
 #include <iostream>
 #include <list>

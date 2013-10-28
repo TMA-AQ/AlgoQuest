@@ -28,8 +28,10 @@ file(
   aq/parser/sql92_grm_tab.cpp
 )
 
-file(GLOB exclude_files "aq/parser/lex.yy.cpp")
-list(REMOVE_ITEM source_files ${exclude_files})
+if(EXISTS "aq/parser/lex.yy.cpp")
+  file(GLOB exclude_files "aq/parser/lex.yy.cpp")
+  list(REMOVE_ITEM source_files ${exclude_files})
+endif()
 
 # Create target for the parser
 ADD_CUSTOM_TARGET(SQL_PARSER echo "Creating sql parser")
@@ -53,15 +55,9 @@ ADD_CUSTOM_COMMAND(
   OUTPUTS aq/parser/sql92_grm_tab.cpp
 )
 
-# Add parser.c to the list of sources
 SET(source_files ${source_files} aq/parser/sql92_grm_tab.cpp)
-
-# Since parser.c does not exists yet when cmake is run, mark
-# it as generated
+SET_SOURCE_FILES_PROPERTIES(aq/parser/lex.yy.cpp GENERATED)
 SET_SOURCE_FILES_PROPERTIES(aq/parser/sql92_grm_tab.cpp GENERATED)
-
-# Include binary directory to include lexer.c in parser.c
-# INCLUDE_DIRECTORIES(${Foo_BINARY_DIR}/src)
 
 add_library(
   aq_query_resolver
