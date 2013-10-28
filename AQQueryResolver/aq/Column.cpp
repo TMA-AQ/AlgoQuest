@@ -4,6 +4,8 @@
 #include <aq/Utilities.h>
 #include <aq/Exceptions.h>
 #include <boost/scoped_array.hpp>
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
 
 namespace aq
 {
@@ -165,8 +167,8 @@ void Column::setName( const std::string& name )
 {
 	this->OriginalName = name;
 	this->Name = name;
-	strtoupr( this->Name );
-	Trim( this->Name );
+	boost::to_upper(this->Name);
+	boost::trim(this->Name);
 }
 
 //------------------------------------------------------------------------------
@@ -204,8 +206,8 @@ std::string& Column::getDisplayName()
 void Column::setTableName( const std::string& name )
 {
 	this->TableName = name;
-	strtoupr( this->TableName );
-	Trim( this->TableName );
+	boost::to_upper(this->TableName);
+	boost::trim(this->TableName);
 }
 
 //------------------------------------------------------------------------------

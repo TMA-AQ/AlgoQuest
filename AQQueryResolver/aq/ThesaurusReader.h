@@ -12,7 +12,7 @@ namespace aq
   class ThesaurusReader : public ColumnMapper_Intf
   {
   public:
-    ThesaurusReader(const char * _path, size_t _tableId, size_t _columnId, size_t _size, size_t _packetSize);
+    ThesaurusReader(const char * _path, size_t _tableId, size_t _columnId, size_t _size, size_t _packetSize, size_t _currentPacket = 0, bool _readNextPacket = true);
     ~ThesaurusReader();
     int loadValue(size_t index, aq::ColumnItem& item);
     const aq::ColumnType getType() const { return aq::type_conversion<T>::type; } ;
@@ -26,11 +26,12 @@ namespace aq
     std::vector<size_t> sizes;
     std::pair<size_t, size_t> mappedZone;
     T * val;
+    bool readNextPacket;
   };
   
   template <typename T, class M>
-  ThesaurusReader<T, M>::ThesaurusReader(const char * _path, size_t _tableId, size_t _columnId, size_t _size, size_t _packetSize)
-    : path(_path), tableId(_tableId), columnId(_columnId), size(_size), currentPacket(0)
+  ThesaurusReader<T, M>::ThesaurusReader(const char * _path, size_t _tableId, size_t _columnId, size_t _size, size_t _packetSize, size_t _currentPacket = 0, bool _readNextPacket = true)
+    : path(_path), tableId(_tableId), columnId(_columnId), size(_size), currentPacket(_currentPacket), readNextPacket(_readNextPacket)
   {
     std::string thesaurusFilename = getThesaurusFileName(path.c_str(), tableId, columnId, currentPacket);
     this->thesaurusMapper.reset(new M(thesaurusFilename.c_str()));
@@ -61,7 +62,7 @@ namespace aq
         aq::fill_item<T>(item, val, this->size);
       }
     }
-    else if (index >= mappedZone.second)
+    else if ((index >= mappedZone.second) && (readNextPacket))
     {
       ++currentPacket;
       std::string thesaurusFilename = getThesaurusFileName(path.c_str(), tableId, columnId, currentPacket);
@@ -83,6 +84,10 @@ namespace aq
       // TODO : backward reading is not implemented
       assert(false);
       throw aq::generic_error(aq::generic_error::NOT_IMPLEMENTED, "backward reading of thesaurus is not implemented");
+    }
+    else
+    {
+      rc = -1;
     }
     return rc;
   }

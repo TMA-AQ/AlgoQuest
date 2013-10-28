@@ -11,6 +11,10 @@
 #include <aq/db_loader/DatabaseLoader.h>
 #include <aq/Logger.h>
 #include <aq/QueryReader.h>
+#include <aq/Database.h>
+#include <aq/WIN32FileMapper.h>
+#include <aq/ThesaurusReader.h>
+#include "CommandHandler.h"
 #include "AQEngineSimulate.h"
 #include <io.h>
 #include <cstdio>
@@ -43,7 +47,6 @@
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 
-bool interact_cmd_line;
 size_t failedQueries = 0;
 boost::mutex parserMutex;
 
@@ -55,7 +58,133 @@ int yyerror( const char *pszMsg )
 }
 
 // -------------------------------------------------------------------------------------------------
-int processAQMatrix(const std::string& query, const std::string& aqMatrixFileName, const std::string& answerFileName, aq::TProjectSettings& settings, aq::Base& baseDesc)
+int check_database(const aq::TProjectSettings& settings)
+{
+  int rc = 0;
+  std::vector<std::string> errors;
+
+  aq::Logger::getInstance().log(AQ_NOTICE, "check base [%s]", settings.rootPath.c_str());
+
+  aq::Database db(settings.rootPath);
+  if (!db.isValid())
+  {
+    aq::Logger::getInstance().log(AQ_ERROR, "invalid database [%s]\n", settings.rootPath.c_str());
+    return EXIT_FAILURE;
+  }
+
+  aq::base_t b = db.getBaseDesc();
+
+  aq::ColumnItem item;
+  std::string value;
+  boost::shared_ptr<aq::ColumnMapper_Intf> m;
+  boost::shared_ptr<aq::ColumnMapper_Intf> tr;
+  for (auto& t : b.table)
+  {
+    aq::Logger::getInstance().log(AQ_NOTICE, "check table [id:%u;name:%s;cols:%u;records:%u]\n", t.num, t.nom.c_str(), t.nb_cols, t.nb_enreg);
+    for (auto& c : t.colonne)
+    {
+      aq::Logger::getInstance().log(AQ_NOTICE, "check table [%u;%s] column [%u;%s] [records:%u]\n", t.num, t.nom.c_str(), c.num, c.nom.c_str(), t.nb_enreg);
+      for (size_t p = 0; p <= (t.nb_enreg / settings.packSize); p++)
+      {
+        std::string theFilename = aq::getThesaurusFileName(settings.dataPath.c_str(), t.num, c.num, p);
+        aq::Logger::getInstance().log(AQ_NOTICE, "check thesaurus [%s]\n", theFilename.c_str());
+        switch (c.type)
+        {
+        case aq::symbole::t_char:
+          tr.reset(new aq::ThesaurusReader<char, aq::WIN32FileMapper>(settings.dataPath.c_str(), t.num, c.num, c.taille, settings.packSize, p, false));
+          break;
+        case aq::symbole::t_double: 
+          tr.reset(new aq::ThesaurusReader<double, aq::WIN32FileMapper>(settings.dataPath.c_str(), t.num, c.num, c.taille, settings.packSize, p, false));
+          break;
+        case aq::symbole::t_int: 
+          tr.reset(new aq::ThesaurusReader<uint32_t, aq::WIN32FileMapper>(settings.dataPath.c_str(), t.num, c.num, c.taille, settings.packSize, p, false));
+          break;
+        case aq::symbole::t_long_long: 
+        case aq::symbole::t_date1: 
+          tr.reset(new aq::ThesaurusReader<uint64_t, aq::WIN32FileMapper>(settings.dataPath.c_str(), t.num, c.num, c.taille, settings.packSize, p, false));
+          break;
+        default:
+          aq::Logger::getInstance().log(AQ_ERROR, "type not supported [%s]\n", c.type);
+        }
+        size_t i = 0;
+        bool duplicatedValues = false;
+        std::set<std::string> values;
+        while (tr->loadValue(i++, item) != -1)
+        {
+          value = item.toString(tr->getType());
+          if (values.find(value) != values.end())
+          {
+            duplicatedValues = true;
+            aq::Logger::getInstance().log(AQ_ERROR, "duplicated values [%s] in thesaurus [%s]\n", value.c_str(), theFilename.c_str());
+          }
+          values.insert(value);
+        }
+        if (duplicatedValues)
+        {
+          std::stringstream ss;
+          ss << "duplicated values found in thesaurus [" << theFilename << "]";
+          errors.push_back(ss.str());
+        }
+        aq::Logger::getInstance().log(AQ_NOTICE, "%u unique values read in thesaurus [%s]\n", values.size(), theFilename.c_str());
+      }
+      aq::Logger::getInstance().log(AQ_NOTICE, "read full column\n");
+      switch (c.type)
+      {
+      case aq::symbole::t_char: 
+        m.reset(new aq::ColumnMapper<char, aq::WIN32FileMapper>(settings.dataPath.c_str(), t.num, c.num, c.taille, settings.packSize, false)); 
+        break;
+      case aq::symbole::t_double: 
+        m.reset(new aq::ColumnMapper<double, aq::WIN32FileMapper>(settings.dataPath.c_str(), t.num, c.num, c.taille, settings.packSize, false)); 
+        break;
+      case aq::symbole::t_int: 
+        m.reset(new aq::ColumnMapper<uint32_t, aq::WIN32FileMapper>(settings.dataPath.c_str(), t.num, c.num, c.taille, settings.packSize, false)); 
+        break;
+      case aq::symbole::t_long_long: 
+      case aq::symbole::t_date1: 
+        m.reset(new aq::ColumnMapper<uint64_t, aq::WIN32FileMapper>(settings.dataPath.c_str(), t.num, c.num, c.taille, settings.packSize, false)); 
+        break;
+      default:
+        aq::Logger::getInstance().log(AQ_ERROR, "type not supported [%s]\n", c.type);
+      }
+      for (size_t i = 0; i < t.nb_enreg; i++)
+      {
+        if (m->loadValue(i, item) != 0)
+        {
+          rc = EXIT_FAILURE;
+          aq::Logger::getInstance().log(AQ_ERROR, "bad index %u on table [%u;%s] column [%u;%s]\n", i, t.num, t.nom.c_str(), c.num, c.nom.c_str());
+          std::stringstream ss;
+          ss << "bad index " << i << " on table [" << t.num << ";" << t.nom << "] column [" << c.num << ";" << c.nom << "]";
+          errors.push_back(ss.str());
+        }
+        else if ((value = item.toString(m->getType())) == "")
+        {
+          rc = EXIT_FAILURE;
+          aq::Logger::getInstance().log(AQ_ERROR, "bad value on index %u on table [%u;%s] column [%u;%s]\n", i, t.num, t.nom.c_str(), c.num, c.nom.c_str());
+          std::stringstream ss;
+          ss << "bad value on index " << i << " on table [" << t.num << ";" << t.nom << "] column [" << c.num << ";" << c.nom << "]";
+          errors.push_back(ss.str());
+        }
+        else if ((i % ((t.nb_enreg / 10) + 1)) == 0)
+        {
+          aq::Logger::getInstance().log(AQ_INFO, "%s\n", value.c_str());
+        }
+      }
+    }
+  }
+
+  aq::Logger::getInstance().log(AQ_ERROR, "");
+  aq::Logger::getInstance().log(AQ_ERROR, "ERRORS:\n");
+
+  for (auto& error : errors)
+  {
+    aq::Logger::getInstance().log(AQ_ERROR, "%s\n", error.c_str());
+  }
+
+  return rc;
+}
+
+// -------------------------------------------------------------------------------------------------
+int process_aq_matrix(const std::string& query, const std::string& aqMatrixFileName, const std::string& answerFileName, aq::TProjectSettings& settings, aq::Base& baseDesc)
 {
 	aq::tnode	*pNode;
 	int	nRet;
@@ -114,7 +243,7 @@ int processAQMatrix(const std::string& query, const std::string& aqMatrixFileNam
 }
 
 // -------------------------------------------------------------------------------------------------
-int transformQuery(const std::string& query, aq::TProjectSettings& settings, aq::Base& baseDesc)
+int transform_query(const std::string& query, aq::TProjectSettings& settings, aq::Base& baseDesc)
 {
 	aq::tnode	*pNode;
 	int	nRet;
@@ -150,7 +279,8 @@ int init_base_desc(const std::string& file, aq::Base& bd)
 {
   if (file == "")
   {
-    throw aq::generic_error(aq::generic_error::INVALID_BASE_FILE, "no database specify");
+    // throw aq::generic_error(aq::generic_error::INVALID_BASE_FILE, "no database specify");
+    return -1;
   }
   aq::Logger::getInstance().log(AQ_INFO, "load base %s\n", file.c_str());
   std::fstream bdFile(file.c_str());
@@ -158,14 +288,14 @@ int init_base_desc(const std::string& file, aq::Base& bd)
   if (file.substr(file.size() - 4) == ".xml")
   {
     aq::build_base_from_xml(bdFile, baseDescHolder);
-    bd.loadFromBaseDesc(baseDescHolder);
+    // bd.loadFromBaseDesc(baseDescHolder);
   }
   else
   {
-    // aq::build_base_from_raw(baseDescr.c_str(), baseDescHolder);
-    bd.loadFromRawFile(file.c_str());
+    aq::build_base_from_raw(bdFile, baseDescHolder);
+    // bd.loadFromRawFile(file.c_str());
   }
-  // baseDesc.loadFromBaseDesc(baseDescHolder);
+  bd.loadFromBaseDesc(baseDescHolder);
   return 0;
 }
 
@@ -187,6 +317,59 @@ int load_database(const aq::TProjectSettings& settings, aq::base_t& baseDesc, co
     }
   }
   return EXIT_SUCCESS;
+}
+
+// -------------------------------------------------------------------------------------------------
+int generate_tmp_table(const aq::TProjectSettings& settings, aq::base_t& baseDesc, unsigned int nbValues, unsigned int minValue, unsigned int maxValue)
+{
+  if (minValue > maxValue)
+    return -1;
+  size_t tableIndex = baseDesc.nb_tables + 1;
+  size_t columnIndex = 1;
+  size_t partIndex = 0;
+  size_t size = 0;
+  std::string type;
+  unsigned int range = maxValue - minValue;
+  unsigned int value = 0;
+  switch (sizeof(value))
+  {
+  case 4:  type = "INT"; size = 4; break;
+  case 8:  type = "LON"; size = 8; break;
+  default: type = "INT"; size = 4; break;
+  }
+  ::srand((unsigned int)::time(NULL));
+  FILE * fd = NULL;
+  for (size_t i = 0; i < nbValues; i++)
+  {
+    if ((i % settings.packSize) == 0)
+    {
+      if (fd != NULL)
+        fclose(fd);
+      std::string tmpFilename = settings.rootPath + aq::getTemporaryFileName(tableIndex,  columnIndex,  partIndex, type.c_str(),  size);
+      fd = fopen(tmpFilename.c_str(), "w");
+      if (fd == NULL)
+        return -1;
+    }
+    value = minValue + (::rand() % range);
+    fwrite(&value, sizeof(value), 1, fd);
+  }
+  fclose(fd);
+  baseDesc.nb_tables += 1;
+  baseDesc.table.push_back(aq::base_t::table_t());
+  auto& table = *baseDesc.table.rbegin();
+  std::stringstream ss;
+  ss << "TMP" << tableIndex;
+  table.nom = ss.str();
+  table.nb_cols = 1;
+  table.num = (unsigned int)tableIndex;
+  table.nb_enreg = nbValues;
+  table.colonne.push_back(aq::base_t::table_t::col_t());
+  auto& col = *table.colonne.rbegin();
+  col.nom = "V1";
+  col.num = 1;
+  col.taille = 1;
+  col.type = aq::symbole::t_long_long;
+  return 0;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -314,7 +497,7 @@ int processQuery(const std::string& query, aq::TProjectSettings& settings, aq::B
 		aq::Table::Ptr result = queryResolver.solve();
     timer.stop();
 
-    if (interact_cmd_line)
+    if (settings.cmdLine)
     {
       std::cout << queryResolver.getNbRows() << " rows processed in " << aq::Timer::getString(timer.getTimeElapsed()) << std::endl;
       std::cout << std::endl;
@@ -397,13 +580,13 @@ int processSQLQueries(const std::string& query,
 }
 
 // -------------------------------------------------------------------------------------------------
-int parse_queries(aq::TProjectSettings& settings, aq::Base& baseDesc, 
+int parse_queries(aq::TProjectSettings& settings, const std::string& aqHome, const std::string& aqName, aq::Base& baseDesc, 
                   const std::string& queryIdent, const std::string& sqlQueriesFile, const std::string aqMatrixFileName, 
                   bool transform, bool simulateAQEngine, bool keepFiles, bool force)
 {
   //
   // print info if use as command line tool
-  if (interact_cmd_line)
+  if (settings.cmdLine)
   {
     std::cout << "Welcome to AlgoQuest Monitor version " << AQ_TOOLS_VERSION << std::endl;
     std::cout << "Copyright (c) 2013, AlgoQuest System. All rights reserved." << std::endl;
@@ -431,26 +614,52 @@ int parse_queries(aq::TProjectSettings& settings, aq::Base& baseDesc,
   }
   else
   {
-    if (_isatty(_fileno(stdin)))
-      reader = new aq::QueryReader(std::cin, "aq");
+    reader = new aq::QueryReader(std::cin, settings.cmdLine ? "aq" : "");
+  }
+
+  // 
+  // Get current database name from settings if set
+  if (aqName == "")
+  {
+    std::string databaseName = settings.rootPath;
+    boost::replace_all(databaseName, "\\", "/");
+    while ((databaseName.size() > 0) && (*databaseName.rbegin() == '/'))
+    {
+      databaseName.erase(databaseName.size() - 1);
+    }
+    std::string::size_type pos = databaseName.find_last_of('/');
+    if (pos == std::string::npos)
+    {
+      databaseName = "";
+    }
     else
-      reader = new aq::QueryReader(std::cin);
+    {
+      databaseName = databaseName.substr(pos + 1);
+    }
+  }
+  else
+  {
+    settings.initPath(aqHome + aqName);
   }
 
   std::string query;
+  aq::CommandHandler cmdHandler(aqHome, aqName, settings, baseDesc);
   while ((query = reader->next()) != "")
   {
     if (transform)
     {
-      transformQuery(query, settings, baseDesc);
+      transform_query(query, settings, baseDesc);
     }
     else if (aqMatrixFileName != "")
     {
-      processAQMatrix(query, aqMatrixFileName, settings.outputFile, settings, baseDesc);
+      process_aq_matrix(query, aqMatrixFileName, settings.outputFile, settings, baseDesc);
     }
     else 
     {
-      processSQLQueries(query, settings, baseDesc, simulateAQEngine, keepFiles, queryIdent, force);
+      if (cmdHandler.process(query) == -1)
+      {
+        processSQLQueries(query, settings, baseDesc, simulateAQEngine, keepFiles, queryIdent, force);
+      }
     }
   }
   return EXIT_SUCCESS;
@@ -459,7 +668,7 @@ int parse_queries(aq::TProjectSettings& settings, aq::Base& baseDesc,
 // -------------------------------------------------------------------------------------------------
 int main(int argc, char**argv)
 {
-
+  
 	try
 	{
 
@@ -476,30 +685,52 @@ int main(int argc, char**argv)
 		bool pid_mode = false;
 
 		// aq options
+    std::string aqHome;
+    std::string aqName;
 		std::string propertiesFile;
 		std::string queryIdent;
 		std::string sqlQuery;
 		std::string sqlQueriesFile;
 		std::string baseDescr;
 		std::string answerPathStr;
-		std::string aqMatrixFileName;
 		std::string answerFileName;
     std::string DLLFunction;
-    std::string tableNameToLoad;
 		unsigned int worker;
-		bool simulateAQEngine = false;
 		bool multipleAnswerFiles = false;
 		bool keepFiles = false;
 		bool display = false;
-		bool transform = false;
-		bool skipNestedQuery = false;
 		bool loadDatabase = false;
     bool force = false;
     bool useTextAQMatrix = false;
 
-		// old args for backward compatibility
-		std::vector<std::string> oldArgs;
-    
+    // testing purpose options
+		std::string aqMatrixFileName;
+		bool transform = false;
+    bool checkDatabase = false;
+		bool simulateAQEngine = false;
+		bool skipNestedQuery = false;
+
+    // load option
+    std::string tableNameToLoad;
+
+    // generate tmp table option
+    unsigned int nbValues = 100;
+    unsigned int minValue = 0;
+    unsigned int maxValue = 100;
+    unsigned int nbTables = 1;
+    bool generateTmpTable = false;
+
+    char * s = ::getenv("AQ_HOME");
+    if (s != NULL)
+      aqHome = s;
+
+    //
+    // if aq.ini exists in current directory, use it as default settings
+    settings.iniFile = "aq.ini";
+    boost::filesystem::path iniFile(settings.iniFile);
+    if (boost::filesystem::exists(iniFile))
+      settings.load(settings.iniFile);
+
     //
     // look for properties file in args
     for (size_t i = 1; i < argc; i++)
@@ -538,6 +769,8 @@ int main(int argc, char**argv)
     engine.add_options()
       ("settings,s", po::value<std::string>(&propertiesFile), "")
       ("aq-engine,e", po::value<std::string>(&settings.aqEngine))
+      ("aq-home,h", po::value<std::string>(&aqHome)->default_value(aqHome), "")
+      ("aq-name,n", po::value<std::string>(&aqName), "")
 			("query-ident,i", po::value<std::string>(&queryIdent), "")
       ("queries-file,f", po::value<std::string>(&sqlQueriesFile), "")
 			("answer-path", po::value<std::string>(&answerPathStr), "DEPRECATED") // deprecated
@@ -549,6 +782,7 @@ int main(int argc, char**argv)
 			("display-count", po::value<bool>(&settings.displayCount), "")
       ("force", po::bool_switch(&force), "force use of directory if it already exists")
 			("keep-file,k", po::bool_switch(&keepFiles), "")
+      ("trace,t", po::value<bool>(&settings.trace)->default_value(settings.trace), "")
       ;
 
     po::options_description testing("Testing");
@@ -557,6 +791,7 @@ int main(int argc, char**argv)
 			("transform", po::bool_switch(&transform), "")
 			("skip-nested-query", po::value<bool>(&settings.skipNestedQuery), "")
 			("aq-matrix", po::value<std::string>(&aqMatrixFileName), "")
+      ("check-database", po::bool_switch(&checkDatabase), "")
       ;
 
     po::options_description external("External");
@@ -571,8 +806,17 @@ int main(int argc, char**argv)
 			("load-db", po::bool_switch(&loadDatabase), "")
       ("load-table", po::value<std::string>(&tableNameToLoad), "")
 			;
+    
+    po::options_description genTmpTable("GenerateTmpTable [TESTING PURPOSE]");
+    genTmpTable.add_options()
+      ("gen-tmp-table", po::bool_switch(&generateTmpTable), "")
+			("nb-values", po::value<unsigned int>(&nbValues), "")
+      ("min-value", po::value<unsigned int>(&minValue), "")
+      ("max-value", po::value<unsigned int>(&maxValue), "")
+      ("nb-tables", po::value<unsigned int>(&nbTables), "")
+			;
 
-    all.add(log_options).add(engine).add(testing).add(external).add(loader);
+    all.add(log_options).add(engine).add(testing).add(external).add(loader).add(genTmpTable);
 
 		po::variables_map vm;
 		po::store(po::command_line_parser(argc, argv).options(all).run(), vm);
@@ -584,6 +828,26 @@ int main(int argc, char**argv)
 			return 1;
 		}
 		
+    //
+    //
+    settings.cmdLine = _isatty(_fileno(stdin)) != 0;
+    
+    //
+    //
+    boost::replace_all(aqHome, "\\", "/");
+    boost::replace_all(aqHome, "//", "/");
+    if ((!aqHome.empty()) && (*aqHome.rbegin() != '/'))
+    {
+      aqHome = aqHome + "/";
+    }
+
+    //
+    //
+    if ((aqHome != "") && (aqName != ""))
+    {
+      settings.initPath(aqHome + aqName);
+    }
+
 		//
 		// Initialize Logger
 		aq::Logger::getInstance(ident.c_str(), mode == "STDOUT" ? STDOUT : mode == "LOCALFILE" ? LOCALFILE : mode == "SYSLOG" ? SYSLOG : STDOUT);
@@ -592,14 +856,10 @@ int main(int argc, char**argv)
 		aq::Logger::getInstance().setDateMode(date_mode);
 		aq::Logger::getInstance().setPidMode(pid_mode);
     
-    //
-    // check if aq-tools is used as an interactive cmd line
-    interact_cmd_line = _isatty(_fileno(stdin)) && (sqlQueriesFile == "");
-
 		//
 		// print Project Settings
     aq::Logger::getInstance().log(AQ_DEBUG, "Settings:\n%s\n", settings.to_string().c_str());
-    
+
 		//
 		// If Load database is invoked
 		if (loadDatabase)
@@ -614,16 +874,42 @@ int main(int argc, char**argv)
         aq::Logger::getInstance().log(AQ_CRITICAL, "cannot find database desc file '%s'\n", settings.dbDesc.c_str());
         return EXIT_FAILURE;
       }
+      assert(false);
 		}
-    else
+
+    //
+    // Check Database
+    if (checkDatabase)
     {
-      aq::Base bd;
-      init_base_desc(settings.dbDesc, bd);
-      return parse_queries(
-        settings, bd, 
-        queryIdent, sqlQueriesFile, aqMatrixFileName, 
-        transform, simulateAQEngine, keepFiles, force);
+      return check_database(settings);
     }
+
+    //
+    // If generated temporary table is invoked
+    if (generateTmpTable)
+    {
+      aq::base_t bd;
+      if (aq::build_base_from_raw(settings.dbDesc.c_str(), bd) != -1)
+      {
+        int rc = 0;
+        while ((nbTables-- > 0) && ((rc = generate_tmp_table(settings, bd, nbValues, minValue, maxValue)) == 0));
+        return rc;
+      }
+      else
+      {
+        aq::Logger::getInstance().log(AQ_CRITICAL, "cannot find database desc file '%s'\n", settings.dbDesc.c_str());
+        return EXIT_FAILURE;
+      }
+    }
+
+    //
+    // Solve Queries
+    aq::Base bd;
+    init_base_desc(settings.dbDesc, bd);
+    return parse_queries(
+      settings, aqHome, aqName, bd, 
+      queryIdent, sqlQueriesFile, aqMatrixFileName, 
+      transform, simulateAQEngine, keepFiles, force);
 
   }
 	catch (const aq::generic_error& error)

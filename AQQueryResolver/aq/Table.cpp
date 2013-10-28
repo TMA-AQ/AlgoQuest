@@ -57,8 +57,8 @@ Table::Table( const std::string& name, unsigned int ID, bool _temporary ):
 int Table::getColumnIdx( const std::string& name )
 {
 	std::string auxName = name;
-	strtoupr( auxName );
-	aq::Trim( auxName );
+	boost::to_upper(auxName);
+	boost::trim(auxName);
 	for( size_t idx = 0; idx < this->Columns.size(); ++idx )
 		if( auxName == this->Columns[idx]->getName() )
 			return static_cast<int>(idx);
@@ -106,10 +106,11 @@ void Table::load(const char * path, uint64_t packetSize)
 {
   if (this->temporary)
   {
-    std::for_each(this->Columns.begin(), this->Columns.end(), [&] (Column::Ptr c) {
+    for (auto& c : this->Columns) 
+    {
       aq::TemporaryColumnMapper::Ptr cm(new aq::TemporaryColumnMapper(path, this->ID, c->ID, c->Type, c->Size, packetSize));
       c->loadFromTmp(c->Type, cm);
-    });
+    }
   }
   else
   {
@@ -507,8 +508,8 @@ void Table::loadFromAnswerRaw(	const char *filePath, char fieldSeparator,
 				return;
 			//check for "Count"
 			std::string lastField = fields[fields.size() - 1];
-			strtoupr( lastField );
-			aq::Trim(lastField);
+			boost::to_upper(lastField);
+			boost::trim(lastField);
 			if( lastField == "COUNT" )
 				this->HasCount = true;
 			else
@@ -539,7 +540,7 @@ void Table::loadFromAnswerRaw(	const char *filePath, char fieldSeparator,
 				{
 					char* tableNr = strchr(fields[idx], ':');
 					std::string tableNrStr( tableNr + 1 );
-					aq::Trim( tableNrStr );
+					boost::trim( tableNrStr );
 					llong tableID;
 					StrToInt( tableNrStr.c_str(), &tableID );
 
@@ -717,8 +718,8 @@ void Table::setName( const std::string& name )
 {
 	this->OriginalName = name;
 	this->Name = name;
-	strtoupr( this->Name );
-	aq::Trim( this->Name );
+	boost::to_upper(this->Name);
+	boost::trim(this->Name);
 }
 
 //------------------------------------------------------------------------------

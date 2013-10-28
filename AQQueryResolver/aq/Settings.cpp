@@ -38,7 +38,9 @@ TProjectSettings::TProjectSettings()
 	csvFormat(true),
 	skipNestedQuery(false),
   useBinAQMatrix(true),
-  displayCount(false)
+  displayCount(false),
+  cmdLine(false),
+  trace(false)
 {
 }
 
@@ -66,7 +68,9 @@ TProjectSettings::TProjectSettings(const TProjectSettings& obj)
 	computeAnswer(obj.computeAnswer),
 	skipNestedQuery(obj.skipNestedQuery),
   useBinAQMatrix(obj.useBinAQMatrix),
-  displayCount(obj.displayCount)
+  displayCount(obj.displayCount),
+  cmdLine(obj.cmdLine),
+  trace(obj.trace)
 {
 }
 
@@ -103,6 +107,8 @@ TProjectSettings& TProjectSettings::operator=(const TProjectSettings& obj)
 		skipNestedQuery = obj.skipNestedQuery;
     useBinAQMatrix = obj.useBinAQMatrix;
     displayCount = obj.displayCount;
+    cmdLine = obj.cmdLine;
+    trace = obj.trace;
 	}
 	return *this;
 }
@@ -125,16 +131,27 @@ T get_opt_value(boost::property_tree::ptree& pt, const char * key, T default_val
 void TProjectSettings::load(const std::string& iniFile)
 {
 	this->iniFile = iniFile;
+  std::ifstream fin(iniFile.c_str(), std::ifstream::in);
+  if (fin.is_open())
+  {
+    this->load(fin);
+  }
+}
+    
+void TProjectSettings::load(std::istream& is)
+{
   try
   {
-    std::ifstream fin(iniFile.c_str(), std::ifstream::in);
     boost::property_tree::ptree pt;
-    boost::property_tree::ini_parser::read_ini(fin, pt);
-		
-    // only mandatory value
-    this->rootPath = pt.get<std::string>(boost::property_tree::ptree::path_type("root-folder"));
+    boost::property_tree::ini_parser::read_ini(is, pt);
+
+    std::cout << is << std::endl;
     
-    // other are optional
+    // all option are optional
+    this->rootPath = get_opt_value(pt, "root-folder", this->rootPath);
+		if (*this->rootPath.rbegin() != '/') this->rootPath += "/";
+    boost::algorithm::replace_all(this->rootPath, "\\", "/");
+    boost::algorithm::trim(this->rootPath);
     this->tmpRootPath = get_opt_value(pt, "tmp-folder", this->rootPath + "data_orga/tmp/");
     this->fieldSeparator = get_opt_value(pt, "field-separator", ';');
     this->aqEngine = get_opt_value(pt, "aq-engine", this->aqEngine);
@@ -143,6 +160,7 @@ void TProjectSettings::load(const std::string& iniFile)
     this->group_by_process_size = get_opt_value(pt, "group-by-process-size", this->group_by_process_size);
     this->process_thread = get_opt_value(pt, "process-thread", this->process_thread);
     this->displayCount = get_opt_value(pt, "display-count", this->displayCount);
+    this->trace = get_opt_value(pt, "trace", this->trace);
 
     //
     // Change '\' by '/'
@@ -151,29 +169,6 @@ void TProjectSettings::load(const std::string& iniFile)
     boost::algorithm::replace_all(this->aqLoader, "\\", "/");
     boost::algorithm::trim(this->aqLoader);
 
-    boost::algorithm::replace_all(this->rootPath, "\\", "/");
-    boost::algorithm::trim(this->rootPath);
-    boost::algorithm::replace_all(this->tmpRootPath, "\\", "/");
-    boost::algorithm::trim(this->tmpRootPath);
-		
-		//
-		// add '/' at end of directory if needed
-		if (*this->rootPath.rbegin() != '/') this->rootPath += "/";
-		if (*this->tmpRootPath.rbegin() != '/') this->tmpRootPath += "/";
-
-		//
-		// base desc file
-		this->dbDesc = this->rootPath + "base_struct/base.xml";
-    boost::filesystem::path bdf(this->dbDesc);
-    if (!boost::filesystem::exists(bdf))
-    {
-      this->dbDesc = this->rootPath + "base_struct/base.aqb";
-    }
-
-		//
-		// data path
-    this->dataPath = this->rootPath + "data_orga/vdg/data/";
-    
 	}
 	catch (const boost::property_tree::ptree_error& e)
 	{
@@ -181,6 +176,32 @@ void TProjectSettings::load(const std::string& iniFile)
     oss << "invalid properties file: " << iniFile << " [" << e.what() << "]" << std::endl;
     throw aq::generic_error(aq::generic_error::INVALID_FILE, oss.str());
 	}
+}
+
+void TProjectSettings::initPath(const std::string& root)
+{
+  this->rootPath = root;
+  if (*this->rootPath.rbegin() != '/') this->rootPath += "/";
+  boost::algorithm::replace_all(this->rootPath, "\\", "/");
+  boost::algorithm::trim(this->rootPath);
+
+  //
+  // tmp
+  this->tmpRootPath = this->rootPath + "data_orga/tmp/";
+
+  //
+  // base desc file
+  this->dbDesc = this->rootPath + "base_struct/base.xml";
+  boost::filesystem::path bdf(this->dbDesc);
+  if (!boost::filesystem::exists(bdf))
+  {
+    this->dbDesc = this->rootPath + "base_struct/base.aqb";
+  }
+
+  //
+  // data path
+  this->dataPath = this->rootPath + "data_orga/vdg/data/";
+
 }
 
 void TProjectSettings::changeIdent(const std::string& _queryIdent)
@@ -219,6 +240,8 @@ void TProjectSettings::dump(std::ostream& os) const
 	os << "maxRecordSize:        ["  << maxRecordSize        <<  "]" << std::endl;
   os << "computeAnswer:        ["  << computeAnswer        <<  "]" << std::endl;
   os << "displayCount:         ["  << displayCount         <<  "]" << std::endl;
+  os << "cmdLine:              ["  << cmdLine              <<  "]" << std::endl;
+  os << "trace:                ["  << trace                <<  "]" << std::endl; 
 }
 
 std::string TProjectSettings::to_string() const

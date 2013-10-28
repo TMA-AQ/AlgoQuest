@@ -159,6 +159,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aq\Algo.h" />
+    <ClInclude Include="aq\Database.h" />
     <ClInclude Include="aq\DBTypes.h" />
     <ClInclude Include="aq\BaseDesc.h" />
     <ClInclude Include="aq\DateConversion.h" />
@@ -180,6 +181,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="aq\BaseDesc.cpp" />
+    <ClCompile Include="aq\Database.cpp" />
     <ClCompile Include="aq\DateConversion.cpp" />
     <ClCompile Include="aq\DBTypes.cpp" />
     <ClCompile Include="aq\Exceptions.cpp" />

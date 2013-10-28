@@ -308,25 +308,6 @@ int StrToDouble( const char* psz, double* pdVal  )
 }
 
 //------------------------------------------------------------------------------
-void strtoupr( std::string& strval ) {
-	for( size_t idx = 0; idx < strval.length(); ++idx )
-		strval[idx] = toupper( strval[idx] );
-}
-
-//------------------------------------------------------------------------------
-void Trim( std::string& strval )
-{
-	if( strval == "" )
-		return;
-	int start = 0, end = (int) strval.length() - 1;
-	while( (strval[start] <= 32) && (start <= end) ) ++start;
-	while( (strval[end]) <= 32 && (start <= end) ) --end;
-	if( (start == 0) && (end == (int) strval.length() - 1) )
-		return;
-	strval = strval.substr( start, end-start+1 );
-}
-
-//------------------------------------------------------------------------------
 char* strtoupr( char* pszStr ) {
 	char *psz;
 

@@ -71,6 +71,7 @@ private:
   boost::tribool isCompressable() const { return this->compressable; }
   std::string getOriginalColumn(const std::string& alias) const;
   void executeNested(aq::tnode * pInteriorSelect);
+  void buildJoinPath(const std::string& query);
 
   ////////////////////////////////////////////////////////////////////////////
 	// Variables Members

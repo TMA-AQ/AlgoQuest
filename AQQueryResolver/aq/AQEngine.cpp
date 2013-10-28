@@ -32,6 +32,15 @@ namespace aq
 
     //
     //
+    if (this->settings.cmdLine && this->settings.trace)
+    {
+      std::cout << std::endl;
+      std::cout << query << std::endl;
+      std::cout << std::endl;
+    }
+
+    //
+    //
     std::string new_request_file = settings.workingPath + "New_Request.txt";
     aq::SaveFile(new_request_file.c_str(), query.c_str());
 

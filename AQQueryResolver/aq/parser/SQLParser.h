@@ -80,6 +80,9 @@ void andListToNodeArray( tnode* pNode, std::vector<tnode*>& nodes );
 tnode* nodeArrayToAndList( const std::vector<tnode*>& nodes );
 
 //------------------------------------------------------------------------------
+void joinlistToNodeArray(tnode* pNode, std::vector<tnode*>& nodes);
+
+//------------------------------------------------------------------------------
 void find_nodes(tnode * pNode, int tag, std::vector<tnode*>& nodes);
 /// find FROM, WHERE, GROUP BY, HAVING, main ORDER BY
 tnode* find_main_node( tnode *pNode, int tag );

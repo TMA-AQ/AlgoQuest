@@ -57,7 +57,7 @@ ColumnItem::Ptr getMinMaxFromThesaurus(	size_t tableID, size_t colIdx, size_t pa
 			assert( 0 );
 	}
 	if( fread( pTmpBuf, 1, binItemSize, pFIn ) != binItemSize )
-		throw generic_error(generic_error::INVALID_FILE, "");
+		throw generic_error(generic_error::INVALID_FILE, "invalid thesaurus file [%s]", fileName.c_str());
 
 	switch( column->Type )
 	{

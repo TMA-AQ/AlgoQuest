@@ -43,6 +43,7 @@ public:
 	void simulate(size_t rows, const std::vector<long long>& tableIDs);
   
   void clear();
+  void setJoinPath(const std::vector<std::string>& jp) { this->joinPath = jp; }
   void write(const char * filePath);
 	void load(const char * filePath, std::vector<long long>& tableIDs);
   void loadHeader(const char * filePath, std::vector<long long>& tableIDs);
@@ -64,7 +65,8 @@ public:
   ///
   void writeTemporaryTable();
 
-  const matrix_t getMatrix() const { return this->matrix; }
+  const std::vector<std::string>& getJoinPath() { return this->joinPath; }
+  const matrix_t& getMatrix() const { return this->matrix; }
   const size_t getTableId(size_t c) const { return this->matrix[c].table_id; }
 	const v_size_t& getColumn(size_t c) const { return this->matrix[c].indexes; }
 	const v_size_t& getCount() const { return this->count; }
@@ -85,12 +87,14 @@ private:
 	matrix_t matrix;
 	v_size_t count;
   group_by_t groupByIndex;
-	uint64_t totalCount;
+  std::vector<std::string> joinPath;
+  uint64_t totalCount;
 	uint64_t nbRows;
   std::string answerFormat;
   size_t nbRowsParsed;
   size_t nbPacket;
   size_t packet;
+  size_t rowCountCheck;
 	bool hasCount;
 };
 

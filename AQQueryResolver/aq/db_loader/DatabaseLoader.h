@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <aq/BaseDesc.h>
+#include <aq/DateConversion.h>
 
 namespace aq
 {
@@ -32,6 +33,7 @@ protected:
 
 private:
 	const aq::base_t my_base;
+  aq::DateConversion dateConverter;
   std::string k_rep_racine;
   std::string k_rep_param;
   std::string k_batch_loader;

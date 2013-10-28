@@ -50,14 +50,18 @@ struct TProjectSettings
 	bool skipNestedQuery;
   bool useBinAQMatrix;
   bool displayCount;
+  bool cmdLine;
+  bool trace;
 
 	TProjectSettings();
 	TProjectSettings(const TProjectSettings&);
 	~TProjectSettings();
 	TProjectSettings& operator=(const TProjectSettings&);
 
+  void initPath(const std::string& root);
   void load(const std::string& iniFile, const std::string& queryIdent);
 	void load(const std::string& iniFile);
+	void load(std::istream& is);
 	void changeIdent(const std::string& queryIdent);
   void dump(std::ostream& os) const;
   std::string to_string() const;

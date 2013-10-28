@@ -73,7 +73,8 @@ const aq::tnode * check_cmp_op::getColumnRef() const
 }
 
 bool check_cmp_op::check(const aq::ColumnItem& item, const aq::ColumnType& cType) const
-{    
+{   
+  bool rc = false;
   switch (op_tag)
   {
   case K_EQ:

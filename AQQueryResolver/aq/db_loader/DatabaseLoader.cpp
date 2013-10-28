@@ -3,7 +3,6 @@
 #include "DatabaseLoader.h"
 
 #include <aq/Utilities.h>
-#include <aq/DateConversion.h>
 #include <aq/Logger.h>
 #include <aq/Exceptions.h>
 
@@ -222,6 +221,7 @@ void DatabaseLoader::run(size_t num_table, size_t num_column)
 			// record is loaded, update total nb_enreg
 			write_n_enreg++;
 			total_nb_enreg++;
+
 			// changement de paquet ?
 			if ( write_n_enreg > aq::packet_size )
 			{
@@ -280,6 +280,7 @@ void DatabaseLoader::run(size_t num_table, size_t num_column)
 					}
 				}
 			}
+      
 			indice_car = 0 ;
 			// start reading num_colonne
 			for ( i = debut_lecture ; i < len_rec ; i++ ) 
@@ -329,6 +330,7 @@ void DatabaseLoader::run(size_t num_table, size_t num_column)
 					indice_car ++;
 				}
 			}
+
     }
 
 		// last packet
@@ -535,8 +537,6 @@ void DatabaseLoader::FileWriteEnreg(aq::symbole col_type, int col_size, char *my
 	long long int dum_long_long;
 	long long int *my_long_long = &dum_long_long;
 
-  aq::DateConversion dateConverter;
-
 	switch (  col_type )
 	{
 	case aq::t_int :
@@ -585,7 +585,8 @@ void DatabaseLoader::FileWriteEnreg(aq::symbole col_type, int col_size, char *my
 
 	case aq::t_char :
 		// check my_field size
-		if ( (int) strlen ( my_field ) >= col_size ) my_field[ col_size ] = 0 ;
+		if ( (int) strlen ( my_field ) >= col_size ) 
+      my_field[ col_size ] = 0 ;
 		// clean all space at the end
 		CleanSpaceAtEnd (my_field );
 		// write string record and go to next

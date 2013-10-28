@@ -35,13 +35,13 @@ void getAllColumns( aq::tnode* pNode, vector<aq::tnode*>& columns )
 				continue;
 
 			std::string table1(columns[idx]->left->getData().val_str);
-			strtoupr( table1 );
+			boost::to_upper(table1);
 			std::string table2(pNode->left->getData().val_str);
-			strtoupr( table2 );
+			boost::to_upper(table2);
 			std::string col1(columns[idx]->right->getData().val_str);
-			strtoupr( col1 );
+			boost::to_upper(col1);
 			std::string col2(pNode->right->getData().val_str);
-			strtoupr( col2 );
+			boost::to_upper(col2);
 
 			if( columns[idx]->tag == K_PERIOD &&
 				table1 == table2 && col1 == col2 )

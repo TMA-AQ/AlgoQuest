@@ -92,6 +92,7 @@ AQMatrix::AQMatrix(const TProjectSettings& _settings, const Base& _baseDesc)
     nbRowsParsed(0),
     nbPacket(0),
     packet(0),
+    rowCountCheck(0),
 		hasCount(false)
 {
   uid = ++AQMatrix::uid_generator;
@@ -105,6 +106,7 @@ AQMatrix::AQMatrix(const AQMatrix& source)
     nbRowsParsed(0),
     nbPacket(0),
     packet(0),
+    rowCountCheck(0),
 		hasCount(source.hasCount)
 {
 }
@@ -290,17 +292,22 @@ void AQMatrix::loadNextPacket()
     }
     fread(&value, sizeof(uint64_t), 1, fd);
     this->count.push_back(value);
+    this->rowCountCheck += value;
   }
   fclose(fd);
   this->packet += 1;
 
   if (this->packet == nbPacket)
   {
-    // assert(this->totalCount == this->count.size());
+    assert(this->totalCount == this->rowCountCheck);
     assert(this->nbRows == this->count.size());
-    if ((this->totalCount != this->count.size()) || (this->nbRows != this->count.size()))
+    if (this->totalCount != this->rowCountCheck)
     {
-      throw aq::generic_error(aq::generic_error::AQ_ENGINE, "bad matrix data file");
+      throw aq::generic_error(aq::generic_error::AQ_ENGINE, "bad matrix data file [count_expected:%u] [count_get:%u]", this->totalCount, this->rowCountCheck);
+    }
+    if (this->nbRows != this->count.size())
+    {
+      throw aq::generic_error(aq::generic_error::AQ_ENGINE, "bad matrix data file [nb_rows:%u] [nb_count:%u]", this->nbRows, this->count.size());
     }
   }
 }

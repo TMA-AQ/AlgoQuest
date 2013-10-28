@@ -279,6 +279,7 @@ uint64_t functional_tests(const struct opt& o)
           std::string answerPath(o.dbPath);
           answerPath += "/data_orga/tmp/" + std::string(o.queryIdent) + "/dpy/";
           rc = aq::display(cb, answerPath, o, selectedColumns);
+          std::cout << std::endl << std::endl;
         }
       }
       

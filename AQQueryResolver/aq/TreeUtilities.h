@@ -23,6 +23,7 @@ namespace aq
 void addAlias( aq::tnode* pNode );
 void addConditionsToWhere( aq::tnode* pCond, aq::tnode* pStart );
 void addInnerOuterNodes( aq::tnode* pNode, int leftTag, int rightTag );
+void addInnerOuterNodes( aq::tnode* pNode, int tag, const std::vector<std::string>& tables );
 void mark_as_deleted( aq::tnode* pNode );
 void solveSelectStar(aq::tnode* pNode, 
                      Base& BaseDesc,

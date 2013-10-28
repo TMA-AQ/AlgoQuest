@@ -324,7 +324,8 @@ void QueryResolver::resolve(aq::verb::VerbNode::Ptr spTree)
     group_and_order = query.substr(pos);
     query = query.substr(0, pos);
   }
-  aq::ParseJeq(query, true);
+
+  auto joinPath = aq::ParseJeq(query, true);
 
   if (!this->groupBy.empty())
   {
@@ -373,6 +374,11 @@ void QueryResolver::resolve(aq::verb::VerbNode::Ptr spTree)
 
   // Call AQEngine
   aq_engine->call(query, mode);
+  auto aqMatrix = aq_engine->getAQMatrix();
+  if (aqMatrix != 0)
+  {
+    aqMatrix->setJoinPath(joinPath);
+  }
   // aq::MakeBackupFile(pSettings->szOutputFN, aq::backup_type_t::Empty, this->level, this->id);
 
   // parse result
@@ -643,6 +649,9 @@ void QueryResolver::solveAQMatrix(aq::verb::VerbNode::Ptr spTree)
     rowWritter->setColumn(columnTypes);
     processes->addProcess(rowWritter);
   }
+
+  //
+  // build joinPath
 
   //
   // build result from aq matrix

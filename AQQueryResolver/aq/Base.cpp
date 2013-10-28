@@ -2,6 +2,8 @@
 #include <aq/Exceptions.h>
 #include <boost/bind.hpp>
 #include <boost/scoped_array.hpp>
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
 
 namespace aq
 {
@@ -80,8 +82,8 @@ const Table::Ptr Base::getTable(size_t id) const
 Table::Ptr Base::getTable( const std::string& name )
 {
 	std::string auxName = name;
-	strtoupr( auxName );
-	aq::Trim( auxName );
+	boost::to_upper(auxName);
+	boost::trim(auxName);
 	for( size_t idx = 0; idx < this->Tables.size(); ++idx )
   {
 		if( auxName == this->Tables[idx]->getName() )
@@ -103,6 +105,14 @@ Table::Ptr Base::getTable( const std::string& name )
 const Table::Ptr Base::getTable( const std::string& name ) const
 {
   return const_cast<Base*>(this)->getTable(name);
+}
+
+
+//------------------------------------------------------------------------------
+void Base::clear()
+{
+  this->Name = "";
+  this->Tables.clear();
 }
 
 //------------------------------------------------------------------------------

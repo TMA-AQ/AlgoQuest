@@ -32,20 +32,18 @@ typedef std::vector<column_infos_t> columns_infos_t;
 
 void matched_index(const boost::shared_ptr<aq::AQMatrix> aqMatrix, const Base& BaseDesc, column_infos_t& infos)
 {
+  auto joinPath = aqMatrix->getJoinPath();
   Table::Ptr table = BaseDesc.getTable(infos.column->TableID);
-  while (table->isTemporary() && (table->getReferenceTable() != ""))
-  {
-    table = BaseDesc.getTable(table->getReferenceTable());
-  }
+  assert(joinPath.size() >= aqMatrix->getNbColumn());
   for (size_t j = 0; j < aqMatrix->getNbColumn(); ++j) 
   {
-    if (table->ID == aqMatrix->getMatrix()[j].table_id)
+    if (table->getName() == joinPath[j])
     {
       infos.table_index = j;
       return;
     }
   }
-  throw aq::generic_error(aq::generic_error::INVALID_FILE, "");
+  throw aq::generic_error(aq::generic_error::AQ_ENGINE, "cannot find table [%u] in join Path", infos.column->TableID);
 }
 
 void set_grouped(const std::vector<aq::tnode*>& columnGroup, column_infos_t& infos)

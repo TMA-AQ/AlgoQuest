@@ -1,11 +1,12 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 namespace aq
 {
 
   ///
-  void ParseJeq(std::string& aql_query, bool add_active_neutral_filter = false);
+  std::vector<std::string> ParseJeq(std::string& aql_query, bool add_active_neutral_filter = false);
 
 }

@@ -453,6 +453,20 @@ tnode* nodeArrayToAndList( const std::vector<tnode*>& nodes )
 }
 
 //------------------------------------------------------------------------------
+void joinlistToNodeArray(tnode* pNode, std::vector<tnode*>& nodes)
+{
+  aq::tnode * clone = aq::clone_subtree(pNode);
+  aq::tnode * join = aq::find_deeper_node(clone, K_JOIN);
+  while (join != NULL)
+  {
+    nodes.push_back(join->left);
+    nodes.push_back(join->right);
+    join = NULL;
+    aq::tnode * join = aq::find_deeper_node(clone, K_JOIN);
+  }
+}
+
+//------------------------------------------------------------------------------
 void find_nodes(tnode * pNode, int tag, std::vector<tnode*>& l)
 {
 	if (pNode != NULL)
