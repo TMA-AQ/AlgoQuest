@@ -87,6 +87,9 @@
     <ClInclude Include="aq\Database.h">
       <Filter>Fichiers d%27en-tête\aq</Filter>
     </ClInclude>
+    <ClInclude Include="aq\GenericFileMapper.h">
+      <Filter>Fichiers d%27en-tête\aq</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="aq\Logger.cpp">
@@ -99,9 +102,6 @@
       <Filter>Tests</Filter>
     </ClCompile>
     <ClCompile Include="aq\Timer.cpp">
-      <Filter>Fichiers sources\aq</Filter>
-    </ClCompile>
-    <ClCompile Include="aq\FileMapper.cpp">
       <Filter>Fichiers sources\aq</Filter>
     </ClCompile>
     <ClCompile Include="Tests\check_file_mapper.cpp">
@@ -135,6 +135,9 @@
       <Filter>Fichiers sources\aq</Filter>
     </ClCompile>
     <ClCompile Include="aq\Database.cpp">
+      <Filter>Fichiers sources\aq</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\GenericFileMapper.cpp">
       <Filter>Fichiers sources\aq</Filter>
     </ClCompile>
   </ItemGroup>

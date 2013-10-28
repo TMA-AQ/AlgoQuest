@@ -165,6 +165,7 @@
     <ClInclude Include="aq\DateConversion.h" />
     <ClInclude Include="aq\Exceptions.h" />
     <ClInclude Include="aq\FileMapper.h" />
+    <ClInclude Include="aq\GenericFileMapper.h" />
     <ClInclude Include="aq\Logger.h" />
     <ClInclude Include="aq\MMapFileMapper.h" />
     <ClInclude Include="aq\Object.h" />
@@ -185,7 +186,7 @@
     <ClCompile Include="aq\DateConversion.cpp" />
     <ClCompile Include="aq\DBTypes.cpp" />
     <ClCompile Include="aq\Exceptions.cpp" />
-    <ClCompile Include="aq\FileMapper.cpp" />
+    <ClCompile Include="aq\GenericFileMapper.cpp" />
     <ClCompile Include="aq\Logger.cpp" />
     <ClCompile Include="aq\AQLQuery.cpp" />
     <ClCompile Include="aq\AQLSpiritParser.cpp" />

@@ -1,4 +1,4 @@
-#include "FileMapper.h"
+#include "GenericFileMapper.h"
 #include "Logger.h"
 #include "Exceptions.h"
 #include <iostream>
@@ -6,7 +6,7 @@
 
 using namespace aq;
 
-FileMapper::FileMapper(const char * _filename)
+GenericFileMapper::GenericFileMapper(const char * _filename)
 	: m_filename(_filename)
 {
   this->m_fd = fopen(_filename, "rb");
@@ -18,12 +18,12 @@ FileMapper::FileMapper(const char * _filename)
   }
 }
 
-FileMapper::~FileMapper()
+GenericFileMapper::~GenericFileMapper()
 {
   fclose(this->m_fd);
 }
 
-int FileMapper::read(void * buffer, size_t offset, size_t len) 
+int GenericFileMapper::read(void * buffer, size_t offset, size_t len) 
 {
   assert(this->m_fd);
   assert(offset < std::numeric_limits<size_t>::max());
