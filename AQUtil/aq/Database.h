@@ -15,7 +15,7 @@ public:
   void dump(std::ostream& os) const;
   bool isValid() const;
   void create();
-  std::string Database::getName() const;
+  std::string getName() const;
   aq::base_t getBaseDesc() const;
 
 private:

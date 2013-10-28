@@ -1,6 +1,6 @@
 #include "Database.h"
 #include "Exceptions.h"
-#include <iostream>
+#include <fstream>
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string/replace.hpp>
 
@@ -69,7 +69,7 @@ void Database::create()
 std::string Database::getName() const
 {
   std::string name;
-  std::ifstream f(this->getBaseDescFile(), std::ios::in);
+  std::ifstream f(this->getBaseDescFile().c_str(), std::ios::in);
   if (f.is_open())
   {
     std::getline(f, name);
@@ -86,7 +86,7 @@ int Database::load()
 {
   int rc = 0;
   std::string bdFname = this->getBaseDescFile();
-  std::ifstream fin(bdFname, std::ios::in);
+  std::ifstream fin(bdFname.c_str(), std::ios::in);
   if (bdFname.find(".aqb") != std::string::npos)
     aq::build_base_from_raw(fin, baseDesc);
   else if (bdFname.find(".xml") != std::string::npos)

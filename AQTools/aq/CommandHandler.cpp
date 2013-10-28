@@ -81,7 +81,7 @@ int CommandHandler::process(const std::string& cmd)
       {
         std::string tname = words[1];
         boost::trim(tname);
-        auto& table = baseDesc.getTable(tname);
+        auto table = baseDesc.getTable(tname);
         table->dumpRaw(std::cout);
       }
       else
