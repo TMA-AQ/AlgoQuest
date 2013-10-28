@@ -602,8 +602,11 @@ int parse_queries(aq::TProjectSettings& settings, const std::string& aqHome, con
     std::cout << "Welcome to AlgoQuest Monitor version " << AQ_TOOLS_VERSION << std::endl;
     std::cout << "Copyright (c) 2013, AlgoQuest System. All rights reserved." << std::endl;
     std::cout << std::endl;
-    std::cout << "Connected to database " << settings.rootPath << std::endl;
-    std::cout << std::endl;
+    if (settings.rootPath != "")
+    {
+      std::cout << "Connected to database " << settings.rootPath << std::endl;
+      std::cout << std::endl;
+    }
   }
 
   //
