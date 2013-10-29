@@ -8,8 +8,8 @@ namespace verb {
 //------------------------------------------------------------------------------
 class AggregateVerb: public VerbNode
 {
-	VERB_DECLARE( AggregateVerb );
 public:
+  AggregateVerb();
 	virtual int getVerbType() const { return -1; };
 	virtual bool changeQuery( aq::tnode* pStart, aq::tnode* pNode,
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
@@ -46,7 +46,6 @@ struct Visitable
 //------------------------------------------------------------------------------
 class SumVerb: public AggregateVerb // , protected Visitable<VerbVisitor>
 {
-	VERB_DECLARE( SumVerb );
 public:
 	virtual int getVerbType() const { return K_SUM; };
 protected:
@@ -63,7 +62,6 @@ protected:
 //------------------------------------------------------------------------------
 class CountVerb: public AggregateVerb
 {
-	VERB_DECLARE( CountVerb );
 public:
 	virtual int getVerbType() const { return K_COUNT; };
 	// virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
@@ -81,7 +79,6 @@ protected:
 //------------------------------------------------------------------------------
 class AvgVerb: public AggregateVerb
 {
-	VERB_DECLARE( AvgVerb );
 public:
 	virtual int getVerbType() const { return K_AVG; };
   // void accept(VerbVisitor* visitor);
@@ -98,7 +95,6 @@ protected:
 //------------------------------------------------------------------------------
 class MinVerb: public AggregateVerb
 {
-	VERB_DECLARE( MinVerb );
 public:
 	virtual int getVerbType() const { return K_MIN; };
   // void accept(VerbVisitor* visitor);
@@ -115,7 +111,6 @@ protected:
 //------------------------------------------------------------------------------
 class MaxVerb: public AggregateVerb
 {
-	VERB_DECLARE( MaxVerb );
 public:
 	virtual int getVerbType() const { return K_MAX; };
   // void accept(VerbVisitor* visitor);
@@ -132,7 +127,6 @@ protected:
 //------------------------------------------------------------------------------
 class FirstValueVerb: public VerbNode
 {
-	VERB_DECLARE( FirstValueVerb );
 public:
 	virtual int getVerbType() const { return K_FIRST_VALUE; };
 	virtual void changeResult( Table::Ptr table, 
@@ -150,8 +144,8 @@ public:
 //and useful code refactoring
 class LagVerb: public VerbNode
 {
-	VERB_DECLARE( LagVerb );
 public:
+  LagVerb();
 	virtual int getVerbType() const { return K_LAG; };
 	~LagVerb();
 
@@ -167,7 +161,6 @@ public:
 //------------------------------------------------------------------------------
 class RowNumberVerb: public VerbNode
 {
-	VERB_DECLARE( RowNumberVerb );
 public:
 	virtual int getVerbType() const { return K_ROW_NUMBER; };
 	virtual void changeResult( Table::Ptr table, 

@@ -13,101 +13,16 @@ namespace aq {
 namespace verb {
 
 //------------------------------------------------------------------------------
-VERB_IMPLEMENT(SelectVerb);
-
-//------------------------------------------------------------------------------
-SelectVerb::SelectVerb()
-{
-}
-
-//------------------------------------------------------------------------------
-void getAllColumns( aq::tnode* pNode, vector<aq::tnode*>& columns )
-{
-	if( !pNode || pNode->inf == 1 && pNode->tag != K_COMMA || pNode->tag == K_JNO )
-		return;
-	if( pNode->tag == K_PERIOD )
-	{
-		//only if the column name is unique
-		bool found = false;
-		for( size_t idx = 0; idx < columns.size(); ++idx )
-		{
-			if( !columns[idx] )
-				continue;
-
-			std::string table1(columns[idx]->left->getData().val_str);
-			boost::to_upper(table1);
-			std::string table2(pNode->left->getData().val_str);
-			boost::to_upper(table2);
-			std::string col1(columns[idx]->right->getData().val_str);
-			boost::to_upper(col1);
-			std::string col2(pNode->right->getData().val_str);
-			boost::to_upper(col2);
-
-			if( columns[idx]->tag == K_PERIOD &&
-				table1 == table2 && col1 == col2 )
-			{
-				found = true;
-				break;
-			}
-		}
-		if( !found )
-		{
-			columns.push_back( aq::clone_subtree(pNode) );
-			pNode = NULL;
-		}
-		return;
-	}
-	getAllColumns( pNode->left, columns );
-	getAllColumns( pNode->right, columns );
-	getAllColumns( pNode->next, columns );
-}
-
-//------------------------------------------------------------------------------
-void extractName( aq::tnode* pNode, std::string& name )
-{
-	if( !pNode )
-		return;
-	if( pNode->tag == K_AS )
-	{
-		name += pNode->right->getData().val_str;
-	}
-	else if( pNode->tag == K_PERIOD )
-	{
-		if( name != "" )
-			name += " ";
-		name += pNode->left->getData().val_str;
-		name += ".";
-		name += pNode->right->getData().val_str;
-	}
-	else if( pNode->tag == K_COLUMN )
-	{
-		name += pNode->getData().val_str;
-	}
-	else
-	{
-		std::string idstr = std::string( id_to_string( pNode->tag ) );
-		if( idstr != "" )
-		{
-			if( name != "" )
-				name += " ";
-			name += idstr;
-		}
-		extractName( pNode->left, name );
-		extractName( pNode->right, name );
-	}
-}
-
-//------------------------------------------------------------------------------
 bool SelectVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
 	assert( pStartOriginal->tag == pNode->tag );
 	vector<aq::tnode*> columns;
 	columns.clear();
-	getColumnsList( pStartOriginal->left, columns );
+	aq::getColumnsList( pStartOriginal->left, columns );
 	for( size_t idx = 0; idx < columns.size(); ++idx )
 	{
 		std::string name;
-		extractName( columns[idx], name );
+		aq::extractName( columns[idx], name );
 		this->ColumnsDisplay.push_back( name );
 	}
 	return false;
@@ -281,159 +196,10 @@ void SelectVerb::accept(VerbVisitor* visitor)
 }
 
 //------------------------------------------------------------------------------
-VERB_IMPLEMENT( WhereVerb );
-
-//------------------------------------------------------------------------------
-WhereVerb::WhereVerb()
-{}
-
-//------------------------------------------------------------------------------
-//traverse subtree recursively and negate operators when needed
-//if there is a NOT to be applied and the current node is
-//NOT: delete this node and make the child node this node
-//     if no NOT applies, apply NOT to child node
-//     if a NOT already applies, do not apply NOT to child node
-//<, <=, >, >=, =, <>, BETWEEN, LIKE : change into the inverse version
-//OR : change to AND, apply NOT on children
-//AND: change to OR, apply NOT on children
-void processNot( aq::tnode*& pNode, bool applyNot )
-{
-	if( !pNode )
-		return;
-	switch( pNode->tag )
-	{
-	case K_NOT:
-		{
-			aq::tnode* auxNode = pNode;
-			pNode = pNode->left;
-			auxNode->left = NULL;
-			delete auxNode ;
-			processNot( pNode, !applyNot );
-		}
-		break;
-	case K_AND:
-		{
-			if( applyNot )
-				pNode->tag = K_OR;
-			processNot( pNode->left, applyNot );
-			processNot( pNode->right, applyNot );
-		}
-		break;
-	case K_OR:
-		{
-			if( applyNot )
-				pNode->tag = K_AND;
-			processNot( pNode->left, applyNot );
-			processNot( pNode->right, applyNot );
-		}
-		break;
-	case K_LT:
-		if( applyNot )
-			pNode->tag = K_GEQ;
-		break;
-	case K_LEQ:
-		if( applyNot )
-			pNode->tag = K_GT;
-		break;
-	case K_GT:
-		if( applyNot )
-			pNode->tag = K_LEQ;
-		break;
-	case K_GEQ:
-		if( applyNot )
-			pNode->tag = K_LT;
-		break;
-	case K_JSEQ:
-		if( applyNot )
-			pNode->tag = K_JINF;
-		break;
-	case K_JSUP:
-		if( applyNot )
-			pNode->tag = K_JIEQ;
-		break;
-	case K_JINF:
-		if( applyNot )
-			pNode->tag = K_JSEQ;
-		break;
-	case K_JIEQ:
-		if( applyNot )
-			pNode->tag = K_JSUP;
-		break;
-	case K_JEQ:
-		if( applyNot )
-			pNode->tag = K_JNEQ;
-		break;
-	case K_JAUTO:
-		if( applyNot )
-			pNode->tag = K_JAUTO;
-		break;
-	case K_JNEQ:
-		if( applyNot )
-			pNode->tag = K_JEQ;
-		break;
-	case K_EQ:
-		if( applyNot )
-			pNode->tag = K_NEQ;
-		break;
-	case K_NEQ:
-		if( applyNot )
-			pNode->tag = K_EQ;
-		break;
-	case K_BETWEEN:
-		if( applyNot )
-			pNode->tag = K_NOT_BETWEEN;
-		break;
-	case K_NOT_BETWEEN:
-		if( applyNot )
-			pNode->tag = K_BETWEEN;
-		break;
-	case K_LIKE:
-		if( applyNot )
-			pNode->tag = K_NOT_LIKE;
-		break;
-	case K_NOT_LIKE:
-		if( applyNot )
-			pNode->tag = K_LIKE;
-		break;
-	case K_IN:
-		if( applyNot )
-			pNode->tag = K_NOT_IN;
-		break;
-	case K_NOT_IN:
-		if( applyNot )
-			pNode->tag = K_IN;
-		break;
-	case K_JNO:
-		break;
-	case K_IS:
-		if( !pNode->right )
-			throw generic_error(generic_error::NOT_IMPLEMENTED, "");
-		if( pNode->right->tag == K_NOT && 
-			pNode->right->left && pNode->right->left->tag == K_NULL )
-		{
-			aq::tnode* auxNode = pNode->right;
-			pNode->right = pNode->right->left;
-			delete auxNode ;
-		}
-		else if( pNode->right->tag == K_NULL )
-		{
-			aq::tnode* auxNode = new aq::tnode( K_NOT );
-			auxNode->left = pNode->right;
-			pNode->right = auxNode;
-		}
-		else throw generic_error(generic_error::NOT_IMPLEMENTED, "");
-		break;
-	default:
-		throw generic_error(generic_error::NOT_IMPLEMENTED, "operator doesn't support NOT");
-	}	
-}
-
-//------------------------------------------------------------------------------
 bool WhereVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
-	//eliminate K_NOT
-	processNot( pNode->left, false );
-	
+	// eliminate K_NOT
+	aq::processNot(pNode->left, false);
 	return false;
 }
 
@@ -441,7 +207,7 @@ bool WhereVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode*
 bool WhereVerb::changeQuery( aq::tnode* pStart, aq::tnode* pNode,
 	VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext )
 {
-	addInnerOuterNodes( pNode->left, K_INNER, K_INNER );
+	aq::addInnerOuterNodes( pNode->left, K_INNER, K_INNER );
 	return false;
 }
 
@@ -474,33 +240,6 @@ void WhereVerb::accept(VerbVisitor* visitor)
 {
 	visitor->visit(this);
 }
-
-//------------------------------------------------------------------------------
-VERB_IMPLEMENT( OrderVerb );
-
-//------------------------------------------------------------------------------
-OrderVerb::OrderVerb()
-{}
-
-/*//------------------------------------------------------------------------------
-void replaceColumnAlias( aq::tnode* pNode, const char* alias, aq::tnode* column )
-{
-	if( !pNode )
-		return;
-	if( pNode->tag == K_IDENT && strcmp(alias, pNode->data.val_str) == 0 )
-	{
-		pNode->tag = K_PERIOD;
-		set_int_data( pNode, 0 );
-		pNode->left = new_node( K_IDENT );
-		set_string_data( pNode->left, column->left->data.val_str );
-		pNode->right = new_node( K_COLUMN );
-		set_string_data( pNode->right, column->right->data.val_str );
-	}
-
-	replaceColumnAlias( pNode->left, alias, column );
-	replaceColumnAlias( pNode->right, alias, column );
-	replaceColumnAlias( pNode->next, alias, column );
-}*/
 
 //------------------------------------------------------------------------------
 bool OrderVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
@@ -633,13 +372,6 @@ void OrderVerb::accept(VerbVisitor* visitor)
 }
 
 //------------------------------------------------------------------------------
-VERB_IMPLEMENT( ByVerb );
-
-//------------------------------------------------------------------------------
-ByVerb::ByVerb()
-{}
-
-//------------------------------------------------------------------------------
 bool ByVerb::changeQuery( aq::tnode* pStart, aq::tnode* pNode,
 							VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext )
 {
@@ -662,63 +394,10 @@ void ByVerb::accept(VerbVisitor* visitor)
 }
 
 //------------------------------------------------------------------------------
-VERB_IMPLEMENT( FromVerb );
-
-//------------------------------------------------------------------------------
-FromVerb::FromVerb()
-{}
-/*
-//------------------------------------------------------------------------------
-void replaceTableIdent( aq::tnode* pNode, const char* oldIdent, const char* newIdent )
-{
-	if( !pNode )
-		return;
-	if( pNode->tag == K_PERIOD && strcmp(oldIdent, pNode->left->data.val_str) == 0 )
-		set_string_data( pNode->left, newIdent );
-		
-	replaceTableIdent( pNode->left, oldIdent, newIdent );
-	replaceTableIdent( pNode->right, oldIdent, newIdent );
-	//avoid changing column names in the main ORDER BY because it uses the 
-	//names/aliases given to columns after SELECT is done executing
-	//debug13 - this is a debug13 because columns that are not in SELECT
-	//can appear in ORDER BY, which ruins my initial solution for this problem
-	if( pNode->next && pNode->next->tag != K_ORDER ) 
-		replaceTableIdent( pNode->next, oldIdent, newIdent );
-}
-*/
-
-//------------------------------------------------------------------------------
-void PreProcessSelect( aq::tnode *pNode, Base& BaseDesc )
-{
-	int				nRet;
-	// Corect Column References !
-	TColumn2TablesArray* parrC2T;
-	parrC2T = create_column_map_for_tables_used_in_select( pNode, &BaseDesc );
-
-	if ( parrC2T != NULL ) {
-		nRet = 0;	/* Required by "enforce_qualified_column_reference()" */
-		enforce_qualified_column_reference( pNode, parrC2T, &nRet );
-		delete_column2tables_array( parrC2T );
-		if ( nRet == 0 ) {
-			//pNode = expression_transform( pNode, &BaseDesc, pSettings->szThesaurusPath, &nRet );
-			if ( nRet == 0 && pNode != NULL ) {
-			} else {
-				aq::Logger::getInstance().log(AQ_ERROR, "Function expression_transform() returned error : %d !\n", nRet);
-			}
-		} else {
-			aq::Logger::getInstance().log(AQ_ERROR, "Function enforce_qualified_column_reference() returned error : %d !\n", nRet);
-		}
-	} else {
-		aq::Logger::getInstance().log(AQ_ERROR, "Function create_column_map_for_tables_used_in_select() returned NULL !\n");
-		throw generic_error(generic_error::INVALID_QUERY, "Error : No or bad tables specified in SQL SELECT ... FROM Statement");
-	}
-}
-
-//------------------------------------------------------------------------------
 bool FromVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
-	PreProcessSelect( pStart, *this->m_baseDesc );
-  getTablesList(pNode, this->tables);
+	aq::PreProcessSelect( pStart, *this->m_baseDesc );
+  aq::getTablesList(pNode, this->tables);
 	return false;
 }
 
@@ -726,8 +405,8 @@ bool FromVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* 
 bool FromVerb::changeQuery( aq::tnode* pStart, aq::tnode* pNode,
 	VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext )
 {
-	solveOneTableInFrom( pStart, *this->m_baseDesc );
-	moveFromJoinToWhere( pStart, *this->m_baseDesc );
+	aq::solveOneTableInFrom( pStart, *this->m_baseDesc );
+	aq::moveFromJoinToWhere( pStart, *this->m_baseDesc );
 	return false;
 }
 
@@ -736,13 +415,6 @@ void FromVerb::accept(VerbVisitor* visitor)
 {
 	visitor->visit(this);
 }
-
-//------------------------------------------------------------------------------
-VERB_IMPLEMENT( GroupVerb );
-
-//------------------------------------------------------------------------------
-GroupVerb::GroupVerb()
-{}
 
 //------------------------------------------------------------------------------
 bool GroupVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
@@ -900,19 +572,11 @@ void GroupVerb::accept(VerbVisitor* visitor)
 }
 
 //------------------------------------------------------------------------------
-VERB_IMPLEMENT( HavingVerb );
-
-//------------------------------------------------------------------------------
-HavingVerb::HavingVerb()
-{}
-
-//------------------------------------------------------------------------------
 bool HavingVerb::preprocessQuery(	aq::tnode* pStart, aq::tnode* pNode, 
 									aq::tnode* pStartOriginal )
 {
 	//eliminate K_NOT
-	processNot( pNode->left, false );
-
+	aq::processNot( pNode->left, false );
 	return false;
 }
 

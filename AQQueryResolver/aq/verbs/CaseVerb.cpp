@@ -9,13 +9,6 @@ namespace aq {
 namespace verb {
 
 //------------------------------------------------------------------------------
-VERB_IMPLEMENT(CaseVerb);
-
-//------------------------------------------------------------------------------
-CaseVerb::CaseVerb()
-{}
-
-//------------------------------------------------------------------------------
 void CaseVerb::changeResult(	Table::Ptr table, 
 								VerbResult::Ptr resLeft, 
 								VerbResult::Ptr resRight, 
@@ -111,13 +104,6 @@ void CaseVerb::accept(VerbVisitor* visitor)
 }
 
 //------------------------------------------------------------------------------
-VERB_IMPLEMENT(WhenVerb);
-
-//------------------------------------------------------------------------------
-WhenVerb::WhenVerb()
-{}
-
-//------------------------------------------------------------------------------
 void WhenVerb::changeResult(	Table::Ptr table, 
 								VerbResult::Ptr resLeft, 
 								VerbResult::Ptr resRight, 
@@ -150,13 +136,6 @@ void WhenVerb::accept(VerbVisitor* visitor)
 {
   visitor->visit(this);
 }
-
-//------------------------------------------------------------------------------
-VERB_IMPLEMENT(ElseVerb);
-
-//------------------------------------------------------------------------------
-ElseVerb::ElseVerb()
-{}
 
 //------------------------------------------------------------------------------
 void ElseVerb::changeResult(	Table::Ptr table, 

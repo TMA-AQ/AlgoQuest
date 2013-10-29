@@ -12,23 +12,9 @@ VerbFactory& VerbFactory::GetInstance()
 }
 
 //------------------------------------------------------------------------------
-void VerbFactory::addVerb( VerbNode::Ptr verb )
+VerbNode::Ptr VerbFactory::getVerb(int verbType) const
 {
-	if( verb )
-		this->Verbs.push_back( verb );
-}
-
-//------------------------------------------------------------------------------
-VerbNode::Ptr VerbFactory::getVerb( int verbType ) const
-{
-	for (auto it = this->Verbs.begin(); it != this->Verbs.end(); ++it)
-  {
-		if ((*it)->getVerbType() == verbType)
-    {
-			return (*it)->clone();
-    }
-  }
-	return NULL;
+	return this->builder->build(verbType);
 }
 
 }

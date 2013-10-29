@@ -21,8 +21,9 @@ class VerbVisitor;
 //--------------------------------------------------------------------------
 class VerbNode: public Verb
 {
-	OBJECT_DECLARE( VerbNode );
 public:
+  typedef boost::intrusive_ptr<VerbNode> Ptr;
+
 	VerbNode();
 	
   /// Verb interface default implementation
@@ -31,7 +32,7 @@ public:
   virtual void changeResult( Table::Ptr table, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext ) {}
   virtual void addResult ( aq::Row& row ) {}
 
-  virtual VerbNode* clone() const = 0;
+  // virtual VerbNode* clone() const = 0;
   void cloneSubtree(VerbNode::Ptr v);
 
 	void setLeftChild( VerbNode::Ptr child );

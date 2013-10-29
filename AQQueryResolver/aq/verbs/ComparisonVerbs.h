@@ -9,7 +9,6 @@ namespace verb {
 //------------------------------------------------------------------------------
 class ComparisonVerb: public VerbNode
 {
-	VERB_DECLARE( ComparisonVerb );
 public:
 	virtual int getVerbType() const { return -1; };
 	virtual bool changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
@@ -46,7 +45,6 @@ private:
 //------------------------------------------------------------------------------
 class EqVerb: public ComparisonVerb
 {
-	VERB_DECLARE( EqVerb );
 public:
 	virtual int getVerbType() const { return K_EQ; };
 private:
@@ -59,7 +57,6 @@ private:
 //------------------------------------------------------------------------------
 class JeqVerb: public ComparisonVerb
 {
-	VERB_DECLARE( JeqVerb );
 public:
 	virtual int getVerbType() const { return K_JEQ; };
   virtual void accept(VerbVisitor* visitor);
@@ -68,7 +65,6 @@ public:
 //------------------------------------------------------------------------------
 class JautoVerb: public ComparisonVerb
 {
-	VERB_DECLARE( JautoVerb );
 public:
 	virtual int getVerbType() const { return K_JAUTO; };
 };
@@ -76,7 +72,6 @@ public:
 //------------------------------------------------------------------------------
 class LtVerb: public ComparisonVerb
 {
-	VERB_DECLARE( LtVerb );
 public:
 	virtual int getVerbType() const { return K_LT; };
 private:
@@ -88,7 +83,6 @@ private:
 //------------------------------------------------------------------------------
 class LeqVerb: public ComparisonVerb
 {
-	VERB_DECLARE( LeqVerb );
 public:
 	virtual int getVerbType() const { return K_LEQ; };
 private:
@@ -100,7 +94,6 @@ private:
 //------------------------------------------------------------------------------
 class GtVerb: public ComparisonVerb
 {
-	VERB_DECLARE( GtVerb );
 public:
 	virtual int getVerbType() const { return K_GT; };
 private:
@@ -112,7 +105,6 @@ private:
 //------------------------------------------------------------------------------
 class GeqVerb: public ComparisonVerb
 {
-	VERB_DECLARE( GeqVerb );
 public:
 	virtual int getVerbType() const { return K_GEQ; };
 private:
@@ -124,7 +116,6 @@ private:
 //------------------------------------------------------------------------------
 class BetweenVerb: public ComparisonVerb
 {
-	VERB_DECLARE( BetweenVerb );
 public:
 	virtual int getVerbType() const { return K_BETWEEN; };
 };
@@ -132,7 +123,6 @@ public:
 //------------------------------------------------------------------------------
 class NotBetweenVerb: public ComparisonVerb
 {
-	VERB_DECLARE( NotBetweenVerb );
 public:
 	virtual int getVerbType() const { return K_NOT_BETWEEN; };
 };
@@ -140,7 +130,6 @@ public:
 //------------------------------------------------------------------------------
 class LikeVerb: public ComparisonVerb
 {
-	VERB_DECLARE( LikeVerb );
 public:
 	virtual int getVerbType() const { return K_LIKE; };
 };
@@ -148,7 +137,6 @@ public:
 //------------------------------------------------------------------------------
 class NotLikeVerb: public ComparisonVerb
 {
-	VERB_DECLARE( NotLikeVerb );
 public:
 	virtual int getVerbType() const { return K_NOT_LIKE; };
 };
@@ -156,7 +144,6 @@ public:
 //------------------------------------------------------------------------------
 class JinfVerb: public ComparisonVerb
 {
-	VERB_DECLARE( JinfVerb );
 public:
 	virtual int getVerbType() const { return K_JINF; };
 };
@@ -164,7 +151,6 @@ public:
 //------------------------------------------------------------------------------
 class JieqVerb: public ComparisonVerb
 {
-	VERB_DECLARE( JieqVerb );
 public:
 	virtual int getVerbType() const { return K_JIEQ; };
 };
@@ -172,7 +158,6 @@ public:
 //------------------------------------------------------------------------------
 class JsupVerb: public ComparisonVerb
 {
-	VERB_DECLARE( JsupVerb );
 public:
 	virtual int getVerbType() const { return K_JSUP; };
 };
@@ -180,7 +165,6 @@ public:
 //------------------------------------------------------------------------------
 class JseqVerb: public ComparisonVerb
 {
-	VERB_DECLARE( JseqVerb );
 public:
 	virtual int getVerbType() const { return K_JSEQ; };
 };
@@ -188,7 +172,6 @@ public:
 //------------------------------------------------------------------------------
 class NeqVerb: public ComparisonVerb
 {
-	VERB_DECLARE( NeqVerb );
 public:
 	virtual int getVerbType() const { return K_NEQ; };
 private:
@@ -200,7 +183,6 @@ private:
 //------------------------------------------------------------------------------
 class JneqVerb: public ComparisonVerb
 {
-	VERB_DECLARE( JneqVerb );
 public:
 	virtual int getVerbType() const { return K_JNEQ; };
 };
@@ -208,7 +190,6 @@ public:
 //------------------------------------------------------------------------------
 class IsVerb: public VerbNode
 {
-	VERB_DECLARE( IsVerb );
 public:
 	virtual int getVerbType() const { return K_IS; };
 	virtual bool preprocessQuery(	aq::tnode* pStart, aq::tnode* pNode, 

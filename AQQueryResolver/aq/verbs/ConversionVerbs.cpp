@@ -10,14 +10,6 @@ namespace aq {
 namespace verb {
 
 //------------------------------------------------------------------------------
-VERB_IMPLEMENT(CastVerb);
-
-//------------------------------------------------------------------------------
-CastVerb::CastVerb()
-{
-}
-
-//------------------------------------------------------------------------------
 bool CastVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
 	assert( pNode && pNode->right );
@@ -168,14 +160,6 @@ void CastVerb::accept(VerbVisitor* visitor)
 }
 
 //------------------------------------------------------------------------------
-VERB_IMPLEMENT(NvlVerb);
-
-//------------------------------------------------------------------------------
-NvlVerb::NvlVerb()
-{
-}
-
-//------------------------------------------------------------------------------
 void NvlVerb::changeResult( Table::Ptr table, 
 							VerbResult::Ptr resLeft, 
 							VerbResult::Ptr resRight, 
@@ -243,14 +227,6 @@ void NvlVerb::changeResult( Table::Ptr table,
 void NvlVerb::accept(VerbVisitor* visitor)
 {
   visitor->visit(this);
-}
-
-//------------------------------------------------------------------------------
-VERB_IMPLEMENT(DecodeVerb);
-
-//------------------------------------------------------------------------------
-DecodeVerb::DecodeVerb()
-{
 }
 
 //------------------------------------------------------------------------------

@@ -10,9 +10,8 @@ namespace aq
 {
 
 //------------------------------------------------------------------------------
-class ColumnItem: public Object
+class ColumnItem: public Object<ColumnItem>
 {
-	OBJECT_DECLARE( ColumnItem );
 public:
 	// data_holder_t data;
 	double numval;

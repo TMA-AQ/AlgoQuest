@@ -702,13 +702,13 @@ int main(int argc, char**argv)
 		std::string sqlQuery;
 		std::string sqlQueriesFile;
 		std::string baseDescr;
-		std::string answerPathStr;
-		std::string answerFileName;
     std::string DLLFunction;
 		unsigned int worker;
 		bool multipleAnswerFiles = false;
 		bool keepFiles = false;
 		bool display = false;
+    bool displayCount = false;
+    bool trace = false;
 		bool loadDatabase = false;
     bool force = false;
     bool useTextAQMatrix = false;
@@ -735,11 +735,18 @@ int main(int argc, char**argv)
       aqHome = s;
 
     //
+    // initialize verb builder
+    VerbBuilder vb;
+    aq::verb::VerbFactory::GetInstance().setBuilder(&vb);
+
+    //
     // if aq.ini exists in current directory, use it as default settings
     settings.iniFile = "aq.ini";
     boost::filesystem::path iniFile(settings.iniFile);
     if (boost::filesystem::exists(iniFile))
+    {
       settings.load(settings.iniFile);
+    }
 
     //
     // look for properties file in args
@@ -779,21 +786,21 @@ int main(int argc, char**argv)
     engine.add_options()
       ("settings,s", po::value<std::string>(&propertiesFile), "")
       ("aq-engine,e", po::value<std::string>(&settings.aqEngine))
-      ("aq-home,h", po::value<std::string>(&aqHome)->default_value(aqHome), "set AQ Home (AQ_HOME environment variable)")
+      ("aq-home,r", po::value<std::string>(&aqHome)->default_value(aqHome), "set AQ Home (AQ_HOME environment variable)")
       ("aq-name,n", po::value<std::string>(&aqName), "")
 			("query-ident,i", po::value<std::string>(&queryIdent), "")
       ("queries-file,f", po::value<std::string>(&sqlQueriesFile), "")
-			("answer-path", po::value<std::string>(&answerPathStr), "DEPRECATED") // deprecated
-			("answer-file", po::value<std::string>(&answerFileName)->default_value("answer.txt"), "DEPRECATED") // deprecated
 			("output,o", po::value<std::string>(&settings.outputFile), "")
-			("base-descr", po::value<std::string>(&settings.dbDesc), "")
-			("worker", po::value<unsigned int>(&worker), "number of thread assigned to resolve the bunch of sql queries")
-			("query-worker,w", po::value<size_t>(&settings.process_thread)->default_value(settings.process_thread), "number of thread assigned resolve one sql queries")
-			("display-count", po::value<bool>(&settings.displayCount), "")
+			("worker,w", po::value<unsigned int>(&worker), "number of thread assigned to resolve the bunch of sql queries")
+			("parralellize,p", po::value<size_t>(&settings.process_thread)->default_value(settings.process_thread), "number of thread assigned resolve one sql queries")
+			("display-count", po::bool_switch(&displayCount), "")
       ("force", po::bool_switch(&force), "force use of directory if it already exists")
 			("keep-file,k", po::bool_switch(&keepFiles), "")
-      ("trace,t", po::value<bool>(&settings.trace)->default_value(settings.trace), "")
+      ("trace,t", po::bool_switch(&trace), "")
       ;
+
+    po::positional_options_description positionalOptions; 
+    positionalOptions.add("aq-name", -1); 
 
     po::options_description testing("Testing");
     testing.add_options()
@@ -829,7 +836,7 @@ int main(int argc, char**argv)
     all.add(log_options).add(engine).add(testing).add(external).add(loader).add(genTmpTable);
 
 		po::variables_map vm;
-		po::store(po::command_line_parser(argc, argv).options(all).run(), vm);
+		po::store(po::command_line_parser(argc, argv).options(all).positional(positionalOptions).run(), vm);
 		po::notify(vm);    
 
 		if (vm.count("help"))
@@ -837,9 +844,17 @@ int main(int argc, char**argv)
 			std::cout << all << "\n";
 			return 1;
 		}
+
+    // parse positional options
+    if (vm.count("aq-name"))
+    {
+      aqName = vm["aq-name"].as<std::string>();
+    }
 		
     //
-    //
+    // settings flags bool
+    settings.trace = trace || settings.trace;
+    settings.displayCount = displayCount || settings.displayCount;
     settings.cmdLine = _isatty(_fileno(stdin)) != 0;
     
     //
@@ -853,6 +868,10 @@ int main(int argc, char**argv)
 
     //
     //
+    if (aqName == "")
+    {
+      aqName = settings.aqName;
+    }
     if ((aqHome != "") && (aqName != ""))
     {
       settings.initPath(aqHome + aqName);

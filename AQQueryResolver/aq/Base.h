@@ -21,9 +21,8 @@ namespace aq
 {
 
 //------------------------------------------------------------------------------
-class Base: public Object
+class Base: public Object<Base>
 {
-	OBJECT_DECLARE( Base );
 public:
 	typedef std::vector<Table::Ptr> tables_t;
 

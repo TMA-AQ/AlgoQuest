@@ -7,42 +7,26 @@ namespace aq {
 namespace verb {
 
 //--------------------------------------------------------------------------
+struct Builder_Intf
+{
+  virtual VerbNode::Ptr build(unsigned int type) const = 0;
+};
+
+//--------------------------------------------------------------------------
 class VerbFactory
 {
 public:
-	void addVerb( VerbNode::Ptr verb );
+  void setBuilder(Builder_Intf const * _builder) { builder = _builder; }
 	VerbNode::Ptr getVerb( int verbType ) const;
 	static VerbFactory& GetInstance();
 private:
-	//disable creation
 	VerbFactory(){};
-	VerbFactory(const VerbFactory& source){};
-	VerbFactory& operator=( const VerbFactory& source ){ return *this; }
+	VerbFactory(const VerbFactory& source);
+	~VerbFactory(){};
+	VerbFactory& operator=( const VerbFactory& source );
 
-	std::vector<VerbNode::Ptr> Verbs;
+	Builder_Intf const * builder;
 };
-
-//------------------------------------------------------------------------------
-//macro
-#define VERB_DECLARE( class_name )\
-	OBJECT_DECLARE( class_name );\
-	private:\
-	class FactoryRegister##class_name\
-	{\
-	public:\
-		FactoryRegister##class_name()\
-		{\
-			VerbFactory::GetInstance().addVerb( new class_name() );\
-		}\
-	};\
-	static FactoryRegister##class_name FactoryRegisterObj##class_name;\
-	public:\
-	class_name();\
-	virtual VerbNode* clone() const { return new class_name(*this); }
-
-//------------------------------------------------------------------------------
-#define VERB_IMPLEMENT( class_name )\
-	class_name::FactoryRegister##class_name class_name::FactoryRegisterObj##class_name;
 
 }
 }

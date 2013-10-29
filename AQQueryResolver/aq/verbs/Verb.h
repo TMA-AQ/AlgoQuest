@@ -23,7 +23,7 @@ public:
 	verb_error( EType type, int verbTag );
 };
 //--------------------------------------------------------------------------
-class Verb: public Object
+class Verb: public Object<Verb>
 {
 public:
 	//functions that need implementation
@@ -103,8 +103,6 @@ public:
 	bool Disabled; //if true, do not use this Verb or its children anymore
 
 	//irrelevant when implementing derived class
-protected:
-	OBJECT_DECLARE( Verb );
 public:
 	Verb();
 	virtual ~Verb(){};

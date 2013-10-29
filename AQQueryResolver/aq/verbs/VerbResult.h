@@ -12,9 +12,8 @@
 namespace aq {
 namespace verb {
 
-class VerbResult: public Object
+class VerbResult: public Object<VerbResult>
 {
-	OBJECT_DECLARE( VerbResult );
 public:
 	enum ResultType
 	{
@@ -32,8 +31,8 @@ public:
 //------------------------------------------------------------------------------
 class Scalar: public VerbResult
 {
-	OBJECT_DECLARE( Scalar );
 public:
+  typedef boost::intrusive_ptr<Scalar> Ptr;
 
 	virtual int getType() const { return VerbResult::SCALAR; }
 	const aq::data_holder_t getValue() const;
@@ -53,8 +52,9 @@ public:
 //------------------------------------------------------------------------------
 class SubTable: public VerbResult
 {
-	OBJECT_DECLARE( SubTable );
 public:
+  typedef boost::intrusive_ptr<SubTable> Ptr;
+
 	virtual int getType() const { return VerbResult::SUB_TABLE; }
 
 	std::vector<int>	Rows;
@@ -63,16 +63,18 @@ public:
 //------------------------------------------------------------------------------
 class Asterisk: public VerbResult
 {
-	OBJECT_DECLARE( Asterisk );
 public:
+  typedef boost::intrusive_ptr<Asterisk> Ptr;
+
 	virtual int getType() const { return VerbResult::ASTERISK; }
 };
 
 //------------------------------------------------------------------------------
 class TablePartition: public VerbResult
 {
-	OBJECT_DECLARE( TablePartition );
 public:
+  typedef boost::intrusive_ptr<TablePartition> Ptr;
+
 	virtual int getType() const { return VerbResult::TABLE_PARTITION; }
 
 	TablePartition()
@@ -109,8 +111,9 @@ public:
 //------------------------------------------------------------------------------
 class RowValidation: public VerbResult
 {
-	OBJECT_DECLARE( RowValidation );
 public:
+  typedef boost::intrusive_ptr<RowValidation> Ptr;
+
 	virtual int getType() const { return ROW_VALIDATION; };
 
 	std::vector<bool> ValidRows;
@@ -119,8 +122,9 @@ public:
 //------------------------------------------------------------------------------
 class VerbResultArray: public VerbResult
 {
-	OBJECT_DECLARE( VerbResultArray );
 public:
+  typedef boost::intrusive_ptr<VerbResultArray> Ptr;
+
 	virtual int getType() const { return VerbResult::ARRAY; }
 
 	std::deque<VerbResult::Ptr>	Results;

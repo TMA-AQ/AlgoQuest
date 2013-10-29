@@ -9,7 +9,6 @@ namespace verb {
 //------------------------------------------------------------------------------
 class BinaryVerb: public VerbNode
 {
-	VERB_DECLARE( BinaryVerb );
 public:
 	virtual int getVerbType() const { return -1; };
 	virtual bool changeQuery( aq::tnode* pStart, aq::tnode* pNode,
@@ -29,7 +28,6 @@ protected:
 //------------------------------------------------------------------------------
 class MinusVerb: public BinaryVerb
 {
-	VERB_DECLARE( MinusVerb );
 public:
 	virtual int getVerbType() const { return K_MINUS; };
 protected:
@@ -41,7 +39,6 @@ protected:
 //------------------------------------------------------------------------------
 class PlusVerb: public BinaryVerb
 {
-	VERB_DECLARE( PlusVerb );
 public:
 	virtual int getVerbType() const { return K_PLUS; };
 protected:
@@ -53,7 +50,6 @@ protected:
 //------------------------------------------------------------------------------
 class MultiplyVerb: public BinaryVerb
 {
-	VERB_DECLARE( MultiplyVerb );
 public:
 	virtual int getVerbType() const { return K_MUL; };
 protected:
@@ -65,7 +61,6 @@ protected:
 //------------------------------------------------------------------------------
 class DivideVerb: public BinaryVerb
 {
-	VERB_DECLARE( DivideVerb );
 public:
 	virtual int getVerbType() const { return K_DIV; };
 protected:

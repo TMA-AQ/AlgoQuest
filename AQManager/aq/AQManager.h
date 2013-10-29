@@ -5,13 +5,11 @@
 #  define AQLIB_API __declspec(dllimport)
 # endif
   
-# define CALLBACK __stdcall
+# define AQLIB_API __stdcall
 
 #endif
 
 #include <string>
-
-#include <boost/python.hpp>
 
 extern "C"
 {

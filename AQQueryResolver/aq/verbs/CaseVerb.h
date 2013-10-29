@@ -8,7 +8,6 @@ namespace verb {
 //------------------------------------------------------------------------------
 class CaseVerb: public VerbNode
 {
-	VERB_DECLARE( CaseVerb );
 public:
 	virtual int getVerbType() const { return K_CASE; };
 	virtual void changeResult( Table::Ptr table, 
@@ -19,7 +18,6 @@ public:
 //------------------------------------------------------------------------------
 class WhenVerb: public VerbNode
 {
-	VERB_DECLARE( WhenVerb );
 public:
 	virtual int getVerbType() const { return K_WHEN; };
 	virtual void changeResult( Table::Ptr table, 
@@ -30,7 +28,6 @@ public:
 //------------------------------------------------------------------------------
 class ElseVerb: public VerbNode
 {
-	VERB_DECLARE( ElseVerb );
 public:
 	virtual int getVerbType() const { return K_ELSE; };
 	virtual void changeResult( Table::Ptr table, 

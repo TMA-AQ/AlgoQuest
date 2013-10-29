@@ -38,7 +38,7 @@ TColumn2TablesArray* create_column_map_for_tables_used_in_select( aq::tnode *pNo
 void delete_column2tables_array( TColumn2TablesArray* parrC2T );
 
 //------------------------------------------------------------------------------
-void enforce_qualified_column_reference( aq::tnode *pNode, TColumn2TablesArray* parrC2T, int *pErr );
+int enforce_qualified_column_reference( aq::tnode *pNode, TColumn2TablesArray* parrC2T );
 
 }
 

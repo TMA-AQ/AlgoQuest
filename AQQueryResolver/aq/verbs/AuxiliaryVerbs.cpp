@@ -13,9 +13,6 @@ namespace aq {
 namespace verb {
 
 //------------------------------------------------------------------------------
-VERB_IMPLEMENT( ColumnVerb );
-
-//------------------------------------------------------------------------------
 ColumnVerb::ColumnVerb()
   : index(-1), computed_index(-1)
 {}
@@ -173,13 +170,6 @@ void ColumnVerb::accept(VerbVisitor* visitor)
 }
 
 //------------------------------------------------------------------------------
-VERB_IMPLEMENT( CommaVerb );
-
-//------------------------------------------------------------------------------
-CommaVerb::CommaVerb()
-{}
-
-//------------------------------------------------------------------------------
 bool CommaVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 								VerbResult::Ptr resLeft,
 								VerbResult::Ptr resRight, VerbResult::Ptr resNext )
@@ -253,13 +243,6 @@ void CommaVerb::accept(VerbVisitor* visitor)
 }
 
 //------------------------------------------------------------------------------
-VERB_IMPLEMENT( AndVerb );
-
-//------------------------------------------------------------------------------
-AndVerb::AndVerb()
-{}
-
-//------------------------------------------------------------------------------
 void AndVerb::changeResult(	Table::Ptr table, 
 							VerbResult::Ptr resLeft, 
 							VerbResult::Ptr resRight, 
@@ -303,13 +286,6 @@ void AndVerb::accept(VerbVisitor* visitor)
 }
 
 //------------------------------------------------------------------------------
-VERB_IMPLEMENT( InVerb );
-
-//------------------------------------------------------------------------------
-InVerb::InVerb()
-{}
-
-//------------------------------------------------------------------------------
 bool InVerb::preprocessQuery(	aq::tnode* pStart, aq::tnode* pNode, 
 								aq::tnode* pStartOriginal )
 {
@@ -335,13 +311,6 @@ void InVerb::accept(VerbVisitor* visitor)
 }
 
 //------------------------------------------------------------------------------
-VERB_IMPLEMENT( IntValueVerb );
-
-//------------------------------------------------------------------------------
-IntValueVerb::IntValueVerb()
-{}
-
-//------------------------------------------------------------------------------
 bool IntValueVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
 	assert( pNode->getDataType() == aq::tnode::tnodeDataType::NODE_DATA_INT );
@@ -354,13 +323,6 @@ void IntValueVerb::accept(VerbVisitor* visitor)
 {
 	visitor->visit(this);
 }
-
-//------------------------------------------------------------------------------
-VERB_IMPLEMENT( DoubleValueVerb );
-
-//------------------------------------------------------------------------------
-DoubleValueVerb::DoubleValueVerb()
-{}
 
 //------------------------------------------------------------------------------
 bool DoubleValueVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
@@ -377,13 +339,6 @@ void DoubleValueVerb::accept(VerbVisitor* visitor)
 }
 
 //------------------------------------------------------------------------------
-VERB_IMPLEMENT( StringValueVerb );
-
-//------------------------------------------------------------------------------
-StringValueVerb::StringValueVerb()
-{}
-
-//------------------------------------------------------------------------------
 bool StringValueVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
 	assert( pNode->getDataType() == aq::tnode::tnodeDataType::NODE_DATA_STRING );
@@ -398,14 +353,6 @@ void StringValueVerb::accept(VerbVisitor* visitor)
 }
 
 //------------------------------------------------------------------------------
-VERB_IMPLEMENT( AsVerb );
-
-//------------------------------------------------------------------------------
-AsVerb::AsVerb()
-  : index(-1)
-{}
-
-//------------------------------------------------------------------------------
 void replaceTableIdent( aq::tnode* pNode, const char* oldIdent, const char* newIdent )
 {
 	if( !pNode )
@@ -416,6 +363,11 @@ void replaceTableIdent( aq::tnode* pNode, const char* oldIdent, const char* newI
 	replaceTableIdent( pNode->left, oldIdent, newIdent );
 	replaceTableIdent( pNode->right, oldIdent, newIdent );
 	replaceTableIdent( pNode->next, oldIdent, newIdent );
+}
+
+AsVerb::AsVerb()
+  : ident(""), index(-1)
+{
 }
 
 //------------------------------------------------------------------------------
@@ -454,16 +406,9 @@ void AsVerb::addResult(aq::Row& row)
 {
   if (this->Context == K_SELECT)
   {
-    //Scalar * scalar = dynamic_cast<Scalar*>(resLeft.get()); // FIXME : not optimal
-    //if (scalar != 0)
-    //{
-    //  ColumnItem::Ptr item(new ColumnItem(scalar->Item));
-    //  row.computedRow.push_back(aq::row_item_t(item, scalar->Type, scalar->Size, "", this->ident, true));
-    //  (*row.computedRow.rbegin()).aggFunc = scalar->aggFunc;
-    //  (*row.computedRow.rbegin()).displayed = true;
-    //}
     if (this->index == -1)
     {
+      assert(!row.computedRow.empty());
       assert(row.computedRow.size() <= std::numeric_limits<int>::max());
       this->index = static_cast<int>(row.computedRow.size()) - 1;
       row.computedRow[this->index].tableName = "";
@@ -475,6 +420,7 @@ void AsVerb::addResult(aq::Row& row)
       return;
     }
 
+    assert(this->index < row.computedRow.size());
     aq::row_item_t& row_item = row.computedRow[this->index];
     row_item.displayed = true;
   }
@@ -485,13 +431,6 @@ void AsVerb::accept(VerbVisitor* visitor)
 {
 	visitor->visit(this);
 }
-
-//------------------------------------------------------------------------------
-VERB_IMPLEMENT( AsteriskVerb );
-
-//------------------------------------------------------------------------------
-AsteriskVerb::AsteriskVerb()
-{}
 
 //------------------------------------------------------------------------------
 bool AsteriskVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
@@ -505,13 +444,6 @@ void AsteriskVerb::accept(VerbVisitor* visitor)
 {
 	visitor->visit(this);
 }
-
-//------------------------------------------------------------------------------
-VERB_IMPLEMENT( AscVerb );
-
-//------------------------------------------------------------------------------
-AscVerb::AscVerb()
-{}
 
 //------------------------------------------------------------------------------
 void AscVerb::changeResult(	Table::Ptr table, 

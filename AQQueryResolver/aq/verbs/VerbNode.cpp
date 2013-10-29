@@ -34,17 +34,17 @@ void VerbNode::cloneSubtree(VerbNode::Ptr v)
 {
   if (v->getLeftChild())
   {
-    this->Left = v->getLeftChild()->clone();
+    this->Left = aq::verb::VerbFactory::GetInstance().getVerb(v->getLeftChild()->getVerbType());
     this->Left->cloneSubtree(v->getLeftChild());
   }
   if (v->getRightChild())
   {
-    this->Right = v->getRightChild()->clone();
+    this->Right = aq::verb::VerbFactory::GetInstance().getVerb(v->getRightChild()->getVerbType());
     this->Right->cloneSubtree(v->getRightChild());
   }
   if (v->getBrother())
   {
-    this->Brother = v->getBrother()->clone();
+    this->Brother = aq::verb::VerbFactory::GetInstance().getVerb(v->getBrother()->getVerbType());
     this->Brother->cloneSubtree(v->getBrother());
   }
 }
@@ -182,13 +182,13 @@ struct tnodeVerbNode
 //------------------------------------------------------------------------------
 VerbNode::Ptr VerbNode::build( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal, int context, Base& BaseDesc, TProjectSettings& settings )
 {
-  aq::Logger::getInstance().log(AQ_DEBUG, "build verb '%s'\n", id_to_string(pNode->tag));
+  aq::Logger::getInstance().log(AQ_DEBUG, "build verb '%s'\n", id_to_kstring(pNode->tag));
 	VerbNode::Ptr verb = VerbFactory::GetInstance().getVerb( pNode->tag );
   
 	if( !verb )
   {
 		// throw aq::generic_error(aq::generic_error::NOT_IMPLEMENTED, "Verb Not implemented");
-    aq::Logger::getInstance().log(AQ_DEBUG, "Verb '%s' Not implemented\n");
+    aq::Logger::getInstance().log(AQ_DEBUG, "Verb '%s' Not implemented\n", id_to_kstring(pNode->tag));
     return verb;
   }
 
@@ -266,6 +266,8 @@ VerbNode::Ptr VerbNode::BuildVerbsSubtree(	aq::tnode* pSelect, aq::tnode* pStart
 	while( deq.size() > 0 )
 	{
 		tnodeVerbNode& currentnode = deq[0];
+    aq::Logger::getInstance().log(AQ_DEBUG, "%u\n", currentnode.pNode->getTag());
+
 		//next
 		if( currentnode.pNode != pStart )
 		{

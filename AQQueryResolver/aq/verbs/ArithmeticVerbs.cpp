@@ -8,13 +8,6 @@ namespace aq {
 namespace verb {
 
 //------------------------------------------------------------------------------
-VERB_IMPLEMENT(BinaryVerb);
-
-//------------------------------------------------------------------------------
-BinaryVerb::BinaryVerb()
-{}
-
-//------------------------------------------------------------------------------
 void BinaryVerb::computeResult( VerbResult::Ptr param1, VerbResult::Ptr param2 )
 {
 	assert( param1 && param2 );
@@ -148,13 +141,6 @@ void BinaryVerb::accept(VerbVisitor* visitor)
 }
 
 //------------------------------------------------------------------------------
-VERB_IMPLEMENT( MinusVerb );
-
-//------------------------------------------------------------------------------
-MinusVerb::MinusVerb()
-{}
-
-//------------------------------------------------------------------------------
 void MinusVerb::transformItem(	const ColumnItem& item1, const ColumnItem& item2, 
 								ColumnType resultType, ColumnItem& result )
 {
@@ -171,13 +157,6 @@ ColumnType MinusVerb::outputType( ColumnType inputType1, ColumnType inputType2 )
 		return inputType1;
 	throw verb_error(generic_error::VERB_TYPE_MISMATCH, this->getVerbType() );
 }
-
-//------------------------------------------------------------------------------
-VERB_IMPLEMENT( PlusVerb );
-
-//------------------------------------------------------------------------------
-PlusVerb::PlusVerb()
-{}
 
 //------------------------------------------------------------------------------
 void PlusVerb::transformItem(	const ColumnItem& item1, const ColumnItem& item2, 
@@ -202,13 +181,6 @@ ColumnType PlusVerb::outputType( ColumnType inputType1, ColumnType inputType2 )
 }
 
 //------------------------------------------------------------------------------
-VERB_IMPLEMENT( MultiplyVerb );
-
-//------------------------------------------------------------------------------
-MultiplyVerb::MultiplyVerb()
-{}
-
-//------------------------------------------------------------------------------
 void MultiplyVerb::transformItem(	const ColumnItem& item1, const ColumnItem& item2, 
 									ColumnType resultType, ColumnItem& result )
 {
@@ -224,13 +196,6 @@ ColumnType MultiplyVerb::outputType( ColumnType inputType1, ColumnType inputType
 		return inputType1;
 	throw verb_error(generic_error::VERB_TYPE_MISMATCH, this->getVerbType() );
 }
-
-//------------------------------------------------------------------------------
-VERB_IMPLEMENT( DivideVerb );
-
-//------------------------------------------------------------------------------
-DivideVerb::DivideVerb()
-{}
 
 //------------------------------------------------------------------------------
 void DivideVerb::transformItem(	const ColumnItem& item1, const ColumnItem& item2, 

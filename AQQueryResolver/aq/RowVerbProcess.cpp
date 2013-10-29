@@ -16,7 +16,7 @@ namespace aq
       this->applyRowVisitor.reset(new aq::ApplyRowVisitor);
       for (auto& verb : o.verbs) 
       {
-        aq::verb::VerbNode::Ptr v(verb->clone());
+        aq::verb::VerbNode::Ptr v = aq::verb::VerbFactory::GetInstance().getVerb(verb->getVerbType());
         v->cloneSubtree(verb);
         this->verbs.push_back(v);
       }

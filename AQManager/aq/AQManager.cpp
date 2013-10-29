@@ -1,5 +1,5 @@
 #if defined(WIN32)
-# include "stdafx.h"
+// # include "stdafx.h"
 # include <codecvt>
 #endif
 
@@ -29,21 +29,9 @@
 #include <boost/uuid/uuid_io.hpp>
 
 // fixme
-#include "Link.h"
+// #include "Link.h"
 
 namespace fs = boost::filesystem;
-
-// -------------------------------------------------------------------------------------------------
-char const * greet()
-{
-  return "hello world !";
-}
-
-BOOST_PYTHON_MODULE(aq_manager)
-{
-  using namespace boost::python;
-  def("greet", greet);
-}
 
 // -------------------------------------------------------------------------------------------------
 extern int yylineno;

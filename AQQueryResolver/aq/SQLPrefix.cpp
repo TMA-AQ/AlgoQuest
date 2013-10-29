@@ -38,7 +38,8 @@ char* realloc_string_buffer( char* pszStr, unsigned int *pncbBuf, unsigned int n
 
 		pszStr = (char*)malloc( sizeof( char ) * nLen );
 		if ( pszStr == NULL ) {
-			report_error( "Not enough memory", EXIT_ON_MEM_ERROR );
+
+			throw aq::generic_error(aq::generic_error::GENERIC, "Not enough memory [%u]", EXIT_ON_MEM_ERROR );
 			return NULL;
 		}
 		/* memset( pszStr, 0, sizeof( char ) * nLen ); */

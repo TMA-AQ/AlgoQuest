@@ -25,12 +25,6 @@ void OverVerb::changeResult(	Table::Ptr table,
 	
 }
 */
-//------------------------------------------------------------------------------
-VERB_IMPLEMENT(PartitionVerb);
-
-//------------------------------------------------------------------------------
-PartitionVerb::PartitionVerb()
-{}
 
 //------------------------------------------------------------------------------
 bool PartitionVerb::changeQuery( aq::tnode* pStart, aq::tnode* pNode, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext )
@@ -83,13 +77,6 @@ void PartitionVerb::accept(VerbVisitor* visitor)
 {
   visitor->visit(this);
 }
-
-//------------------------------------------------------------------------------
-VERB_IMPLEMENT( FrameVerb );
-
-//------------------------------------------------------------------------------
-FrameVerb::FrameVerb()
-{}
 
 //------------------------------------------------------------------------------
 void extractFrameTypeOffset(	aq::tnode* bound, TablePartition::FrameBoundType& type, 

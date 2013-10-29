@@ -30,10 +30,11 @@ namespace aq
 {
 
 //------------------------------------------------------------------------------
-class Column: public aq::verb::VerbResult 
+class Column: public aq::verb::VerbResult
 {
-	OBJECT_DECLARE( Column );
 public:
+  
+  typedef boost::intrusive_ptr<Column> Ptr; // FIXME
 
 	struct inner_column_cmp_t
 	{

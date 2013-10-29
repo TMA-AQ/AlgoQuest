@@ -266,7 +266,7 @@ aq::verb::VerbNode::Ptr QueryResolver::postProcess()
   // std::cout << *this->sqlStatement << std::endl;
   std::cout << aq::multiline_query(aq::syntax_tree_to_sql_form(this->sqlStatement, sql_query)) << std::endl;
 #endif
-  
+
   std::set<aq::tnode*> nodes;
   aq::checkTree( this->sqlStatement, nodes);
 	aq::cleanQuery( this->sqlStatement );

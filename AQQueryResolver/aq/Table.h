@@ -31,9 +31,8 @@ class Base;
 class RowProcess_Intf;
 
 //------------------------------------------------------------------------------
-class Table: public Object
+class Table: public Object<Table>
 {
-	OBJECT_DECLARE( Table );
 public:
 	typedef std::vector<Column::Ptr> columns_t;
 

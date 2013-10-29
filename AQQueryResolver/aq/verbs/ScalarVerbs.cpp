@@ -10,13 +10,6 @@ namespace aq {
 namespace verb {
 
 //------------------------------------------------------------------------------
-VERB_IMPLEMENT(ScalarVerb);
-
-//------------------------------------------------------------------------------
-ScalarVerb::ScalarVerb()
-{}
-
-//------------------------------------------------------------------------------
 void ScalarVerb::computeResult( VerbResult::Ptr param )
 {
 	assert( param );
@@ -122,13 +115,6 @@ void ScalarVerb::accept(VerbVisitor* visitor)
 }
 
 //------------------------------------------------------------------------------
-VERB_IMPLEMENT(SqrtVerb);
-
-//------------------------------------------------------------------------------
-SqrtVerb::SqrtVerb()
-{}
-
-//------------------------------------------------------------------------------
 void SqrtVerb::transformItem( const ColumnItem& item, ColumnItem& result )
 {
 	result.numval = sqrt( item.numval );
@@ -146,13 +132,6 @@ ColumnType SqrtVerb::outputType( ColumnType inputType )
 }
 
 //------------------------------------------------------------------------------
-VERB_IMPLEMENT(AbsVerb);
-
-//------------------------------------------------------------------------------
-AbsVerb::AbsVerb()
-{}
-
-//------------------------------------------------------------------------------
 void AbsVerb::transformItem( const ColumnItem& item, ColumnItem& result )
 {
 	result.numval = fabs( item.numval );
@@ -168,9 +147,6 @@ ColumnType AbsVerb::outputType( ColumnType inputType )
 		throw verb_error(generic_error::VERB_TYPE_MISMATCH, this->getVerbType() );
 	return inputType;
 }
-
-//------------------------------------------------------------------------------
-VERB_IMPLEMENT(SubstringVerb);
 
 //------------------------------------------------------------------------------
 SubstringVerb::SubstringVerb(): StartPos(1), Size(-1)
@@ -232,13 +208,6 @@ void SubstringVerb::accept(VerbVisitor* visitor)
 }
 
 //------------------------------------------------------------------------------
-VERB_IMPLEMENT(ToDateVerb);
-
-//------------------------------------------------------------------------------
-ToDateVerb::ToDateVerb()
-{}
-
-//------------------------------------------------------------------------------
 bool ToDateVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
 	assert( pNode );
@@ -268,13 +237,6 @@ ColumnType ToDateVerb::outputType( ColumnType inputType )
 }
 
 //------------------------------------------------------------------------------
-VERB_IMPLEMENT(YearVerb);
-
-//------------------------------------------------------------------------------
-YearVerb::YearVerb()
-{}
-
-//------------------------------------------------------------------------------
 void YearVerb::transformItem( const ColumnItem& item, ColumnItem& result )
 {
   // TODO
@@ -295,13 +257,6 @@ ColumnType YearVerb::outputType( ColumnType inputType )
 
 	return COL_TYPE_INT;
 }
-
-//------------------------------------------------------------------------------
-VERB_IMPLEMENT(MonthVerb);
-
-//------------------------------------------------------------------------------
-MonthVerb::MonthVerb()
-{}
 
 //------------------------------------------------------------------------------
 void MonthVerb::transformItem( const ColumnItem& item, ColumnItem& result )
@@ -326,13 +281,6 @@ ColumnType MonthVerb::outputType( ColumnType inputType )
 }
 
 //------------------------------------------------------------------------------
-VERB_IMPLEMENT(DayVerb);
-
-//------------------------------------------------------------------------------
-DayVerb::DayVerb()
-{}
-
-//------------------------------------------------------------------------------
 void DayVerb::transformItem( const ColumnItem& item, ColumnItem& result )
 {
   // TODO
@@ -353,13 +301,6 @@ ColumnType DayVerb::outputType( ColumnType inputType )
 
 	return COL_TYPE_INT;
 }
-
-//------------------------------------------------------------------------------
-VERB_IMPLEMENT(ToCharVerb);
-
-//------------------------------------------------------------------------------
-ToCharVerb::ToCharVerb()
-{}
 
 //------------------------------------------------------------------------------
 void Convert(	ColumnItem& dest, int destType, 
@@ -401,13 +342,6 @@ ColumnType ToCharVerb::outputType( ColumnType inputType )
 	this->InputType = inputType;
 	return COL_TYPE_VARCHAR;
 }
-
-//------------------------------------------------------------------------------
-VERB_IMPLEMENT(DateVerb);
-
-//------------------------------------------------------------------------------
-DateVerb::DateVerb()
-{}
 
 //------------------------------------------------------------------------------
 void DateVerb::transformItem( const ColumnItem& item, ColumnItem& result )

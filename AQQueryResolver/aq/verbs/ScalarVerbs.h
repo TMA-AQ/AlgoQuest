@@ -9,7 +9,6 @@ namespace verb {
 //------------------------------------------------------------------------------
 class ScalarVerb: public VerbNode
 {
-	VERB_DECLARE( ScalarVerb );
 public:
 	virtual int getVerbType() const { return -1; };
 	virtual bool changeQuery( aq::tnode* pStart, aq::tnode* pNode,
@@ -27,7 +26,6 @@ protected:
 //------------------------------------------------------------------------------
 class SqrtVerb: public ScalarVerb
 {
-	VERB_DECLARE( SqrtVerb );
 public:
 	virtual int getVerbType() const { return K_SQRT; }
 protected:
@@ -38,7 +36,6 @@ protected:
 //------------------------------------------------------------------------------
 class AbsVerb: public ScalarVerb
 {
-	VERB_DECLARE( AbsVerb );
 public:
 	virtual int getVerbType() const { return K_ABS; }
 protected:
@@ -49,8 +46,8 @@ protected:
 //------------------------------------------------------------------------------
 class SubstringVerb: public ScalarVerb
 {
-	VERB_DECLARE( SubstringVerb );
 public:
+  SubstringVerb();
 	virtual int getVerbType() const { return K_SUBSTRING; }
 	bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
   void accept(VerbVisitor*);
@@ -65,7 +62,6 @@ protected:
 //------------------------------------------------------------------------------
 class ToDateVerb: public ScalarVerb
 {
-	VERB_DECLARE( ToDateVerb );
 public:
 	virtual int getVerbType() const { return K_TO_DATE; };
 	bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
@@ -78,7 +74,6 @@ protected:
 //------------------------------------------------------------------------------
 class YearVerb: public ScalarVerb
 {
-	VERB_DECLARE( YearVerb );
 public:
 	virtual int getVerbType() const { return K_YEAR; };
 protected:
@@ -89,7 +84,6 @@ protected:
 //------------------------------------------------------------------------------
 class MonthVerb: public ScalarVerb
 {
-	VERB_DECLARE( MonthVerb );
 public:
 	virtual int getVerbType() const { return K_MONTH; };
 protected:
@@ -100,7 +94,6 @@ protected:
 //------------------------------------------------------------------------------
 class DayVerb: public ScalarVerb
 {
-	VERB_DECLARE( DayVerb );
 public:
 	virtual int getVerbType() const { return K_DAY; };
 protected:
@@ -111,7 +104,6 @@ protected:
 //------------------------------------------------------------------------------
 class ToCharVerb: public ScalarVerb
 {
-	VERB_DECLARE( ToCharVerb );
 public:
 	virtual int getVerbType() const { return K_TO_CHAR; };
 	virtual bool changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
@@ -128,7 +120,6 @@ protected:
 //------------------------------------------------------------------------------
 class DateVerb: public ScalarVerb
 {
-	VERB_DECLARE( DateVerb );
 public:
 	virtual int getVerbType() const { return K_DATE; };
 protected:

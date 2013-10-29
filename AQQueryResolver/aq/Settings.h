@@ -28,6 +28,8 @@ struct TProjectSettings
 	std::string dbDesc;
 	std::string aqEngine;
 	std::string aqLoader;
+  std::string aqHome;
+  std::string aqName;
   std::string rootPath;
   std::string workingPath;
 	std::string tmpRootPath;

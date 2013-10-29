@@ -8,8 +8,10 @@ namespace verb {
 //------------------------------------------------------------------------------
 class ColumnVerb: public VerbNode
 {
-	VERB_DECLARE( ColumnVerb );
 public:
+  ColumnVerb();
+  typedef boost::intrusive_ptr<ColumnVerb> Ptr;
+
 	virtual int getVerbType() const { return K_PERIOD; };
 	virtual bool changeQuery( aq::tnode* pStart, aq::tnode* pNode,
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
@@ -44,8 +46,9 @@ private:
 //------------------------------------------------------------------------------
 class CommaVerb: public VerbNode
 {
-	VERB_DECLARE( CommaVerb );
 public:
+  typedef boost::intrusive_ptr<CommaVerb> Ptr;
+
 	virtual int getVerbType() const { return K_COMMA; };
 	bool changeQuery( aq::tnode* pStart, aq::tnode* pNode,
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
@@ -58,8 +61,9 @@ public:
 //------------------------------------------------------------------------------
 class AndVerb: public VerbNode
 {
-	VERB_DECLARE( AndVerb );
 public:
+  typedef boost::intrusive_ptr<CommaVerb> Ptr;
+
 	virtual int getVerbType() const { return K_AND; };
 	virtual void changeResult(	Table::Ptr table, 
 								VerbResult::Ptr resLeft, 
@@ -71,8 +75,9 @@ public:
 //------------------------------------------------------------------------------
 class InVerb: public VerbNode
 {
-	VERB_DECLARE( InVerb );
 public:
+  typedef boost::intrusive_ptr<InVerb> Ptr;
+
 	virtual int getVerbType() const { return K_IN; };
 	virtual bool preprocessQuery(	aq::tnode* pStart, aq::tnode* pNode, 
 									aq::tnode* pStartOriginal );
@@ -86,8 +91,9 @@ public:
 //------------------------------------------------------------------------------
 class IntValueVerb: public VerbNode
 {
-	VERB_DECLARE( IntValueVerb );
 public:
+  typedef boost::intrusive_ptr<IntValueVerb> Ptr;
+
 	virtual int getVerbType() const { return K_INTEGER; };
 	virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
 	virtual void accept(VerbVisitor*);
@@ -96,8 +102,9 @@ public:
 //------------------------------------------------------------------------------
 class DoubleValueVerb: public VerbNode
 {
-	VERB_DECLARE( DoubleValueVerb );
 public:
+  typedef boost::intrusive_ptr<DoubleValueVerb> Ptr;
+
 	virtual int getVerbType() const { return K_REAL; };
 	virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
 	virtual void accept(VerbVisitor*);
@@ -106,8 +113,9 @@ public:
 //------------------------------------------------------------------------------
 class StringValueVerb: public VerbNode
 {
-	VERB_DECLARE( StringValueVerb );
 public:
+  typedef boost::intrusive_ptr<StringValueVerb> Ptr;
+
 	virtual int getVerbType() const { return K_STRING; };
 	virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
 	virtual void accept(VerbVisitor*);
@@ -116,8 +124,10 @@ public:
 //------------------------------------------------------------------------------
 class AsVerb: public VerbNode
 {
-	VERB_DECLARE( AsVerb );
 public:
+  typedef boost::intrusive_ptr<AsVerb> Ptr;
+  AsVerb();
+
 	virtual int getVerbType() const { return K_AS; };
 	virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
 	virtual void changeResult( Table::Ptr table, 
@@ -133,8 +143,9 @@ private:
 //------------------------------------------------------------------------------
 class AsteriskVerb: public VerbNode
 {
-	VERB_DECLARE( AsteriskVerb );
 public:
+  typedef boost::intrusive_ptr<AsteriskVerb> Ptr;
+
 	virtual int getVerbType() const { return K_STAR; };
 	virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
 	virtual void accept(VerbVisitor*);
@@ -143,8 +154,9 @@ public:
 //------------------------------------------------------------------------------
 class AscVerb: public VerbNode
 {
-	VERB_DECLARE( AscVerb );
 public:
+  typedef boost::intrusive_ptr<AscVerb> Ptr;
+
 	virtual int getVerbType() const { return K_ASC; };
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );

@@ -9,7 +9,6 @@ namespace verb {
 //------------------------------------------------------------------------------
 class CastVerb: public VerbNode
 {
-	VERB_DECLARE( CastVerb );
 public:
 	virtual int getVerbType() const { return K_CAST; };
 
@@ -27,7 +26,6 @@ private:
 //------------------------------------------------------------------------------
 class NvlVerb: public VerbNode
 {
-	VERB_DECLARE( NvlVerb );
 public:
 	virtual int getVerbType() const { return K_NVL; };
 
@@ -39,7 +37,6 @@ public:
 //------------------------------------------------------------------------------
 class DecodeVerb: public VerbNode
 {
-	VERB_DECLARE( DecodeVerb );
 public:
 	virtual int getVerbType() const { return K_DECODE; };
 

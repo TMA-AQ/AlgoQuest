@@ -8,9 +8,6 @@ namespace aq {
 namespace verb {
 
 //------------------------------------------------------------------------------
-VERB_IMPLEMENT(AggregateVerb);
-
-//------------------------------------------------------------------------------
 AggregateVerb::AggregateVerb()
   : index(-1), count(0)
 {}
@@ -127,8 +124,12 @@ void AggregateVerb::addResult(aq::Row& row)
   {
     aq::apply_aggregate(row_item.aggFunc, row_item.type, this->item, this->count, *row_item.item, row.count);
   }
-  this->count += row.count;
- 
+
+  if (!row_item.null)
+  {
+    this->count += row.count;
+  }
+
   if (this->getRightChild() != NULL)
   {
     // FIXME : manage partition and Frame
@@ -141,6 +142,12 @@ void AggregateVerb::addResult(aq::Row& row)
   else if (row.completed)
   {
     *row_item.item = this->item;
+    if (row_item.aggFunc == aq::aggregate_function_t::COUNT)
+    {
+      row_item.type = aq::ColumnType::COL_TYPE_BIG_INT;
+      row_item.item->numval = static_cast<double>(this->count);
+      row_item.null = false;
+    }
     this->count = 0;
     this->item.numval = 0;
     this->item.strval = "";
@@ -152,14 +159,6 @@ void AggregateVerb::addResult(aq::Row& row)
 void AggregateVerb::accept(VerbVisitor* visitor)
 {
   visitor->visit(this);
-}
-
-//------------------------------------------------------------------------------
-VERB_IMPLEMENT(SumVerb);
-
-//------------------------------------------------------------------------------
-SumVerb::SumVerb()
-{
 }
 
 //------------------------------------------------------------------------------
@@ -274,13 +273,6 @@ Scalar::Ptr SumVerb::computeResultRegular(	Column::Ptr column,
 //}
 
 //------------------------------------------------------------------------------
-VERB_IMPLEMENT( CountVerb );
-
-//------------------------------------------------------------------------------
-CountVerb::CountVerb()
-{}
-
-//------------------------------------------------------------------------------
 //bool CountVerb::preprocessQuery(	aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 //{
 //	//count parameter is irrelevant
@@ -360,14 +352,6 @@ VerbResult::Ptr CountVerb::computeResultPartition(	Column::Ptr column,
 //}
 
 //------------------------------------------------------------------------------
-VERB_IMPLEMENT(AvgVerb);
-
-//------------------------------------------------------------------------------
-AvgVerb::AvgVerb()
-{
-}
-
-//------------------------------------------------------------------------------
 Scalar::Ptr AvgVerb::computeResultRegular(	Column::Ptr column, 
 											Table::Ptr table,
 											llong start,
@@ -433,13 +417,6 @@ VerbResult::Ptr AvgVerb::computeResultPartition(	Column::Ptr column,
 //{
 //	visitor->visit(this);
 //}
-
-//------------------------------------------------------------------------------
-VERB_IMPLEMENT(MinVerb);
-
-//------------------------------------------------------------------------------
-MinVerb::MinVerb()
-{}
 
 //------------------------------------------------------------------------------
 Scalar::Ptr MinVerb::computeResultRegular(	Column::Ptr column, 
@@ -586,13 +563,6 @@ VerbResult::Ptr MinVerb::computeResultPartition(	Column::Ptr column,
 //}
 
 //------------------------------------------------------------------------------
-VERB_IMPLEMENT(MaxVerb);
-
-//------------------------------------------------------------------------------
-MaxVerb::MaxVerb()
-{}
-
-//------------------------------------------------------------------------------
 Scalar::Ptr MaxVerb::computeResultRegular(	Column::Ptr column, 
 											Table::Ptr table,
 											llong start,
@@ -624,13 +594,6 @@ VerbResult::Ptr MaxVerb::computeResultPartition(	Column::Ptr column,
 //{
 //	visitor->visit(this);
 //}
-
-//------------------------------------------------------------------------------
-VERB_IMPLEMENT( FirstValueVerb );
-
-//------------------------------------------------------------------------------
-FirstValueVerb::FirstValueVerb()
-{}
 
 //------------------------------------------------------------------------------
 Column::Ptr OffsetColumn(	Column::Ptr column, TablePartition::Ptr partition, 
@@ -784,9 +747,6 @@ void FirstValueVerb::accept(VerbVisitor* visitor)
 }
 
 //------------------------------------------------------------------------------
-VERB_IMPLEMENT( LagVerb );
-
-//------------------------------------------------------------------------------
 LagVerb::LagVerb(): Offset(0), Default(NULL)
 {}
 
@@ -861,12 +821,6 @@ void LagVerb::changeResult(	Table::Ptr table,
 void LagVerb::accept(VerbVisitor* visitor)
 {
 }
-//------------------------------------------------------------------------------
-VERB_IMPLEMENT( RowNumberVerb );
-
-//------------------------------------------------------------------------------
-RowNumberVerb::RowNumberVerb()
-{}
 
 //------------------------------------------------------------------------------
 void RowNumberVerb::changeResult(	Table::Ptr table, 

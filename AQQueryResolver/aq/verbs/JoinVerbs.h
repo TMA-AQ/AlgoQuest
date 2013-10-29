@@ -8,7 +8,6 @@ namespace verb {
 //------------------------------------------------------------------------------
 class JoinVerb: public VerbNode
 {
-	VERB_DECLARE( JoinVerb );
 public:
 	virtual int getVerbType() const { return -1; };
 	virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
@@ -21,7 +20,6 @@ protected:
 //------------------------------------------------------------------------------
 class LeftJoinVerb: public JoinVerb
 {
-	VERB_DECLARE( LeftJoinVerb );
 public:
 	virtual int getVerbType() const { return K_LEFT; };
 protected:
@@ -31,7 +29,6 @@ protected:
 //------------------------------------------------------------------------------
 class RightJoinVerb: public JoinVerb
 {
-	VERB_DECLARE( RightJoinVerb );
 public:
 	virtual int getVerbType() const { return K_RIGHT; };
 protected:
@@ -41,7 +38,6 @@ protected:
 //------------------------------------------------------------------------------
 class FullJoinVerb: public JoinVerb
 {
-	VERB_DECLARE( FullJoinVerb );
 public:
 	virtual int getVerbType() const { return K_FULL; };
 protected:

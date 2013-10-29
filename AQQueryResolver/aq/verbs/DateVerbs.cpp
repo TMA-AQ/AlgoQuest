@@ -9,13 +9,6 @@ namespace aq {
 namespace verb {
 
 //------------------------------------------------------------------------------
-VERB_IMPLEMENT(CurrentDateVerb);
-
-//------------------------------------------------------------------------------
-CurrentDateVerb::CurrentDateVerb()
-{}
-
-//------------------------------------------------------------------------------
 bool CurrentDateVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 									VerbResult::Ptr resLeft,
 									VerbResult::Ptr resRight, 

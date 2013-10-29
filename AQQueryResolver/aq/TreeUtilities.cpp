@@ -1,6 +1,7 @@
 #include "TreeUtilities.h"
 #include "ExprTransform.h"
 #include "parser/sql92_grm_tab.hpp"
+#include "parser/ID2Str.h"
 #include <cassert>
 #include <algorithm>
 #include <aq/DateConversion.h>
@@ -21,6 +22,77 @@ namespace aq
 {
   
 //------------------------------------------------------------------------------
+SolveMinMaxGroupBy::SolveMinMaxGroupBy(): pGroupBy(NULL), _min(true)
+{
+}
+
+//------------------------------------------------------------------------------
+SolveMinMaxGroupBy::~SolveMinMaxGroupBy()
+{
+	delete_subtree( this->pGroupBy );
+	for( size_t idx = 0; idx < this->columns.size(); ++idx )
+		delete_subtree( this->columns[idx] );
+}
+
+//------------------------------------------------------------------------------
+bool SolveMinMaxGroupBy::checkAndClear( aq::tnode* pSelect )
+{
+	std::vector<aq::tnode*> auxColumns;
+	commaListToNodeArray( pSelect->left, auxColumns );
+	int nrMinMaxCols = 0;
+	for( size_t idx = 0; idx < auxColumns.size(); ++idx )
+	{
+		if( !auxColumns[idx] )
+			return false;
+		if( auxColumns[idx]->tag == K_PERIOD )
+			continue;
+		if( auxColumns[idx]->tag != K_AS )
+			return false;
+		if( auxColumns[idx]->left->tag == K_PERIOD )
+			continue;
+		if( !(auxColumns[idx]->left->tag == K_MIN || 
+			auxColumns[idx]->left->tag == K_MAX) )
+			return false;
+		minMaxCol = idx;
+		_min = auxColumns[idx]->left->tag == K_MIN;
+		++nrMinMaxCols;
+	}
+	if( nrMinMaxCols != 1 )
+		return false;
+
+	aq::tnode* pGroup = pSelect;
+	while( pGroup->next && pGroup->next->tag != K_GROUP )
+		pGroup = pGroup->next;
+	if( !pGroup->next )
+		return false;
+
+	aq::tnode* pFrom = find_main_node( pSelect, K_FROM );
+	if( !pFrom )
+		return false;
+	std::vector<aq::tnode*> tables;
+	commaListToNodeArray( pFrom->left, tables );
+	
+	if( tables.size() != 1 )
+		return false; //no min+group by or max+group by + from 1 table
+
+	this->tableName = tables[0]->getData().val_str;
+
+	this->pGroupBy = pGroup->next;
+	pGroup->next = pGroup->next->next;
+
+	aq::tnode* pAux = auxColumns[minMaxCol]->left;
+	auxColumns[minMaxCol]->left = auxColumns[minMaxCol]->left->left;
+	delete pAux ;
+
+	//make copies of the column nodes because they belong to the query
+	//and the query might get modified before modifyTmpFiles is called
+	for( size_t idx = 0; idx < auxColumns.size(); ++idx )
+		this->columns.push_back( aq::clone_subtree(auxColumns[idx]) );
+
+	return true;
+}
+
+//------------------------------------------------------------------------------
 void getRowItemName( aq::tnode* pNode, std::string& name)
 {
   if (pNode->tag == K_PERIOD)
@@ -31,7 +103,14 @@ void getRowItemName( aq::tnode* pNode, std::string& name)
   }
   else
   {
-    name = pNode->getData().val_str;
+    if (pNode->getDataType() == aq::tnode::tnodeDataType::NODE_DATA_STRING)
+    {
+      name = pNode->getData().val_str;
+    }
+    else
+    {
+      name = aq::id_to_string(pNode->getTag());
+    }
   }
 }
 
@@ -856,77 +935,6 @@ bool isMonoTable(aq::tnode * query, std::string& tableName)
 }
 
 //------------------------------------------------------------------------------
-SolveMinMaxGroupBy::SolveMinMaxGroupBy(): pGroupBy(NULL), _min(true)
-{
-}
-
-//------------------------------------------------------------------------------
-SolveMinMaxGroupBy::~SolveMinMaxGroupBy()
-{
-	delete_subtree( this->pGroupBy );
-	for( size_t idx = 0; idx < this->columns.size(); ++idx )
-		delete_subtree( this->columns[idx] );
-}
-
-//------------------------------------------------------------------------------
-bool SolveMinMaxGroupBy::checkAndClear( aq::tnode* pSelect )
-{
-	std::vector<aq::tnode*> auxColumns;
-	commaListToNodeArray( pSelect->left, auxColumns );
-	int nrMinMaxCols = 0;
-	for( size_t idx = 0; idx < auxColumns.size(); ++idx )
-	{
-		if( !auxColumns[idx] )
-			return false;
-		if( auxColumns[idx]->tag == K_PERIOD )
-			continue;
-		if( auxColumns[idx]->tag != K_AS )
-			return false;
-		if( auxColumns[idx]->left->tag == K_PERIOD )
-			continue;
-		if( !(auxColumns[idx]->left->tag == K_MIN || 
-			auxColumns[idx]->left->tag == K_MAX) )
-			return false;
-		minMaxCol = idx;
-		_min = auxColumns[idx]->left->tag == K_MIN;
-		++nrMinMaxCols;
-	}
-	if( nrMinMaxCols != 1 )
-		return false;
-
-	aq::tnode* pGroup = pSelect;
-	while( pGroup->next && pGroup->next->tag != K_GROUP )
-		pGroup = pGroup->next;
-	if( !pGroup->next )
-		return false;
-
-	aq::tnode* pFrom = find_main_node( pSelect, K_FROM );
-	if( !pFrom )
-		return false;
-	std::vector<aq::tnode*> tables;
-	commaListToNodeArray( pFrom->left, tables );
-	
-	if( tables.size() != 1 )
-		return false; //no min+group by or max+group by + from 1 table
-
-	this->tableName = tables[0]->getData().val_str;
-
-	this->pGroupBy = pGroup->next;
-	pGroup->next = pGroup->next->next;
-
-	aq::tnode* pAux = auxColumns[minMaxCol]->left;
-	auxColumns[minMaxCol]->left = auxColumns[minMaxCol]->left->left;
-	delete pAux ;
-
-	//make copies of the column nodes because they belong to the query
-	//and the query might get modified before modifyTmpFiles is called
-	for( size_t idx = 0; idx < auxColumns.size(); ++idx )
-		this->columns.push_back( aq::clone_subtree(auxColumns[idx]) );
-
-	return true;
-}
-
-//------------------------------------------------------------------------------
 void readTmpFile( const char* filePath, std::vector<llong>& vals )
 {
 	FILE *pFIn = fopenUTF8( filePath, "rb" );
@@ -1470,6 +1478,240 @@ void transformExpression(const aq::Base& baseDesc, const aq::TProjectSettings& s
       }
     }
   }
+}
+
+// from main verbs
+
+//------------------------------------------------------------------------------
+void getAllColumns(aq::tnode* pNode, std::vector<aq::tnode*>& columns)
+{
+	if( !pNode || pNode->inf == 1 && pNode->tag != K_COMMA || pNode->tag == K_JNO )
+		return;
+	if( pNode->tag == K_PERIOD )
+	{
+		//only if the column name is unique
+		bool found = false;
+		for( size_t idx = 0; idx < columns.size(); ++idx )
+		{
+			if( !columns[idx] )
+				continue;
+
+			std::string table1(columns[idx]->left->getData().val_str);
+			boost::to_upper(table1);
+			std::string table2(pNode->left->getData().val_str);
+			boost::to_upper(table2);
+			std::string col1(columns[idx]->right->getData().val_str);
+			boost::to_upper(col1);
+			std::string col2(pNode->right->getData().val_str);
+			boost::to_upper(col2);
+
+			if( columns[idx]->tag == K_PERIOD &&
+				table1 == table2 && col1 == col2 )
+			{
+				found = true;
+				break;
+			}
+		}
+		if( !found )
+		{
+			columns.push_back( aq::clone_subtree(pNode) );
+			pNode = NULL;
+		}
+		return;
+	}
+	getAllColumns( pNode->left, columns );
+	getAllColumns( pNode->right, columns );
+	getAllColumns( pNode->next, columns );
+}
+
+//------------------------------------------------------------------------------
+void extractName( aq::tnode* pNode, std::string& name )
+{
+	if( !pNode )
+		return;
+	if( pNode->tag == K_AS )
+	{
+		name += pNode->right->getData().val_str;
+	}
+	else if( pNode->tag == K_PERIOD )
+	{
+		if( name != "" )
+			name += " ";
+		name += pNode->left->getData().val_str;
+		name += ".";
+		name += pNode->right->getData().val_str;
+	}
+	else if( pNode->tag == K_COLUMN )
+	{
+		name += pNode->getData().val_str;
+	}
+	else
+	{
+		std::string idstr = std::string( id_to_string( pNode->tag ) );
+		if( idstr != "" )
+		{
+			if( name != "" )
+				name += " ";
+			name += idstr;
+		}
+		extractName( pNode->left, name );
+		extractName( pNode->right, name );
+	}
+}
+
+//------------------------------------------------------------------------------
+void processNot( aq::tnode*& pNode, bool applyNot )
+{
+	if( !pNode )
+		return;
+	switch( pNode->tag )
+	{
+	case K_NOT:
+		{
+			aq::tnode* auxNode = pNode;
+			pNode = pNode->left;
+			auxNode->left = NULL;
+			delete auxNode ;
+			processNot( pNode, !applyNot );
+		}
+		break;
+	case K_AND:
+		{
+			if( applyNot )
+				pNode->tag = K_OR;
+			processNot( pNode->left, applyNot );
+			processNot( pNode->right, applyNot );
+		}
+		break;
+	case K_OR:
+		{
+			if( applyNot )
+				pNode->tag = K_AND;
+			processNot( pNode->left, applyNot );
+			processNot( pNode->right, applyNot );
+		}
+		break;
+	case K_LT:
+		if( applyNot )
+			pNode->tag = K_GEQ;
+		break;
+	case K_LEQ:
+		if( applyNot )
+			pNode->tag = K_GT;
+		break;
+	case K_GT:
+		if( applyNot )
+			pNode->tag = K_LEQ;
+		break;
+	case K_GEQ:
+		if( applyNot )
+			pNode->tag = K_LT;
+		break;
+	case K_JSEQ:
+		if( applyNot )
+			pNode->tag = K_JINF;
+		break;
+	case K_JSUP:
+		if( applyNot )
+			pNode->tag = K_JIEQ;
+		break;
+	case K_JINF:
+		if( applyNot )
+			pNode->tag = K_JSEQ;
+		break;
+	case K_JIEQ:
+		if( applyNot )
+			pNode->tag = K_JSUP;
+		break;
+	case K_JEQ:
+		if( applyNot )
+			pNode->tag = K_JNEQ;
+		break;
+	case K_JAUTO:
+		if( applyNot )
+			pNode->tag = K_JAUTO;
+		break;
+	case K_JNEQ:
+		if( applyNot )
+			pNode->tag = K_JEQ;
+		break;
+	case K_EQ:
+		if( applyNot )
+			pNode->tag = K_NEQ;
+		break;
+	case K_NEQ:
+		if( applyNot )
+			pNode->tag = K_EQ;
+		break;
+	case K_BETWEEN:
+		if( applyNot )
+			pNode->tag = K_NOT_BETWEEN;
+		break;
+	case K_NOT_BETWEEN:
+		if( applyNot )
+			pNode->tag = K_BETWEEN;
+		break;
+	case K_LIKE:
+		if( applyNot )
+			pNode->tag = K_NOT_LIKE;
+		break;
+	case K_NOT_LIKE:
+		if( applyNot )
+			pNode->tag = K_LIKE;
+		break;
+	case K_IN:
+		if( applyNot )
+			pNode->tag = K_NOT_IN;
+		break;
+	case K_NOT_IN:
+		if( applyNot )
+			pNode->tag = K_IN;
+		break;
+	case K_JNO:
+		break;
+	case K_IS:
+		if( !pNode->right )
+			throw generic_error(generic_error::NOT_IMPLEMENTED, "");
+		if( pNode->right->tag == K_NOT && 
+			pNode->right->left && pNode->right->left->tag == K_NULL )
+		{
+			aq::tnode* auxNode = pNode->right;
+			pNode->right = pNode->right->left;
+			delete auxNode ;
+		}
+		else if( pNode->right->tag == K_NULL )
+		{
+			aq::tnode* auxNode = new aq::tnode( K_NOT );
+			auxNode->left = pNode->right;
+			pNode->right = auxNode;
+		}
+		else throw generic_error(generic_error::NOT_IMPLEMENTED, "");
+		break;
+	default:
+		throw generic_error(generic_error::NOT_IMPLEMENTED, "operator doesn't support NOT");
+	}	
+}
+
+//------------------------------------------------------------------------------
+void PreProcessSelect(aq::tnode *pNode, Base& BaseDesc)
+{
+	int	nRet = 0;
+	TColumn2TablesArray * parrC2T = create_column_map_for_tables_used_in_select(pNode, &BaseDesc);
+
+	if (parrC2T != NULL) 
+  {
+		nRet = enforce_qualified_column_reference(pNode, parrC2T);
+		delete_column2tables_array(parrC2T);
+		if (nRet != 0) 
+    {
+			aq::Logger::getInstance().log(AQ_ERROR, "Function enforce_qualified_column_reference() returned error : %d !\n", nRet);
+		}
+	} 
+  else 
+  {
+		aq::Logger::getInstance().log(AQ_ERROR, "Function create_column_map_for_tables_used_in_select() returned NULL !\n");
+		throw generic_error(generic_error::INVALID_QUERY, "Error : No or bad tables specified in SQL SELECT ... FROM Statement");
+	}
 }
 
 }

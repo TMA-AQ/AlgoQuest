@@ -8,6 +8,7 @@
 #include <boost/property_tree/ini_parser.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/replace.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
 #include <boost/filesystem.hpp>
 
 namespace aq
@@ -22,6 +23,8 @@ TProjectSettings::TProjectSettings()
 	dbDesc(""),
 	aqEngine("aq-engine"),
   aqLoader("aq-loader"),
+  aqHome(""),
+  aqName(""),
 	rootPath(""),
   workingPath(""),
   tmpRootPath(""),
@@ -53,6 +56,8 @@ TProjectSettings::TProjectSettings(const TProjectSettings& obj)
 	dbDesc(obj.dbDesc),
 	aqEngine(obj.aqEngine),
   aqLoader(obj.aqLoader),
+  aqHome(obj.aqHome),
+  aqName(obj.aqName),
 	rootPath(obj.rootPath),
   workingPath(obj.workingPath),
   tmpRootPath(obj.tmpRootPath),
@@ -89,6 +94,8 @@ TProjectSettings& TProjectSettings::operator=(const TProjectSettings& obj)
     dbDesc = obj.dbDesc;
 		aqEngine = obj.aqEngine;
     aqLoader = obj.aqLoader;
+    aqHome = obj.aqHome;
+    aqName = obj.aqName;
 		rootPath = obj.rootPath;
     workingPath = obj.workingPath;
 		tmpRootPath = obj.tmpRootPath;
@@ -122,9 +129,20 @@ void TProjectSettings::load(const std::string& iniFile, const std::string& query
 template <class T>
 T get_opt_value(boost::property_tree::ptree& pt, const char * key, T default_value)
 {
-  boost::optional<T> opt;
-  pt.get_optional<size_t>(boost::property_tree::ptree::path_type(key));
+  boost::optional<T> opt = pt.get_optional<T>(boost::property_tree::ptree::path_type(key));
   if (opt.is_initialized()) return opt.get();
+  else return default_value;
+}
+
+bool get_opt_value(boost::property_tree::ptree& pt, const char * key, bool default_value)
+{
+  boost::optional<std::string> opt = pt.get_optional<std::string>(boost::property_tree::ptree::path_type(key));
+  if (opt.is_initialized()) 
+  {
+    std::string s = opt.get();
+    boost::to_upper(s);
+    return s == "TRUE" || s == "YES" || s == "1";
+  }
   else return default_value;
 }
 
@@ -148,10 +166,11 @@ void TProjectSettings::load(std::istream& is)
     std::cout << is << std::endl;
     
     // all option are optional
-    this->rootPath = get_opt_value(pt, "root-folder", this->rootPath);
-		if (*this->rootPath.rbegin() != '/') this->rootPath += "/";
-    boost::algorithm::replace_all(this->rootPath, "\\", "/");
-    boost::algorithm::trim(this->rootPath);
+    this->aqHome = get_opt_value(pt, "aq-home", this->aqHome);
+    boost::algorithm::replace_all(this->aqHome, "\\", "/");
+    boost::algorithm::trim(this->aqHome);
+		if (!this->aqHome.empty() && (*this->aqHome.rbegin() != '/')) this->aqHome += "/";
+    this->aqName = get_opt_value(pt, "aq-name", this->aqName);
     this->tmpRootPath = get_opt_value(pt, "tmp-folder", this->rootPath + "data_orga/tmp/");
     this->fieldSeparator = get_opt_value(pt, "field-separator", ';');
     this->aqEngine = get_opt_value(pt, "aq-engine", this->aqEngine);
@@ -161,6 +180,10 @@ void TProjectSettings::load(std::istream& is)
     this->process_thread = get_opt_value(pt, "process-thread", this->process_thread);
     this->displayCount = get_opt_value(pt, "display-count", this->displayCount);
     this->trace = get_opt_value(pt, "trace", this->trace);
+
+    //
+    //
+    this->initPath(this->aqHome + this->aqName);
 
     //
     // Change '\' by '/'

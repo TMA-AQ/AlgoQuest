@@ -3,7 +3,6 @@
 #include "parser/SQLParser.h"
 #include "parser/sql92_grm_tab.hpp"
 #include "Base.h"
-#include "Table.h"
 #include <vector>
 #include <list>
 #include <exception>
@@ -20,6 +19,25 @@ extern const int inverseTypes[];
 namespace aq
 {
  
+/// should be somewhere else
+class SolveMinMaxGroupBy
+{
+public:
+	SolveMinMaxGroupBy();
+	~SolveMinMaxGroupBy();
+	bool checkAndClear( aq::tnode* pSelect );
+	void modifyTmpFiles(	const char* tmpPath, 
+							int selectLevel,
+							Base& BaseDesc, 
+							TProjectSettings& Settings );
+private:
+	aq::tnode* pGroupBy;
+	std::vector<aq::tnode*> columns;
+	bool _min;
+	size_t minMaxCol;
+	std::string tableName;
+};
+
 void addAlias( aq::tnode* pNode );
 void addConditionsToWhere( aq::tnode* pCond, aq::tnode* pStart );
 void addInnerOuterNodes( aq::tnode* pNode, int leftTag, int rightTag );
@@ -44,24 +62,6 @@ void changeTableNames(	aq::tnode* pIntSelectAs, aq::tnode* pInteriorSelect, aq::
 void changeColumnNames(	aq::tnode* pIntSelectAs, aq::tnode* pInteriorSelect, aq::tnode* pExteriorSelect, bool keepAlias );
 aq::tnode * getJoin(aq::tnode* pNode);
 bool isMonoTable(aq::tnode* query, std::string& tableName);
-
-class SolveMinMaxGroupBy
-{
-public:
-	SolveMinMaxGroupBy();
-	~SolveMinMaxGroupBy();
-	bool checkAndClear( aq::tnode* pSelect );
-	void modifyTmpFiles(	const char* tmpPath, 
-							int selectLevel,
-							Base& BaseDesc, 
-							TProjectSettings& Settings );
-private:
-	aq::tnode* pGroupBy;
-	std::vector<aq::tnode*> columns;
-	bool _min;
-	size_t minMaxCol;
-	std::string tableName;
-};
 
 void readTmpFile( const char* filePath, std::vector<llong>& vals );
 void writeTmpFile(	const char* filePath, const std::vector<llong>& vals, size_t startIdx, size_t endIdx );
@@ -107,5 +107,22 @@ int is_column_reference(const aq::tnode * pNode);
 void dateNodeToBigInt(tnode * pNode);
 
 void transformExpression(const aq::Base& baseDesc, const aq::TProjectSettings& settings, aq::tnode * tree);
+
+void getAllColumns(aq::tnode* pNode, std::vector<aq::tnode*>& columns);
+
+void extractName(aq::tnode* pNode, std::string& name);
+
+/// \brief traverse subtree recursively and negate operators when needed
+///
+/// if there is a NOT to be applied and the current node is
+/// NOT: delete this node and make the child node this node
+///      if no NOT applies, apply NOT to child node
+///      if a NOT already applies, do not apply NOT to child node
+/// <, <=, >, >=, =, <>, BETWEEN, LIKE : change into the inverse version
+/// OR : change to AND, apply NOT on children
+/// AND: change to OR, apply NOT on children
+void processNot(aq::tnode*& pNode, bool applyNot);
+
+void PreProcessSelect(aq::tnode *pNode, Base& BaseDesc);
 
 }

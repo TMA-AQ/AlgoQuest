@@ -112,7 +112,7 @@ TID2String g_id2str[] = {
 	{ K_LIST,			"LIST"			},
 	{ K_OUTREF,			"OUTREF"		},
 	{ K_SOURCE,			"SOURCE"		},
-	{ K_STAR,			"K_STAR"		},
+	{ K_STAR,			"*"		},
 	{ K_START,			"START"			},
 	{ K_TO,				"TO"			},
 /*

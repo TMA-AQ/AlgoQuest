@@ -22,30 +22,6 @@ using namespace std;
 namespace aq
 {
 
-//------------------------------------------------------------------------------
-/* bExit == 1 - exit the app. - ex. for memmory allocation failed */
-void report_error( const char* pszMsg, int bExit ) {
-	int errnum;
-	char szBuf[ 1000 ];
-
-	errnum = errno;	/* Save it for later use */
-
-	if ( pszMsg != NULL ) {
-		sprintf( szBuf, "Error = %s : %s\n", pszMsg, strerror( errno ) );
-		yyerror( szBuf );
-	} else {
-		sprintf( szBuf, "Error : %s\n", strerror( errno ) );
-		yyerror( szBuf );
-	}
-
-	if ( bExit == 1 ) {
-		if ( errnum != 0 )
-			exit( -errnum );
-		else
-			exit( -1 );
-	}
-}
-
 tnode::tnode(short _tag)
   : 
   left(NULL),
@@ -148,7 +124,7 @@ void tnode::set_string_data(const char* pszStr)
       this->data.val_str = (char*)malloc( sizeof( char ) * nLen );
       if (this->data.val_str == NULL) 
       {
-        report_error( "Not enough memory", EXIT_ON_MEM_ERROR );
+        throw aq::generic_error(aq::generic_error::GENERIC, "Not enough memory [%u]", EXIT_ON_MEM_ERROR);
       }
       this->nStrBufCb = nLen;				/* Set Buffer Len */
       this->eNodeDataType	= NODE_DATA_STRING; /* Set Correct Data Type */
@@ -193,8 +169,7 @@ void tnode::append_string_data(char* pszStr)
 
     pszBuf = (char*)malloc( sizeof( char ) * nLen );
     if ( pszBuf == NULL ) {
-      report_error( "Not enough memory", EXIT_ON_MEM_ERROR );
-      return;
+      throw aq::generic_error(aq::generic_error::GENERIC, "Not enough memory [%u]", EXIT_ON_MEM_ERROR);
     }
 
     strcpy( pszBuf, this->data.val_str );	/* Keep the old string */

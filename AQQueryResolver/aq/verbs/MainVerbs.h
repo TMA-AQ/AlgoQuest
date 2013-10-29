@@ -10,7 +10,6 @@ namespace verb {
 //------------------------------------------------------------------------------
 class SelectVerb: public VerbNode
 {
-	VERB_DECLARE( SelectVerb );
 public:
 	virtual int getVerbType() const { return K_SELECT; };
 	virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
@@ -35,7 +34,6 @@ private:
 //------------------------------------------------------------------------------
 class WhereVerb: public VerbNode
 {
-	VERB_DECLARE( WhereVerb );
 public:
 	virtual int getVerbType() const { return K_WHERE; };
 	virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
@@ -49,7 +47,6 @@ public:
 //------------------------------------------------------------------------------
 class OrderVerb: public VerbNode
 {
-	VERB_DECLARE( OrderVerb );
 public:
 	virtual int getVerbType() const { return K_ORDER; };
 	virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
@@ -63,7 +60,6 @@ public:
 //------------------------------------------------------------------------------
 class ByVerb: public VerbNode
 {
-	VERB_DECLARE( ByVerb );
 public:
 	virtual int getVerbType() const { return K_BY; };
 	virtual bool changeQuery( aq::tnode* pStart, aq::tnode* pNode,
@@ -76,7 +72,6 @@ public:
 //------------------------------------------------------------------------------
 class FromVerb: public VerbNode
 {
-	VERB_DECLARE( FromVerb );
 public:
 	virtual int getVerbType() const { return K_FROM; };
 	virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
@@ -96,7 +91,6 @@ private:
 //------------------------------------------------------------------------------
 class GroupVerb: public VerbNode
 {
-	VERB_DECLARE( GroupVerb );
 public:
 	virtual int getVerbType() const { return K_GROUP; };
   virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
@@ -120,7 +114,6 @@ private:
 //------------------------------------------------------------------------------
 class HavingVerb: public VerbNode
 {
-	VERB_DECLARE( HavingVerb );
 public:
 	virtual int getVerbType() const { return K_HAVING; };
 	virtual bool preprocessQuery(	aq::tnode* pStart, aq::tnode* pNode, 

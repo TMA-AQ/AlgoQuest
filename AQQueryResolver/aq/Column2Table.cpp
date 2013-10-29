@@ -1,13 +1,6 @@
 #include "Column2Table.h"
 #include "Base.h"
 #include "parser/sql92_grm_tab.hpp"
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>		// One of this required by "toupper()"
-#include <ctype.h>		// One of this required by "toupper()"
-
-//------------------------------------------------------------------------------
-extern int yyerror ( const char *pszMsg );
 
 namespace aq
 {
@@ -38,17 +31,17 @@ int get_table_and_column_id_from_table_array( const Base* baseDesc,
 													unsigned int *pnTableId, 
 												  unsigned int *pnColumnId, 
 												  unsigned int *pnColumnSize,
-												  ColumnType *peColumnType ) {
+												  ColumnType *peColumnType ) 
+{
 	
 	Table::Ptr table = baseDesc->getTable( std::string(pszTableName) );
 
 	if ( pnTableId != NULL )
 		*pnTableId = static_cast<unsigned int>(table->ID);
 
-	if ( get_column_id_from_table( *table, pszColumnName, pnColumnId, pnColumnSize, peColumnType ) != 0 ) {
-#ifdef CREATE_LOG
-		Log( "get_table_and_column_id_from_table_array() : Function get_column_id_from_table( T:<%s>, C:<%s> ) returned NULL !\n", pszTableName, pszColumnName );
-#endif
+	if ( get_column_id_from_table( *table, pszColumnName, pnColumnId, pnColumnSize, peColumnType ) != 0 ) 
+  {
+		aq::Logger::getInstance().log(AQ_ERROR, "get_table_and_column_id_from_table_array() : Function get_column_id_from_table( T:<%s>, C:<%s> ) returned NULL !\n", pszTableName, pszColumnName);
 		return -1;
 	}
 
@@ -56,7 +49,8 @@ int get_table_and_column_id_from_table_array( const Base* baseDesc,
 }
 
 //------------------------------------------------------------------------------
-TColumn2Tables* new_column2tables( const char *pszColumnName ) {
+TColumn2Tables* new_column2tables( const char *pszColumnName ) 
+{
 	TColumn2Tables* pC2T;
 	
 	if ( pszColumnName == NULL )
@@ -64,14 +58,14 @@ TColumn2Tables* new_column2tables( const char *pszColumnName ) {
 
 	pC2T = (TColumn2Tables*)malloc( sizeof( TColumn2Tables ) );
 	if ( pC2T == NULL ) {
-		report_error( "Not enough memory", EXIT_ON_MEM_ERROR );
+    throw aq::generic_error(aq::generic_error::GENERIC, "Not enough memory [%u]", EXIT_ON_MEM_ERROR);
 		return NULL;
 	}
 	memset( pC2T, 0, sizeof( TColumn2Tables ) );
 
 	pC2T->m_pszColumnName = (char*)malloc( ( strlen( pszColumnName ) + 1 ) * sizeof( char ) );
 	if ( pC2T->m_pszColumnName == NULL ) {
-		report_error( "Not enough memory", EXIT_ON_MEM_ERROR );
+    throw aq::generic_error(aq::generic_error::GENERIC, "Not enough memory [%u]", EXIT_ON_MEM_ERROR);
 		return NULL;
 	}
 
@@ -114,7 +108,7 @@ TColumn2Tables* add_table_name( TColumn2Tables *pC2T, const char *pszTableName )
 	/* Allocate new pointer array */
 	ppTableNames = (char**)malloc( ( pC2T->m_nTableCount + 1 ) * sizeof( char* ) );
 	if ( ppTableNames == NULL ) {
-		report_error( "Not enough memory", EXIT_ON_MEM_ERROR );
+    throw aq::generic_error(aq::generic_error::GENERIC, "Not enough memory [%u]", EXIT_ON_MEM_ERROR);
 		return NULL;
 	}
 
@@ -130,7 +124,7 @@ TColumn2Tables* add_table_name( TColumn2Tables *pC2T, const char *pszTableName )
 	/* Allocate buffer for column name */
 	pC2T->m_pparrTableNames[ pC2T->m_nTableCount ] = (char*)malloc( strlen( pszTableName ) + 1 );
 	if ( pC2T->m_pparrTableNames[ pC2T->m_nTableCount ] == NULL ) {
-		report_error( "Not enough memory", EXIT_ON_MEM_ERROR );
+    throw aq::generic_error(aq::generic_error::GENERIC, "Not enough memory [%u]", EXIT_ON_MEM_ERROR);
 		return NULL;
 	}
 
@@ -149,7 +143,7 @@ TColumn2TablesArray* new_column2tables_array( void ) {
 	/* Allocate new pointer array */
 	parrC2T = (TColumn2TablesArray*)malloc( sizeof( TColumn2TablesArray ) );
 	if ( parrC2T == NULL ) {
-		report_error( "Not enough memory", EXIT_ON_MEM_ERROR );
+    throw aq::generic_error(aq::generic_error::GENERIC, "Not enough memory [%u]", EXIT_ON_MEM_ERROR);
 		return NULL;
 	}
 	memset( parrC2T, 0, sizeof( TColumn2TablesArray ) );
@@ -182,7 +176,7 @@ TColumn2TablesArray* add_column2tables( TColumn2TablesArray* parrC2T, TColumn2Ta
 	/* Allocate new pointer array */
 	ppC2TTmp = (TColumn2Tables**)malloc( ( parrC2T->m_nColumnCount + 1 ) * sizeof( TColumn2Tables* ) );
 	if ( ppC2TTmp == NULL ) {
-		report_error( "Not enough memory", EXIT_ON_MEM_ERROR );
+    throw aq::generic_error(aq::generic_error::GENERIC, "Not enough memory [%u]", EXIT_ON_MEM_ERROR);
 		return NULL;
 	}
 
@@ -215,7 +209,7 @@ TColumn2Tables* find_column_in_column2tables_array( TColumn2TablesArray* parrC2T
 	/* Create Temporary String to allow modification by strtoupr() */
 	pszTmpColumnName = (char*)malloc( ( strlen( pszColumnName ) + 1 ) * sizeof( char ) );
 	if ( pszTmpColumnName == NULL ) {
-		report_error( "Not enough memory", EXIT_ON_MEM_ERROR );
+    throw aq::generic_error(aq::generic_error::GENERIC, "Not enough memory [%u]", EXIT_ON_MEM_ERROR);
 		return NULL;
 	}
 	strcpy( pszTmpColumnName, pszColumnName );
@@ -269,46 +263,54 @@ TColumn2TablesArray* add_table_columns_to_column2tables_array(	TColumn2TablesArr
 }
 
 //------------------------------------------------------------------------------
-/* Return -1 on error, 0 on success */
-int add_tnode_tables( aq::tnode *pNode, Base* baseDesc, TColumn2TablesArray* parrC2T ) {
+// Return -1 on error, 0 on success
+int add_tnode_tables( aq::tnode *pNode, Base* baseDesc, TColumn2TablesArray* parrC2T ) 
+{
 	/* Check node type against K_COMMA, K_IDENT */
-	if ( pNode->tag == K_COMMA ) {
+	if ( pNode->tag == K_COMMA ) 
+  {
 		if ( add_tnode_tables( pNode->left, baseDesc, parrC2T ) != 0 ) 
 			return -1;
 		if ( add_tnode_tables( pNode->right, baseDesc, parrC2T ) != 0 ) 
 			return -1;
-	} else if ( pNode->tag == K_IDENT ) {
-		if ( add_table_columns_to_column2tables_array( parrC2T, baseDesc, pNode->getData().val_str ) == NULL ) {
-#ifdef CREATE_LOG
-		Log( "add_aq::tnode_tables() : Function add_table_columns_to_column2tables_array() returned -1 (error)!\n" );
-#endif
+	} 
+  else if ( pNode->tag == K_IDENT ) 
+  {
+		if ( add_table_columns_to_column2tables_array( parrC2T, baseDesc, pNode->getData().val_str ) == NULL ) 
+    {
+      aq::Logger::getInstance().log(AQ_ERROR, "add_aq::tnode_tables() : Function add_table_columns_to_column2tables_array() returned -1 (error)!\n");
 			return -1;
 		}
-	} else if ( pNode->tag == K_INNER || pNode->tag == K_LEFT || pNode->tag == K_RIGHT || 
-				pNode->tag == K_FULL || pNode->tag == K_OUTER || pNode->tag == K_JOIN ) {
+	} 
+  else if ( pNode->tag == K_INNER || pNode->tag == K_LEFT || pNode->tag == K_RIGHT || 
+    pNode->tag == K_FULL || pNode->tag == K_OUTER || pNode->tag == K_JOIN ) 
+  {
 		/* K_INNER, K_LEFT, K_RIGHT, K_FULL, K_OUTER, K_JOIN */
-		if ( add_tnode_tables( pNode->left, baseDesc, parrC2T ) != 0 ) 
+    if ( add_tnode_tables( pNode->left, baseDesc, parrC2T ) != 0 ) 
 			return -1;
-	} else if ( pNode->tag == K_AS ) {
+	} 
+  else if ( pNode->tag == K_AS ) 
+  {
 		/* correlation_name */
 		if ( add_tnode_tables( pNode->left, baseDesc, parrC2T ) != 0 ) 
 			return -1;
-	} else if ( pNode->tag == K_SELECT ) {
+	} 
+  else if ( pNode->tag == K_SELECT ) 
+  {
 		/* K_SELECT -> find K_FROM */
 		aq::tnode *pNodeFound;
 		pNodeFound = find_main_node( pNode, K_FROM );
-		if ( pNodeFound == NULL ) {
-#ifdef CREATE_LOG
-			Log( "add_aq::tnode_tables() : Function find_main_node() returned NULL !\n" );
-#endif
+		if ( pNodeFound == NULL ) 
+    {
+      aq::Logger::getInstance().log(AQ_ERROR, "add_aq::tnode_tables() : Function find_main_node() returned NULL !\n");
 			return -1;
 		}
 		if ( add_tnode_tables( pNodeFound->left, baseDesc, parrC2T ) != 0 )
 			return -1;
-	} else {
-#ifdef CREATE_LOG
-		Log( "add_aq::tnode_tables() : Invalid TAG (%u) encountered !\n", pNode->tag );
-#endif
+	} 
+  else 
+  {
+		aq::Logger::getInstance().log(AQ_ERROR, "add_aq::tnode_tables() : Invalid TAG (%u) encountered !\n", pNode->tag);
 		return -1;
 	}
 
@@ -316,41 +318,39 @@ int add_tnode_tables( aq::tnode *pNode, Base* baseDesc, TColumn2TablesArray* par
 }
 
 //------------------------------------------------------------------------------
-TColumn2TablesArray* create_column_map_for_tables_used_in_select( aq::tnode *pNode, Base* baseDesc ) {
-	aq::tnode *pNodeFound;
-	TColumn2TablesArray* parrC2T;
+TColumn2TablesArray* create_column_map_for_tables_used_in_select( aq::tnode *pNode, Base* baseDesc )
+{
+	aq::tnode * pNodeFound = NULL;
+	TColumn2TablesArray * parrC2T = NULL;
 
-	/* Find K_FROM node */
 	pNodeFound = find_main_node( pNode, K_FROM );
-	if ( pNodeFound == NULL ) {
-#ifdef CREATE_LOG
-		Log( "create_column_map_for_tables_used_in_select() : Function find_main_node() returned NULL !\n" );
-#endif
+	if ( pNodeFound == NULL ) 
+  {
+		aq::Logger::getInstance().log(AQ_ERROR, "create_column_map_for_tables_used_in_select() : Function find_main_node() returned NULL !\n");
 		return NULL;
 	}
 
 	parrC2T = new_column2tables_array();
-	if ( parrC2T == NULL )
-		return NULL;
-
-	if ( add_tnode_tables( pNodeFound->left, baseDesc, parrC2T ) != 0 ) {
-		delete_column2tables_array( parrC2T );
-		return NULL;
+	if ((parrC2T != NULL) && (add_tnode_tables( pNodeFound->left, baseDesc, parrC2T ) != 0)) 
+  {
+    aq::Logger::getInstance().log(AQ_ERROR, "add_tnode_tables failed\n");
+		delete_column2tables_array(parrC2T);
+    parrC2T = NULL;
 	}
 	
 	return parrC2T;
 }
 
 //------------------------------------------------------------------------------
-void enforce_qualified_column_reference( aq::tnode *pNode, TColumn2TablesArray* parrC2T, int *pErr ) {
-	if ( pErr == NULL )
-		return;
+int enforce_qualified_column_reference( aq::tnode *pNode, TColumn2TablesArray* parrC2T) 
+{
+  int pErr = 0;
 
 	if ( pNode == NULL )
-		return;
+		return -1;
 
 	if ( parrC2T == NULL )
-		return;
+		return -1;
 
 	std::vector<aq::tnode*> nodes;
 	nodes.push_back( pNode );
@@ -373,31 +373,31 @@ void enforce_qualified_column_reference( aq::tnode *pNode, TColumn2TablesArray* 
 		//reached a K_COLUMN without a K_PERIOD parent
 		TColumn2Tables* pC2T;
 		pC2T = find_column_in_column2tables_array( parrC2T, pNode->getData().val_str );
-		if ( pC2T != NULL ) {
-			if ( pC2T->m_nTableCount > 1 ) {
-				char szBuf[ 1000 ];
-				/* Error column name ambiguity ! */
-				sprintf( szBuf, "Column name ambiguity ! Multiple tables with same column name : <%s>", pNode->getData().val_str );
-				yyerror( szBuf );
-				*pErr = -1;
-			} else if ( pC2T->m_nTableCount == 0 ) {
-				char szBuf[ 1000 ];
-				/* Error no table with column name */
-				sprintf( szBuf, "No table with column name <%s> specified using FROM ... !", pNode->getData().val_str );
-				yyerror( szBuf );
-				*pErr = -2;
-			} else {
+		if ( pC2T != NULL ) 
+    {
+			if ( pC2T->m_nTableCount > 1 ) 
+      {
+				aq::Logger::getInstance().log(AQ_ERROR, "Column name ambiguity ! Multiple tables with same column name : <%s>", pNode->getData().val_str);
+				return -1;
+			} 
+      else if ( pC2T->m_nTableCount == 0 ) 
+      {
+				aq::Logger::getInstance().log(AQ_ERROR, "No table with column name <%s> specified using FROM ... !", pNode->getData().val_str);
+        return -2;
+			} 
+      else 
+      {
 				aq::tnode *pNodeColumn, *pNodeTable;
 				pNodeColumn = new aq::tnode( *pNode );
-				if ( pNodeColumn == NULL ) {
-					*pErr = -3;
-					return;
+				if ( pNodeColumn == NULL ) 
+        {
+					return -3;
 				}
 				pNodeTable = new aq::tnode( K_IDENT );
-				if ( pNodeTable == NULL ) {
-					delete pNodeColumn ;
-					*pErr = -4;
-					return;
+				if ( pNodeTable == NULL ) 
+        {
+          delete pNodeColumn ;
+					return -4;
 				}
 				pNodeTable->set_string_data( pC2T->m_pparrTableNames[ 0 ] );
 				pNode->tag = K_PERIOD;
@@ -407,6 +407,7 @@ void enforce_qualified_column_reference( aq::tnode *pNode, TColumn2TablesArray* 
 			}
 		}
 	}
+  return pErr;
 }
 
 }
