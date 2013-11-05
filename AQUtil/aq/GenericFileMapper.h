@@ -9,7 +9,14 @@ namespace aq
 class GenericFileMapper
 {
 public:
-	GenericFileMapper(const char * _filename);
+  enum mode_t
+  {
+    READ,
+    WRITE,
+    READ_WRITE,
+  };
+public:
+	GenericFileMapper(const char * _filename, const mode_t _mode = mode_t::READ);
 	~GenericFileMapper();
 
 	int read(void * buffer, size_t offset, size_t len);
@@ -24,6 +31,7 @@ private:
 	const std::string m_filename;
   size_t m_size;
   FILE * m_fd;
+  mode_t mode;
 };
 
 }

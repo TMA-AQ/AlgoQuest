@@ -57,8 +57,8 @@ ColumnMapper<T, M>::ColumnMapper(const char * _path, size_t _tableId, size_t _co
 		currentPart(0),
 		packetSize(_packetSize),
 		path(_path),
-    cache(_cache),
-    mode(_mode)
+    mode(_mode),
+    cache(_cache)
 {
 	std::string prmFilename = getPrmFileName(path.c_str(), tableId, columnId, currentPart);
 	std::string thesaurusFilename = getThesaurusFileName(path.c_str(), tableId, columnId, currentPart);
@@ -274,7 +274,7 @@ boost::shared_ptr<aq::ColumnMapper_Intf> build_column_mapper(const aq::ColumnTyp
                                                              const size_t               size, 
                                                              const size_t               packetSize,
                                                              const bool                 cache = false,
-                                                             typename const M::mode_t   mode = M::mode_t::READ)
+                                                             const typename M::mode_t   mode = M::mode_t::READ)
 {      
   boost::shared_ptr<aq::ColumnMapper_Intf> cm;
   switch(type)

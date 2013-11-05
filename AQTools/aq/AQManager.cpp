@@ -18,6 +18,8 @@
 #include <aq/ThesaurusReader.h>
 #include <aq/TreeUtilities.h>
 
+#include <fstream>
+
 #include <boost/array.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>

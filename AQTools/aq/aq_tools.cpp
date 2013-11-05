@@ -21,6 +21,7 @@
 #  define _fileno fileno
 #endif
 #include <iostream>
+#include <fstream>
 #include <boost/thread.hpp>
 #include <boost/program_options.hpp>
 #include <boost/algorithm/string/replace.hpp>

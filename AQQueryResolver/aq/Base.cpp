@@ -1,5 +1,6 @@
 #include "Base.h"
 #include <aq/Exceptions.h>
+#include <fstream>
 #include <boost/bind.hpp>
 #include <boost/scoped_array.hpp>
 #include <boost/algorithm/string/trim.hpp>

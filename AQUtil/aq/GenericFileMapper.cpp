@@ -6,10 +6,17 @@
 
 using namespace aq;
 
-GenericFileMapper::GenericFileMapper(const char * _filename)
-	: m_filename(_filename)
+GenericFileMapper::GenericFileMapper(const char * _filename, const mode_t _mode)
+	: m_filename(_filename), mode(_mode)
 {
-  this->m_fd = fopen(_filename, "rb");
+  if (_mode == mode_t::READ)
+  {
+    this->m_fd = fopen(_filename, "rb");
+  }
+  else
+  {
+    this->m_fd = fopen(_filename, "a+");
+  }
   if (this->m_fd != NULL)
   {
     fseek(this->m_fd, 0, SEEK_END);

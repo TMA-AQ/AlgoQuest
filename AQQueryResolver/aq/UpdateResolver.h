@@ -16,13 +16,13 @@ namespace aq
     UpdateResolver(aq::tnode * _statement, aq::Settings & _settings, aq::AQEngine_Intf * _aqEngine, aq::Base & _base);
     void solve();
 
-    int UpdateResolver::process(std::vector<Row>& rows);
-    RowProcess_Intf * UpdateResolver::clone();
-    const std::vector<aq::Column::Ptr>& UpdateResolver::getColumns() const;
-    void UpdateResolver::setColumn(std::vector<aq::Column::Ptr> _columns);
-    unsigned int UpdateResolver::getTotalCount() const;
+    int process(std::vector<Row>& rows);
+    RowProcess_Intf * clone();
+    const std::vector<aq::Column::Ptr>& getColumns() const;
+    void setColumn(std::vector<aq::Column::Ptr> _columns);
+    unsigned int getTotalCount() const;
 
-    void UpdateResolver::addColumn(aq::Column::Ptr column);
+    void addColumn(aq::Column::Ptr column);
 
   private:
     struct col_handler_t

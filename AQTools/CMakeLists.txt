@@ -5,7 +5,7 @@ project(AQTools)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib/${CMAKE_BUILD_TYPE})
 set(EXECUTABLE_OUTPUT_PATH bin/${CMAKE_BUILD_TYPE})
 
-find_package(Boost 1.50.0 COMPONENTS program_options thread filesystem system timer REQUIRED)
+find_package(Boost 1.50.0 COMPONENTS program_options thread filesystem system timer regex REQUIRED)
 
 include_directories(
   ${PROJECT_SOURCE_DIR}
