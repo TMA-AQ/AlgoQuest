@@ -6,7 +6,7 @@
 namespace aq
 {
 
-  AQEngineSimulate::AQEngineSimulate(aq::Base& _baseDesc, aq::TProjectSettings& _settings)
+  AQEngineSimulate::AQEngineSimulate(aq::Base& _baseDesc, aq::Settings& _settings)
     : baseDesc(_baseDesc), settings(_settings)
   {
     srand( static_cast<unsigned int>( time( NULL ) ) ); //temporaire

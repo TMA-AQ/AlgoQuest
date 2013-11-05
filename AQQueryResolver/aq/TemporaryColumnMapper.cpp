@@ -1,5 +1,6 @@
 #include "TemporaryColumnMapper.h"
 #include <aq/Utilities.h>
+#include <aq/Exceptions.h>
 #include <boost/lexical_cast.hpp>
 
 namespace aq
@@ -101,6 +102,18 @@ int TemporaryColumnMapper::loadValue(size_t offset, ColumnItem& value)
 		break;
 	}
   return rc;
+}
+
+int TemporaryColumnMapper::setValue(size_t, ColumnItem&)
+{
+  throw aq::generic_error(aq::generic_error::NOT_IMPLEMENTED, "set value not implemented for temporary column mapper");
+  return 0;
+}
+
+int TemporaryColumnMapper::append(ColumnItem& value)
+{
+  throw aq::generic_error(aq::generic_error::NOT_IMPLEMENTED, "append value not implemented for temporary column mapper");
+  return 0;
 }
 
 }

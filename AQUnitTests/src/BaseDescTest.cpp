@@ -48,8 +48,7 @@ BOOST_AUTO_TEST_CASE(test_base_desc)
   std::string baseFilename = "./base_desc_unit_test.aq";
   generate_raw_base_file(baseFilename.c_str());
 
-  aq::Base b1;
-  b1.loadFromRawFile(baseFilename.c_str());
+  aq::Base b1(baseFilename.c_str());
   
   aq::Base b2;
   aq::base_t baseDescHolder;

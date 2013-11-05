@@ -18,7 +18,7 @@ namespace aq
     // creator
     //--------------------------------------------------------------------------------------------
 
-    AQThreadRequest(int nbrThread, aq::TProjectSettings* settings, aq::AQEngine_Intf* aqEngine, aq::Base& baseDesc)
+    AQThreadRequest(int nbrThread, aq::Settings* settings, aq::AQEngine_Intf* aqEngine, aq::Base& baseDesc)
       : _nbrThread(nbrThread), _settings(settings), _aqEngine(aqEngine), _baseDesc(baseDesc)
     {
       srand(static_cast<unsigned int>(time(NULL))); //temporaire
@@ -133,7 +133,7 @@ namespace aq
     //--------------------------------------------------------------------------------------------
 
     int                                           _nbrThread;
-    aq::TProjectSettings*                         _settings;
+    aq::Settings*                         _settings;
     aq::AQEngine_Intf*                            _aqEngine;
     aq::Base&                                     _baseDesc;
 

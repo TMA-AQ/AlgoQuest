@@ -3,7 +3,7 @@
 namespace aq
 {
   
-ExpressionTransform::ExpressionTransform(const Base& _baseDesc, const TProjectSettings& _settings)
+ExpressionTransform::ExpressionTransform(const Base& _baseDesc, const Settings& _settings)
   : baseDesc(_baseDesc), settings(_settings)
 {
 }
@@ -175,22 +175,10 @@ void check_like::init()
   pNodeRes = NULL;
   bNotLike = (pNodeTmp->tag == K_NOT_LIKE);
 
-  cEscape = NO_ESCAPE_CHAR;
-  if (pNodeStr != NULL && pNodeStr->tag == K_ESCAPE) 
-  {
-    if (pNodeStr->right != NULL && pNodeStr->right->getData().val_str != NULL)
-      cEscape = pNodeStr->right->getData().val_str[ 0 ];
-    if (cEscape == '\0')
-      cEscape = NO_ESCAPE_CHAR;
-    pNodeStr = pNodeStr->left;
-  }
   if (pNodeStr == NULL)
     throw aq::generic_error(aq::generic_error::INVALID_QUERY, "");
 
-  if (PatternMatchingCreate( pNodeStr->getData().val_str, cEscape, &patternDesc) == -1 ) 
-  {
-    throw aq::generic_error(aq::generic_error::INVALID_QUERY, "");
-  }
+  this->rgx = boost::regex(pNodeStr->getData().val_str);
 }
 
 const aq::tnode * check_like::getColumnRef() const
@@ -203,8 +191,8 @@ bool check_like::check(const aq::ColumnItem& item, const aq::ColumnType& cType) 
   szTmpBuf[0] = '\0';
   item.toString(szTmpBuf, cType);
   pszVal = szTmpBuf;
-  int nRet = MatchPattern(pszVal, patternDesc);
-  return ((!bNotLike && (nRet == 1)) || (bNotLike && (nRet == 0)));
+  bool match = boost::regex_match(pszVal, this->rgx);
+  return (match && !bNotLike) || (!match && bNotLike);
 }
 
 void check_like::success(aq::tnode * node)

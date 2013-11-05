@@ -14,7 +14,7 @@ namespace aq
   class QueryResolverSimulate
   {
   public:
-    QueryResolverSimulate(aq::tnode* pNode, aq::TProjectSettings* settings, aq::AQEngine_Intf* aqEngine, aq::Base& baseDesc);
+    QueryResolverSimulate(aq::tnode* pNode, aq::Settings* settings, aq::AQEngine_Intf* aqEngine, aq::Base& baseDesc);
     ~QueryResolverSimulate() {}
 
     void  solve();
@@ -35,7 +35,7 @@ namespace aq
     std::string                                                       _id;
 
     aq::tnode*                                                        _node;
-    aq::TProjectSettings*                                             _settings;
+    aq::Settings*                                                     _settings;
     aq::AQEngine_Intf*                                                _aqEngine;
     aq::Base&                                                         _baseDesc;
 

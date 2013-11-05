@@ -10,7 +10,7 @@
 namespace aq
 {
 
-  QueryResolverSimulate::QueryResolverSimulate(aq::tnode* pNode, aq::TProjectSettings* settings, aq::AQEngine_Intf* aqEngine, aq::Base& baseDesc)
+  QueryResolverSimulate::QueryResolverSimulate(aq::tnode* pNode, aq::Settings* settings, aq::AQEngine_Intf* aqEngine, aq::Base& baseDesc)
     : _node(pNode), _settings(settings), _aqEngine(aqEngine), _baseDesc(baseDesc)
   {
     this->_id = "";

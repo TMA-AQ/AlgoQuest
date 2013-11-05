@@ -2,11 +2,12 @@
 #define __AQ_NESTEDQUERIES_H__
 
 #include "parser/SQLParser.h"
-#include <aq/Utilities.h>
 #include "AQEngine_Intf.h"
+#include "RowWritter_Intf.h"
 #include "Table.h"
 #include "verbs/VerbNode.h"
 #include <aq/Timer.h>
+#include <aq/Utilities.h>
 #include <vector>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/logic/tribool.hpp>
@@ -18,11 +19,11 @@ namespace aq
 class QueryResolver
 {
 public:
-	QueryResolver(aq::tnode * _sqlStatement, TProjectSettings * _pSettings, AQEngine_Intf * _aq_engine, Base& _baseDesc, unsigned int& _id, unsigned int _level = 1);
+	QueryResolver(aq::tnode * _sqlStatement, Settings * _pSettings, AQEngine_Intf * _aq_engine, Base& _baseDesc, unsigned int& _id, unsigned int _level = 1);
 	~QueryResolver();
 
   /// main entry
-	Table::Ptr solve();
+	Table::Ptr solve(boost::shared_ptr<aq::RowWritter_Intf> rowWritter = boost::shared_ptr<aq::RowWritter_Intf>());
 
   /// 
   void preProcess();
@@ -77,7 +78,7 @@ private:
 	// Variables Members
 
   // Settings
-	TProjectSettings * pSettings;
+	Settings * pSettings;
 	Base& BaseDesc;
 	AQEngine_Intf * aq_engine;
 
@@ -98,6 +99,7 @@ private:
 	Table::Ptr result;
   std::map<size_t, aq::tnode*> values;
   std::map<std::string, boost::shared_ptr<QueryResolver> > nestedTables;
+  boost::shared_ptr<aq::RowWritter_Intf> resultHandler;
   unsigned int& id_generator;
   const unsigned int id;
   unsigned int nestedId;

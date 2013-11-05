@@ -10,7 +10,7 @@ class AQEngineBasic : public AQEngine_Intf
 {
 public:
   void call(const std::string& query, aq::AQEngine_Intf::mode_t mode);
-	void call(TProjectSettings& settings, 
+	void call(Settings& settings, 
 		tnode *pNode, 
 		aq::AQEngine_Intf::mode_t mode, 
 		int selectLevel);

@@ -34,8 +34,7 @@ void runParserTest( std::string query, std::string expected, std::string baseFil
   BOOST_REQUIRE(true);
   BOOST_TEST_MESSAGE("a message");
   
-  aq::Base baseDesc;
-  baseDesc.loadFromRawFile(baseFilename.c_str());
+  aq::Base baseDesc(baseFilename.c_str());
 
   aq::tnode * pNode;
   if ((SQLParse(query.c_str(), &pNode)) != 0 ) 

@@ -15,6 +15,8 @@ namespace aq
     ThesaurusReader(const char * _path, size_t _tableId, size_t _columnId, size_t _size, size_t _packetSize, size_t _currentPacket = 0, bool _readNextPacket = true);
     ~ThesaurusReader();
     int loadValue(size_t index, aq::ColumnItem& item);
+    int setValue(size_t index, ColumnItem& value);
+    int append(ColumnItem& value);
     const aq::ColumnType getType() const { return aq::type_conversion<T>::type; } ;
   private:
     boost::shared_ptr<M> thesaurusMapper;
@@ -90,6 +92,20 @@ namespace aq
       rc = -1;
     }
     return rc;
+  }
+  
+  template <typename T, class M>
+  int ThesaurusReader<T, M>::setValue(size_t, aq::ColumnItem&)
+  {
+    throw aq::generic_error(aq::generic_error::NOT_IMPLEMENTED, "set value is not allowed in thesaurus reader");
+    return 0;
+  }
+  
+  template <typename T, class M>
+  int ThesaurusReader<T, M>::append(ColumnItem& value)
+  {
+    throw aq::generic_error(aq::generic_error::NOT_IMPLEMENTED, "append value is not allowed in thesaurus reader");
+    return 0;
   }
 
 }

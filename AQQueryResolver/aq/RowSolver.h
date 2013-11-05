@@ -29,7 +29,7 @@ public:
 
 public:
   RowSolver(boost::shared_ptr<aq::AQMatrix> _aqMatrix, const std::vector<Column::Ptr>& _columnTypes, 
-    const std::vector<aq::tnode*> _columnGroup, const TProjectSettings& _settings, const Base& _BaseDesc);
+    const std::vector<aq::tnode*> _columnGroup, const Settings& _settings, const Base& _BaseDesc);
 
   void solve(boost::shared_ptr<aq::RowProcess_Intf> rowProcess, uint64_t nbThread, bool aggregate = false);
 
@@ -58,7 +58,7 @@ private:
   boost::shared_ptr<aq::AQMatrix> aqMatrix; 
   const std::vector<Column::Ptr>& columnTypes; 
   const std::vector<aq::tnode*> columnGroup;
-  const TProjectSettings& settings;
+  const Settings& settings;
   const Base& BaseDesc;
   boost::shared_ptr<aq::RowProcess_Intf> rowProcess;
   uint64_t nbThread;

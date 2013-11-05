@@ -65,7 +65,7 @@
 //
 ////------------------------------------------------------------------------------
 //void addUnionMinusNode(int tag, std::vector<aq::tnode*>& queries, std::vector<int>& operation, aq::tnode* pNode,
-//                       TProjectSettings * pSettings, AQEngine_Intf * aq_engine, Base& BaseDesc)
+//                       Settings * pSettings, AQEngine_Intf * aq_engine, Base& BaseDesc)
 //{
 //	assert( pNode );
 //	if( tag == K_SEL_MINUS )
@@ -98,7 +98,7 @@
 //                    std::vector<size_t>& reverseValuePos,
 //                    Column& nullColumn, Table& valuesToInsert, size_t startIdx, 
 //                    size_t endIdx, bool append,
-//                    TProjectSettings * pSettings, AQEngine_Intf * aq_engine, Base& BaseDesc)
+//                    Settings * pSettings, AQEngine_Intf * aq_engine, Base& BaseDesc)
 //{
 //  char szBuffer[256];
 //	sprintf( szBuffer, "%s%sB001T%.4uC%.4uP%.12u", pSettings->szRootPath.c_str(), 
@@ -118,7 +118,7 @@
 //
 ////------------------------------------------------------------------------------
 //void SolveInsert(aq::tnode* pNode,
-//                 TProjectSettings * pSettings, AQEngine_Intf * aq_engine, Base& BaseDesc)
+//                 Settings * pSettings, AQEngine_Intf * aq_engine, Base& BaseDesc)
 //{
 //	if( !pNode || pNode->tag != K_INSERT )
 //		return;
@@ -271,7 +271,7 @@
 //
 ////------------------------------------------------------------------------------
 //void SolveUpdateDelete(aq::tnode* pNode,
-//                       TProjectSettings * pSettings, AQEngine_Intf * aq_engine, Base& BaseDesc)
+//                       Settings * pSettings, AQEngine_Intf * aq_engine, Base& BaseDesc)
 //{
 //	size_t tableIdx = BaseDesc.getTableIdx( pNode->left->getData().val_str );
 //	std::vector<Column::Ptr>& columns = BaseDesc.Tables[tableIdx]->Columns;
@@ -530,7 +530,7 @@
 //
 ////------------------------------------------------------------------------------
 //void SolveUnionMinus(aq::tnode* pNode,
-//                     TProjectSettings * pSettings, AQEngine_Intf * aq_engine, Base& BaseDesc)
+//                     Settings * pSettings, AQEngine_Intf * aq_engine, Base& BaseDesc)
 //{
 //	std::vector<aq::tnode*> queries;
 //	std::vector<int> operation;
@@ -635,7 +635,7 @@
 //
 ////------------------------------------------------------------------------------
 //void SolveTruncate(aq::tnode* pNode,
-//                   TProjectSettings * pSettings, AQEngine_Intf * aq_engine, Base& BaseDesc)
+//                   Settings * pSettings, AQEngine_Intf * aq_engine, Base& BaseDesc)
 //{
 //	size_t tableIdx = -1;
 //	Table::Ptr table = new Table();
@@ -660,7 +660,7 @@
 //
 ////------------------------------------------------------------------------------
 //void SolveCreate(aq::tnode* pNode,
-//                 TProjectSettings * pSettings, AQEngine_Intf * aq_engine, Base& BaseDesc)
+//                 Settings * pSettings, AQEngine_Intf * aq_engine, Base& BaseDesc)
 //{
 //	Table::Ptr table = new Table();
 //	table->setName( pNode->left->getData().val_str );

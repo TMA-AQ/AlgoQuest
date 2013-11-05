@@ -7,11 +7,9 @@
 namespace aq
 {
 
-//------------------------------------------------------------------------------
-Table::Ptr solveOptimalMinMax(	aq::verb::VerbNode::Ptr spTree, Base& BaseDesc, 
-								TProjectSettings& Settings );
-
-//------------------------------------------------------------------------------
-bool trivialSelectFromSelect( aq::tnode* pSelect );
+///
+Table::Ptr solveOptimalMinMax(aq::verb::VerbNode::Ptr   spTree, 
+                              Base                    & BaseDesc, 
+                              Settings        & Settings);
 
 }

@@ -14,6 +14,8 @@ public:
 	TemporaryColumnMapper(const char * _path, size_t _tableId, size_t _columnId, aq::ColumnType itemType, size_t _itemSize, size_t _packetSize);
 	~TemporaryColumnMapper();
 	int loadValue(size_t index, ColumnItem& value);
+	int setValue(size_t index, ColumnItem& value);
+  int append(ColumnItem& value);
   virtual const aq::ColumnType getType() const { return itemType; }
 private:
   uint64_t nbRemap;

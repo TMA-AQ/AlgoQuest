@@ -1,81 +1,28 @@
 #include "Column2Table.h"
 #include "Base.h"
 #include "parser/sql92_grm_tab.hpp"
+#include <boost/algorithm/string/case_conv.hpp>
 
 namespace aq
 {
-
-//------------------------------------------------------------------------------
-/* Return -1 on error or if not found, 0 on success */
-int get_column_id_from_table( Table& pTD, char* pszColumnName, unsigned int *pnColumnId,
-								  unsigned int *pnColumnSize, ColumnType *peColumnType ) {
-	int idx = pTD.getColumnIdx( std::string(pszColumnName) );
-	if( idx < 0 )
-		return -1;
-
-	if ( pnColumnId != NULL )
-		*pnColumnId = static_cast<unsigned int>(pTD.Columns[idx]->ID);
-	if ( pnColumnSize != NULL )
-		*pnColumnSize = static_cast<unsigned int>(pTD.Columns[idx]->Size);
-	if ( peColumnType != NULL )
-		*peColumnType = pTD.Columns[idx]->Type;
-
-	return 0;
-}
-
-//------------------------------------------------------------------------------
-/* Return -1 on error, 0 on success */
-int get_table_and_column_id_from_table_array( const Base* baseDesc, 
-													char *pszTableName,
-												  char *pszColumnName, 
-													unsigned int *pnTableId, 
-												  unsigned int *pnColumnId, 
-												  unsigned int *pnColumnSize,
-												  ColumnType *peColumnType ) 
+  
+///  
+struct TColumn2Tables
 {
-	
-	Table::Ptr table = baseDesc->getTable( std::string(pszTableName) );
+	char			   *  m_pszColumnName;
+	unsigned int	  m_nTableCount;
+	char			   ** m_pparrTableNames;
+};
 
-	if ( pnTableId != NULL )
-		*pnTableId = static_cast<unsigned int>(table->ID);
-
-	if ( get_column_id_from_table( *table, pszColumnName, pnColumnId, pnColumnSize, peColumnType ) != 0 ) 
-  {
-		aq::Logger::getInstance().log(AQ_ERROR, "get_table_and_column_id_from_table_array() : Function get_column_id_from_table( T:<%s>, C:<%s> ) returned NULL !\n", pszTableName, pszColumnName);
-		return -1;
-	}
-
-	return 0;
-}
-
-//------------------------------------------------------------------------------
-TColumn2Tables* new_column2tables( const char *pszColumnName ) 
+///
+struct TColumn2TablesArray
 {
-	TColumn2Tables* pC2T;
-	
-	if ( pszColumnName == NULL )
-		return NULL;
-
-	pC2T = (TColumn2Tables*)malloc( sizeof( TColumn2Tables ) );
-	if ( pC2T == NULL ) {
-    throw aq::generic_error(aq::generic_error::GENERIC, "Not enough memory [%u]", EXIT_ON_MEM_ERROR);
-		return NULL;
-	}
-	memset( pC2T, 0, sizeof( TColumn2Tables ) );
-
-	pC2T->m_pszColumnName = (char*)malloc( ( strlen( pszColumnName ) + 1 ) * sizeof( char ) );
-	if ( pC2T->m_pszColumnName == NULL ) {
-    throw aq::generic_error(aq::generic_error::GENERIC, "Not enough memory [%u]", EXIT_ON_MEM_ERROR);
-		return NULL;
-	}
-
-	strcpy( pC2T->m_pszColumnName, pszColumnName );
-	strtoupr( pC2T->m_pszColumnName );
-	return pC2T;
-}
+	unsigned int	    m_nColumnCount;
+	TColumn2Tables ** m_pparrC2T;
+};
 
 //------------------------------------------------------------------------------
-void delete_column2tables( TColumn2Tables *pC2T ) {
+void delete_column2tables(aq::TColumn2Tables *pC2T) {
 	if ( pC2T != NULL ) {
 		if ( pC2T->m_nTableCount != 0 ) {
 			unsigned int iTable;
@@ -91,63 +38,6 @@ void delete_column2tables( TColumn2Tables *pC2T ) {
 			free( pC2T->m_pszColumnName );
 		free( pC2T );
 	}
-}
-
-//------------------------------------------------------------------------------
-TColumn2Tables* add_table_name( TColumn2Tables *pC2T, const char *pszTableName ) {
-	char **ppTableNames;
-
-	if ( pC2T == NULL || pszTableName == NULL ) {
-#ifdef CREATE_LOG
-		Log( "add_table_name() : One of the parameters is NULL (pC2T:%u; pszTableName:<%u>)!\n", 
-			 (unsigned int)pC2T, (unsigned int)pszTableName );
-#endif
-		return NULL;
-	}
-
-	/* Allocate new pointer array */
-	ppTableNames = (char**)malloc( ( pC2T->m_nTableCount + 1 ) * sizeof( char* ) );
-	if ( ppTableNames == NULL ) {
-    throw aq::generic_error(aq::generic_error::GENERIC, "Not enough memory [%u]", EXIT_ON_MEM_ERROR);
-		return NULL;
-	}
-
-	/* Copy old data if any & free the old buffer */
-	if ( pC2T->m_nTableCount != 0 ) {
-		memcpy( ppTableNames, pC2T->m_pparrTableNames, pC2T->m_nTableCount * sizeof( char* ) );
-		free( pC2T->m_pparrTableNames );
-	}
-
-	/* Set the new buffer */
-	pC2T->m_pparrTableNames = ppTableNames;
-
-	/* Allocate buffer for column name */
-	pC2T->m_pparrTableNames[ pC2T->m_nTableCount ] = (char*)malloc( strlen( pszTableName ) + 1 );
-	if ( pC2T->m_pparrTableNames[ pC2T->m_nTableCount ] == NULL ) {
-    throw aq::generic_error(aq::generic_error::GENERIC, "Not enough memory [%u]", EXIT_ON_MEM_ERROR);
-		return NULL;
-	}
-
-	/* Keep the column name */
-	strcpy( pC2T->m_pparrTableNames[ pC2T->m_nTableCount ], pszTableName );
-	strtoupr( pC2T->m_pparrTableNames[ pC2T->m_nTableCount ] );
-	pC2T->m_nTableCount++;
-
-	return pC2T;
-}
-
-//------------------------------------------------------------------------------
-TColumn2TablesArray* new_column2tables_array( void ) {
-	TColumn2TablesArray *parrC2T;
-
-	/* Allocate new pointer array */
-	parrC2T = (TColumn2TablesArray*)malloc( sizeof( TColumn2TablesArray ) );
-	if ( parrC2T == NULL ) {
-    throw aq::generic_error(aq::generic_error::GENERIC, "Not enough memory [%u]", EXIT_ON_MEM_ERROR);
-		return NULL;
-	}
-	memset( parrC2T, 0, sizeof( TColumn2TablesArray ) );
-	return parrC2T;
 }
 
 //------------------------------------------------------------------------------
@@ -167,22 +57,123 @@ void delete_column2tables_array( TColumn2TablesArray* parrC2T ) {
 }
 
 //------------------------------------------------------------------------------
-TColumn2TablesArray* add_column2tables( TColumn2TablesArray* parrC2T, TColumn2Tables* pC2T ) {
-	TColumn2Tables **ppC2TTmp;
+/* Return -1 on error or if not found, 0 on success */
+int get_column_id_from_table(Table& pTD, char * pszColumnName, unsigned int * pnColumnId,
+                             unsigned int * pnColumnSize, ColumnType * peColumnType ) {
+	int idx = pTD.getColumnIdx( std::string(pszColumnName) );
+	if( idx < 0 )
+		return -1;
+
+	if ( pnColumnId != NULL )
+		*pnColumnId = static_cast<unsigned int>(pTD.Columns[idx]->ID);
+	if ( pnColumnSize != NULL )
+		*pnColumnSize = static_cast<unsigned int>(pTD.Columns[idx]->Size);
+	if ( peColumnType != NULL )
+		*peColumnType = pTD.Columns[idx]->Type;
+
+	return 0;
+}
+
+//------------------------------------------------------------------------------
+aq::TColumn2Tables * new_column2tables(const char * pszColumnName) 
+{
+	TColumn2Tables* pC2T;
+	
+	if ( pszColumnName == NULL )
+		return NULL;
+
+	pC2T = (TColumn2Tables*)malloc( sizeof( TColumn2Tables ) );
+	if ( pC2T == NULL ) {
+    throw aq::generic_error(aq::generic_error::GENERIC, "Not enough memory");
+		return NULL;
+	}
+	memset( pC2T, 0, sizeof( TColumn2Tables ) );
+
+	pC2T->m_pszColumnName = (char*)malloc( ( strlen( pszColumnName ) + 1 ) * sizeof( char ) );
+	if ( pC2T->m_pszColumnName == NULL ) {
+    throw aq::generic_error(aq::generic_error::GENERIC, "Not enough memory");
+		return NULL;
+	}
+
+	strcpy( pC2T->m_pszColumnName, pszColumnName );
+	boost::to_upper( pC2T->m_pszColumnName );
+	return pC2T;
+}
+
+//------------------------------------------------------------------------------
+aq::TColumn2Tables * add_table_name(aq::TColumn2Tables * pC2T, const char * pszTableName ) {
+	char **ppTableNames;
+
+	if ( pC2T == NULL || pszTableName == NULL ) {
+#ifdef CREATE_LOG
+		Log( "add_table_name() : One of the parameters is NULL (pC2T:%u; pszTableName:<%u>)!\n", 
+			 (unsigned int)pC2T, (unsigned int)pszTableName );
+#endif
+		return NULL;
+	}
+
+	/* Allocate new pointer array */
+	ppTableNames = (char**)malloc( ( pC2T->m_nTableCount + 1 ) * sizeof( char* ) );
+	if ( ppTableNames == NULL ) {
+    throw aq::generic_error(aq::generic_error::GENERIC, "Not enough memory");
+		return NULL;
+	}
+
+	/* Copy old data if any & free the old buffer */
+	if ( pC2T->m_nTableCount != 0 ) {
+		memcpy( ppTableNames, pC2T->m_pparrTableNames, pC2T->m_nTableCount * sizeof( char* ) );
+		free( pC2T->m_pparrTableNames );
+	}
+
+	/* Set the new buffer */
+	pC2T->m_pparrTableNames = ppTableNames;
+
+	/* Allocate buffer for column name */
+	pC2T->m_pparrTableNames[ pC2T->m_nTableCount ] = (char*)malloc( strlen( pszTableName ) + 1 );
+	if ( pC2T->m_pparrTableNames[ pC2T->m_nTableCount ] == NULL ) {
+    throw aq::generic_error(aq::generic_error::GENERIC, "Not enough memory");
+		return NULL;
+	}
+
+	/* Keep the column name */
+	strcpy( pC2T->m_pparrTableNames[ pC2T->m_nTableCount ], pszTableName );
+	boost::to_upper( pC2T->m_pparrTableNames[ pC2T->m_nTableCount ] );
+	pC2T->m_nTableCount++;
+
+	return pC2T;
+}
+
+//------------------------------------------------------------------------------
+aq::TColumn2TablesArray * new_column2tables_array() {
+	aq::TColumn2TablesArray * parrC2T;
+
+	/* Allocate new pointer array */
+	parrC2T = (aq::TColumn2TablesArray*)malloc( sizeof( aq::TColumn2TablesArray ) );
+	if ( parrC2T == NULL ) {
+    throw aq::generic_error(aq::generic_error::GENERIC, "Not enough memory");
+		return NULL;
+	}
+	memset( parrC2T, 0, sizeof( aq::TColumn2TablesArray ) );
+	return parrC2T;
+}
+
+//------------------------------------------------------------------------------
+aq::TColumn2TablesArray * add_column2tables(aq::TColumn2TablesArray* parrC2T, aq::TColumn2Tables * pC2T) {
+	aq::TColumn2Tables **ppC2TTmp;
 
 	if ( pC2T == NULL )
 		return parrC2T;
 
 	/* Allocate new pointer array */
-	ppC2TTmp = (TColumn2Tables**)malloc( ( parrC2T->m_nColumnCount + 1 ) * sizeof( TColumn2Tables* ) );
+	ppC2TTmp = (aq::TColumn2Tables**)malloc( ( parrC2T->m_nColumnCount + 1 ) * sizeof( aq::TColumn2Tables* ) );
 	if ( ppC2TTmp == NULL ) {
-    throw aq::generic_error(aq::generic_error::GENERIC, "Not enough memory [%u]", EXIT_ON_MEM_ERROR);
+    throw aq::generic_error(aq::generic_error::GENERIC, "Not enough memory");
 		return NULL;
 	}
 
 	/* Copy old data if any & free the old buffer */
 	if ( parrC2T->m_nColumnCount != 0 ) {
-		memcpy( ppC2TTmp, parrC2T->m_pparrC2T, parrC2T->m_nColumnCount * sizeof( TColumn2Tables* ) );
+		memcpy( ppC2TTmp, parrC2T->m_pparrC2T, parrC2T->m_nColumnCount * sizeof( aq::TColumn2Tables* ) );
 		free( parrC2T->m_pparrC2T );
 	}
 
@@ -197,7 +188,7 @@ TColumn2TablesArray* add_column2tables( TColumn2TablesArray* parrC2T, TColumn2Ta
 }
 
 //------------------------------------------------------------------------------
-TColumn2Tables* find_column_in_column2tables_array( TColumn2TablesArray* parrC2T, const char* pszColumnName ) {
+aq::TColumn2Tables * find_column_in_column2tables_array(aq::TColumn2TablesArray * parrC2T, const char * pszColumnName ) {
 	unsigned int iColumn;
 	char		 *pszTmpColumnName;
 
@@ -209,11 +200,11 @@ TColumn2Tables* find_column_in_column2tables_array( TColumn2TablesArray* parrC2T
 	/* Create Temporary String to allow modification by strtoupr() */
 	pszTmpColumnName = (char*)malloc( ( strlen( pszColumnName ) + 1 ) * sizeof( char ) );
 	if ( pszTmpColumnName == NULL ) {
-    throw aq::generic_error(aq::generic_error::GENERIC, "Not enough memory [%u]", EXIT_ON_MEM_ERROR);
+    throw aq::generic_error(aq::generic_error::GENERIC, "Not enough memory");
 		return NULL;
 	}
 	strcpy( pszTmpColumnName, pszColumnName );
-	strtoupr( pszTmpColumnName );
+	boost::to_upper( pszTmpColumnName );
 
 	for ( iColumn = 0; iColumn < parrC2T->m_nColumnCount; iColumn++ ) {
 		if ( strcmp( parrC2T->m_pparrC2T[ iColumn ]->m_pszColumnName, pszTmpColumnName ) == 0 ) {
@@ -230,11 +221,11 @@ TColumn2Tables* find_column_in_column2tables_array( TColumn2TablesArray* parrC2T
 }
 
 //------------------------------------------------------------------------------
-TColumn2TablesArray* add_table_columns_to_column2tables_array(	TColumn2TablesArray* parrC2T, 
-																Base* baseDesc, 
-																char *pszTableName ) {
+aq::TColumn2TablesArray * add_table_columns_to_column2tables_array(aq::TColumn2TablesArray * parrC2T, 
+                                                                   aq::Base * baseDesc, 
+                                                                   char * pszTableName ) {
 	unsigned int iColumn;
-	TColumn2Tables *pC2T;
+	aq::TColumn2Tables *pC2T;
 	
 	Table& pTD = *baseDesc->getTable(pszTableName);
 
@@ -264,7 +255,7 @@ TColumn2TablesArray* add_table_columns_to_column2tables_array(	TColumn2TablesArr
 
 //------------------------------------------------------------------------------
 // Return -1 on error, 0 on success
-int add_tnode_tables( aq::tnode *pNode, Base* baseDesc, TColumn2TablesArray* parrC2T ) 
+int add_tnode_tables(aq::tnode * pNode, aq::Base * baseDesc, aq::TColumn2TablesArray * parrC2T) 
 {
 	/* Check node type against K_COMMA, K_IDENT */
 	if ( pNode->tag == K_COMMA ) 
@@ -318,7 +309,7 @@ int add_tnode_tables( aq::tnode *pNode, Base* baseDesc, TColumn2TablesArray* par
 }
 
 //------------------------------------------------------------------------------
-TColumn2TablesArray* create_column_map_for_tables_used_in_select( aq::tnode *pNode, Base* baseDesc )
+TColumn2TablesArray * create_column_map_for_tables_used_in_select(aq::tnode * pNode, Base * baseDesc)
 {
 	aq::tnode * pNodeFound = NULL;
 	TColumn2TablesArray * parrC2T = NULL;
@@ -342,15 +333,20 @@ TColumn2TablesArray* create_column_map_for_tables_used_in_select( aq::tnode *pNo
 }
 
 //------------------------------------------------------------------------------
-int enforce_qualified_column_reference( aq::tnode *pNode, TColumn2TablesArray* parrC2T) 
+int enforce_qualified_column_reference(aq::tnode * pNode, aq::Base & baseDesc) 
 {
   int pErr = 0;
 
-	if ( pNode == NULL )
-		return -1;
-
+  TColumn2TablesArray * parrC2T = create_column_map_for_tables_used_in_select(pNode, &baseDesc);
+  
 	if ( parrC2T == NULL )
 		return -1;
+
+	if ( pNode == NULL )
+  {
+    delete_column2tables_array(parrC2T);
+		return -1;
+  }
 
 	std::vector<aq::tnode*> nodes;
 	nodes.push_back( pNode );
@@ -364,8 +360,7 @@ int enforce_qualified_column_reference( aq::tnode *pNode, TColumn2TablesArray* p
 		if( pNode->left )
 			nodes.push_back( pNode->left );
 		//do not call on K_PERIOD's node right branch if the right tag is K_COLUMN !
-		if(	pNode->right &&
-			(pNode->tag != K_PERIOD || pNode->right->tag != K_COLUMN ) )
+		if(	pNode->right && (pNode->tag != K_PERIOD || pNode->right->tag != K_COLUMN ) )
 				nodes.push_back( pNode->right );
 		
 		if ( pNode->tag != K_COLUMN ) 
@@ -377,11 +372,13 @@ int enforce_qualified_column_reference( aq::tnode *pNode, TColumn2TablesArray* p
     {
 			if ( pC2T->m_nTableCount > 1 ) 
       {
+        delete_column2tables_array(parrC2T);
 				aq::Logger::getInstance().log(AQ_ERROR, "Column name ambiguity ! Multiple tables with same column name : <%s>", pNode->getData().val_str);
 				return -1;
 			} 
       else if ( pC2T->m_nTableCount == 0 ) 
       {
+        delete_column2tables_array(parrC2T);
 				aq::Logger::getInstance().log(AQ_ERROR, "No table with column name <%s> specified using FROM ... !", pNode->getData().val_str);
         return -2;
 			} 
@@ -391,11 +388,13 @@ int enforce_qualified_column_reference( aq::tnode *pNode, TColumn2TablesArray* p
 				pNodeColumn = new aq::tnode( *pNode );
 				if ( pNodeColumn == NULL ) 
         {
+          delete_column2tables_array(parrC2T);
 					return -3;
 				}
 				pNodeTable = new aq::tnode( K_IDENT );
 				if ( pNodeTable == NULL ) 
         {
+          delete_column2tables_array(parrC2T);
           delete pNodeColumn ;
 					return -4;
 				}
@@ -407,6 +406,8 @@ int enforce_qualified_column_reference( aq::tnode *pNode, TColumn2TablesArray* p
 			}
 		}
 	}
+
+  delete_column2tables_array(parrC2T);
   return pErr;
 }
 

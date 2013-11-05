@@ -180,7 +180,7 @@ struct tnodeVerbNode
 };
 
 //------------------------------------------------------------------------------
-VerbNode::Ptr VerbNode::build( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal, int context, Base& BaseDesc, TProjectSettings& settings )
+VerbNode::Ptr VerbNode::build( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal, int context, Base& BaseDesc, Settings& settings )
 {
   aq::Logger::getInstance().log(AQ_DEBUG, "build verb '%s'\n", id_to_kstring(pNode->tag));
 	VerbNode::Ptr verb = VerbFactory::GetInstance().getVerb( pNode->tag );
@@ -229,7 +229,7 @@ VerbNode::Ptr VerbNode::build( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* p
 }
 
 //------------------------------------------------------------------------------
-VerbNode::Ptr VerbNode::BuildVerbsTree( aq::tnode* pStart, const boost::array<unsigned int, 6>& categories_order, Base& baseDesc, TProjectSettings * settings )
+VerbNode::Ptr VerbNode::BuildVerbsTree( aq::tnode* pStart, const boost::array<unsigned int, 6>& categories_order, Base& baseDesc, Settings * settings )
 {
   aq::Logger::getInstance().log(AQ_DEBUG, "build verb tree\n");
 	if( pStart->tag != K_SELECT )
@@ -255,7 +255,7 @@ VerbNode::Ptr VerbNode::BuildVerbsTree( aq::tnode* pStart, const boost::array<un
 }
 
 //------------------------------------------------------------------------------
-VerbNode::Ptr VerbNode::BuildVerbsSubtree(	aq::tnode* pSelect, aq::tnode* pStart, aq::tnode* pStartOriginal, int context, Base& BaseDesc, TProjectSettings *pSettings  )
+VerbNode::Ptr VerbNode::BuildVerbsSubtree(	aq::tnode* pSelect, aq::tnode* pStart, aq::tnode* pStartOriginal, int context, Base& BaseDesc, Settings *pSettings  )
 {
 	VerbNode::Ptr spStart = VerbNode::build(pSelect, pStart, pStartOriginal, context, BaseDesc, *pSettings);
 	if( !spStart || !spStart->isToSolved() )

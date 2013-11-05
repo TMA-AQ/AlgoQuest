@@ -35,7 +35,7 @@ public:
 	typedef std::vector<column_t> matrix_t;
   typedef std::vector<std::pair<uint64_t, uint64_t> > group_by_t;
 
-	AQMatrix(const TProjectSettings& settings, const Base& baseDesc);
+	AQMatrix(const Settings& settings, const Base& baseDesc);
 	AQMatrix(const AQMatrix& source);
 	~AQMatrix();
 	AQMatrix& operator=(const AQMatrix& source);
@@ -84,7 +84,7 @@ private:
 
   static uint64_t uid_generator;
   uint64_t uid;
-	const TProjectSettings& settings;
+	const Settings& settings;
   const Base& baseDesc;
 	matrix_t matrix;
 	v_size_t count;

@@ -38,6 +38,7 @@ namespace aq
   {
   public:
 
+    typedef std::vector<size_t> index_t;
     typedef std::vector<row_item_t> row_t;
 
     Row();
@@ -45,6 +46,7 @@ namespace aq
     ~Row();
     Row& operator=(const Row& source);
 
+    index_t indexes;
     row_t initialRow;
     row_t computedRow;
     unsigned int count;

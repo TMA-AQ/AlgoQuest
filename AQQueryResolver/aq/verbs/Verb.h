@@ -79,7 +79,7 @@ public:
   }
   
   /// Set the Base Description
-  virtual void setSettings(TProjectSettings * settings) 
+  virtual void setSettings(Settings * settings) 
   {
     // empty by default
   }

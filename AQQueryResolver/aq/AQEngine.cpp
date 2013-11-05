@@ -15,7 +15,7 @@
 namespace aq
 {
 
-  AQEngine::AQEngine(Base& _baseDesc, TProjectSettings& _settings)
+  AQEngine::AQEngine(Base& _baseDesc, Settings& _settings)
     : baseDesc(_baseDesc), settings(_settings)
   {
   }
@@ -230,7 +230,7 @@ namespace aq
 #include <windows.h>
 
 // ------------------------------------------------------------------------------------------------
-  AQEngineWindows::AQEngineWindows(Base& _baseDesc, TProjectSettings& _settings)
+  AQEngineWindows::AQEngineWindows(Base& _baseDesc, Settings& _settings)
     : AQEngine(_baseDesc, _settings)
   {
   }
@@ -261,7 +261,7 @@ namespace aq
 #endif
 
 // ------------------------------------------------------------------------------------------------
-  AQEngineSystem::AQEngineSystem(Base& _baseDesc, TProjectSettings& _settings)
+  AQEngineSystem::AQEngineSystem(Base& _baseDesc, Settings& _settings)
     : AQEngine(_baseDesc, _settings)
   {
   }

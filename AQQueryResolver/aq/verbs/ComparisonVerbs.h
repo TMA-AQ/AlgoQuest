@@ -28,14 +28,14 @@ public:
 		m_baseDesc = baseDesc;
 	}
 
-	virtual void setSettings(TProjectSettings * settings) 
+	virtual void setSettings(Settings * settings) 
 	{
 		m_settings = settings;
 	}
 
 private:
 	Base * m_baseDesc;
-	TProjectSettings * m_settings;
+	Settings * m_settings;
 	virtual bool compare(	ColumnItem* item1, 
 							ColumnItem* item2, 
 							aq::ColumnType type );

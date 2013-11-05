@@ -5,8 +5,6 @@
 
 #include <boost/intrusive_ptr.hpp>
 
-//--------------------------------------------------------------------------
-//Abstract object
 template <class T>
 class Object
 {
@@ -62,10 +60,4 @@ inline void	intrusive_ptr_release(Object<T> * pObj)
     pObj->releaseRef();
 }
 
-//------------------------------------------------------------------------------
-//macro
-//#define OBJECT_DECLARE( class_name )\
-//	public:\
-//	typedef boost::intrusive_ptr<class_name> Ptr;
-
-#endif	//__FIAN_Object_H__
+#endif

@@ -84,7 +84,7 @@ namespace
 
 uint64_t AQMatrix::uid_generator = 0;
 
-AQMatrix::AQMatrix(const TProjectSettings& _settings, const Base& _baseDesc)
+AQMatrix::AQMatrix(const Settings& _settings, const Base& _baseDesc)
 	: settings(_settings),
     baseDesc(_baseDesc),
 		totalCount(0),

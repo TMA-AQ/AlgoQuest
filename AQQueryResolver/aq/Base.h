@@ -25,16 +25,13 @@ class Base: public Object<Base>
 {
 public:
 	typedef std::vector<Table::Ptr> tables_t;
-
-  tables_t& getTables() { return this->Tables; }
-  const tables_t& getTables() const { return this->Tables; }
-  const std::string& getName() const { return this->Name; }
   
-  Table::Ptr getTable(size_t id);
-	Table::Ptr getTable(const std::string& name) ;
-  const Table::Ptr getTable(size_t id) const;
-	const Table::Ptr getTable(const std::string& name) const;
-
+  Base();
+  Base(const Base& source);
+  Base(const std::string& file);
+  ~Base();
+  Base& operator=(const Base& source);
+  
 	/// The standard content of this file is defined below :
 	/// 
 	/// <Name_Base>
@@ -44,7 +41,7 @@ public:
 	/// "<Col_Name>" <col_id> <col_size> <col_type>
 	/// 
 	/// Example : 
-	/// mabase
+	/// my_base_name
 	/// 4
 	/// 
 	/// "BONUS" 1 1 4
@@ -55,15 +52,25 @@ public:
 	///
 	/// ...
 	///
-  void clear();
-	void loadFromBaseDesc( const aq::base_t& base );
-	void loadFromRawFile( const char* pszDataBaseFile );
-	void saveToRawFile( const char* pszDataBaseFile );
-	void dumpRaw( std::ostream& os ) const;
-	void dumpXml( std::ostream& os ) const;
+  static int load(const std::string& filename, Base& base);
 
+	void loadFromBaseDesc( const aq::base_t& base );
+  void dumpRaw(std::ostream& os) const;
+	void dumpXml(std::ostream& os) const;
+
+  void clear();
+
+  tables_t& getTables() { return this->Tables; }
+  const tables_t& getTables() const { return this->Tables; }
+  const std::string& getName() const { return this->Name; }
+  
+  Table::Ptr getTable(size_t id);
+	Table::Ptr getTable(const std::string& name) ;
+  const Table::Ptr getTable(size_t id) const;
+	const Table::Ptr getTable(const std::string& name) const;
+  
 private:
-	tables_t Tables;
+	tables_t    Tables;
 	std::string Name;
 };
 

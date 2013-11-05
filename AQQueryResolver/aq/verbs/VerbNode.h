@@ -56,18 +56,18 @@ public:
   
   bool isToSolved() const { return this->toSolve; }
 
-	static VerbNode::Ptr build( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal, int context, Base& BaseDesc, TProjectSettings& settings );
+	static VerbNode::Ptr build( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal, int context, Base& BaseDesc, Settings& settings );
 
 	/// build a subtree for each major category
 	/// order is given by \a categories_order (the last one will be executed first)
 	/// engine actually executes GROUP BY before select and after where, but
 	/// I need to delete it after select gets the grouping columns
-  static VerbNode::Ptr BuildVerbsTree( aq::tnode* pStart, const boost::array<unsigned int, 6>& categories_order, Base& baseDesc, TProjectSettings * settings );
+  static VerbNode::Ptr BuildVerbsTree( aq::tnode* pStart, const boost::array<unsigned int, 6>& categories_order, Base& baseDesc, Settings * settings );
    
   /// build a VerbNode subtree corresponding to the ppStart subtree
   /// a branch will end when a VerbNode for that aq::tnode cannot be found
   /// top level node in the subtree will not have a brother
-  static VerbNode::Ptr BuildVerbsSubtree( aq::tnode* pSelect, aq::tnode* pStart, aq::tnode* pStartOriginal, int context, Base& BaseDesc, TProjectSettings *pSettings );
+  static VerbNode::Ptr BuildVerbsSubtree( aq::tnode* pSelect, aq::tnode* pStart, aq::tnode* pStartOriginal, int context, Base& BaseDesc, Settings *pSettings );
 
   /// Debug purpose
   static void dump(std::ostream& os, VerbNode::Ptr tree, std::string ident = "");

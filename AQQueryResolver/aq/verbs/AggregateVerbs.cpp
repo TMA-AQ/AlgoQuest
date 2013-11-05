@@ -48,7 +48,6 @@ void AggregateVerb::changeResult(	Table::Ptr table,
 		//PARTITION BY UNBOUNDED PRECEDING UNBOUNDED FOLLOWING
 		//but as if there is no GROUP BY (count column counts)
 		table->GroupByApplied = false;
-		partition = table->Partition;
 	}
 	if( partition )
 	{
@@ -183,53 +182,8 @@ Column::Ptr computeSumPartition(	Column::Ptr column,
 									Table::Ptr table,
 									TablePartition::Ptr partition )
 {
-	table->unravel( partition );
-	Column::Ptr sum = new Column();
-	sum->Type = column->Type;
-	for( size_t idx = 0; idx < partition->Rows.size() - 1; ++idx )
-	{
-		llong partitionStart = partition->Rows[idx];
-		llong partitionEnd = partition->Rows[idx + 1];
-		double sumVal = 0;
-		//compute value of the first sum
-		llong start;
-		if( partition->FrameStartType == TablePartition::AQ_UNBOUNDED )
-			start = partitionStart;
-		else
-			start = partitionStart + partition->FrameStart;
-		llong end;
-		if( partition->FrameEndType == TablePartition::AQ_UNBOUNDED )
-			end = partitionEnd;
-		else
-			end = partitionStart + partition->FrameEnd + 1;
-		llong startAux = max(start, partitionStart);
-		llong endAux = min(end, partitionEnd);
-		for( llong idx2 = startAux; idx2 < endAux; ++idx2 )
-			sumVal += column->Items[idx2]->numval;
-
-		for( llong idx2 = partitionStart; idx2 < partitionEnd; ++idx2 )
-		{
-			llong oldStart = start;
-			llong oldEnd = end;
-			if( partition->FrameStartType == TablePartition::AQ_UNBOUNDED )
-				start = partitionStart;
-			else
-				start = idx2 + partition->FrameStart;
-			if( partition->FrameEndType == TablePartition::AQ_UNBOUNDED )
-				end = partitionEnd;
-			else
-				end = idx2 + partition->FrameEnd + 1;
-			if( start > oldStart && oldStart >= partitionStart && oldStart < partitionEnd )
-				sumVal -= column->Items[oldStart]->numval;
-			if( end > oldEnd && end <= partitionEnd && end > partitionStart )
-				sumVal += column->Items[end-1]->numval;
-			if( end > partitionStart && start < partitionEnd )
-				sum->Items.push_back( new ColumnItem(sumVal) );
-			else
-				sum->Items.push_back( NULL );
-		}
-	}
-	return sum;
+  assert(false);
+	return Column::Ptr();
 }
 
 //------------------------------------------------------------------------------
@@ -309,32 +263,8 @@ Column::Ptr computeCountPartition(	Column::Ptr column,
 									Table::Ptr table,
 									TablePartition::Ptr partition )
 {
-	table->unravel( partition );
-	Column::Ptr count = new Column();
-	count->Type = COL_TYPE_INT;
-	for( size_t idx = 0; idx < partition->Rows.size() - 1; ++idx )
-	{
-		llong partitionStart = partition->Rows[idx];
-		llong partitionEnd = partition->Rows[idx + 1];
-
-		for( llong idx2 = partitionStart; idx2 < partitionEnd; ++idx2 )
-		{
-			llong start, end;
-			if( partition->FrameStartType == TablePartition::AQ_UNBOUNDED )
-				start = partitionStart;
-			else
-				start = max(partitionStart, idx2 + partition->FrameStart);
-			if( partition->FrameEndType == TablePartition::AQ_UNBOUNDED )
-				end = partitionEnd;
-			else
-				end = min(partitionEnd, idx2 + partition->FrameEnd + 1);
-			if( start >= end )
-				count->Items.push_back( NULL );
-			else
-				count->Items.push_back( new ColumnItem((double) (end - start)) );
-		}
-	}
-	return count;
+  assert(false);
+	return Column::Ptr();
 }
 
 //------------------------------------------------------------------------------
@@ -600,108 +530,8 @@ Column::Ptr OffsetColumn(	Column::Ptr column, TablePartition::Ptr partition,
 							bool firstValue, llong offsetVal, Table::Ptr table,
 							ColumnItem::Ptr defaultValue )
 {
-	Column::Ptr newColumn = new Column( "", 0, 0, column->Type );
-	vector<size_t>& partitions = partition->Rows;
-	size_t partIdx = 0;
-	assert( partitions.size() > 1 );
-	assert( partitions[partitions.size() - 1] >= column->Items.size() );
-	Column::Ptr columnCount = column->getCount();
-	Column::Ptr newColumnCount = NULL;
-	if( columnCount )
-	{
-		newColumnCount = new Column( *columnCount );
-		assert( table->HasCount );
-	}
-	vector<llong> newColumnToColumnMap;
-	for( size_t idx = 0; idx < column->Items.size(); ++idx )
-	{
-		if( idx >= partitions[partIdx + 1] )
-		{
-			++partIdx;
-			assert( partitions[partIdx] - partitions[partIdx-1] > 0 );
-		}
-
-		//get itemIndex such that column[itemIndex] contains the row that is 
-		//Offset rows behind the first row in column[idx]
-		//(remember that each column[idx] can represent more than 1 row)
-		llong offset = offsetVal;
-		size_t itemIndex = (idx > 0) ? idx - 1 : std::string::npos;
-		while((itemIndex != std::string::npos) && (itemIndex >= partitions[partIdx]) && (offset > columnCount->Items[itemIndex]->numval) )
-		{
-			offset -= static_cast<llong>(columnCount->Items[itemIndex]->numval);
-			--itemIndex;
-		}
-
-		//lag and create new rows as needed
-		llong count = 1;
-		if( columnCount )
-			count = static_cast<llong>(columnCount->Items[idx]->numval);
-		llong unsolvedItems = count;
-		bool solvedItemsInIdx = false;
-		while( unsolvedItems > 0 )
-		{	
-			ColumnItem::Ptr lagItem = defaultValue;
-			//get the item as long as it doesn't pass the upper partition boundary
-			if ((itemIndex != std::string::npos) && (itemIndex >= partitions[partIdx]))
-				lagItem = column->Items[itemIndex];
-			else
-				if( firstValue )
-					lagItem = column->Items[partitions[partIdx]]; //get the first available item
-
-			llong itemIndexCount = 1;
-			if( columnCount )
-			{
-				//test if we are at the first column[idx] we use to solve rows
-				//if yes then it solves offset rows for us
-				if( !solvedItemsInIdx ) 
-					itemIndexCount = (llong) offset;
-				else
-					itemIndexCount = (llong) columnCount->Items[itemIndex]->numval;
-			}
-			//get number of rows we can solve at this step, using column[itemIndex] value
-			llong solveItems = min(unsolvedItems, itemIndexCount);
-			llong newColumnSize = (llong) newColumn->Items.size();
-			if( columnCount && solvedItemsInIdx &&
-				ColumnItem::equal(	lagItem.get(), 
-						newColumn->Items[newColumnSize - 1].get(), 
-						column->Type) )
-			{
-				if( columnCount )
-					newColumnCount->Items[newColumnSize - 1]->numval += solveItems;
-			}
-			else
-			{
-				newColumn->Items.push_back( lagItem );
-				if( columnCount )
-					newColumnCount->Items.push_back( new ColumnItem((double) solveItems) );
-				newColumnToColumnMap.push_back((llong) idx);
-				solvedItemsInIdx = true;
-			}
-			unsolvedItems -= solveItems;
-			++itemIndex;
-		}
-		assert( itemIndex <= (idx + 1) );
-	}
-
-	assert( newColumn->Items.size() >= column->Items.size() );
-
-	if( newColumn->Items.size() == column->Items.size() )
-		return newColumn; //no need to change table
-
-	//recreate table (split row groups)
-	vector<Column::Ptr> newColumns = table->getColumnsTemplate();
-	if( table->HasCount )
-		newColumns.pop_back();
-
-	for( size_t idx = 0; idx < newColumn->Items.size(); ++idx )
-		for( size_t idx2 = 0; idx2 < newColumns.size(); ++idx2 )
-			newColumns[idx2]->Items.push_back( 
-			table->Columns[idx2]->Items[newColumnToColumnMap[idx]] );
-	if( table->HasCount )
-		newColumns.push_back( newColumnCount );
-	table->updateColumnsContent( newColumns );
-
-	return newColumn;
+  assert(false);
+	return Column::Ptr();
 }
 
 //------------------------------------------------------------------------------
@@ -828,24 +658,7 @@ void RowNumberVerb::changeResult(	Table::Ptr table,
 									VerbResult::Ptr resRight,
 									VerbResult::Ptr resNext )
 {
-	assert( resRight->getType() == VerbResult::TABLE_PARTITION );
-	TablePartition::Ptr partition = boost::static_pointer_cast<TablePartition>( resRight );
-	assert( partition );
-
-	Column::Ptr count = table->Columns[table->Columns.size() - 1];
-
-	//create new column
-	Column::Ptr newColumn = new Column( COL_TYPE_BIG_INT );
-	for( size_t idx = 0; idx + 1 < partition->Rows.size(); ++idx )
-	{
-		size_t rowNumber = 0;
-		for( size_t idx2 = partition->Rows[idx]; idx2 < partition->Rows[idx+1]; ++idx2 )
-			for( size_t idx3 = 0; idx3 < (size_t)count->Items[idx2]->numval; ++idx3 )
-				newColumn->Items.push_back( new ColumnItem( (double) ++rowNumber ) );
-	}
-
-	this->Result = newColumn;
-	table->unravel( partition );
+	assert(false);
 }
 
 //------------------------------------------------------------------------------

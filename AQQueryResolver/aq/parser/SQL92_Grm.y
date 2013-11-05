@@ -1464,21 +1464,20 @@ value_scalar	: K_INTEGER
 //---------------------------------------------------
 update_stmt	: K_UPDATE table_name 
 			  K_SET column_value_list
-			  K_WHERE column_value_list				{
-														$1->left		= $2;
+			  where_clause							{
+														$1->left = $2;
 														aq::tnode *pNode;
-														pNode			= new tnode( K_UPDATE_ARGS );
-														$1->right		= pNode;
-														pNode->left		= $4;
-														pNode->right	= $6;
-														$$				= $1;
+														pNode = new tnode( K_SET );
+														$1->next	 = pNode;
+														pNode->left = $4;
+														pNode->next = $5;
 													}
 			| K_UPDATE table_name 
 			  K_SET column_value_list
 			  K_WHERE K_LPAREN column_name_list K_RPAREN K_IN subquery	{
 														$1->left		= $2;
 														aq::tnode *pNode;
-														pNode			= new tnode( K_UPDATE_ARGS );
+														pNode			= new tnode( K_SET );
 														$1->right		= pNode;
 														pNode->left		= $4;
 														pNode->right	= $9;

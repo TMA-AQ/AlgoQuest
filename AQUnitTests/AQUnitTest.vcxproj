@@ -182,6 +182,7 @@
     <ClCompile Include="src\BaseDescTest.cpp" />
     <ClCompile Include="src\ColumnMapperTest.cpp" />
     <ClCompile Include="src\ExprTransformTest.cpp" />
+    <ClCompile Include="src\FileMapperTest.cpp" />
     <ClCompile Include="src\JeqParserTest.cpp" />
     <ClCompile Include="src\ParserTest.cpp" />
     <ClCompile Include="src\QueryResolverSimulate.cpp" />

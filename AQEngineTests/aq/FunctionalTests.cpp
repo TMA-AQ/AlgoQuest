@@ -252,7 +252,7 @@ uint64_t functional_tests(const struct opt& o)
 
       aq::Logger::getInstance().log(AQ_INFO, "checking '%s'\n", reader->getFullIdent().c_str());
       aq::Logger::getInstance().log(AQ_INFO, "expecting: %s\n", reader->getExpected());
-      aq::TProjectSettings settings;
+      aq::Settings settings;
       aq::Base baseDesc;
       aq::AQMatrix matrix(settings, baseDesc);
 

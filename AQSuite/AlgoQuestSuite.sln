@@ -26,6 +26,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AQL2SQL", "..\AQL2SQL\AQL2S
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AQPythonBinding", "..\AQEngineTests\AQPythonBinding.vcxproj", "{D9EF81A8-A22B-4594-A409-7488ED7B26AD}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Testing", "..\Testing\Testing.vcxproj", "{0DCFF417-AEAD-4E7C-A33B-A4ADD2788F49}"
+	ProjectSection(ProjectDependencies) = postProject
+		{49633ED8-BD24-4937-A454-7F73C1F9AFD0} = {49633ED8-BD24-4937-A454-7F73C1F9AFD0}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -238,6 +243,22 @@ Global
 		{D9EF81A8-A22B-4594-A409-7488ED7B26AD}.Release|x64.ActiveCfg = Release|x64
 		{D9EF81A8-A22B-4594-A409-7488ED7B26AD}.Release|x86.ActiveCfg = Release|Win32
 		{D9EF81A8-A22B-4594-A409-7488ED7B26AD}.Release|x86.Build.0 = Release|Win32
+		{0DCFF417-AEAD-4E7C-A33B-A4ADD2788F49}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{0DCFF417-AEAD-4E7C-A33B-A4ADD2788F49}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{0DCFF417-AEAD-4E7C-A33B-A4ADD2788F49}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{0DCFF417-AEAD-4E7C-A33B-A4ADD2788F49}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0DCFF417-AEAD-4E7C-A33B-A4ADD2788F49}.Debug|Win32.Build.0 = Debug|Win32
+		{0DCFF417-AEAD-4E7C-A33B-A4ADD2788F49}.Debug|x64.ActiveCfg = Debug|x64
+		{0DCFF417-AEAD-4E7C-A33B-A4ADD2788F49}.Debug|x86.ActiveCfg = Debug|Win32
+		{0DCFF417-AEAD-4E7C-A33B-A4ADD2788F49}.Debug|x86.Build.0 = Debug|Win32
+		{0DCFF417-AEAD-4E7C-A33B-A4ADD2788F49}.Release|Any CPU.ActiveCfg = Release|Win32
+		{0DCFF417-AEAD-4E7C-A33B-A4ADD2788F49}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{0DCFF417-AEAD-4E7C-A33B-A4ADD2788F49}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{0DCFF417-AEAD-4E7C-A33B-A4ADD2788F49}.Release|Win32.ActiveCfg = Release|Win32
+		{0DCFF417-AEAD-4E7C-A33B-A4ADD2788F49}.Release|Win32.Build.0 = Release|Win32
+		{0DCFF417-AEAD-4E7C-A33B-A4ADD2788F49}.Release|x64.ActiveCfg = Release|Win32
+		{0DCFF417-AEAD-4E7C-A33B-A4ADD2788F49}.Release|x86.ActiveCfg = Release|Win32
+		{0DCFF417-AEAD-4E7C-A33B-A4ADD2788F49}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

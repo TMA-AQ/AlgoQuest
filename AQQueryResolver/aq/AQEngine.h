@@ -10,7 +10,7 @@ namespace aq
 class AQEngine : public AQEngine_Intf
 {
 public:
-	AQEngine(Base& _baseDesc, TProjectSettings& _settings);
+	AQEngine(Base& _baseDesc, Settings& _settings);
 	~AQEngine();
   
   void call(const std::string& query, mode_t mode);
@@ -25,7 +25,7 @@ private:
 	void generateAQMatrixFromPRM(const std::string prmFile, aq::tnode * whereNode);
 
 	const Base& baseDesc;
-	const TProjectSettings& settings;
+	const Settings& settings;
   boost::shared_ptr<aq::AQMatrix> aqMatrix;
 	std::vector<llong> tableIDs;
 };
@@ -35,7 +35,7 @@ private:
 class AQEngineWindows : public AQEngine
 {
 public:
-  AQEngineWindows(Base& _baseDesc, TProjectSettings& settings);
+  AQEngineWindows(Base& _baseDesc, Settings& settings);
   int run(const char * prg, const char * args) const;
 };
 
@@ -44,7 +44,7 @@ public:
 class AQEngineSystem : public AQEngine
 {
 public:
-  AQEngineSystem(Base& _baseDesc, TProjectSettings& settings);
+  AQEngineSystem(Base& _baseDesc, Settings& settings);
   int run(const char * prg, const char * args) const;
 };
 

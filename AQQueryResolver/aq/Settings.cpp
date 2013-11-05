@@ -14,7 +14,7 @@
 namespace aq
 {
 
-TProjectSettings::TProjectSettings()
+Settings::Settings()
   : 
 	iniFile(""),
   queryIdent(""),
@@ -47,7 +47,7 @@ TProjectSettings::TProjectSettings()
 {
 }
 
-TProjectSettings::TProjectSettings(const TProjectSettings& obj)
+Settings::Settings(const Settings& obj)
 	:
 	iniFile(obj.iniFile),
 	outputFile(obj.outputFile),
@@ -79,11 +79,11 @@ TProjectSettings::TProjectSettings(const TProjectSettings& obj)
 {
 }
 
-TProjectSettings::~TProjectSettings()
+Settings::~Settings()
 {
 }
 
-TProjectSettings& TProjectSettings::operator=(const TProjectSettings& obj)
+Settings& Settings::operator=(const Settings& obj)
 {
 	if (this != &obj)
 	{
@@ -120,7 +120,7 @@ TProjectSettings& TProjectSettings::operator=(const TProjectSettings& obj)
 	return *this;
 }
 
-void TProjectSettings::load(const std::string& iniFile, const std::string& queryIdent)
+void Settings::load(const std::string& iniFile, const std::string& queryIdent)
 {
 	this->load(iniFile);
 	this->changeIdent(queryIdent);
@@ -146,7 +146,7 @@ bool get_opt_value(boost::property_tree::ptree& pt, const char * key, bool defau
   else return default_value;
 }
 
-void TProjectSettings::load(const std::string& iniFile)
+void Settings::load(const std::string& iniFile)
 {
 	this->iniFile = iniFile;
   std::ifstream fin(iniFile.c_str(), std::ifstream::in);
@@ -156,7 +156,7 @@ void TProjectSettings::load(const std::string& iniFile)
   }
 }
     
-void TProjectSettings::load(std::istream& is)
+void Settings::load(std::istream& is)
 {
   try
   {
@@ -201,7 +201,7 @@ void TProjectSettings::load(std::istream& is)
 	}
 }
 
-void TProjectSettings::initPath(const std::string& root)
+void Settings::initPath(const std::string& root)
 {
   this->rootPath = root;
   if (*this->rootPath.rbegin() != '/') this->rootPath += "/";
@@ -227,7 +227,7 @@ void TProjectSettings::initPath(const std::string& root)
 
 }
 
-void TProjectSettings::changeIdent(const std::string& _queryIdent)
+void Settings::changeIdent(const std::string& _queryIdent)
 {
 	this->queryIdent = _queryIdent;
 	
@@ -244,7 +244,7 @@ void TProjectSettings::changeIdent(const std::string& _queryIdent)
 	this->iniFile = this->rootPath + "/calculus/" + queryIdent + "/aqengine.ini";
 }
 
-void TProjectSettings::dump(std::ostream& os) const
+void Settings::dump(std::ostream& os) const
 {
   os << "root-path:            ['" << rootPath             << "']" << std::endl;
   os << "working-path:         ['" << workingPath          << "']" << std::endl;
@@ -267,13 +267,13 @@ void TProjectSettings::dump(std::ostream& os) const
   os << "trace:                ["  << trace                <<  "]" << std::endl; 
 }
 
-std::string TProjectSettings::to_string() const
+std::string Settings::to_string() const
 {
   this->dump(this->output);
   return this->output.str();
 }
 
-void TProjectSettings::writeAQEngineIni(std::ostream& os) const
+void Settings::writeAQEngineIni(std::ostream& os) const
 {
 	os << "export.filename.final=" << dbDesc << std::endl;
 	os << "step1.field.separator=" << fieldSeparator << std::endl;

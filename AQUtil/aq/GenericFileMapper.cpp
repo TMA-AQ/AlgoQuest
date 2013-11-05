@@ -43,3 +43,33 @@ int GenericFileMapper::read(void * buffer, size_t offset, size_t len)
   return 0;
 }
 
+int GenericFileMapper::write(void * buffer, size_t offset, size_t len)
+{
+  assert(this->m_fd);
+  assert(offset < std::numeric_limits<size_t>::max());
+  if (this->m_fd == NULL)
+  {
+    throw aq::generic_error(aq::generic_error::COULD_NOT_OPEN_FILE, m_filename);
+  }
+  if (offset >= std::numeric_limits<size_t>::max())
+  {
+    throw aq::generic_error(aq::generic_error::GENERIC, "bad offset of mapped file " + m_filename);
+  }
+  
+  fseek(this->m_fd, static_cast<long>(offset), SEEK_SET);
+  fwrite(buffer, 1, len, this->m_fd);
+  if (feof(this->m_fd))
+    return -1;
+  return 0;
+}
+
+int GenericFileMapper::move(size_t new_offset, size_t old_offset, size_t len)
+{
+  // TODO
+  return 0;
+}
+
+int GenericFileMapper::erase(size_t offset, size_t len)
+{
+  return this->move(offset, offset + len, this->size() - len);
+}

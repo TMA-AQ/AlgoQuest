@@ -330,7 +330,6 @@
     <ClInclude Include="aq\db_loader\DatabaseLoader.h" />
     <ClInclude Include="aq\DumpVisitor.h" />
     <ClInclude Include="aq\ExprTransform.h" />
-    <ClInclude Include="aq\LIKE_PatternMatching.h" />
     <ClInclude Include="aq\Optimizations.h" />
     <ClInclude Include="aq\parser\ID2Str.h" />
     <ClInclude Include="aq\parser\JeqParser.h" />
@@ -356,6 +355,7 @@
     <ClInclude Include="aq\TemporaryColumnMapper.h" />
     <ClInclude Include="aq\ThesaurusReader.h" />
     <ClInclude Include="aq\TreeUtilities.h" />
+    <ClInclude Include="aq\UpdateResolver.h" />
     <ClInclude Include="aq\verbs\AggregateVerbs.h" />
     <ClInclude Include="aq\verbs\ArithmeticVerbs.h" />
     <ClInclude Include="aq\verbs\AuxiliaryVerbs.h" />
@@ -381,11 +381,9 @@
     <ClCompile Include="aq\Column.cpp" />
     <ClCompile Include="aq\Column2Table.cpp" />
     <ClCompile Include="aq\ColumnItem.cpp" />
-    <ClCompile Include="aq\ColumnMapper.cpp" />
     <ClCompile Include="aq\db_loader\DatabaseLoader.cpp" />
     <ClCompile Include="aq\DumpVisitor.cpp" />
     <ClCompile Include="aq\ExprTransform.cpp" />
-    <ClCompile Include="aq\LIKE_PatternMatching.cpp" />
     <ClCompile Include="aq\Optimizations.cpp" />
     <ClCompile Include="aq\parser\ID2Str.cpp" />
     <ClCompile Include="aq\parser\JeqParser.cpp" />
@@ -410,6 +408,7 @@
     <ClCompile Include="aq\Table.cpp" />
     <ClCompile Include="aq\TemporaryColumnMapper.cpp" />
     <ClCompile Include="aq\TreeUtilities.cpp" />
+    <ClCompile Include="aq\UpdateResolver.cpp" />
     <ClCompile Include="aq\verbs\AggregateVerbs.cpp" />
     <ClCompile Include="aq\verbs\ArithmeticVerbs.cpp" />
     <ClCompile Include="aq\verbs\AuxiliaryVerbs.cpp" />

@@ -88,9 +88,6 @@
     <ClInclude Include="aq\ExprTransform.h">
       <Filter>Header Files\aq</Filter>
     </ClInclude>
-    <ClInclude Include="aq\LIKE_PatternMatching.h">
-      <Filter>Header Files\aq</Filter>
-    </ClInclude>
     <ClInclude Include="aq\Optimizations.h">
       <Filter>Header Files\aq</Filter>
     </ClInclude>
@@ -241,6 +238,9 @@
     <ClInclude Include="aq\ThesaurusReader.h">
       <Filter>Header Files\aq</Filter>
     </ClInclude>
+    <ClInclude Include="aq\UpdateResolver.h">
+      <Filter>Header Files\aq</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="aq\verbs\AggregateVerbs.cpp">
@@ -288,16 +288,10 @@
     <ClCompile Include="aq\ColumnItem.cpp">
       <Filter>Source Files\aq</Filter>
     </ClCompile>
-    <ClCompile Include="aq\ColumnMapper.cpp">
-      <Filter>Source Files\aq</Filter>
-    </ClCompile>
     <ClCompile Include="aq\DumpVisitor.cpp">
       <Filter>Source Files\aq</Filter>
     </ClCompile>
     <ClCompile Include="aq\ExprTransform.cpp">
-      <Filter>Source Files\aq</Filter>
-    </ClCompile>
-    <ClCompile Include="aq\LIKE_PatternMatching.cpp">
       <Filter>Source Files\aq</Filter>
     </ClCompile>
     <ClCompile Include="aq\Optimizations.cpp">
@@ -386,6 +380,9 @@
     </ClCompile>
     <ClCompile Include="aq\RowTableWritter.cpp">
       <Filter>Source Files\aq\row_solver</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\UpdateResolver.cpp">
+      <Filter>Source Files\aq</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -6,7 +6,7 @@ void AQEngineBasic::call(const std::string&, aq::AQEngine_Intf::mode_t)
 {
 }
 
-void AQEngineBasic::call(TProjectSettings&, 
+void AQEngineBasic::call(Settings&, 
 												 tnode *, 
 												 aq::AQEngine_Intf::mode_t , 
 												 int)

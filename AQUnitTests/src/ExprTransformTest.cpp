@@ -20,13 +20,12 @@ std::string transform(const char * ini, const char * query, int tag)
 { 
   int pErr;
   aq::tnode * tree = NULL;
-  aq::TProjectSettings settings;
-  aq::Base base;
+  aq::Settings settings;
   
   aq::Logger::getInstance().setLevel(2);
 
   settings.load(ini);
-  base.loadFromRawFile(settings.szDBDescFN);
+  aq::Base base(settings.dbDesc.c_str());
   pErr = SQLParse(query, &tree);
   BOOST_REQUIRE(pErr == 0);
   BOOST_REQUIRE(tree != NULL);

@@ -100,7 +100,7 @@ public:
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
 	virtual void addResult(aq::Row& row);
   void accept(VerbVisitor* visitor);
-  virtual void setSettings(TProjectSettings* settings)
+  virtual void setSettings(Settings* settings)
   {
     this->useRowResolver = true;
   }

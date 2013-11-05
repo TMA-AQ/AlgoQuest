@@ -15,9 +15,9 @@
 namespace aq
 {
 
-struct TProjectSettings 
+struct Settings 
 {
-  typedef boost::shared_ptr<TProjectSettings> Ptr;
+  typedef boost::shared_ptr<Settings> Ptr;
   
   mutable std::stringstream output;
 
@@ -55,10 +55,10 @@ struct TProjectSettings
   bool cmdLine;
   bool trace;
 
-	TProjectSettings();
-	TProjectSettings(const TProjectSettings&);
-	~TProjectSettings();
-	TProjectSettings& operator=(const TProjectSettings&);
+	Settings();
+	Settings(const Settings&);
+	~Settings();
+	Settings& operator=(const Settings&);
 
   void initPath(const std::string& root);
   void load(const std::string& iniFile, const std::string& queryIdent);

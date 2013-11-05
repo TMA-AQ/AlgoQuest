@@ -222,13 +222,11 @@ int check_answer_data(std::ostream& os,
   std::string vdgPath(o.dbPath);
   vdgPath += "/data_orga/vdg/data/";
 
-  aq::TProjectSettings settings;
-  aq::Base baseDesc;
-  baseDesc.loadFromRawFile(baseFilename.c_str());
+  aq::Settings settings;
+  aq::Base baseDesc(baseFilename);
 
   // Set the baseDesc for the Where Conditions
   // whereValidator.setBaseDesc(baseDesc);
-
 
   aq::AQMatrix matrix(settings, baseDesc);
   
@@ -437,7 +435,7 @@ public:
       }
     }
 
-    unsigned int i = o.withCount ? 1 : *(rows.rbegin());
+    size_t i = o.withCount ? 1 : *(rows.rbegin());
     do
     {
       for (auto& c : display_order)
@@ -487,9 +485,8 @@ int display(display_cb * cb,
   std::string vdgPath(o.dbPath);
   vdgPath += "/data_orga/vdg/data/";
 
-  aq::TProjectSettings settings;
-  aq::Base baseDesc;
-  baseDesc.loadFromRawFile(baseFilename.c_str());
+  aq::Settings settings;
+  aq::Base baseDesc(baseFilename);
 
   aq::AQMatrix aqMatrix(settings, baseDesc);
   

@@ -7,7 +7,7 @@ namespace aq
 {
 
 //-------------------------------------------------------------------------------
-ColumnItem::Ptr getMinMaxFromThesaurus(	size_t tableID, size_t colIdx, size_t partIdx, bool min, Base& BaseDesc, TProjectSettings& Settings )
+ColumnItem::Ptr getMinMaxFromThesaurus(	size_t tableID, size_t colIdx, size_t partIdx, bool min, Base& BaseDesc, Settings& Settings )
 {
 	ColumnItem::Ptr minMax = NULL;
   size_t tableIdx = 0;
@@ -90,8 +90,9 @@ ColumnItem::Ptr getMinMaxFromThesaurus(	size_t tableID, size_t colIdx, size_t pa
 }
 
 //-------------------------------------------------------------------------------
-Table::Ptr solveOptimalMinMax(	aq::verb::VerbNode::Ptr spTree, Base& BaseDesc, 
-								TProjectSettings& Settings )
+Table::Ptr solveOptimalMinMax(aq::verb::VerbNode::Ptr spTree, 
+                              Base& BaseDesc, 
+                              Settings& Settings )
 {
 	if( !spTree->getLeftChild() )
   {
@@ -145,24 +146,6 @@ Table::Ptr solveOptimalMinMax(	aq::verb::VerbNode::Ptr spTree, Base& BaseDesc,
 	table->Columns.push_back( newColumn );
 	table->TotalCount = 1;
 	return table;
-}
-
-//-------------------------------------------------------------------------------
-bool trivialSelectFromSelect( aq::tnode* pSelect )
-{
-	assert( pSelect && pSelect->tag == K_SELECT );
-	aq::tnode* pFrom = find_main_node( pSelect, K_FROM );
-	std::vector<aq::tnode*> tables;
-	commaListToNodeArray( pFrom->left, tables );
-	if( tables.size() != 1 )
-		return false;
-	aq::tnode* pWhere = find_main_node( pSelect, K_WHERE );
-	std::vector<aq::tnode*> conds;
-	andListToNodeArray( pWhere->left, conds );
-	if( conds.size() == 1 && conds[0]->tag == K_JNO )
-		return true;
-	else
-		return false;
 }
 
 }

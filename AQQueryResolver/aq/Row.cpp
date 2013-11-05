@@ -101,6 +101,7 @@ Row::Row(const Row& source)
   reinit(source.reinit),
   flush(source.flush)
 {
+  std::copy(source.indexes.begin(), source.indexes.end(), std::back_inserter<aq::Row::index_t>(this->indexes));
   std::copy(source.initialRow.begin(), source.initialRow.end(), std::back_inserter<aq::Row::row_t>(this->initialRow));
   std::copy(source.computedRow.begin(), source.computedRow.end(), std::back_inserter<aq::Row::row_t>(this->computedRow));
 }
@@ -119,6 +120,7 @@ Row& Row::operator=(const Row& source)
     this->flush = source.flush;
     this->computedRow.clear();
     this->initialRow.clear();
+    std::copy(source.indexes.begin(), source.indexes.end(), std::back_inserter<aq::Row::index_t>(this->indexes));
     std::copy(source.initialRow.begin(), source.initialRow.end(), std::back_inserter<aq::Row::row_t>(this->initialRow));
     std::copy(source.computedRow.begin(), source.computedRow.end(), std::back_inserter<aq::Row::row_t>(this->computedRow));
   }

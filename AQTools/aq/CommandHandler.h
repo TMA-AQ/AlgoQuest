@@ -10,7 +10,7 @@ namespace aq
 class CommandHandler
 {
 public:
-  CommandHandler(const std::string& _dbsPath, const std::string& _dbName, aq::TProjectSettings& _settings, aq::Base& _baseDesc) 
+  CommandHandler(const std::string& _dbsPath, const std::string& _dbName, aq::Settings& _settings, aq::Base& _baseDesc) 
     : databasesPath(_dbsPath), databaseName(_dbName), settings(_settings), baseDesc(_baseDesc)
   {
   }
@@ -18,10 +18,10 @@ public:
   int process(const std::string& cmd);
 
 private:
-  std::string databasesPath;
-  std::string databaseName;
-  aq::TProjectSettings& settings;
-  aq::Base& baseDesc;
+  std::string    databasesPath;
+  std::string    databaseName;
+  aq::Settings & settings;
+  aq::Base     & baseDesc;
 };
 
 }

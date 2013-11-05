@@ -1,11 +1,12 @@
 #if defined(WIN32)
-// # include "stdafx.h"
+# include "stdafx.h"
 # include <codecvt>
 #endif
 
 #include <aq/Exceptions.h>
 #include <aq/Logger.h>
 #include <aq/Base.h>
+#include <aq/Database.h>
 #include <aq/AQEngine.h>
 #include <aq/SQLPrefix.h>
 #include <aq/Column2Table.h>
@@ -28,9 +29,6 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
-// fixme
-// #include "Link.h"
-
 namespace fs = boost::filesystem;
 
 // -------------------------------------------------------------------------------------------------
@@ -45,7 +43,7 @@ size_t failedQueries = 0;
 boost::mutex parserMutex;
 
 // -------------------------------------------------------------------------------------------------
-int prepareQuery(const std::string& query, const aq::TProjectSettings& settingsBase, aq::Base& baseDesc, aq::TProjectSettings& settings, 
+int prepareQuery(const std::string& query, const aq::Settings& settingsBase, aq::Base& baseDesc, aq::Settings& settings, 
                  std::string& displayFile, const std::string queryIdentStr, bool force)
 {		
 	//
@@ -67,14 +65,14 @@ int prepareQuery(const std::string& query, const aq::TProjectSettings& settingsB
 	//
 	// create directories
 	std::list<fs::path> lpaths;
-	lpaths.push_back(fs::path(settings.szRootPath + "/calculus/" + queryIdentTmp));
-	lpaths.push_back(fs::path(settings.szTempPath1));
-	lpaths.push_back(fs::path(settings.szTempPath2));
+	lpaths.push_back(fs::path(settings.workingPath));
+	lpaths.push_back(fs::path(settings.tmpPath));
+	lpaths.push_back(fs::path(settings.dpyPath));
 	for (std::list<fs::path>::const_iterator dir = lpaths.begin(); dir != lpaths.end(); ++dir)
 	{
 		if (fs::exists(*dir))
 		{
-			aq::Logger::getInstance().log(AQ_ERROR, "directory already exist '%s'\n", (*dir).c_str());
+			aq::Logger::getInstance().log(AQ_WARNING, "directory already exist '%s'\n", (*dir).c_str());
       if (!force)
       {
         return EXIT_FAILURE;
@@ -82,7 +80,7 @@ int prepareQuery(const std::string& query, const aq::TProjectSettings& settingsB
 		}
 		else if (!fs::create_directory(*dir))
 		{
-			aq::Logger::getInstance().log(AQ_ERROR, "cannot create directory '%s'\n", (*dir).c_str());
+			aq::Logger::getInstance().log(AQ_WARNING, "cannot create directory '%s'\n", (*dir).c_str());
       if (!force)
       {
         return EXIT_FAILURE;
@@ -92,7 +90,7 @@ int prepareQuery(const std::string& query, const aq::TProjectSettings& settingsB
 
   //
   // write request file
-  std::string queryFilename(settings.szRootPath + "/calculus/" + queryIdentTmp + "/Request.sql");
+  std::string queryFilename(settings.workingPath + "/Request.sql");
   std::ofstream queryFile(queryFilename.c_str());
   queryFile << query;
   queryFile.close();
@@ -103,16 +101,15 @@ int prepareQuery(const std::string& query, const aq::TProjectSettings& settingsB
 	settings.writeAQEngineIni(iniFile);
 	iniFile.close();
 
+  //
 	// generate answer file
-	// displayFile = settings.szRootPath + "/calculus/" + queryIdentStr + "/display.txt"; // TODO
-	displayFile = settings.szRootPath + "/calculus/" + queryIdentStr + "/answer.txt"; // TODO
-	aq::Logger::getInstance().log(AQ_INFO, "save answer to %s\n", displayFile.c_str());
+	aq::Logger::getInstance().log(AQ_INFO, "save answer to %s\n", settings.answerFile.c_str());
 
 	return EXIT_SUCCESS;
 }
 
 // -------------------------------------------------------------------------------------------------
-int processQuery(const std::string& query, aq::TProjectSettings& settings, aq::Base& baseDesc, aq::AQEngine_Intf * aq_engine,
+int processQuery(const std::string& query, aq::Settings& settings, aq::Base& baseDesc, aq::AQEngine_Intf * aq_engine,
                  const std::string& answer, bool clean)
 {
 	try
@@ -147,19 +144,14 @@ int processQuery(const std::string& query, aq::TProjectSettings& settings, aq::B
 		aq::QueryResolver queryResolver(pNode, &settings, aq_engine, baseDesc, id);
     queryResolver.solve();
 
-		aq::Table::Ptr result = queryResolver.getResult();
-		if (!settings.useRowResolver && result)
-		{
-			aq::Timer timer;
-			result->saveToAnswer(settings.szAnswerFN, settings.fieldSeparator);
-			aq::Logger::getInstance().log(AQ_INFO, "Save Answer: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
-		}
+    aq::Table::Ptr result = queryResolver.getResult();
 
 		if (clean)
 		{
-			std::string workingDirectory = settings.szRootPath + "/calculus/" + settings.queryIdent;
-			aq::Logger::getInstance().log(AQ_NOTICE, "remove working directory '%s'\n", workingDirectory.c_str());
-			aq::DeleteFolder(workingDirectory.c_str());
+			aq::Logger::getInstance().log(AQ_NOTICE, "remove working directory '%s'\n", settings.workingPath.c_str());
+			aq::DeleteFolder(settings.workingPath.c_str());
+			aq::Logger::getInstance().log(AQ_NOTICE, "remove tmp working directory '%s'\n", settings.tmpPath.c_str());
+			aq::DeleteFolder(settings.tmpPath.c_str());
 		}
 
 		delete pNode;
@@ -185,7 +177,7 @@ int processQuery(const std::string& query, aq::TProjectSettings& settings, aq::B
 
 // -------------------------------------------------------------------------------------------------
 int processSQLQueries(const std::string query, 
-                      const aq::TProjectSettings& settingsBase, aq::Base& baseDesc,
+                      const aq::Settings& settingsBase, aq::Base& baseDesc,
                       const std::string queryIdent, bool clean, bool force)
 {
 
@@ -195,7 +187,7 @@ int processSQLQueries(const std::string query,
   //
   // prepare and process query
   std::string answer;
-  aq::TProjectSettings settings(settingsBase);
+  aq::Settings settings(settingsBase);
 
   //
   // Load AQ engine
@@ -218,8 +210,38 @@ int processSQLQueries(const std::string query,
 // ------------------------------------------------------------------------------------------------
 extern "C"
 {
+  
+int get_db_list_on_path(const char * path, std::vector<const char *>& db_list)
+{
+  boost::filesystem::path p(path);
+  if (boost::filesystem::exists(p) && boost::filesystem::is_directory(p))
+  {
+    boost::filesystem::directory_iterator end_it;
+    for (boost::filesystem::directory_iterator it(p); it != end_it; ++it)
+    {
+      if (boost::filesystem::is_directory(it->status()))
+      {
+        aq::Database db(it->path().string());
+        if (db.isValid())
+        {
+          db_list.push_back(db.getName().c_str());
+        }
+      }
+    }
+  }
+  return EXIT_SUCCESS;
+}
+  
+int get_db_list(std::vector<const char *>& db_list)
+{
+  char * s = ::getenv("AQ_HOME");
+  if (s == NULL)
+  {
+    aq::Logger::getInstance().log(AQ_ERROR, "AQ_HOME environment variable is not set");
+  }
+  return get_db_list_on_path(s, db_list);
+}
 
-// -------------------------------------------------------------------------------------------------
 int solve_query(const char * _query, const char * _iniFilename, const char * _workingDirectory, 
                 const char * _logIdent, const char * _logMode, unsigned int logLevel,
                 bool clean, bool force)
@@ -236,17 +258,14 @@ int solve_query(const char * _query, const char * _iniFilename, const char * _wo
     std::string logMode(_logMode); 
 
 		// Settings
-		aq::TProjectSettings settings;
+		aq::Settings settings;
 
 		// log options
 		bool lock_mode = false;
 		bool date_mode = false;
 		bool pid_mode = false;
-
-		// aq options
-		bool skipNestedQuery = false;
-
-		//
+		
+    //
 		// Initialize Logger
 		aq::Logger::getInstance(logIdent.c_str(), logMode == "STDOUT" ? STDOUT : logMode == "LOCALFILE" ? LOCALFILE : logMode == "SYSLOG" ? SYSLOG : STDOUT);
 		aq::Logger::getInstance().setLevel(logLevel);
@@ -260,7 +279,6 @@ int solve_query(const char * _query, const char * _iniFilename, const char * _wo
 		{
 			aq::Logger::getInstance().log(AQ_INFO, "read %s\n", iniFilename.c_str());
 			settings.load(iniFilename);
-			settings.executeNestedQuery = !skipNestedQuery;
 		}
 
 		//
@@ -274,23 +292,22 @@ int solve_query(const char * _query, const char * _iniFilename, const char * _wo
 		//
 		// Load DB Schema
 		aq::Base baseDesc;
-		aq::Logger::getInstance().log(AQ_INFO, "load base %s\n", settings.szDBDescFN);
+		aq::Logger::getInstance().log(AQ_INFO, "load base %s\n", settings.aqName);
     aq::base_t baseDescHolder;
-    if (strncmp(settings.szDBDescFN + strlen(settings.szDBDescFN) - 4, ".xml", 4) == 0)
+    std::fstream bdFile(settings.dbDesc);
+    if (settings.dbDesc.substr(settings.dbDesc.size() - 4) == ".xml")
     {
-      std::fstream bdFile(settings.szDBDescFN);
       aq::build_base_from_xml(bdFile, baseDescHolder);
     }
     else
     {
-      aq::build_base_from_raw(settings.szDBDescFN, baseDescHolder);
-      // baseDesc.loadFromRawFile(settings.szDBDescFN);
+      aq::build_base_from_xml(bdFile, baseDescHolder);
     }
     baseDesc.loadFromBaseDesc(baseDescHolder);
 		
 		//
 		// Load AQ engine
-		aq::Logger::getInstance().log(AQ_INFO, "Use aq engine: '%s'\n", settings.szEnginePath.c_str());
+		aq::Logger::getInstance().log(AQ_INFO, "Use aq engine: '%s'\n", settings.aqEngine.c_str());
 		processSQLQueries(query, settings, baseDesc,  workingDirectory, clean, force);
 	}
 	catch (const aq::generic_error& error)
@@ -318,7 +335,7 @@ int load_db(const char * propertiesFile, unsigned int tableId)
   
   //
   // read ini file
-  aq::TProjectSettings settings;
+  aq::Settings settings;
   if (strcmp(propertiesFile, "") == 0)
   {
     aq::Logger::getInstance().log(AQ_INFO, "no properties file");
@@ -330,33 +347,32 @@ int load_db(const char * propertiesFile, unsigned int tableId)
   
   //
   // Load DB Schema
-  aq::Base baseDesc;
-  std::string baseDescr_filename = settings.szDBDescFN;
+  std::string baseDescr_filename = settings.dbDesc;
   aq::Logger::getInstance().log(AQ_INFO, "load base %s\n", baseDescr_filename.c_str());
   std::fstream bdFile(baseDescr_filename.c_str());
-  aq::base_t baseDescHolder;
+  aq::base_t bd;
   if (baseDescr_filename.substr(baseDescr_filename.size() - 4) == ".xml")
   {
-    aq::build_base_from_xml(bdFile, baseDescHolder);
-    baseDesc.loadFromBaseDesc(baseDescHolder);
+    aq::build_base_from_xml(bdFile, bd);
   }
   else
   {
-    baseDesc.loadFromRawFile(baseDescr_filename.c_str());
+    aq::build_base_from_raw(bdFile, bd);
   }
 
   //
   // load base
-  for (size_t t = 0; t < baseDesc.getTables().size(); ++t)
+  for (size_t t = 0; t < bd.table.size(); ++t)
   {
-    if ((tableId != 0) && (tableId != baseDesc.getTables()[t]->ID))
+    if ((tableId != 0) && (tableId != bd.table[t].num))
     {
       continue;
     }
-    for (size_t c = 0; c < baseDesc.getTables()[t]->Columns.size(); ++c)
+    aq::DatabaseLoader loader(bd, settings.aqLoader, settings.rootPath, settings.packSize, ','/*settings.fieldSeparator*/, settings.csvFormat); // FIXME
+    for (size_t c = 0; c < bd.table[t].colonne.size(); ++c)
     {
       aq::Logger::getInstance().log(AQ_INFO, "loading column %d of table %d\n", c + 1, t + 1);
-      cut_in_col(propertiesFile, t + 1, c + 1);
+      loader.run(t + 1, c + 1);
     }
   }
   return EXIT_SUCCESS;
@@ -364,7 +380,7 @@ int load_db(const char * propertiesFile, unsigned int tableId)
 
 const char * aql2sql(const char * aql_query)
 {
-  return "prout";
+  return "TODO";
 }
 
 }

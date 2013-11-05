@@ -55,7 +55,7 @@ namespace aq
 {
   
 RowSolver::RowSolver(boost::shared_ptr<aq::AQMatrix> _aqMatrix, const std::vector<Column::Ptr>& _columnTypes, 
-                     const std::vector<aq::tnode*> _columnGroup, const TProjectSettings& _settings, const Base& _BaseDesc)
+                     const std::vector<aq::tnode*> _columnGroup, const Settings& _settings, const Base& _BaseDesc)
                      : aqMatrix(_aqMatrix), columnTypes(_columnTypes), columnGroup(_columnGroup), settings(_settings), BaseDesc(_BaseDesc)
 {
 }
@@ -205,6 +205,7 @@ void RowSolver::solve_thread(boost::shared_ptr<aq::RowProcess_Intf> rowProcess,
   aq::Timer timer;
   std::vector<aq::Row> rows(1);
   aq::Row& row = rows[0];
+  row.indexes.resize(aqMatrix->getNbColumn());
   row.initialRow.resize(columns.size());
   size_t nrow = 0;
   size_t groupByIndex = 0;
@@ -220,6 +221,11 @@ void RowSolver::solve_thread(boost::shared_ptr<aq::RowProcess_Intf> rowProcess,
     row.completed = !aggregate;
     row.flush = false;
     row.reinit = (groupByCount == 0);
+
+    for (size_t n = 0; n < aqMatrix->getNbColumn(); ++n)
+    {
+      row.indexes[n] = aqMatrix->getColumn(n)[i];
+    }
 
     for (size_t c = 0; c < columns.size(); ++c) // FIXME : optimisable
     {

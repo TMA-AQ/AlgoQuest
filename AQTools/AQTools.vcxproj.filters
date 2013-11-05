@@ -26,13 +26,16 @@
     <ClInclude Include="aq\AQEngineBasic.h">
       <Filter>Fichiers d%27en-tête\aq</Filter>
     </ClInclude>
-    <ClInclude Include="aq\Link.h">
-      <Filter>Fichiers d%27en-tête\aq</Filter>
-    </ClInclude>
     <ClInclude Include="aq\AQEngineSimulate.h">
       <Filter>Fichiers d%27en-tête\aq</Filter>
     </ClInclude>
     <ClInclude Include="aq\CommandHandler.h">
+      <Filter>Fichiers d%27en-tête\aq</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\VerbBuilder.h">
+      <Filter>Fichiers d%27en-tête\aq</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\AQManager.h">
       <Filter>Fichiers d%27en-tête\aq</Filter>
     </ClInclude>
   </ItemGroup>
@@ -47,6 +50,12 @@
       <Filter>Fichiers sources\aq</Filter>
     </ClCompile>
     <ClCompile Include="aq\CommandHandler.cpp">
+      <Filter>Fichiers sources\aq</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\VerbBuilder.cpp">
+      <Filter>Fichiers sources\aq</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\AQManager.cpp">
       <Filter>Fichiers sources\aq</Filter>
     </ClCompile>
   </ItemGroup>

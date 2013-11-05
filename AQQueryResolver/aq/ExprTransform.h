@@ -4,7 +4,7 @@
 #include "parser/SQLParser.h"
 #include "parser/sql92_grm_tab.hpp"
 #include "Column2Table.h"
-#include "LIKE_PatternMatching.h"
+// #include "LIKE_PatternMatching.h"
 #include "ColumnMapper_Intf.h"
 #include "TreeUtilities.h"
 #include "ThesaurusReader.h"
@@ -12,6 +12,7 @@
 
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/regex.hpp>
 
 namespace 
 {
@@ -212,7 +213,7 @@ namespace aq {
 class ExpressionTransform
 {
 public:
-  ExpressionTransform(const Base& _baseDesc, const TProjectSettings& _settings);
+  ExpressionTransform(const Base& _baseDesc, const Settings& _settings);
   template <typename M> aq::tnode * transform(aq::tnode * pNode) const;
 private:
   enum transformation_type
@@ -227,7 +228,7 @@ private:
   template <typename M> aq::tnode* transform_like(aq::tnode* pNode) const;
   template <typename M> aq::tnode* transform_between(aq::tnode* pNode) const;
   const Base& baseDesc;
-  const TProjectSettings& settings;
+  const Settings& settings;
 };
 
 class check_cmp_op
@@ -287,10 +288,11 @@ private:
 	ColumnType cType;
   bool bNotLike;
   
-	TPatternDescription	patternDesc;
+	// TPatternDescription	patternDesc;
+  boost::regex rgx;
 	mutable char szTmpBuf[100];
 	mutable const char * pszVal;
-	int	cEscape;
+	// int cEscape;
 };
 
 template <typename M>
@@ -419,7 +421,7 @@ aq::tnode * ExpressionTransform::transform(aq::tnode * pNode, CMP& cmp) const
 namespace expression_transform {
   
   template <class M>
-  aq::tnode * transform(const aq::Base& base, const aq::TProjectSettings& settings, aq::tnode * node)
+  aq::tnode * transform(const aq::Base& base, const aq::Settings& settings, aq::tnode * node)
   {
     aq::tnode * newNode = aq::clone_subtree(node);
     aq::ExpressionTransform expTr(base, settings);

@@ -215,25 +215,7 @@ bool WhereVerb::changeQuery( aq::tnode* pStart, aq::tnode* pNode,
 void WhereVerb::changeResult( Table::Ptr table, 
 	VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext )
 {
-	if( !resLeft )
-		return;
-
-	if( resLeft->getType() != VerbResult::ROW_VALIDATION )
-		throw verb_error(verb_error::VERB_BAD_SYNTAX, this->getVerbType());
-	RowValidation::Ptr rv = boost::dynamic_pointer_cast<RowValidation>( resLeft );
-	
-	//recreate table
-	vector<Column::Ptr> newColumns = table->getColumnsTemplate();
-
-	for( size_t idx = 0; idx < rv->ValidRows.size(); ++idx )
-	{
-		if( !rv->ValidRows[idx] )
-			continue;
-		for( size_t idx2 = 0; idx2 < table->Columns.size(); ++idx2 )
-			newColumns[idx2]->Items.push_back( table->Columns[idx2]->Items[idx] );
-	}
-
-	table->updateColumnsContent( newColumns );
+	assert(false);
 }
 
 void WhereVerb::accept(VerbVisitor* visitor)
@@ -283,86 +265,7 @@ bool OrderVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 void OrderVerb::changeResult(	Table::Ptr table, 
 								VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext )
 {
-	assert( resLeft );
-	VerbResultArray::Ptr resArray = boost::dynamic_pointer_cast<VerbResultArray>( resLeft );
-	if( !resArray )
-	{
-		resArray = new VerbResultArray();
-		resArray->Results.push_back( resLeft );
-	}
-	assert( resArray->Results.size() > 0 );
-	vector<Column::Ptr> selectColumns;
-	for( size_t idx = 0; idx < table->Columns.size(); ++idx )
-		if( !table->Columns[idx]->Invisible )
-			selectColumns.push_back( table->Columns[idx] );
-
-	vector<Column::Ptr> columns;
-	for( size_t idx = 0; idx < resArray->Results.size(); ++idx )
-	{
-		
-		VerbResult::Ptr result = resArray->Results[idx];
-		assert( result );
-		switch( result->getType() )
-		{
-		case VerbResult::COLUMN:
-		  columns.push_back( boost::static_pointer_cast<Column>( result ) );
-			break;
-		case VerbResult::SCALAR:
-			{
-			  Scalar::Ptr scalar = boost::static_pointer_cast<Scalar>( result );
-				if( scalar->Type != COL_TYPE_INT &&
-					scalar->Type != COL_TYPE_BIG_INT )
-					throw verb_error(generic_error::INVALID_QUERY, this->getVerbType());
-				int colNum = (int) scalar->Item.numval;
-				--colNum;
-				if( colNum < 0 || colNum >= (int) selectColumns.size() )
-					throw verb_error(generic_error::INVALID_QUERY, this->getVerbType());
-				columns.push_back( selectColumns[colNum] );
-			}
-			break;
-		default:
-			throw verb_error(generic_error::INVALID_QUERY, this->getVerbType());
-		}
-	}
-
-	TablePartition::Ptr partition = NULL;
-	if( this->Context == K_SELECT )
-	{
-		if( resRight )
-		{
-			assert( resRight->getType() == VerbResult::TABLE_PARTITION );
-			partition = boost::static_pointer_cast<TablePartition>( resRight );
-		}
-	}
-	
-	if( this->Context != K_SELECT )
-	{
-		//we do a final group by at the end of the query, but it should not interfere
-		//with the results of a final order by, so do the group by before
-		table->cleanRedundantColumns();
-		table->groupBy();
-		table->OrderByApplied = true;
-	}
-	//make copy so that the partition returned by PARTITION BY is not changed
-	if( !partition )
-	{
-		partition = new TablePartition();
-		partition->FrameEndType = TablePartition::AQ_RELATIVE;
-		partition->Rows.push_back( 0 );
-		if( table->Columns.size() > 0 )
-			partition->Rows.push_back( (int) table->Columns[0]->Items.size() );
-		else
-			partition->Rows.push_back( 0 );
-	}
-	else
-		if( !partition->FrameUnitsInitialized )
-			partition->FrameEndType = TablePartition::AQ_RELATIVE;
-
-	TablePartition::Ptr partitionCopy = new TablePartition( *partition );
-	table->orderBy( columns, partitionCopy );
-	
-	if( this->Context == K_SELECT )
-		this->Result = partition;
+	assert(false);
 }
 
 //------------------------------------------------------------------------------
@@ -396,7 +299,10 @@ void ByVerb::accept(VerbVisitor* visitor)
 //------------------------------------------------------------------------------
 bool FromVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
-	aq::PreProcessSelect( pStart, *this->m_baseDesc );
+  if (enforce_qualified_column_reference(pStart, *this->m_baseDesc) != 0)
+  {
+		throw generic_error(generic_error::INVALID_QUERY, "Error : No or bad tables specified in SQL SELECT ... FROM Statement");
+  }
   aq::getTablesList(pNode, this->tables);
 	return false;
 }
@@ -438,60 +344,7 @@ void GroupVerb::changeResult(	Table::Ptr table,
 								VerbResult::Ptr resRight, 
 								VerbResult::Ptr resNext )
 {
-	assert( resLeft );
-	assert( resLeft->getType() == VerbResult::ARRAY ||
-			resLeft->getType() == VerbResult::COLUMN );
-	
-	vector<Column::Ptr> columns;
-	if( resLeft->getType() == VerbResult::ARRAY )
-	{
-	  VerbResultArray::Ptr resArray = boost::static_pointer_cast<VerbResultArray>( resLeft );
-		for( size_t idx = 0; idx < resArray->Results.size(); ++idx )
-		  columns.push_back( boost::static_pointer_cast<Column>( resArray->Results[idx] ) );
-	}
-	else
-	  columns.push_back( boost::static_pointer_cast<Column>( resLeft ) );
-
-	table->groupBy();
-	table->Partition = new TablePartition();
-	table->orderBy( columns, table->Partition );
-	table->GroupByApplied = true;
-	/*
-
-	Column::Ptr foundColumn = NULL;
-	//get extra columns needed for group by
-	Column::Ptr count = NULL;
-	if( table->HasCount )
-	{
-		count = table->Columns[table->Columns.size() - 1];
-		table->Columns.pop_back();
-	}
-	for( size_t idx = 0; idx < columns.size(); ++idx )
-	{
-		bool found = false;
-		for( size_t idx2 = 0; idx2 < table->Columns.size(); ++idx2 )
-			if( table->Columns[idx2]->getName() == columns[idx]->getName() )
-			{
-				table
-				break;
-			}
-			if( !found )
-			{
-				if( !foundColumn )
-					foundColumn = columns[idx];
-				columns[idx]->Invisible = true;
-				table->Columns.push_back( columns[idx] );
-			}
-	}
-	if( table->HasCount )
-		table->Columns.push_back( count );
-
-	//make sure to grow ex-scalars if needed
-	if( foundColumn )
-		for( size_t idx = 0; idx < table->Columns.size(); ++idx )
-			if( table->Columns[idx]->Items.size() < foundColumn->Items.size() )
-				table->Columns[idx]->increase( foundColumn->Items.size() );
-	*/
+  assert(false);
 }
 
 //------------------------------------------------------------------------------
@@ -586,49 +439,7 @@ void HavingVerb::changeResult(	Table::Ptr table,
 								VerbResult::Ptr resRight, 
 								VerbResult::Ptr resNext )
 {
-	if( !resLeft )
-		return;
-
-	if( resLeft->getType() != VerbResult::ROW_VALIDATION )
-		throw verb_error(verb_error::VERB_BAD_SYNTAX, this->getVerbType());
-	RowValidation::Ptr rv = boost::dynamic_pointer_cast<RowValidation>( resLeft );
-
-	//recreate table
-	vector<Column::Ptr> newColumns = table->getColumnsTemplate();
-
-	for( size_t idx = 0; idx < rv->ValidRows.size(); ++idx )
-	{
-		if( !rv->ValidRows[idx] )
-			continue;
-		for( size_t idx2 = 0; idx2 < table->Columns.size(); ++idx2 )
-			newColumns[idx2]->Items.push_back( table->Columns[idx2]->Items[idx] );
-	}
-
-	table->updateColumnsContent( newColumns );
-
-	//update group by partitions
-	std::vector<size_t>& oldRows = table->Partition->Rows;
-	assert( oldRows.size() > 0 );
-	std::vector<size_t> rows;
-	size_t skipped = 0;
-	for( size_t idx = 0; idx < oldRows.size() - 1; ++idx )
-		if( !rv->ValidRows[oldRows[idx]] )
-		{
-			skipped += oldRows[idx+1] - oldRows[idx];
-		}
-		else
-		{
-			size_t last = oldRows[idx] - skipped;
-			if( rows.size() == 0 || rows[rows.size() - 1] != last )
-				rows.push_back( last );
-			rows.push_back( oldRows[idx + 1] - skipped );
-		}
-	if( rows.size() == 0 )
-	{
-		rows.push_back( 0 );
-		rows.push_back( 0 );
-	}
-	table->Partition->Rows = rows;
+  assert(false);
 }
 
 //------------------------------------------------------------------------------

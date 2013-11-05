@@ -28,7 +28,7 @@ public:
     m_baseDesc = baseDesc;
   }
   
-  virtual void setSettings(TProjectSettings * settings) 
+  virtual void setSettings(Settings * settings) 
   {
     m_settings = settings;
   }
@@ -38,7 +38,7 @@ public:
 private:
 	std::string TableName, ColumnName, ColumnOnlyName;
   Base * m_baseDesc;
-  TProjectSettings * m_settings;
+  Settings * m_settings;
   int index;
   int computed_index;
 };

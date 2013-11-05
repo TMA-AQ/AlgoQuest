@@ -22,77 +22,6 @@ namespace aq
 {
   
 //------------------------------------------------------------------------------
-SolveMinMaxGroupBy::SolveMinMaxGroupBy(): pGroupBy(NULL), _min(true)
-{
-}
-
-//------------------------------------------------------------------------------
-SolveMinMaxGroupBy::~SolveMinMaxGroupBy()
-{
-	delete_subtree( this->pGroupBy );
-	for( size_t idx = 0; idx < this->columns.size(); ++idx )
-		delete_subtree( this->columns[idx] );
-}
-
-//------------------------------------------------------------------------------
-bool SolveMinMaxGroupBy::checkAndClear( aq::tnode* pSelect )
-{
-	std::vector<aq::tnode*> auxColumns;
-	commaListToNodeArray( pSelect->left, auxColumns );
-	int nrMinMaxCols = 0;
-	for( size_t idx = 0; idx < auxColumns.size(); ++idx )
-	{
-		if( !auxColumns[idx] )
-			return false;
-		if( auxColumns[idx]->tag == K_PERIOD )
-			continue;
-		if( auxColumns[idx]->tag != K_AS )
-			return false;
-		if( auxColumns[idx]->left->tag == K_PERIOD )
-			continue;
-		if( !(auxColumns[idx]->left->tag == K_MIN || 
-			auxColumns[idx]->left->tag == K_MAX) )
-			return false;
-		minMaxCol = idx;
-		_min = auxColumns[idx]->left->tag == K_MIN;
-		++nrMinMaxCols;
-	}
-	if( nrMinMaxCols != 1 )
-		return false;
-
-	aq::tnode* pGroup = pSelect;
-	while( pGroup->next && pGroup->next->tag != K_GROUP )
-		pGroup = pGroup->next;
-	if( !pGroup->next )
-		return false;
-
-	aq::tnode* pFrom = find_main_node( pSelect, K_FROM );
-	if( !pFrom )
-		return false;
-	std::vector<aq::tnode*> tables;
-	commaListToNodeArray( pFrom->left, tables );
-	
-	if( tables.size() != 1 )
-		return false; //no min+group by or max+group by + from 1 table
-
-	this->tableName = tables[0]->getData().val_str;
-
-	this->pGroupBy = pGroup->next;
-	pGroup->next = pGroup->next->next;
-
-	aq::tnode* pAux = auxColumns[minMaxCol]->left;
-	auxColumns[minMaxCol]->left = auxColumns[minMaxCol]->left->left;
-	delete pAux ;
-
-	//make copies of the column nodes because they belong to the query
-	//and the query might get modified before modifyTmpFiles is called
-	for( size_t idx = 0; idx < auxColumns.size(); ++idx )
-		this->columns.push_back( aq::clone_subtree(auxColumns[idx]) );
-
-	return true;
-}
-
-//------------------------------------------------------------------------------
 void getRowItemName( aq::tnode* pNode, std::string& name)
 {
   if (pNode->tag == K_PERIOD)
@@ -343,9 +272,21 @@ void solveSelectStar(aq::tnode* pNode,
   {
     aq::joinlistToNodeArray(n, tables2);
   }
+  if (!tables2.empty())
+  {
+    tables.clear();
+  }
+  std::set<std::string> tables_names;
   for (auto& n : tables2)
   {
-    tables.push_back(n);
+    std::string tname = syntax_tree_to_sql_form(n);
+    boost::trim(tname);
+    boost::to_upper(tname);
+    if (tables_names.find(tname) == tables_names.end())
+    {
+      tables_names.insert(tname);
+      tables.push_back(n);
+    }
   }
   std::vector<aq::tnode*> colRefs;
   aq::tnode *column;
@@ -1210,6 +1151,23 @@ void getColumnTypes( aq::tnode* pNode, std::vector<Column::Ptr>& columnTypes, Ba
 }
 
 //------------------------------------------------------------------------------
+aq::ColumnItem GetItem( const aq::tnode& n )
+{
+  aq::ColumnItem item;
+  switch (n.getDataType())
+  {
+  case aq::tnode::tnodeDataType::NODE_DATA_INT:
+  case aq::tnode::tnodeDataType::NODE_DATA_NUMBER:
+    item.numval = static_cast<double>(n.getData().val_int);
+    break;
+  case aq::tnode::tnodeDataType::NODE_DATA_STRING:
+    item.strval = n.getData().val_str;
+    break;
+  }
+  return item;
+}
+
+//------------------------------------------------------------------------------
 aq::tnode* Getnode( ColumnItem::Ptr item, ColumnType type )
 {
 	aq::tnode	*pNode = NULL;
@@ -1463,7 +1421,7 @@ void dateNodeToBigInt(tnode * pNode)
   }
 }
 
-void transformExpression(const aq::Base& baseDesc, const aq::TProjectSettings& settings, aq::tnode * tree)
+void transformExpression(const aq::Base& baseDesc, const aq::Settings& settings, aq::tnode * tree)
 {
   aq::tnode * whereNode = aq::find_main_node(tree, K_WHERE);
   if (whereNode)
@@ -1690,28 +1648,6 @@ void processNot( aq::tnode*& pNode, bool applyNot )
 	default:
 		throw generic_error(generic_error::NOT_IMPLEMENTED, "operator doesn't support NOT");
 	}	
-}
-
-//------------------------------------------------------------------------------
-void PreProcessSelect(aq::tnode *pNode, Base& BaseDesc)
-{
-	int	nRet = 0;
-	TColumn2TablesArray * parrC2T = create_column_map_for_tables_used_in_select(pNode, &BaseDesc);
-
-	if (parrC2T != NULL) 
-  {
-		nRet = enforce_qualified_column_reference(pNode, parrC2T);
-		delete_column2tables_array(parrC2T);
-		if (nRet != 0) 
-    {
-			aq::Logger::getInstance().log(AQ_ERROR, "Function enforce_qualified_column_reference() returned error : %d !\n", nRet);
-		}
-	} 
-  else 
-  {
-		aq::Logger::getInstance().log(AQ_ERROR, "Function create_column_map_for_tables_used_in_select() returned NULL !\n");
-		throw generic_error(generic_error::INVALID_QUERY, "Error : No or bad tables specified in SQL SELECT ... FROM Statement");
-	}
 }
 
 }

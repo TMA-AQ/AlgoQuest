@@ -36,35 +36,7 @@ bool PartitionVerb::changeQuery( aq::tnode* pStart, aq::tnode* pNode, VerbResult
 void PartitionVerb::changeResult(	Table::Ptr table, 
 									VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext )
 {
-	assert( resLeft );
-	VerbResultArray::Ptr resArray = boost::dynamic_pointer_cast<VerbResultArray>( resLeft );
-	if( !resArray )
-	{
-		resArray = new VerbResultArray();
-		resArray->Results.push_back( resLeft );
-	}
-	assert( resArray->Results.size() > 0 );
-	vector<Column::Ptr> columns;
-	for( size_t idx = 0; idx < resArray->Results.size(); ++idx )
-	{
-	  Column::Ptr column = boost::dynamic_pointer_cast<Column>( resArray->Results[idx] );
-		assert( column );
-		columns.push_back( column );
-	}
-	if( table->Columns[0]->Items.size() < 2 )
-		return; //nothing to partition
-
-	TablePartition::Ptr partition = NULL;
-	if( resRight )
-	{
-		assert( resRight->getType() == VerbResult::TABLE_PARTITION );
-		partition = boost::static_pointer_cast<TablePartition>( resRight );
-	}
-	else
-		partition = new TablePartition();
-	table->orderBy( columns, partition );
-
-	this->Result = partition;
+	assert(false);
 }
 
 //------------------------------------------------------------------------------

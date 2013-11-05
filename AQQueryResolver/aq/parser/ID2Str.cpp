@@ -311,6 +311,7 @@ TID2String g_id2kstr[] = {
   { K_UNBOUNDED, "K_UNBOUNDED" },
   { K_UNION, "K_UNION" },
   { K_UPDATE, "K_UPDATE" },
+  { K_UPDATE_ARGS, "K_UPDATE_ARGS"},
   { K_USING, "K_USING" },
   { K_VALUES, "K_VALUES" },
   { K_WHEN, "K_WHEN" },

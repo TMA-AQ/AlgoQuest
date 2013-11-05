@@ -14,7 +14,7 @@ namespace aq
   class AQEngineSimulate : public aq::AQEngine_Intf
   {
   public:
-    AQEngineSimulate(Base& _baseDesc, TProjectSettings& settings);
+    AQEngineSimulate(Base& _baseDesc, Settings& settings);
     void call(const std::string& query, aq::AQEngine_Intf::mode_t mode); 
     void call(aq::tnode * pNode, aq::AQEngine_Intf::mode_t mode, int selectLevel);
     
@@ -33,7 +33,7 @@ namespace aq
     boost::shared_ptr<aq::AQMatrix> aqMatrix;
     std::vector<llong> tableIDs;
     const Base& baseDesc;
-    const TProjectSettings& settings;
+    const Settings& settings;
   };
 
 }

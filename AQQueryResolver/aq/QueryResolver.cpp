@@ -44,7 +44,7 @@ namespace aq
 {
 
 //------------------------------------------------------------------------------
-QueryResolver::QueryResolver(aq::tnode * _sqlStatement, TProjectSettings * _pSettings, AQEngine_Intf * _aq_engine, Base& _baseDesc, unsigned int& _id, unsigned int _level)
+QueryResolver::QueryResolver(aq::tnode * _sqlStatement, Settings * _pSettings, AQEngine_Intf * _aq_engine, Base& _baseDesc, unsigned int& _id, unsigned int _level)
 	:	sqlStatement(_sqlStatement),
     originalSqlStatement(NULL),
     outerSelect(NULL),
@@ -77,8 +77,10 @@ QueryResolver::~QueryResolver()
 }
 
 //-------------------------------------------------------------------------------
-Table::Ptr QueryResolver::solve()
+Table::Ptr QueryResolver::solve(boost::shared_ptr<aq::RowWritter_Intf> rowWritter)
 {
+
+  this->resultHandler = rowWritter;
 
   this->preProcess();
 
@@ -645,9 +647,13 @@ void QueryResolver::solveAQMatrix(aq::verb::VerbNode::Ptr spTree)
   }
   else
   {
-    rowWritter.reset(new aq::RowWritter(pSettings->outputFile == "stdout" ? pSettings->outputFile : pSettings->answerFile));
-    rowWritter->setColumn(columnTypes);
-    processes->addProcess(rowWritter);
+    if (!resultHandler)
+    {
+      resultHandler.reset(new aq::RowWritter(pSettings->outputFile == "stdout" ? pSettings->outputFile : pSettings->answerFile));
+      resultHandler->setColumn(columnTypes);
+    }
+    processes->addProcess(this->resultHandler);
+    rowWritter = this->resultHandler;
   }
 
   //
