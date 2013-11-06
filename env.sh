@@ -1,5 +1,5 @@
 # PROJECT_DIR=$(dirname $0)
-PROJECT_DIR=$HOME/Developpements/AlgoQuest
+PROJECT_DIR=$HOME/Developpement/AlgoQuest
 
 export AQUTIL_SOURCE_DIR="${PROJECT_DIR}/AQUtil"
 export AQUTIL_LIBRARY_DIR="${PROJECT_DIR}/AQUtil/lib"

@@ -12,9 +12,8 @@ AQQueryResolver/build/
 AQQueryResolver/CMakeCache.txt
 AQQueryResolver/CMakeFiles/
 AQQueryResolver/Makefile
-AQQueryResolver/bin/
+AQQueryResolver/lib/
 AQQueryResolver/cmake_install.cmake
-AQQueryResolver/bin/
 
 AQUnitTest/build/
 AQUnitTests/CMakeCache.txt

@@ -5,7 +5,7 @@ project(AQTools)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib/${CMAKE_BUILD_TYPE})
 set(EXECUTABLE_OUTPUT_PATH bin/${CMAKE_BUILD_TYPE})
 
-find_package(Boost 1.50.0 COMPONENTS program_options thread filesystem system timer regex REQUIRED)
+find_package(Boost 1.48.0 COMPONENTS program_options thread filesystem system timer regex REQUIRED)
 
 include_directories(
   ${PROJECT_SOURCE_DIR}
@@ -22,6 +22,16 @@ link_directories(
 )
 
 set(CMAKE_CXX_FLAGS "-O0 -ggdb -std=c++11")
+
+IF(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
+
+    # Linux specific code
+    SET(OperatingSystem "FreeBSD")
+
+    set(CMAKE_CXX_COMPILER "g++46")
+    set(CMAKE_CXX_FLAGS "-O0 -ggdb -std=c++0x")
+
+ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
 
 file(
   GLOB_RECURSE

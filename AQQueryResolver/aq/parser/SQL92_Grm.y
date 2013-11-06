@@ -1690,7 +1690,12 @@ int SQLParse( const char *pszStr, aq::tnode** ppNode ) {
 	int rc = 0;
 	yy_scan_string( pszStr );
 	rc = yyparse( (void*)ppNode );
-    yylex_destroy();
+
+  // FIXME
+#ifndef __FreeBSD__ 
+  yylex_destroy();
+#endif
+
 	return rc;
 }
 

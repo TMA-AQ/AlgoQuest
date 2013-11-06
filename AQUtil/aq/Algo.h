@@ -1,6 +1,8 @@
 #ifndef __AQ_CORE_ALGO_H__
 #define __AQ_CORE_ALGO_H__
 
+#include <algorithm>
+
 namespace aq {
   namespace core {
 

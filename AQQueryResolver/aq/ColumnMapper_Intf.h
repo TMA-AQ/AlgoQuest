@@ -2,6 +2,7 @@
 #define __COLUMN_MAPPER_INTF_H__
 
 #include "ColumnItem.h"
+#include <cstring>
 #include <boost/shared_ptr.hpp>
 
 namespace aq

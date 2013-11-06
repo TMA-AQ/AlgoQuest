@@ -6,7 +6,7 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib/${CMAKE_BUILD_TYPE})
 set(EXECUTABLE_OUTPUT_PATH bin/${CMAKE_BUILD_TYPE})
 
 # set(Boost_DEBUG 1)
-find_package(Boost 1.50.0 COMPONENTS program_options thread filesystem system timer REQUIRED)
+find_package(Boost 1.48.0 COMPONENTS program_options thread filesystem system timer REQUIRED)
 
 include_directories(
   ${PROJECT_SOURCE_DIR}
@@ -48,6 +48,19 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     list(REMOVE_ITEM source_files ${exclude_files})
 
 ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
+IF(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
+
+    # Linux specific code
+    SET(OperatingSystem "FreeBSD")
+
+    set(CMAKE_CXX_COMPILER "g++46")
+    set(CMAKE_CXX_FLAGS "-O0 -ggdb -std=c++0x")
+
+    file(GLOB exclude_files "aq/WIN32FileMapper.*")
+    list(REMOVE_ITEM source_files ${exclude_files})
+
+ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
 
 add_library(
   aq_util

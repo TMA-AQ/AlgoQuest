@@ -3,6 +3,7 @@
 
 #include "Symbole.h"
 #include "DBTypes.h"
+#include <cstdio>
 #include <string>
 #include <vector>
 

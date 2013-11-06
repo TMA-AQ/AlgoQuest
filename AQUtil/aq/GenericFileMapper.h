@@ -1,6 +1,7 @@
 #ifndef __GENERIC_FILE_MAPPER_H__
 #define __GENERIC_FILE_MAPPER_H__
 
+#include <cstdio>
 #include <string>
 
 namespace aq

@@ -4,6 +4,7 @@
 #include "Logger.h"
 #include <cstdio>
 #include <cstdlib>
+#include <climits>
 #include <cstring>
 #include <boost/filesystem.hpp>
 
@@ -273,7 +274,11 @@ FILE* fopenUTF8( const char* pszFlename, const char* pszMode )
 
 //------------------------------------------------------------------------------
 #if defined(_MSC_VER)
-#define strtoll _strtoi64
+# define strtoll _strtoi64
+#endif
+#if defined(__FreeBSD__)
+# define strtoll strtol
+# define atoll atol
 #endif
 int StrToInt( const char* psz, llong* pnVal )
 {

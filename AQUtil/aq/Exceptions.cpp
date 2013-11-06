@@ -1,4 +1,5 @@
 #include "Exceptions.h"
+#include <cstdio>
 #include <cstdarg>
 #include <cassert>
 

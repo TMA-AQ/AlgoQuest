@@ -13,6 +13,13 @@
 #include <algorithm>
 #include <string>
 
+#if defined(WIN32)
+# include <windows.h>
+# define atoll _atoi64
+#elif defined(__FreeBSD__)
+# define atoll atol
+#endif
+
 #define k_batch_size_max 8192   // batch_name
 #define k_record_size_max 40960   // record in a file
 #define k_field_size_max 4096   // record in a file  
@@ -547,11 +554,7 @@ void DatabaseLoader::FileWriteEnreg(aq::symbole col_type, int col_size, char *my
 
 	case aq::t_long_long :
 		if ( strcmp ( my_field, "NULL")  ==   0 )  *my_long_long  = 'NULL'; // ****  
-#ifdef WIN32
-		else  *my_long_long  = _atoi64 (my_field );   
-#else
 		else  *my_long_long  = atoll (my_field );   
-#endif
 		fwrite( my_long_long , sizeof(long long), 1, fcol );
 		break;
 
