@@ -18,6 +18,9 @@ extern const double EPSILON;
 
 namespace aq
 {
+  
+//------------------------------------------------------------------------------
+void * safecalloc(size_t nb, size_t size);
 
 //------------------------------------------------------------------------------
 char* LoadFile( const char *pszFN );
@@ -62,10 +65,10 @@ std::wstring string2Wstring(const std::string& s);
 class FileCloser
 {
 public:
-	FileCloser(FILE *pFile): pFile(pFile){};
+	FileCloser(FILE *& pFile): pFile(pFile){};
 	~FileCloser() { if( pFile ) fclose(pFile); };
 private:
-	FILE *pFile;
+	FILE *& pFile;
 };
 
 //------------------------------------------------------------------------------
@@ -91,10 +94,15 @@ void getFileNames( const char* path, std::vector<std::string>& filenames, const 
 aq::ColumnType symbole_to_column_type(aq::symbole s);
 
 //-------------------------------------------------------------------------------
-void CleanSpaceAtEnd ( char *my_field );
+void cleanSpaceAtEnd(char * my_field);
 
 //-------------------------------------------------------------------------------
-void ChangeCommaToDot (  char *string );
+char * cleanNameFast(char * strval); ///< return NULL when failure
+
+//-------------------------------------------------------------------------------
+/// assume input is a double
+/// change  ',' in '.'
+void ChangeCommaToDot(char * string);
 
 /// backup
 enum backup_type_t

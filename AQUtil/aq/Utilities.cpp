@@ -23,6 +23,17 @@ namespace aq
 
 extern const double EPSILON = 0.0000001;
 
+//-------------------------------------------------------------------------------
+void * safecalloc(size_t nb, size_t size)
+{
+	void *p = (void *) calloc(nb, size);
+	if (!p)
+	{
+		throw aq::generic_error(aq::generic_error::GENERIC, "not enough memory");
+	}
+	return p;
+}
+
 //------------------------------------------------------------------------------
 char* LoadFile( const char *pszFN ) {
 	char* pszBuf = NULL;
@@ -467,24 +478,37 @@ aq::ColumnType symbole_to_column_type(symbole s)
 }
 
 //-------------------------------------------------------------------------------
-void CleanSpaceAtEnd ( char *my_field )
+void cleanSpaceAtEnd ( char *my_field )
 {
-	// discard all space at the end
 	size_t max_size = strlen( my_field);
-	// beware >0, must have at least one char
-	for ( size_t i = max_size -1; i > 0 ; i -- )
+  if (max_size == 0) 
+    return;
+	for (size_t i = max_size - 1; i > 0 ; i--)
 	{
-		if ( my_field [ i ] == ' ' ) my_field [ i ] = '\0';
-		else return;
+		if (my_field[i] == ' ') 
+      my_field[i] = '\0';
+		else 
+      return;
 	}
-	//at this point  my_field is empty 
-	//need this ;   strcpy ( my_field, "NULL" ); ?
 }
+
+//-------------------------------------------------------------------------------
+char * cleanNameFast(char * strval)
+{
+	if (!strval)
+		return strval;
+	size_t len = strlen(strval);
+	if (len < 2)
+		return strval;
+	if ((strval[0] != '"') || (strval[len - 1] != '"'))
+		return strval;
+	strval[len - 1] = '\0';
+	return strval + 1;
+}
+
 //-------------------------------------------------------------------------------
 void ChangeCommaToDot (  char *string )
 {
-	// assume  : input is to be converted in double
-	// change  ',' in '.'
 	char *p;
 	// seach first  ',' in string
 	p = strchr(string, ',' );
@@ -590,7 +614,7 @@ void FileWriteEnreg( aq::ColumnType col_type, const int col_size, char *my_field
 		// check my_field size
 		if ( (int) strlen ( my_field ) >= col_size ) my_field[ col_size ] = 0 ;
 		// clean all space at the end
-		CleanSpaceAtEnd (my_field );
+		cleanSpaceAtEnd (my_field );
 		// write string record and go to next
 		fwrite(my_field, sizeof(char), strlen( my_field ) , fcol );
 		fwrite("\0",sizeof(char),1, fcol );

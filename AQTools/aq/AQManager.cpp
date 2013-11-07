@@ -53,28 +53,28 @@ int check_database(const aq::Settings& settings)
   boost::shared_ptr<aq::ColumnMapper_Intf> tr;
   for (auto& t : b.table)
   {
-    aq::Logger::getInstance().log(AQ_NOTICE, "check table [id:%u;name:%s;cols:%u;records:%u]\n", t.num, t.nom.c_str(), t.nb_cols, t.nb_enreg);
+    aq::Logger::getInstance().log(AQ_NOTICE, "check table [id:%u;name:%s;cols:%u;records:%u]\n", t.id, t.name.c_str(), t.nb_cols, t.nb_record);
     for (auto& c : t.colonne)
     {
-      aq::Logger::getInstance().log(AQ_NOTICE, "check table [%u;%s] column [%u;%s] [records:%u]\n", t.num, t.nom.c_str(), c.num, c.nom.c_str(), t.nb_enreg);
-      for (size_t p = 0; p <= (t.nb_enreg / settings.packSize); p++)
+      aq::Logger::getInstance().log(AQ_NOTICE, "check table [%u;%s] column [%u;%s] [records:%u]\n", t.id, t.name.c_str(), c.id, c.name.c_str(), t.nb_record);
+      for (size_t p = 0; p <= (t.nb_record / settings.packSize); p++)
       {
-        std::string theFilename = aq::getThesaurusFileName(settings.dataPath.c_str(), t.num, c.num, p);
+        std::string theFilename = aq::getThesaurusFileName(settings.dataPath.c_str(), t.id, c.id, p);
         aq::Logger::getInstance().log(AQ_NOTICE, "check thesaurus [%s]\n", theFilename.c_str());
         switch (c.type)
         {
         case aq::symbole::t_char:
-          tr.reset(new aq::ThesaurusReader<char, aq::FileMapper>(settings.dataPath.c_str(), t.num, c.num, c.taille, settings.packSize, p, false));
+          tr.reset(new aq::ThesaurusReader<char, aq::FileMapper>(settings.dataPath.c_str(), t.id, c.id, c.size, settings.packSize, p, false));
           break;
         case aq::symbole::t_double: 
-          tr.reset(new aq::ThesaurusReader<double, aq::FileMapper>(settings.dataPath.c_str(), t.num, c.num, c.taille, settings.packSize, p, false));
+          tr.reset(new aq::ThesaurusReader<double, aq::FileMapper>(settings.dataPath.c_str(), t.id, c.id, c.size, settings.packSize, p, false));
           break;
         case aq::symbole::t_int: 
-          tr.reset(new aq::ThesaurusReader<uint32_t, aq::FileMapper>(settings.dataPath.c_str(), t.num, c.num, c.taille, settings.packSize, p, false));
+          tr.reset(new aq::ThesaurusReader<uint32_t, aq::FileMapper>(settings.dataPath.c_str(), t.id, c.id, c.size, settings.packSize, p, false));
           break;
         case aq::symbole::t_long_long: 
         case aq::symbole::t_date1: 
-          tr.reset(new aq::ThesaurusReader<uint64_t, aq::FileMapper>(settings.dataPath.c_str(), t.num, c.num, c.taille, settings.packSize, p, false));
+          tr.reset(new aq::ThesaurusReader<uint64_t, aq::FileMapper>(settings.dataPath.c_str(), t.id, c.id, c.size, settings.packSize, p, false));
           break;
         default:
           aq::Logger::getInstance().log(AQ_ERROR, "type not supported [%s]\n", c.type);
@@ -104,40 +104,40 @@ int check_database(const aq::Settings& settings)
       switch (c.type)
       {
       case aq::symbole::t_char: 
-        m.reset(new aq::ColumnMapper<char, aq::FileMapper>(settings.dataPath.c_str(), t.num, c.num, c.taille, settings.packSize, false)); 
+        m.reset(new aq::ColumnMapper<char, aq::FileMapper>(settings.dataPath.c_str(), t.id, c.id, c.size, settings.packSize, false)); 
         break;
       case aq::symbole::t_double: 
-        m.reset(new aq::ColumnMapper<double, aq::FileMapper>(settings.dataPath.c_str(), t.num, c.num, c.taille, settings.packSize, false)); 
+        m.reset(new aq::ColumnMapper<double, aq::FileMapper>(settings.dataPath.c_str(), t.id, c.id, c.size, settings.packSize, false)); 
         break;
       case aq::symbole::t_int: 
-        m.reset(new aq::ColumnMapper<uint32_t, aq::FileMapper>(settings.dataPath.c_str(), t.num, c.num, c.taille, settings.packSize, false)); 
+        m.reset(new aq::ColumnMapper<uint32_t, aq::FileMapper>(settings.dataPath.c_str(), t.id, c.id, c.size, settings.packSize, false)); 
         break;
       case aq::symbole::t_long_long: 
       case aq::symbole::t_date1: 
-        m.reset(new aq::ColumnMapper<uint64_t, aq::FileMapper>(settings.dataPath.c_str(), t.num, c.num, c.taille, settings.packSize, false)); 
+        m.reset(new aq::ColumnMapper<uint64_t, aq::FileMapper>(settings.dataPath.c_str(), t.id, c.id, c.size, settings.packSize, false)); 
         break;
       default:
         aq::Logger::getInstance().log(AQ_ERROR, "type not supported [%s]\n", c.type);
       }
-      for (size_t i = 0; i < t.nb_enreg; i++)
+      for (size_t i = 0; i < t.nb_record; i++)
       {
         if (m->loadValue(i, item) != 0)
         {
           rc = EXIT_FAILURE;
-          aq::Logger::getInstance().log(AQ_ERROR, "bad index %u on table [%u;%s] column [%u;%s]\n", i, t.num, t.nom.c_str(), c.num, c.nom.c_str());
+          aq::Logger::getInstance().log(AQ_ERROR, "bad index %u on table [%u;%s] column [%u;%s]\n", i, t.id, t.name.c_str(), c.id, c.name.c_str());
           std::stringstream ss;
-          ss << "bad index " << i << " on table [" << t.num << ";" << t.nom << "] column [" << c.num << ";" << c.nom << "]";
+          ss << "bad index " << i << " on table [" << t.id << ";" << t.name << "] column [" << c.id << ";" << c.name << "]";
           errors.push_back(ss.str());
         }
         else if ((value = item.toString(m->getType())) == "")
         {
           rc = EXIT_FAILURE;
-          aq::Logger::getInstance().log(AQ_ERROR, "bad value on index %u on table [%u;%s] column [%u;%s]\n", i, t.num, t.nom.c_str(), c.num, c.nom.c_str());
+          aq::Logger::getInstance().log(AQ_ERROR, "bad value on index %u on table [%u;%s] column [%u;%s]\n", i, t.id, t.name.c_str(), c.id, c.name.c_str());
           std::stringstream ss;
-          ss << "bad value on index " << i << " on table [" << t.num << ";" << t.nom << "] column [" << c.num << ";" << c.nom << "]";
+          ss << "bad value on index " << i << " on table [" << t.id << ";" << t.name << "] column [" << c.id << ";" << c.name << "]";
           errors.push_back(ss.str());
         }
-        else if ((i % ((t.nb_enreg / 10) + 1)) == 0)
+        else if ((i % ((t.nb_record / 10) + 1)) == 0)
         {
           aq::Logger::getInstance().log(AQ_INFO, "%s\n", value.c_str());
         }
@@ -244,19 +244,23 @@ int transform_query(const std::string& query, aq::Settings& settings, aq::Base& 
 // -------------------------------------------------------------------------------------------------
 int load_database(const aq::Settings& settings, aq::base_t& baseDesc, const std::string& tableNameToLoad)
 {
-  for (size_t t = 0; t < baseDesc.table.size(); ++t)
+  aq::DatabaseLoader loader(baseDesc, settings.aqLoader, settings.rootPath, settings.packSize, ','/*settings.fieldSeparator*/, settings.csvFormat); // FIXME
+  if (tableNameToLoad != "")
   {
-    if ((tableNameToLoad != "") && (tableNameToLoad != baseDesc.table[t].nom))
+    for (size_t t = 0; t < baseDesc.table.size(); ++t)
     {
-      continue;
+      if (tableNameToLoad != baseDesc.table[t].name)
+      {
+        continue;
+      }
+      loader.generate_ini();
+      aq::Logger::getInstance().log(AQ_INFO, "loading table %d\n", t + 1);
+      loader.load(t + 1);
     }
-    aq::DatabaseLoader loader(baseDesc, settings.aqLoader, settings.rootPath, settings.packSize, ','/*settings.fieldSeparator*/, settings.csvFormat); // FIXME
-    loader.generate_ini();
-    for (size_t c = 0; c < baseDesc.table[t].colonne.size(); ++c)
-    {
-      aq::Logger::getInstance().log(AQ_INFO, "loading column %d of table %d\n", c + 1, t + 1);
-      loader.run(t + 1, c + 1);
-    }
+  }
+  else
+  {
+    loader.load();
   }
   return EXIT_SUCCESS;
 }
@@ -301,15 +305,15 @@ int generate_tmp_table(const aq::Settings& settings, aq::base_t& baseDesc, unsig
   auto& table = *baseDesc.table.rbegin();
   std::stringstream ss;
   ss << "TMP" << tableIndex;
-  table.nom = ss.str();
+  table.name = ss.str();
   table.nb_cols = 1;
-  table.num = (unsigned int)tableIndex;
-  table.nb_enreg = nbValues;
+  table.id = (unsigned int)tableIndex;
+  table.nb_record = nbValues;
   table.colonne.push_back(aq::base_t::table_t::col_t());
   auto& col = *table.colonne.rbegin();
-  col.nom = "V1";
-  col.num = 1;
-  col.taille = 1;
+  col.name = "V1";
+  col.id = 1;
+  col.size = 1;
   col.type = aq::symbole::t_long_long;
   return 0;
 }

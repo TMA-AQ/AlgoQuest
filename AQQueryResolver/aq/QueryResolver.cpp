@@ -378,8 +378,29 @@ void QueryResolver::resolve(aq::verb::VerbNode::Ptr spTree)
   aq_engine->call(query, mode);
   auto aqMatrix = aq_engine->getAQMatrix();
   if (aqMatrix != 0)
-  {
-    aqMatrix->setJoinPath(joinPath);
+  {  
+    assert(joinPath.size() >= aqMatrix->getNbColumn());
+    std::vector<std::string> jp;
+    if (joinPath.size() >= aqMatrix->getNbColumn())
+    {
+      for (auto& tname : joinPath)
+      {
+        auto& table = BaseDesc.getTable(tname);
+        for (auto& tm : aqMatrix->getMatrix())
+        {
+          if (tm.table_id == table->ID)
+          {
+            jp.push_back(tname);
+            break;
+          }
+        }
+      }
+    }
+    else
+    {
+      std::copy(joinPath.begin(), joinPath.end(), std::back_inserter(jp));
+    }
+    aqMatrix->setJoinPath(jp);
   }
   // aq::MakeBackupFile(pSettings->szOutputFN, aq::backup_type_t::Empty, this->level, this->id);
 

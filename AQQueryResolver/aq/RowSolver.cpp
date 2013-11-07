@@ -64,7 +64,6 @@ void RowSolver::matched_index(column_infos_t& infos)
 {
   auto joinPath = aqMatrix->getJoinPath();
   Table::Ptr table = BaseDesc.getTable(infos.column->TableID);
-  assert(joinPath.size() >= aqMatrix->getNbColumn());
   for (size_t j = 0; j < aqMatrix->getNbColumn(); ++j) 
   {
     if (table->getName() == joinPath[j])

@@ -127,17 +127,17 @@ void Base::clear()
 //------------------------------------------------------------------------------
 void Base::loadFromBaseDesc(const aq::base_t& base) 
 {
-  this->Name = base.nom;
+  this->Name = base.name;
   std::for_each(base.table.begin(), base.table.end(), [&] (const base_t::table_t& table) {
-		Table::Ptr pTD(new Table(table.nom, table.num));
-		pTD->TotalCount = table.nb_enreg;
+		Table::Ptr pTD(new Table(table.name, table.id));
+		pTD->TotalCount = table.nb_record;
     std::for_each(table.colonne.begin(), table.colonne.end(), [&] (const base_t::table_t::col_t& column) {
       aq::ColumnType type = aq::symbole_to_column_type(column.type);
       unsigned int size = 0;
       switch (type)
       {
       case COL_TYPE_VARCHAR: 
-        size = column.taille; 
+        size = column.size; 
         break;
       case COL_TYPE_INT: 
       case COL_TYPE_BIG_INT:
@@ -146,7 +146,7 @@ void Base::loadFromBaseDesc(const aq::base_t& base)
         size = 1; 
         break;
       }
-      pTD->Columns.push_back(new Column(column.nom, column.num, size, type));
+      pTD->Columns.push_back(new Column(column.name, column.id, size, type));
 		});
 		this->Tables.push_back(pTD);
   });

@@ -20,7 +20,7 @@ Database::Database(const std::string& _path)
 
 bool Database::isValid() const
 {
-  if (baseDesc.nom == "")
+  if (baseDesc.name == "")
     return false;
 
   std::string bdFname = this->getBaseDescFile();

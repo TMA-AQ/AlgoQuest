@@ -1,12 +1,3 @@
-/*
-*  base_desc.c
-*  cut_in_col_v10
-*
-*  Created by Ouzi on 23/09/09.
-*  Copyright 2009 __MyCompanyName__. All rights reserved.
-*
-*/
-
 #include "BaseDesc.h"
 #include "Utilities.h"
 #include "Exceptions.h"
@@ -14,6 +5,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <algorithm>
+#include <boost/algorithm/string/trim.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
 #define k_size_max 1024
@@ -24,28 +16,11 @@ using namespace aq;
 namespace // anonymous namespace
 {
   
-void *safecalloc(size_t nb, size_t size)
-{
-	void *p = (void *) calloc(nb, size);
-	if (!p)
-	{
-		fprintf(stderr, "Pas assez de memoire\n");
-		exit(0);
-	}
-	return p;
-}
-
-void remove_double_quote(std::string& s)
-{
-  if (s[0] == '\"') s.erase(0, 1);
-  if (s[s.size() - 1] == '\"') s.erase(s.size() - 1, 1);
-}
-
 void clean(base_t& base)
 {
   base.nb_tables = 0;
-  base.nom = "";
-  base.num = -1;
+  base.name = "";
+  base.id = -1;
   base.table.clear();
 }
 
@@ -68,92 +43,51 @@ const char * type_to_string(symbole type)
 
 void fill_column_type(base_t::table_t::col_t * colonne, const char * type_aux)
 {
-	// Type connus
-	// serie numbers 
 	if ((strcmp ( type_aux ,"INT" ) == 0) || (strcmp(type_aux,"NUMBER") == 0))
 	{ 
 		colonne->type = t_int;
-		strcpy(colonne->cadrage,"D"); 
 	}
-	// long or long_long
 	else if ((strcmp(type_aux,"BIG_INT") == 0) || (strcmp(type_aux,"LONG" ) == 0))
 	{ 
 		colonne->type = t_long_long;
-		strcpy(colonne->cadrage,"D"); 
 	}
-	else if ( strcmp(type_aux,"DATE1") == 0 || strcmp(type_aux,"DATE") == 0)
+	else if ((strcmp(type_aux,"DATE1") == 0) || (strcmp(type_aux,"DATE") == 0))
 	{
 		colonne->type=t_date1;
-		strcpy(colonne->cadrage,"D"); 
 	}
-	else if ( strcmp(type_aux,"DATE2") == 0 )
+	else if (strcmp(type_aux,"DATE2") == 0)
 	{
 		colonne->type=t_date2;
-		strcpy(colonne->cadrage,"D"); 
 	}
-	else if ( strcmp(type_aux,"DATE3") == 0 )
+	else if (strcmp(type_aux,"DATE3") == 0)
 	{
 		colonne->type=t_date3;
-		strcpy(colonne->cadrage,"D"); 
 	}
-	// serie chars
-	else if ((strcmp(type_aux, "CHAR") == 0)  ||
-    (strcmp(type_aux, "VARCHAR") == 0) ||
-    (strcmp(type_aux, "VARCHAR2") == 0))
+	else if ((strcmp(type_aux, "CHAR") == 0)  || (strcmp(type_aux, "VARCHAR") == 0) || (strcmp(type_aux, "VARCHAR2") == 0))
 	{
 		colonne->type=t_char;
-		strcpy(colonne->cadrage,"G"); 
 	}
-
-	//  2008 06 24
-	// serie float, real, double
-	else if ((strcmp(type_aux, "FLOAT") == 0) ||
-		(strcmp(type_aux, "REAL") == 0) ||
-		(strcmp(type_aux, "DOUBLE") == 0))
+	else if ((strcmp(type_aux, "FLOAT") == 0) || (strcmp(type_aux, "REAL") == 0) || (strcmp(type_aux, "DOUBLE") == 0))
 	{
 		colonne->type = t_double;
-		strcpy(colonne->cadrage,"D"); 
-		/*
-		// to fill from : file descriptor or  ini.properties 2009/09/01
-		colonne->float_info.nb_decimale_max = k_float_nb_decimal_max; 
-		colonne->float_info.decimale_separator =  k_double_separator; 
-		*/
 	}
-	// 2008/06/24
-
-	// serie raws
-	else if ( strcmp ( type_aux , "RAW" ) == 0 )
+	else if (strcmp(type_aux , "RAW") == 0)
 	{
 		colonne->type = t_raw;
-		strcpy(colonne->cadrage,"G"); 
 	}
   else
   {
-
-    // types inconnus 
-    aq::Logger::getInstance().log(AQ_CRITICAL, "le Types %s est inconnu\n", type_aux); 
-    aq::Logger::getInstance().log(AQ_CRITICAL, "Les types implementes sont INT, NUMBER, LONG, BIG_INT , FLOAT, DOUBLE, REAL, CHAR, VARCHAR2, VARCHAR2, DATE1, DATE2 et DATE3 \n");
-    aq::Logger::getInstance().log(AQ_CRITICAL, "Les types non implementes mais declares : RAW  \n");
-    
-    throw aq::generic_error(aq::generic_error::INVALID_BASE_FILE, "");
+    throw aq::generic_error(aq::generic_error::INVALID_BASE_FILE, "UNKNOW TYPE [%s]", type_aux);
   }
 }
 
 // -----------------------------------------------------------------------------------------------------------
-// lecture du base_desc
-// -----------------------------------------------------------------------------------------------------------
-// Lit le fichier de description d'une base et le place dans une structure s_base_v2
-// Argument : le nom du fichier de description
 void construis_colonne ( FILE* fp, base_t::table_t::col_t *colonne )
 {
-	// Lecture des informations au niveau de la colonne
-	// Nom de la colonne, numero, taille en char, type 
-	// la cadrage est deduis du type de la colonne
-
-	char nom[k_size_max], type_aux[k_size_max];
-	fscanf(fp,"%s %d %d %s", nom, &(colonne->num), &(colonne->taille), type_aux);
-	colonne->nom = nom;
-  remove_double_quote(colonne->nom);
+	char name[k_size_max], type_aux[k_size_max];
+	fscanf(fp,"%s %d %d %s", name, &(colonne->id), &(colonne->size), type_aux);
+	colonne->name = name;
+  boost::trim_if(colonne->name, boost::is_any_of("\""));
   fill_column_type(colonne, type_aux);
 }
 
@@ -161,24 +95,21 @@ void construis_colonne ( FILE* fp, base_t::table_t::col_t *colonne )
 void construis_colonne ( std::istream& iss, base_t::table_t::col_t *colonne )
 {
   std::string type_aux;
-	iss >> colonne->nom;
-  iss >> colonne->num;
-  iss >> colonne->taille;
+	iss >> colonne->name;
+  iss >> colonne->id;
+  iss >> colonne->size;
   iss >> type_aux;
-  remove_double_quote(colonne->nom);
+  boost::trim_if(colonne->name, boost::is_any_of("\""));
   fill_column_type(colonne, type_aux.c_str());
 }
 
 //-----------------------------------------------------------
 void construis_table ( FILE* fp, base_t::table_t * table )
 {
-	// Lecture des informations au niveau de la table
-	// Nom de la table, numero, nombre de lignes et nombre de colonnes 
-	char nom[k_size_max];
-	fscanf(fp,"%s %d %d %d", nom, &(table->num), &(table->nb_enreg), &(table->nb_cols));
-	table->nom = nom;
-  remove_double_quote(table->nom);
-	// Lecture des colonnes
+	char name[k_size_max];
+	fscanf(fp,"%s %d %d %d", name, &(table->id), &(table->nb_record), &(table->nb_cols));
+	table->name = name;
+  boost::trim_if(table->name, boost::is_any_of("\""));
 	for (int i = 0 ; i < table->nb_cols ; i++)
 	{
     base_t::table_t::col_t c;
@@ -190,11 +121,11 @@ void construis_table ( FILE* fp, base_t::table_t * table )
 //-----------------------------------------------------------
 void construis_table ( std::istream& iss, base_t::table_t * table )
 {
-  iss >> table->nom;
-  iss >> table->num;
-  iss >> table->nb_enreg;
+  iss >> table->name;
+  iss >> table->id;
+  iss >> table->nb_record;
   iss >> table->nb_cols;
-  remove_double_quote(table->nom);
+  boost::trim_if(table->name, boost::is_any_of("\""));
 	for (int i = 0 ; i < table->nb_cols ; i++)
 	{
     base_t::table_t::col_t c;
@@ -228,13 +159,10 @@ int build_base_from_raw ( const char * fname, base_t& base )
 void build_base_from_raw ( FILE* fp, base_t& base )
 {
    clean(base);
-	// Lecture des informations au niveau de la base
-	// Nom de la base et nombre de tables
-	char nom[k_size_max];
-	fscanf(fp,"%s %d",nom ,&(base.nb_tables));
-	base.nom = nom;
-	base.num = 1; // **** non renseigne dans base pour l'instant
-	// Lecture des tables 
+	char name[k_size_max];
+	fscanf(fp, "%s %d", name, &(base.nb_tables));
+	base.name = name;
+	base.id = 1;
 	for (int i = 0 ; i < base.nb_tables ; i++)
 	{
     base_t::table_t table;
@@ -246,9 +174,9 @@ void build_base_from_raw ( FILE* fp, base_t& base )
 void build_base_from_raw ( std::istream& iss, base_t& base )
 {
   clean(base);
-	iss >> base.nom;
+	iss >> base.name;
   iss >> base.nb_tables;
-	base.num = 1;
+	base.id = 1;
 	for (int i = 0 ; i < base.nb_tables ; i++)
 	{
     base_t::table_t table;
@@ -260,11 +188,11 @@ void build_base_from_raw ( std::istream& iss, base_t& base )
 
 void dump_raw_base(std::ostream& oss, const base_t& base)
 {
-  oss << base.nom << std::endl;
+  oss << base.name << std::endl;
   std::for_each(base.table.begin(), base.table.end(), [&] (const base_t::table_t& table) {
-    oss << "  " << table.nom << std::endl;
+    oss << "  " << table.name << std::endl;
     std::for_each(table.colonne.begin(), table.colonne.end(), [&] (const base_t::table_t::col_t& column) {
-      oss << "  " << "  " << column.nom << std::endl;
+      oss << "  " << "  " << column.name << std::endl;
     });
   });
 }
@@ -274,21 +202,21 @@ void build_base_from_xml ( std::istream& is, base_t& base )
   clean(base);
   boost::property_tree::ptree parser;
   boost::property_tree::xml_parser::read_xml(is, parser);
-  base.nom = parser.get<std::string>("Database.<xmlattr>.Name");
+  base.name = parser.get<std::string>("Database.<xmlattr>.Name");
   boost::property_tree::ptree tables = parser.get_child("Database.Tables");
   for (auto& ptTable : tables) 
   {
     base_t::table_t table;
-    table.nom = ptTable.second.get<std::string>("<xmlattr>.Name");
-    table.num = ptTable.second.get<int>("<xmlattr>.ID");
-    table.nb_enreg = ptTable.second.get<int>("<xmlattr>.NbRows");
+    table.name = ptTable.second.get<std::string>("<xmlattr>.Name");
+    table.id = ptTable.second.get<int>("<xmlattr>.ID");
+    table.nb_record = ptTable.second.get<int>("<xmlattr>.NbRows");
     boost::property_tree::ptree columns = ptTable.second.get_child("Columns");
     for (auto& ptColumn : columns) 
     {
       base_t::table_t::col_t col;
-      col.nom = ptColumn.second.get<std::string>("<xmlattr>.Name");
-      col.num = ptColumn.second.get<int>("<xmlattr>.ID");
-      col.taille = ptColumn.second.get<int>("<xmlattr>.Size");
+      col.name = ptColumn.second.get<std::string>("<xmlattr>.Name");
+      col.id = ptColumn.second.get<int>("<xmlattr>.ID");
+      col.size = ptColumn.second.get<int>("<xmlattr>.Size");
       std::string type = ptColumn.second.get<std::string>("<xmlattr>.Type");
       fill_column_type(&col, type.c_str());
       table.colonne.push_back(col);
@@ -301,15 +229,15 @@ void build_base_from_xml ( std::istream& is, base_t& base )
 
 void dump_xml_base(std::ostream& oss, const base_t& base)
 {
-  oss << "<Database Name=\"" << base.nom << "\">" << std::endl;
+  oss << "<Database Name=\"" << base.name << "\">" << std::endl;
   oss << "<Tables>" << std::endl;
   for (auto& table : base.table) 
   {
-    oss << "<Table Name=\"" << table.nom << "\" ID=\"" << table.num << "\" NbRows=\"" << table.nb_enreg << "\">" << std::endl;
+    oss << "<Table Name=\"" << table.name << "\" ID=\"" << table.id << "\" NbRows=\"" << table.nb_record << "\">" << std::endl;
     oss << "<Columns>" << std::endl;
     for (auto& column : table.colonne) 
     {
-      oss << "<Column Name=\"" << column.nom << "\" ID=\""<< column.num << "\" Size=\"" << column.taille << "\" Type=\"" << type_to_string(column.type) << "\"/>" << std::endl;
+      oss << "<Column Name=\"" << column.name << "\" ID=\""<< column.id << "\" Size=\"" << column.size << "\" Type=\"" << type_to_string(column.type) << "\"/>" << std::endl;
     }
     oss << "</Columns>" << std::endl;
     oss << "</Table>" << std::endl;
