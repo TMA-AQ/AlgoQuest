@@ -211,7 +211,7 @@ void WIN32FileMapper::resize(size_t len)
   }
 
   ::SetFileValidData(this->hfile, len);
-  ::SetFilePointer(this->hfile, len, NULL, FILE_BEGIN);
+  ::SetFilePointer(this->hfile, static_cast<long>(len), NULL, FILE_BEGIN);
   ::SetEndOfFile(this->hfile);
 
   LARGE_INTEGER file_size = {0};

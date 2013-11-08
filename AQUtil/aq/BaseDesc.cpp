@@ -4,7 +4,6 @@
 #include "Logger.h"
 #include <cstring>
 #include <cstdlib>
-#include <algorithm>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
@@ -158,7 +157,7 @@ int build_base_from_raw ( const char * fname, base_t& base )
 
 void build_base_from_raw ( FILE* fp, base_t& base )
 {
-   clean(base);
+  clean(base);
 	char name[k_size_max];
 	fscanf(fp, "%s %d", name, &(base.nb_tables));
 	base.name = name;
@@ -327,6 +326,7 @@ const char * symbole_to_char(aq::symbole sid)
   case precision: return "precision"; break; 
   case t_star: return "t_star"; break; 
   case last_symbole: return "last_symbole"; break;
+  default: return "unknown"; break;
   }
 }
 
