@@ -29,11 +29,11 @@ typedef std::vector<uint32_t>       prm_t;
 // ---------------------------------------------------------------------------------------------
 struct column_info_t
 {
-  const aq::base_t::table_t::col_t   col;
-  std::string                        filename;
-  FILE                             * fd;
-  prm_t                            * prm;
-  thesaurus_t                      * thesaurus;
+  aq::base_t::table_t::col_t   col;
+  std::string                  filename;
+  FILE                       * fd;
+  prm_t                      * prm;
+  thesaurus_t                * thesaurus;
 };
 
 // ---------------------------------------------------------------------------------------------

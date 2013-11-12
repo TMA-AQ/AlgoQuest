@@ -385,7 +385,7 @@ void QueryResolver::resolve(aq::verb::VerbNode::Ptr spTree)
     {
       for (auto& tname : joinPath)
       {
-        auto& table = BaseDesc.getTable(tname);
+	aq::Table::Ptr table = BaseDesc.getTable(tname);
         for (auto& tm : aqMatrix->getMatrix())
         {
           if (tm.table_id == table->ID)

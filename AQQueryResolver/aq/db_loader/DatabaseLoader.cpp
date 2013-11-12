@@ -140,7 +140,7 @@ void DatabaseLoader::load(const size_t table_id)
 // --------------------------------------------------------------------------------------------
 void DatabaseLoader::loadTable(const aq::base_t::table_t& table, const std::string& filename) const
 {
-  aq::Logger::getInstance().log(AQ_INFO, "Table : %u\n", table.name);
+  aq::Logger::getInstance().log(AQ_INFO, "Table : %u\n", table.name.c_str());
   
 	FILE * fd_table;
   FileCloser fcloser(fd_table);
@@ -402,7 +402,7 @@ void write_record(const char * field, size_t size, FILE * f, aq::column_info_t& 
 {
   T value;
   if (strcmp(field, "NULL") == 0)
-    value = NULL;
+    value = 0; // FIXME
   else
     value = boost::lexical_cast<T>(field);
   if (f != NULL)
