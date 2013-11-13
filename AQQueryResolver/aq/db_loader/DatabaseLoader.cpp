@@ -44,7 +44,7 @@ namespace aq
       }
       static size_t write(T& value, size_t size, FILE * fd)
       {
-        return fwrite(value, sizeof(boost::remove_pointer<T>::type), size, fd);
+        return fwrite(value, sizeof(typename boost::remove_pointer<T>::type), size, fd);
       }
     };
     
@@ -65,8 +65,8 @@ namespace aq
     template <typename T>
     void write_record(const char * field, size_t size, aq::column_info_t& ci)
     {
-      typedef typename pointer_type_handler<T> ptr_handler;
-      typedef typename typename raw_type_handler<T> raw_handler;
+      typedef typename helper::pointer_type_handler<T> ptr_handler;
+      typedef typename helper::raw_type_handler<T> raw_handler;
       typedef typename boost::mpl::if_<boost::is_pointer<T>, ptr_handler, raw_handler>::type handler_type_t;
       typename handler_type_t::type value;
       
@@ -108,11 +108,10 @@ DatabaseLoader::DatabaseLoader(const aq::base_t bd, const std::string& _path, co
   my_base(bd),
   k_rep_racine(_path),
   k_batch_loader(""),
-  k_packet_size(_packet_size),
-  k_double_separator(','),
+  format_file_name("%sB%03dT%04dC%04dP%012d"),
+  packet_size(_packet_size),
   end_of_field_c(_end_of_field_c),
-  csv_format(_csv_format),
-  format_file_name("%sB%03dT%04dC%04dP%012d")
+  csv_format(_csv_format)
 {
   base_desc_file = this->k_rep_racine + "base_desc/base.aqb";
 	rep_source = k_rep_racine + "data_orga/tables/";
@@ -127,11 +126,10 @@ DatabaseLoader::DatabaseLoader(const aq::base_t bd, const std::string& _loader, 
   my_base(bd),
   k_rep_racine(_path),
   k_batch_loader(_loader),
-  k_packet_size(_packet_size),
-  k_double_separator(','),
+  format_file_name("%sB%03dT%04dC%04dP%012d"),
+  packet_size(_packet_size),
   end_of_field_c(_end_of_field_c),
-  csv_format(_csv_format),
-  format_file_name("%sB%03dT%04dC%04dP%012d")
+  csv_format(_csv_format)
 {
   base_desc_file = this->k_rep_racine + "base_desc/base.aqb";
 	rep_source = k_rep_racine + "data_orga/tables/";
@@ -239,7 +237,7 @@ void DatabaseLoader::loadTable(const aq::base_t::table_t& table, const std::stri
 
   // import records
   int write_n_enreg = 0;
-  while (fgets(my_record, aq::packet_size, fd_table)) // read record
+  while (fgets(my_record, this->packet_size, fd_table)) // read record
   {
     if (feof(fd_table))  
       break;
@@ -249,7 +247,7 @@ void DatabaseLoader::loadTable(const aq::base_t::table_t& table, const std::stri
       throw aq::generic_error(aq::generic_error::INVALID_FILE, "error reading record  %d, loading aborted\n", total_nb_enreg);
     }
 
-    if ((write_n_enreg % aq::packet_size) == 0)
+    if ((write_n_enreg % this->packet_size) == 0)
     {
       // next packet
       for (auto& ci : columns_infos)
@@ -275,7 +273,7 @@ void DatabaseLoader::loadTable(const aq::base_t::table_t& table, const std::stri
     write_n_enreg++;
     total_nb_enreg++;
 
-    if (write_n_enreg > aq::packet_size)
+    if (write_n_enreg > this->packet_size)
     {
       // write packet
       for (auto& ci : columns_infos)
@@ -303,7 +301,6 @@ void DatabaseLoader::writeRecord(std::vector<struct aq::column_info_t>& columns_
 {
   
 	size_t len_rec = strlen(record);
-	int debut_lecture = 0;
 	int cur_col = 0;
   bool end_of_field = false;
   
@@ -403,7 +400,7 @@ void DatabaseLoader::runLoader(size_t table, column_info_t& ci, size_t packet) c
     fclose(ci.fd);
     int rc;
     char exec_cmd[1024];
-    sprintf(exec_cmd, "%s %s %d %d %d", k_batch_loader.c_str(), ini_filename.c_str(), table , ci.col.id, packet);
+    sprintf(exec_cmd, "%s %s %lu %d %lu", k_batch_loader.c_str(), ini_filename.c_str(), table , ci.col.id, packet);
     aq::Logger::getInstance().log(AQ_INFO, exec_cmd);
     rc = system(exec_cmd);
     if (rc != 0)

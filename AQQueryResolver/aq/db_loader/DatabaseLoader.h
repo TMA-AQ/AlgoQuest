@@ -65,8 +65,7 @@ private:
   std::string rep_cible;
   std::string base_desc_file;
   std::string format_file_name;
-  size_t k_packet_size;
-  char k_double_separator;
+  size_t packet_size;
   unsigned char end_of_field_c;   
   bool csv_format;
 
