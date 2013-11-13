@@ -48,7 +48,7 @@ public:
 
 protected:
   void buildPrmThesaurus(const column_info_t& ci, size_t table_id, size_t packet) const;
-  void runLoader(size_t table, size_t column, size_t packet) const;
+  void runLoader(size_t table, column_info_t& ci, size_t packet) const;
   void loadTable(const aq::base_t::table_t& table, const std::string& filename) const;
   void writeRecord(std::vector<aq::column_info_t>& columns_infos, const char * record) const;
   void FileWriteEnreg(aq::column_info_t& ci, char *my_field) const;

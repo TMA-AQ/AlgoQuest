@@ -22,6 +22,7 @@ struct base_t
       int id;
       symbole type;
       int size; ///< number of elements
+      int getSize() const;
     };
     typedef std::vector<col_t> cols_t;
 

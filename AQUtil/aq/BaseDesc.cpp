@@ -139,6 +139,21 @@ void construis_table ( std::istream& iss, base_t::table_t * table )
 namespace aq
 {
   
+int base_t::table_t::col_t::getSize() const
+{
+  int byte_size = 0;
+  switch (this->type)
+  {
+  case t_int: byte_size = this->size * sizeof(int32_t); break;
+  case t_double: byte_size = this->size * sizeof(double); break;
+  case t_long_long: byte_size = this->size * sizeof(int64_t); break;
+  case t_char: byte_size = this->size * sizeof(char); break;
+  default:
+    throw aq::generic_error(aq::generic_error::NOT_IMPLEMENTED, "type [%s] not supported", aq::symbole_to_char(this->type));
+  }
+  return byte_size;
+}
+
 int build_base_from_raw ( const char * fname, base_t& base )
 {
   int rc = 0;

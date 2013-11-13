@@ -246,6 +246,7 @@ int load_database(const aq::Settings& settings, aq::base_t& baseDesc, const std:
 {
   aq::DatabaseLoader loader(baseDesc, settings.aqLoader, settings.rootPath, settings.packSize, ','/*settings.fieldSeparator*/, settings.csvFormat); // FIXME
   // aq::DatabaseLoader loader(baseDesc, settings.rootPath, settings.packSize, ',', settings.csvFormat);
+  loader.generate_ini();
   if (tableNameToLoad != "")
   {
     for (size_t t = 0; t < baseDesc.table.size(); ++t)
@@ -254,8 +255,8 @@ int load_database(const aq::Settings& settings, aq::base_t& baseDesc, const std:
       {
         continue;
       }
-      loader.generate_ini();
       aq::Logger::getInstance().log(AQ_INFO, "loading table %d\n", t + 1);
+      assert(baseDesc.table[t].id = (t + 1));
       loader.load(t + 1);
     }
   }
