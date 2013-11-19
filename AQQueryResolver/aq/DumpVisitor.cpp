@@ -22,16 +22,6 @@ void DumpVisitor::visit(CountVerb*)
 	this->query += " COUNT ";
 }
 
-void DumpVisitor::visit(FirstValueVerb*)
-{
-	this->query += " FIRST_VALUE ";
-}
-
-void DumpVisitor::visit(LagVerb*)
-{
-	this->query += " LAG ";
-}
-
 void DumpVisitor::visit(MaxVerb*)
 {
 	this->query += " MAX ";
@@ -42,10 +32,6 @@ void DumpVisitor::visit(MinVerb*)
 	this->query += " MIN ";
 }
 
-void DumpVisitor::visit(RowNumberVerb*)
-{
-	this->query += " ROW_NUMBER ";
-}
 
 void DumpVisitor::visit(SumVerb*)
 {

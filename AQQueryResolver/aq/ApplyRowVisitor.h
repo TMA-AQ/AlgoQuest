@@ -23,11 +23,8 @@ public:
 	void visit(verb::AggregateVerb*);
 	void visit(verb::AvgVerb*);
 	void visit(verb::CountVerb*);
-	void visit(verb::FirstValueVerb*);
-	void visit(verb::LagVerb*);
 	void visit(verb::MaxVerb*);
 	void visit(verb::MinVerb*);
-	void visit(verb::RowNumberVerb*);
 	void visit(verb::SumVerb*);
 	
 	// Arithmetics Verbs

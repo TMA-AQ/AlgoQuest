@@ -26,24 +26,24 @@ void set_grouped(const std::vector<aq::tnode*>& columnGroup, aq::RowSolver::colu
   }
 }
 
-boost::shared_ptr<aq::ColumnMapper_Intf> new_column_mapper(const aq::ColumnType type, const char * path, const size_t tableId, 
-                                                           const size_t columnId, const size_t size, const size_t packetSize)
+aq::RowSolver::column_infos_t::mapper_type_t new_column_mapper(const aq::ColumnType type, const char * path, const size_t tableId, 
+                                                               const size_t columnId, const size_t size, const size_t packetSize)
 {      
-  boost::shared_ptr<aq::ColumnMapper_Intf> cm;
+  aq::RowSolver::column_infos_t::mapper_type_t cm;
   switch(type)
   {
   case aq::ColumnType::COL_TYPE_BIG_INT:
   case aq::ColumnType::COL_TYPE_DATE:
-    cm.reset(new aq::ColumnMapper<int64_t, aq::FileMapper>(path, tableId, columnId, size, packetSize));
+    cm = aq::ColumnMapper_Intf<int64_t>::Ptr(new aq::ColumnMapper<int64_t, aq::FileMapper>(path, tableId, columnId, size, packetSize));
     break;
   case aq::ColumnType::COL_TYPE_INT:
-    cm.reset(new aq::ColumnMapper<int32_t, aq::FileMapper>(path, tableId, columnId, size, packetSize));
+    cm = aq::ColumnMapper_Intf<int32_t>::Ptr(new aq::ColumnMapper<int32_t, aq::FileMapper>(path, tableId, columnId, size, packetSize));
     break;
   case aq::ColumnType::COL_TYPE_DOUBLE:
-    cm.reset(new aq::ColumnMapper<double, aq::FileMapper>(path, tableId, columnId, size, packetSize));
+    cm = aq::ColumnMapper_Intf<double>::Ptr(new aq::ColumnMapper<double, aq::FileMapper>(path, tableId, columnId, size, packetSize));
     break;
   case aq::ColumnType::COL_TYPE_VARCHAR:
-    cm.reset(new aq::ColumnMapper<char, aq::FileMapper>(path, tableId, columnId, size, packetSize));
+    cm = aq::ColumnMapper_Intf<char>::Ptr(new aq::ColumnMapper<char, aq::FileMapper>(path, tableId, columnId, size, packetSize));
     break;
   }
   return cm;
@@ -82,7 +82,8 @@ void RowSolver::prepareColumnAndColumnMapper(const std::vector<Column::Ptr>& col
   // order must be the same that columnsType
   for (size_t i = 0; i < columnTypes.size(); ++i)
   {
-    column_infos_t infos;
+    columns_infos.push_back(column_infos_t());
+    auto& infos = *columns_infos.rbegin();
     
     // COLUMN
     Column::Ptr c(new Column(*columnTypes[i]));
@@ -101,10 +102,12 @@ void RowSolver::prepareColumnAndColumnMapper(const std::vector<Column::Ptr>& col
     columnTypes[i]->TableID = BaseDesc.getTable(columnTypes[i]->getTableName())->ID;
 
     // MAPPER
-    ColumnMapper_Intf::Ptr cm;
+    auto& cm = infos.mapper;
     if (columnTypes[i]->Temporary)
     {
-      cm.reset(new aq::TemporaryColumnMapper(settings.tmpPath.c_str(), columnTypes[i]->TableID, columnTypes[i]->ID, columnTypes[i]->Type, columnTypes[i]->Size, settings.packSize));
+      // TODO !!!!!
+      assert(false);
+      // cm.reset(new aq::TemporaryColumnMapper(settings.tmpPath.c_str(), columnTypes[i]->TableID, columnTypes[i]->ID, columnTypes[i]->Type, columnTypes[i]->Size, settings.packSize));
     }
     else
     {
@@ -125,8 +128,6 @@ void RowSolver::prepareColumnAndColumnMapper(const std::vector<Column::Ptr>& col
 
     // GROUPED
     set_grouped(columnGroup, infos);
-
-    columns_infos.push_back(infos);
   }
 }
 
@@ -157,27 +158,29 @@ void RowSolver::addGroupColumn(const std::vector<Column::Ptr>& columnTypes,
       {
         if( table.Columns[idx]->getName() == auxCol.getName() )
         {
+          
+          columns_infos.push_back(column_infos_t());
+          auto& infos = *columns_infos.rbegin();
 
           // COLUMN
-          Column::Ptr column = new Column(*table.Columns[idx]);
+          infos.column = new Column(*table.Columns[idx]);
+          auto& column = infos.column;
           column->setTableName(table.getName());
           column->TableID = BaseDesc.getTable(column->getTableName())->ID;
           column->GroupBy = true;
 
           // MAPPER
-          ColumnMapper_Intf::Ptr cm;
+          auto& cm = infos.mapper;
           if (column->Temporary)
           {
-            cm.reset(new aq::TemporaryColumnMapper(settings.tmpPath.c_str(), column->TableID, column->ID, column->Type, column->Size, settings.packSize));
+            // TODO !!!
+            assert(false);
+            // cm.reset(new aq::TemporaryColumnMapper(settings.tmpPath.c_str(), column->TableID, column->ID, column->Type, column->Size, settings.packSize));
           }
           else
           {
             cm = new_column_mapper(column->Type, settings.dataPath.c_str(), column->TableID, column->ID, column->Size, settings.packSize);
           }
-
-          column_infos_t infos;
-          infos.column = column;
-          infos.mapper = cm;
 
           // TABLE_INDEX
           matched_index(infos);
@@ -185,7 +188,6 @@ void RowSolver::addGroupColumn(const std::vector<Column::Ptr>& columnTypes,
           // GROUPED
           set_grouped(columnGroup, infos);
 
-          columns_infos.push_back(infos);
 
           found = true;
           break;
@@ -194,6 +196,23 @@ void RowSolver::addGroupColumn(const std::vector<Column::Ptr>& columnTypes,
 
     }
   }
+}
+
+template <typename T>
+void set_value(const RowSolver::column_infos_t& infos, aq::row_item_t& item, size_t index)
+{
+  T value;
+  boost::get<aq::ColumnMapper_Intf<T>::Ptr>(infos.mapper)->loadValue(index, &value);
+  boost::get<aq::ColumnItem<T> >(item.item).setValue(value);
+}
+
+template <> inline
+void set_value<char*>(const RowSolver::column_infos_t& infos, aq::row_item_t& item, size_t index)
+{
+  char * value = new char[128]; // FIXME
+  memset(value, 0, 128); // FIXME
+  boost::get<aq::ColumnMapper_Intf<char>::Ptr>(infos.mapper)->loadValue(index, value);
+  boost::get<aq::ColumnItem<char*> >(item.item).setValue(value);
 }
 
 void RowSolver::solve_thread(boost::shared_ptr<aq::RowProcess_Intf> rowProcess,
@@ -213,6 +232,26 @@ void RowSolver::solve_thread(boost::shared_ptr<aq::RowProcess_Intf> rowProcess,
   // FIXME
   // load aqMatrix packet if needed
   // aqMatrix->loadNextPacket();
+
+  for (size_t c = 0; c < columns.size(); ++c)
+  {
+    switch (columns[c].column->Type)
+    {
+    case aq::ColumnType::COL_TYPE_INT:
+      row.initialRow[c].item = aq::ColumnItem<int32_t>();
+      break;
+    case aq::ColumnType::COL_TYPE_BIG_INT:
+    case aq::ColumnType::COL_TYPE_DATE:
+      row.initialRow[c].item = aq::ColumnItem<int64_t>();
+      break;
+    case aq::ColumnType::COL_TYPE_DOUBLE:
+      row.initialRow[c].item = aq::ColumnItem<double>();
+      break;
+    case aq::ColumnType::COL_TYPE_VARCHAR:
+      row.initialRow[c].item = aq::ColumnItem<char*>();
+      break;
+    }
+  }
 
   size_t index;
   for (size_t i = indexes.first; i < indexes.second; ++i)
@@ -239,7 +278,26 @@ void RowSolver::solve_thread(boost::shared_ptr<aq::RowProcess_Intf> rowProcess,
       if (index > 0)
       {
         index -= 1;
-        columns[c].mapper->loadValue(index, *item_tmp.item);
+        switch (columns[c].column->Type)
+        {
+        case aq::ColumnType::COL_TYPE_INT:
+          set_value<int32_t>(columns[c], item_tmp, index);
+          break;
+        case aq::ColumnType::COL_TYPE_BIG_INT:
+          set_value<int64_t>(columns[c], item_tmp, index);
+          break;
+        case aq::ColumnType::COL_TYPE_DOUBLE:
+          set_value<double>(columns[c], item_tmp, index);
+          break;
+        case aq::ColumnType::COL_TYPE_VARCHAR:
+          set_value<char*>(columns[c], item_tmp, index);
+          break;
+        default:
+          // TODO !!!
+          assert(false);
+          throw aq::generic_error(aq::generic_error::NOT_IMPLEMENTED, "type not supported");
+          break;
+        }
         item_tmp.null = false;
       }
       else

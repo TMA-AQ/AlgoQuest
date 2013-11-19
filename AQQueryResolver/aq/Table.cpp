@@ -128,189 +128,6 @@ int Table::getColumnIdx( const std::string& name ) const
 }
 
 //------------------------------------------------------------------------------
-void Table::computeUniqueRow(Table& aqMatrix, std::vector<std::vector<size_t> >& mapToUniqueIndex, std::vector<std::vector<size_t> >& uniqueIndex) const
-{
-	//each column in the table holds a list of row indexes
-	//compute a column containing unique and sorted row indexes
-	//also compute a mapping between the original row indexes and the
-	//sorted and unique indexes
-	size_t nrColumns = aqMatrix.Columns.size();
-	if( aqMatrix.HasCount )
-		--nrColumns;
-	for( size_t idx = 0; idx < nrColumns; ++idx )
-	{
-		mapToUniqueIndex.push_back( std::vector<size_t>() );
-		uniqueIndex.push_back( std::vector<size_t>() );
-		if( aqMatrix.Columns[idx]->Items.size() < 1 )
-			continue;
-		Column::inner_column_cmp_t cmp(*(aqMatrix.Columns[idx].get()));
-		std::vector<size_t> index;
-		for( size_t idx2 = 0; idx2 < aqMatrix.Columns[idx]->Items.size(); ++idx2 )
-			index.push_back( idx2 );
-		std::sort( index.begin(), index.end(), cmp );
-
-		mapToUniqueIndex[idx].resize( index.size(), -1 );
-		uniqueIndex[idx].push_back( (size_t) aqMatrix.Columns[idx]->Items[index[0]]->numval );
-		mapToUniqueIndex[idx][index[0]] = uniqueIndex[idx].size() - 1;
-		for( size_t idx2 = 1; idx2 < index.size(); ++idx2 )
-		{
-			size_t row1 = (size_t) aqMatrix.Columns[idx]->Items[index[idx2 - 1]]->numval;
-			size_t row2 = (size_t) aqMatrix.Columns[idx]->Items[index[idx2]]->numval;
-			if( row1 != row2 )
-				uniqueIndex[idx].push_back( row2 );
-			mapToUniqueIndex[idx][index[idx2]] = uniqueIndex[idx].size() - 1;
-		}
-	}
-}
-
-//------------------------------------------------------------------------------
-void Table::load(const char * path, uint64_t packetSize)
-{
-  if (this->temporary)
-  {
-    for (auto& c : this->Columns) 
-    {
-      aq::TemporaryColumnMapper::Ptr cm(new aq::TemporaryColumnMapper(path, this->ID, c->ID, c->Type, c->Size, packetSize));
-      c->loadFromTmp(c->Type, cm);
-    }
-  }
-  else
-  {
-    throw aq::generic_error(aq::generic_error::NOT_IMPLEMENTED, "table load not implemented");
-  }
-}
-
-//------------------------------------------------------------------------------
-void Table::loadColumn(Column::Ptr col, const std::vector<size_t>& uniqueIndex, const std::vector<size_t>& mapToUniqueIndex, const Column::Ptr columnType, const Settings& pSettings, const Base& BaseDesc)
-{		
-	std::string tableName = columnType->getTableName();
-	size_t tableID = BaseDesc.getTable(tableName)->ID;
-
-	//load the required column values
-	llong currentNumPack = -1;
-
-	unsigned char		*pTmpBuf = NULL;
-	size_t           nTmpBufSize = 0;
-	size_t           nBinItemSize = 0;
-
-	pTmpBuf			  = NULL;
-	nBinItemSize	= 0;
-	switch( columnType->Type )
-	{
-	case COL_TYPE_INT:
-		nTmpBufSize		= 1000;
-		nBinItemSize	= 4;
-		break;
-	case COL_TYPE_BIG_INT:
-	case COL_TYPE_DATE:
-	case COL_TYPE_DOUBLE:
-		nTmpBufSize		= 1000;
-		nBinItemSize	= 8;
-		break;
-	case COL_TYPE_VARCHAR:
-		nTmpBufSize		= columnType->Size + 1000;	// reserve 1000 bytes extra space for text mode !
-		nBinItemSize	= columnType->Size;
-		break;
-	}
-
-	pTmpBuf = new unsigned char[nTmpBufSize];
-	pTmpBuf[nBinItemSize] = 0;
-	boost::scoped_array<unsigned char> pTmpBufDel( pTmpBuf ); //!!!debug13
-	
-	boost::shared_ptr<aq::FileMapper> prmMapper;
-	boost::shared_ptr<aq::FileMapper> thesaurusMapper;
-
-	aq::Timer realValuesTimer;
-	Column::Ptr columnValues = new Column( *columnType );
-	for( size_t idx2 = 0; idx2 < uniqueIndex.size(); ++idx2 )
-	{
-		llong absRaw = uniqueIndex[idx2];
-		size_t numPack = (size_t) (absRaw / pSettings.packSize);
-		llong packOffset = absRaw % pSettings.packSize;
-
-		// aq::Logger::getInstance().log(AQ_DEBUG, "process row %u => unique index %ld on packet %u offset %ld\n", idx2, absRaw, numPack, packOffset);
-
-		if( numPack != currentNumPack )
-		{
-			std::string dataPath = pSettings.dataPath;
-			sprintf( szBuffer, "B001T%.4uC%.4uV01P%.12u", tableID, columnType->ID, numPack ); // FIXME : use a function
-			dataPath += szBuffer;
-
-			std::string prmFilePath = dataPath + ".prm";
-			std::string theFilePath = dataPath + ".the";
-
-			 aq::Logger::getInstance().log(AQ_DEBUG, "Open prm file %s\n", prmFilePath.c_str());
-			 aq::Logger::getInstance().log(AQ_DEBUG, "Open thesaurus %s\n", theFilePath.c_str());
-
-			prmMapper.reset(new aq::FileMapper(prmFilePath.c_str()));
-			thesaurusMapper.reset(new aq::FileMapper(theFilePath.c_str()));
-
-			currentNumPack = numPack;
-		}
-		
-		int prmFileItemSize = 4;
-		int prmOffset = ((long) packOffset * prmFileItemSize);
-		int theOffset;
-		prmMapper->read(&theOffset, prmOffset, prmFileItemSize);
-
-		switch( columnType->Type )
-		{
-		case COL_TYPE_INT:
-			{
-				int *pnItemData;
-				pnItemData = (int*)( pTmpBuf );
-				thesaurusMapper->read(pTmpBuf, nBinItemSize * theOffset, nBinItemSize);
-				if( *pnItemData == 'NULL' )
-					columnValues->Items.push_back( NULL );
-				else
-					columnValues->Items.push_back( new ColumnItem( *pnItemData ) );
-			}
-			break;
-		case COL_TYPE_BIG_INT:
-		case COL_TYPE_DATE:
-			{
-				long long *pnItemData;
-				pnItemData = (long long*)( pTmpBuf );
-				thesaurusMapper->read(pTmpBuf, nBinItemSize * theOffset, nBinItemSize);
-				if( *pnItemData == 'NULL' )
-					columnValues->Items.push_back( NULL );
-				else
-					columnValues->Items.push_back( new ColumnItem( (double) *pnItemData ) );
-			}
-			break;
-		case COL_TYPE_DOUBLE:
-			{
-				double *pdItemData;
-				pdItemData = (double*)( pTmpBuf );
-				thesaurusMapper->read(pTmpBuf, nBinItemSize * theOffset, nBinItemSize);
-				if( *pdItemData == 'NULL' )
-					columnValues->Items.push_back( NULL );
-				else
-					columnValues->Items.push_back( new ColumnItem( *pdItemData ) );
-			}
-			break;
-		case COL_TYPE_VARCHAR:
-			{	
-				thesaurusMapper->read(pTmpBuf, nBinItemSize * theOffset, nBinItemSize);
-				if( strcmp((char*)pTmpBuf, "NULL") == 0 )
-					columnValues->Items.push_back( NULL );
-				else
-					columnValues->Items.push_back( new ColumnItem( std::string((char*)pTmpBuf) ) );
-			}
-			break;
-		}
-	}
-	aq::Logger::getInstance().log(AQ_DEBUG, "Turn %u numerics references of column %s into real values: Time Elapsed = %s\n", 
-		uniqueIndex.size(),
-		columnType->getName().c_str(), aq::Timer::getString(realValuesTimer.getTimeElapsed()).c_str());
-
-	for( size_t idx2 = 0; idx2 < mapToUniqueIndex.size(); ++idx2 ) {
-		assert(mapToUniqueIndex[idx2] < columnValues->Items.size());
-		col->Items.push_back( columnValues->Items[mapToUniqueIndex[idx2]] );
-	}
-}
-
-//------------------------------------------------------------------------------
 std::vector<Column::Ptr> Table::getColumnsByName( std::vector<Column::Ptr>& columns ) const
 {
 	std::vector<Column::Ptr> correspondingColumns;
@@ -318,20 +135,17 @@ std::vector<Column::Ptr> Table::getColumnsByName( std::vector<Column::Ptr>& colu
 	{
 		bool found = false;
 		for( size_t idx2 = 0; idx2 < this->Columns.size(); ++idx2 )
+    {
 			if( columns[idx]->getName() == this->Columns[idx2]->getName() )
 			{
 				correspondingColumns.push_back( this->Columns[idx2] );
 				found = true;
 				break;
 			}
+    }
 		if( !found )
 		{
-			//we have an intermediary column, not a table column
-			//check that it's valid
-			if( this->Columns.size() > 0 )
-				if( columns[idx]->Items.size() != this->Columns[0]->Items.size() )
-					throw generic_error(generic_error::INVALID_QUERY, "");
-			correspondingColumns.push_back( columns[idx] );
+      throw generic_error(generic_error::INVALID_QUERY, "");
 		}
 	}
 	return correspondingColumns;

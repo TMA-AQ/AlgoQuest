@@ -97,97 +97,12 @@ bool SelectVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 }
 
 //------------------------------------------------------------------------------
-void SelectVerb::changeResult(	Table::Ptr table, 
-								VerbResult::Ptr resLeft,
-								VerbResult::Ptr resRight, VerbResult::Ptr resNext )
+void SelectVerb::changeResult(Table::Ptr table, 
+                              VerbResult::Ptr resLeft,
+                              VerbResult::Ptr resRight, 
+                              VerbResult::Ptr resNext )
 {
-	assert( resLeft && !resRight );
-	if( resLeft->getType() == VerbResult::ASTERISK )
-	{
-		assert( this->Columns.size() <= table->Columns.size() );
-		for( size_t idx = 0; idx < this->Columns.size(); ++idx )
-			table->Columns[idx]->setName( this->Columns[idx] );
-		return;
-	}
-	//either one column or one K_COMMA operator
-	VerbResultArray::Ptr resArray = boost::dynamic_pointer_cast<VerbResultArray>( resLeft );
-	if( !resArray )
-	{
-		resArray = new VerbResultArray();
-		resArray->Results.push_back( resLeft );
-	}
-
-	std::vector<Column::Ptr> newColumns;
-	std::deque<VerbResult::Ptr>& params = resArray->Results;
-	assert( params.size() == this->Columns.size() );
-	Column::Ptr foundColumn = NULL;
-	size_t nrColumns = table->Columns.size();
-	if( table->HasCount )
-		--nrColumns;
-	for( size_t idx = 0; idx < nrColumns; ++idx )
-		table->Columns[idx]->Invisible = true;
-	for( size_t idx = 0; idx < this->Columns.size(); ++idx )
-	{
-		if( !params[idx] )
-			throw generic_error(generic_error::GENERIC, "");
-		Column::Ptr column;
-		if( params[idx]->getType() == VerbResult::COLUMN )
-		{
-		  column = boost::static_pointer_cast<Column>( params[idx] );
-			newColumns.push_back( column );
-			if( !foundColumn )
-				foundColumn = column;
-		}
-		else
-		{
-			assert( params[idx]->getType() == VerbResult::SCALAR );
-			Scalar::Ptr scalar = boost::static_pointer_cast<Scalar>( params[idx] );
-			column = new Column(scalar->Type);
-			column->Items.push_back(new ColumnItem(scalar->Item));
-			newColumns.push_back( column );
-		}
-		if( idx < this->Columns.size() )
-		{
-			column->setName( this->Columns[idx] );
-			column->setDisplayName( this->ColumnsDisplay[idx] );
-		}
-		column->Invisible = false;
-	}
-
-	//add the rest of the columns
-	for( size_t idx = 0; idx < table->Columns.size(); ++idx )
-		if( table->Columns[idx]->Invisible )
-			newColumns.push_back( table->Columns[idx] );
-	/*{
-		bool found = false;
-		for( size_t idx2 = 0; idx2 < newColumns.size(); ++idx2 )
-			if( newColumns[idx2]->getName() == table->Columns[idx]->getName() )
-			{
-				found = true;
-				break;
-			}
-			if( !found )
-			{
-				table->Columns[idx]->Invisible = true;
-				newColumns.push_back( table->Columns[idx] );
-			}
-	}*/
-
-	if( table->HasCount && foundColumn )
-		newColumns.push_back( table->Columns[table->Columns.size()-1] );
-	if( table->HasCount && !foundColumn )
-		table->HasCount = false;
-
-	//turn scalars into columns
-	if( foundColumn )
-		for( size_t idx = 0; idx < newColumns.size(); ++idx )
-			if( newColumns[idx]->Items.size() < foundColumn->Items.size() )
-				newColumns[idx]->increase( foundColumn->Items.size() );
-
-	if( !foundColumn )
-		table->TotalCount = 1;
-
-	table->Columns = newColumns;
+  assert(false);
 }
 
 void SelectVerb::accept(VerbVisitor* visitor)
@@ -231,11 +146,13 @@ bool OrderVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode*
 	vector<aq::tnode*> selectColumns;
 	getColumnsList( pStart->left, selectColumns );
 	for( size_t idx = 0; idx < columns.size(); ++idx )
+  {
 		if( columns[idx]->tag == K_IDENT || 
 			columns[idx]->tag == K_COLUMN )
 		{
 			int colIdx = -1;
 			for( size_t idx2 = 0; idx2 < selectColumns.size(); ++idx2 )
+      {
 				if( selectColumns[idx2] &&
 					selectColumns[idx2]->tag == K_AS &&
 					strcmp( selectColumns[idx2]->right->getData().val_str,
@@ -245,11 +162,15 @@ bool OrderVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode*
 					colIdx = (int) idx2;
 					break;
 				}
+      }
 			if( colIdx < 0 )
+      {
 				throw verb_error(generic_error::INVALID_QUERY, this->getVerbType());
+      }
 			columns[idx]->tag = K_INTEGER;
 			columns[idx]->set_int_data( colIdx + 1 );
 		}
+  }
 	return false;
 }
 
@@ -285,9 +206,7 @@ bool ByVerb::changeQuery( aq::tnode* pStart, aq::tnode* pNode,
 void ByVerb::changeResult(	Table::Ptr table, 
 							VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext )
 {
-	//simply move the parameters up to the parent
-	assert( resLeft && !resRight );
-	this->Result = resLeft;
+	assert(false);
 }
 
 //------------------------------------------------------------------------------
@@ -323,16 +242,16 @@ void FromVerb::accept(VerbVisitor* visitor)
 }
 
 //------------------------------------------------------------------------------
-bool GroupVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
+bool GroupVerb::preprocessQuery(aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal)
 {
   return this->useRowResolver;
 }
 
 //------------------------------------------------------------------------------
-bool GroupVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
-								VerbResult::Ptr resLeft, 
-								VerbResult::Ptr resRight, 
-								VerbResult::Ptr resNext )
+bool GroupVerb::changeQuery(aq::tnode* pStart, aq::tnode* pNode,
+                            VerbResult::Ptr resLeft, 
+                            VerbResult::Ptr resRight, 
+                            VerbResult::Ptr resNext )
 {
 	pNode->tag = K_DELETED;
 	return false;
@@ -340,11 +259,49 @@ bool GroupVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 
 //------------------------------------------------------------------------------
 void GroupVerb::changeResult(	Table::Ptr table, 
-								VerbResult::Ptr resLeft, 
-								VerbResult::Ptr resRight, 
-								VerbResult::Ptr resNext )
+                             VerbResult::Ptr resLeft, 
+                             VerbResult::Ptr resRight, 
+                             VerbResult::Ptr resNext )
 {
   assert(false);
+}
+
+bool is_new_group(const aq::row_item_t::item_t& i1, const aq::row_item_t::item_t& i2, aq::ColumnType type)
+{
+  bool new_group = false;
+  switch (type)
+  {
+  case aq::ColumnType::COL_TYPE_INT:
+    {
+      const aq::ColumnItem<int32_t>& i1_tmp = boost::get<aq::ColumnItem<int32_t> >(i1);
+      const aq::ColumnItem<int32_t>& i2_tmp = boost::get<aq::ColumnItem<int32_t> >(i2);
+      new_group = !ColumnItem<int32_t>::equal(i1_tmp, i2_tmp);
+    }
+    break;
+  case aq::ColumnType::COL_TYPE_BIG_INT:
+  case aq::ColumnType::COL_TYPE_DATE:
+    {
+      const aq::ColumnItem<int64_t>& i1_tmp = boost::get<aq::ColumnItem<int64_t> >(i1);
+      const aq::ColumnItem<int64_t>& i2_tmp = boost::get<aq::ColumnItem<int64_t> >(i2);
+      new_group = !ColumnItem<int64_t>::equal(i1_tmp, i2_tmp);
+    }
+    break;
+  case aq::ColumnType::COL_TYPE_DOUBLE:
+    {
+      const aq::ColumnItem<double>& i1_tmp = boost::get<aq::ColumnItem<double> >(i1);
+      const aq::ColumnItem<double>& i2_tmp = boost::get<aq::ColumnItem<double> >(i2);
+      new_group = !ColumnItem<double>::equal(i1_tmp, i2_tmp);
+    }
+    break;
+  case aq::ColumnType::COL_TYPE_VARCHAR:
+    {
+      const aq::ColumnItem<char*>& i1_tmp = boost::get<aq::ColumnItem<char*> >(i1);
+      const aq::ColumnItem<char*>& i2_tmp = boost::get<aq::ColumnItem<char*> >(i2);
+      new_group = !ColumnItem<char*>::equal(i1_tmp, i2_tmp);
+    }
+    break;
+  }
+  return new_group;
 }
 
 //------------------------------------------------------------------------------
@@ -371,9 +328,10 @@ void GroupVerb::addResult(aq::Row& row)
   {
     for (size_t i = 0; i < row.initialRow.size(); ++i)
     {
-      if (row.initialRow[i].grouped && !ColumnItem::equal(row_prv.initialRow[i].item.get(), row.initialRow[i].item.get(), row_prv.initialRow[i].type))
+      // row_prv.initialRow[i].type
+      if (row.initialRow[i].grouped)
       {
-        new_group = true;
+        new_group = is_new_group(row_prv.initialRow[i].item, row.initialRow[i].item, row.initialRow[i].type);
       }
     }
   }
@@ -400,9 +358,15 @@ void GroupVerb::addResult(aq::Row& row)
       switch (row.computedRow[i].aggFunc)
       {
       case SUM:
-        row_acc.computedRow[i].item->numval *= row_acc.count;
+
+        // FIXME : TODO
+        // row_acc.computedRow[i].item->numval *= row_acc.count;
+        
         break;
       default:
+
+        throw aq::generic_error(aq::generic_error::NOT_IMPLEMENTED, "aggregate function not implemented");
+
         break;
       }
     }
@@ -411,7 +375,38 @@ void GroupVerb::addResult(aq::Row& row)
   {
     for (size_t i = 0; i < row.computedRow.size(); ++i)
     {
-      aq::apply_aggregate(row.computedRow[i].aggFunc, row.computedRow[i].type, *row_acc.computedRow[i].item, row_acc.count, *row_prv.computedRow[i].item, row_prv.count);
+      switch (row.computedRow[i].type)
+      {
+      case aq::ColumnType::COL_TYPE_INT:
+        {
+          auto& i1 = boost::get<aq::ColumnItem<int32_t> >(row_acc.computedRow[i].item);
+          auto& i2 = boost::get<aq::ColumnItem<int32_t> >(row_acc.computedRow[i].item);
+          i1.applyAggregate(row.computedRow[i].aggFunc, i2);
+        }
+        break;
+      case aq::ColumnType::COL_TYPE_BIG_INT:
+      case aq::ColumnType::COL_TYPE_DATE:
+        {
+          auto& i1 = boost::get<aq::ColumnItem<int64_t> >(row_acc.computedRow[i].item);
+          auto& i2 = boost::get<aq::ColumnItem<int64_t> >(row_acc.computedRow[i].item);
+          i1.applyAggregate(row.computedRow[i].aggFunc, i2);
+        }
+        break;
+      case aq::ColumnType::COL_TYPE_DOUBLE:
+        {
+          auto& i1 = boost::get<aq::ColumnItem<double> >(row_acc.computedRow[i].item);
+          auto& i2 = boost::get<aq::ColumnItem<double> >(row_acc.computedRow[i].item);
+          i1.applyAggregate(row.computedRow[i].aggFunc, i2);
+        }
+        break;
+      case aq::ColumnType::COL_TYPE_VARCHAR:
+        {
+          auto& i1 = boost::get<aq::ColumnItem<char*> >(row_acc.computedRow[i].item);
+          auto& i2 = boost::get<aq::ColumnItem<char*> >(row_acc.computedRow[i].item);
+          i1.applyAggregate(row.computedRow[i].aggFunc, i2);
+        }
+        break;
+      }
     }
     this->row_acc.count += this->row_prv.count;
   }

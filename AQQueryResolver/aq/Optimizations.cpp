@@ -7,21 +7,21 @@ namespace aq
 {
 
 //-------------------------------------------------------------------------------
-ColumnItem::Ptr getMinMaxFromThesaurus(	size_t tableID, size_t colIdx, size_t partIdx, bool min, Base& BaseDesc, Settings& Settings )
+template <typename T>
+typename ColumnItem<T>::Ptr getMinMaxFromThesaurus(Column::Ptr column, size_t tableID, size_t colIdx, size_t partIdx, bool min, Base& BaseDesc, Settings& Settings)
 {
-	ColumnItem::Ptr minMax = NULL;
+	typename ColumnItem<T>::Ptr minMax = NULL;
   size_t tableIdx = 0;
   for (tableIdx = 0; tableIdx < BaseDesc.getTables().size(); ++tableIdx)
   {
     if (BaseDesc.getTables()[tableIdx]->ID == tableID)
       break;
   }
-	std::string fileName = getThesaurusFileName( Settings.dataPath.c_str(), tableIdx + 1, colIdx + 1, partIdx );
-	FILE* pFIn = fopen( fileName.c_str(), "rb" );
+	std::string fileName = getThesaurusFileName(Settings.dataPath.c_str(), tableIdx + 1, colIdx + 1, partIdx);
+	FILE* pFIn = fopen(fileName.c_str(), "rb");
 	if ( pFIn == NULL )
 		return minMax;
 	FileCloser fileCloser(pFIn);
-	Column::Ptr column = BaseDesc.getTable(static_cast<unsigned int>(tableID))->Columns[colIdx];
 
 	size_t binItemSize	= 0;
 	size_t tmpBufSize = 1000;
@@ -64,25 +64,25 @@ ColumnItem::Ptr getMinMaxFromThesaurus(	size_t tableID, size_t colIdx, size_t pa
 	case COL_TYPE_INT: 
 		{
 			int *pItemData = (int*)( pTmpBuf );
-			minMax = new ColumnItem( *pItemData );
+			minMax = new ColumnItem<int32_t>( *pItemData );
 		}
 		break;
 	case COL_TYPE_BIG_INT:
 	case COL_TYPE_DATE:
 		{
-			llong *pItemData = (llong*)( pTmpBuf );
-			minMax = new ColumnItem( (double) *pItemData );
+			int64_t *pItemData = (int64_t*)( pTmpBuf );
+			minMax = new ColumnItem<int64_t(*pItemData );
 		}
 		break;
 	case COL_TYPE_DOUBLE:
 		{
 			double *pItemData = (double*)( pTmpBuf );
-			minMax = new ColumnItem( *pItemData );
+			minMax = new ColumnItem<double>( *pItemData );
 		}
 		break;
 	case COL_TYPE_VARCHAR:
 		pTmpBuf[column->Size] = '\0';
-		minMax = new ColumnItem( (char*) pTmpBuf );
+		minMax = new ColumnItem<char*>( (char*) pTmpBuf );
 		break;
 	}
 
@@ -126,23 +126,31 @@ Table::Ptr solveOptimalMinMax(aq::verb::VerbNode::Ptr spTree,
 	Table::Ptr table = BaseDesc.getTable( columnVerb->getTableName() );
 	size_t colIdx = table->getColumnIdx( columnVerb->getColumnOnlyName() );
 	Column::Ptr column = table->Columns[colIdx];
-	ColumnItem::Ptr minMax = NULL;
+
+  switch (column->Type)
+  {
+  case aq::ColumnType::COL_TYPE_INT:
+    
+    break;
+  }
+
+	// ColumnItem::Ptr minMax = NULL;
 	bool min = verb1->getVerbType() == K_MIN;
 	for( int partIdx = 0; ; ++partIdx )
 	{
-		ColumnItem::Ptr item = getMinMaxFromThesaurus( table->ID, colIdx, partIdx, min, BaseDesc, Settings );
-		if( !item )
-			break;
-		if( !minMax )
-			minMax = item;
-		else
-			if( min == ColumnItem::lessThan(item.get(), minMax.get(), column->Type) )
-				minMax = item;
+		//ColumnItem::Ptr item = getMinMaxFromThesaurus( table->ID, colIdx, partIdx, min, BaseDesc, Settings );
+		//if( !item )
+		//	break;
+		//if( !minMax )
+		//	minMax = item;
+		//else
+		//	if( min == ColumnItem::lessThan(item.get(), minMax.get(), column->Type) )
+		//		minMax = item;
 	}
 	
 	table.reset(new Table());
 	Column::Ptr newColumn(new Column(*column));
-	newColumn->Items.push_back( minMax );
+	// newColumn->Items.push_back( minMax );
 	table->Columns.push_back( newColumn );
 	table->TotalCount = 1;
 	return table;

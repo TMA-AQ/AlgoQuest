@@ -78,71 +78,13 @@ void ComparisonVerb::changeResult(	Table::Ptr table,
 									VerbResult::Ptr resRight, 
 									VerbResult::Ptr resNext )
 {
-	if( !resLeft || !resRight )
-		throw verb_error(generic_error::VERB_BAD_SYNTAX, this->getVerbType());
-	//we have at least 1 column
-	Column::Ptr column;
-	VerbResult::Ptr other;
-	if( resLeft->getType() == VerbResult::SCALAR )
-	{
-		if( resRight->getType() != VerbResult::COLUMN )
-			throw verb_error(generic_error::VERB_BAD_SYNTAX, this->getVerbType());
-		column = boost::dynamic_pointer_cast<Column>( resRight );
-		other = resLeft;
-	}
-	else
-	{
-		if( resLeft->getType() != VerbResult::COLUMN )
-			throw verb_error(generic_error::VERB_BAD_SYNTAX, this->getVerbType());
-		column = boost::dynamic_pointer_cast<Column>( resLeft );
-		other = resRight;
-	}
-	RowValidation::Ptr rowValidation = new RowValidation();
-	vector<bool>& validRows = rowValidation->ValidRows;
-	validRows.resize( column->Items.size(), false );
-	if( other->getType() == VerbResult::SCALAR )
-	{
-	  Scalar::Ptr scalar = boost::dynamic_pointer_cast<Scalar>( other );
-		for( size_t idx = 0; idx < column->Items.size(); ++idx )
-			validRows[idx] = this->compare(	column->Items[idx].get(), 
-											&scalar->Item, 
-											column->Type );
-	}
-	else
-	{
-	  Column::Ptr column2 = boost::dynamic_pointer_cast<Column>( other );
-		if( column->Items.size() != column2->Items.size() )
-			throw verb_error(generic_error::VERB_BAD_SYNTAX, this->getVerbType());
-		
-		for( size_t idx = 0; idx < column->Items.size(); ++idx )
-			validRows[idx] = this->compare(	column->Items[idx].get(), 
-											column2->Items[idx].get(), 
-											column->Type );
-	}
-	this->Result = rowValidation;
+  assert(false);
 }
 
 //------------------------------------------------------------------------------
 void ComparisonVerb::accept(VerbVisitor* visitor)
 {
   visitor->visit(this);
-}
-
-//------------------------------------------------------------------------------
-bool ComparisonVerb::compare(	ColumnItem* item1, 
-								ColumnItem* item2, 
-								ColumnType type )
-{
-	throw verb_error(generic_error::VERB_BAD_SYNTAX, this->getVerbType());
-	return false;
-}
-
-//------------------------------------------------------------------------------
-bool EqVerb::compare(	ColumnItem* item1, 
-						ColumnItem* item2, 
-						ColumnType type )
-{
-	return ColumnItem::equal( item1, item2, type );
 }
 
 //------------------------------------------------------------------------------
@@ -155,46 +97,6 @@ void EqVerb::accept(VerbVisitor* visitor)
 void JeqVerb::accept(VerbVisitor* visitor)
 {
   visitor->visit(this);
-}
-
-//------------------------------------------------------------------------------
-bool LtVerb::compare(	ColumnItem* item1, 
-						ColumnItem* item2, 
-						ColumnType type )
-{
-	return ColumnItem::lessThan( item1, item2, type );
-}
-
-//------------------------------------------------------------------------------
-bool LeqVerb::compare(	ColumnItem* item1, 
-						ColumnItem* item2, 
-						ColumnType type )
-{
-	return ColumnItem::equal(item1, item2, type) || ColumnItem::lessThan( item1, item2, type );
-}
-
-//------------------------------------------------------------------------------
-bool GtVerb::compare(	ColumnItem* item1, 
-						ColumnItem* item2, 
-						ColumnType type )
-{
-	return !ColumnItem::equal(item1, item2, type) && !ColumnItem::lessThan( item1, item2, type );
-}
-
-//------------------------------------------------------------------------------
-bool GeqVerb::compare(	ColumnItem* item1, 
-						ColumnItem* item2, 
-						ColumnType type )
-{
-	return !ColumnItem::lessThan( item1, item2, type );
-}
-
-//------------------------------------------------------------------------------
-bool NeqVerb::compare(	ColumnItem* item1, 
-						ColumnItem* item2, 
-						ColumnType type )
-{
-	return !ColumnItem::equal( item1, item2, type );
 }
 
 //------------------------------------------------------------------------------
@@ -218,18 +120,7 @@ void IsVerb::changeResult(	Table::Ptr table,
 							VerbResult::Ptr resRight, 
 							VerbResult::Ptr resNext )
 {
-	if( !resLeft )
-		throw verb_error(generic_error::VERB_BAD_SYNTAX, this->getVerbType());
-	Column::Ptr column;
-	if( resLeft->getType() != VerbResult::COLUMN )
-		throw verb_error(generic_error::VERB_BAD_SYNTAX, this->getVerbType());
-	column = boost::dynamic_pointer_cast<Column>( resLeft );
-	RowValidation::Ptr rowValidation = new RowValidation();
-	vector<bool>& validRows = rowValidation->ValidRows;
-	validRows.resize( column->Items.size(), false );
-	for( size_t idx = 0; idx < column->Items.size(); ++idx )
-		validRows[idx] = (column->Items[idx] == NULL) == !this->IsNot;
-	this->Result = rowValidation;
+  assert(false);
 }
 
 //------------------------------------------------------------------------------

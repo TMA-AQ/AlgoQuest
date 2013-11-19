@@ -380,7 +380,6 @@
     <ClCompile Include="aq\Base.cpp" />
     <ClCompile Include="aq\Column.cpp" />
     <ClCompile Include="aq\Column2Table.cpp" />
-    <ClCompile Include="aq\ColumnItem.cpp" />
     <ClCompile Include="aq\db_loader\DatabaseLoader.cpp" />
     <ClCompile Include="aq\DumpVisitor.cpp" />
     <ClCompile Include="aq\ExprTransform.cpp" />
@@ -406,7 +405,6 @@
     <ClCompile Include="aq\SQLPrefix.cpp" />
     <ClCompile Include="aq\statement_resolver.cpp" />
     <ClCompile Include="aq\Table.cpp" />
-    <ClCompile Include="aq\TemporaryColumnMapper.cpp" />
     <ClCompile Include="aq\TreeUtilities.cpp" />
     <ClCompile Include="aq\UpdateResolver.cpp" />
     <ClCompile Include="aq\verbs\AggregateVerbs.cpp" />

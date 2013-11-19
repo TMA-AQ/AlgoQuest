@@ -20,11 +20,8 @@ void ApplyRowVisitor::visit(verb::AggregateVerb* agg)
 
 void ApplyRowVisitor::visit(verb::AvgVerb*){}
 void ApplyRowVisitor::visit(verb::CountVerb*){}
-void ApplyRowVisitor::visit(verb::FirstValueVerb*){}
-void ApplyRowVisitor::visit(verb::LagVerb*){}
 void ApplyRowVisitor::visit(verb::MaxVerb*){}
 void ApplyRowVisitor::visit(verb::MinVerb*){}
-void ApplyRowVisitor::visit(verb::RowNumberVerb*){}
 void ApplyRowVisitor::visit(verb::SumVerb*){}
 
 // Arithmetics Verbs

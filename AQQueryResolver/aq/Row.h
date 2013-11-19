@@ -3,13 +3,16 @@
 
 #include "ColumnItem.h"
 #include <vector>
+#include <boost/variant.hpp>
 
 namespace aq
 {
 
+  // ---------------------------------------------------------------------------
   struct row_item_t
   {
-    ColumnItem::Ptr item;
+    typedef boost::variant<ColumnItem<int32_t>, ColumnItem<int64_t>, ColumnItem<double>, ColumnItem<char*> > item_t;
+    item_t item;
     aq::ColumnType type;
     unsigned int size;
     std::string tableName;
@@ -20,7 +23,7 @@ namespace aq
     bool displayed;
     bool null;
     row_item_t();
-    row_item_t(ColumnItem::Ptr _item,
+    row_item_t(const item_t& _item,
       aq::ColumnType _type,
       unsigned int _size,
       std::string _tableName,
@@ -31,9 +34,8 @@ namespace aq
     row_item_t& operator=(const row_item_t& source);
     bool match(const std::string& _tableName, const std::string& _columnName);
   };
-   
-  //////////////////////////////////////////////////////////////////////////////////////
 
+  // ---------------------------------------------------------------------------
   class Row
   {
   public:

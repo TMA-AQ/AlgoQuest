@@ -65,10 +65,47 @@ void generate_parent(aq::tnode* pNode, aq::tnode* parent = NULL);
 void getColumnTypes( aq::tnode* pNode, std::vector<Column::Ptr>& columnTypes, Base& baseDesc );
 
 void cleanQuery( aq::tnode*& pNode );
-	
-aq::ColumnItem GetItem( const aq::tnode& );
 
-aq::tnode* Getnode( ColumnItem::Ptr item, ColumnType type );
+//------------------------------------------------------------------------------
+template <typename T> aq::ColumnItem<T> GetItem(const aq::tnode& n)
+{
+  aq::ColumnItem<T> item;
+  item.setValue(static_cast<T>(n.getData().val_int));
+  return item;
+}
+
+//template <> aq::ColumnItem<char*> GetItem(const aq::tnode& n)
+//{
+//  aq::ColumnItem<char*> item;
+//  char * value = new char[strlen(n.getData().val_str) + 1];
+//  strcpy(value, n.getData().val_str);
+//  item.setValue(value);
+//  return item;
+//}
+
+//------------------------------------------------------------------------------
+//template <typename T> aq::tnode * Getnode(ColumnItem<T>::Ptr item, ColumnType type)
+//{
+//	aq::tnode	* pNode = NULL;
+//	if( !item )
+//		return pNode;
+//	switch( type )
+//	{
+//	case COL_TYPE_INT:
+//	case COL_TYPE_DATE:
+//		pNode = new aq::tnode( K_INTEGER );
+//		pNode->set_int_data( (llong) item->getValue() );
+//		break;
+//	case COL_TYPE_DOUBLE:
+//		pNode = new aq::tnode( K_REAL );
+//		pNode->set_double_data( item->getValue() );
+//		break;
+//	default:
+//		pNode = new aq::tnode( K_STRING );
+//		pNode->set_string_data( item->getValue() );
+//	}
+//	return pNode;
+//}
 
 aq::tnode* GetTree( Table& table );
 

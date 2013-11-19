@@ -9,15 +9,14 @@ namespace aq
 {
   
   template <typename T, class M>
-  class ThesaurusReader : public ColumnMapper_Intf
+  class ThesaurusReader : public ColumnMapper_Intf<T>
   {
   public:
     ThesaurusReader(const char * _path, size_t _tableId, size_t _columnId, size_t _size, size_t _packetSize, size_t _currentPacket = 0, bool _readNextPacket = true);
     ~ThesaurusReader();
-    int loadValue(size_t index, aq::ColumnItem& item);
-    int setValue(size_t index, ColumnItem& value);
-    int append(ColumnItem& value);
-    const aq::ColumnType getType() const { return aq::type_conversion<T>::type; } ;
+    int loadValue(size_t index, T * item);
+    int setValue(size_t index, T * value);
+    int append(T * value);
   private:
     boost::shared_ptr<M> thesaurusMapper;
     const std::string path;
@@ -49,7 +48,7 @@ namespace aq
   }
 
   template <typename T, class M>
-  int ThesaurusReader<T, M>::loadValue(size_t index, aq::ColumnItem& item)
+  int ThesaurusReader<T, M>::loadValue(size_t index, T * value)
   {
     int rc = 0;
     if (((index >= mappedZone.first) && (index < mappedZone.second)))
@@ -59,10 +58,7 @@ namespace aq
       {
         packet_index -= sizes[i];
       }
-      if ((rc = this->thesaurusMapper->read(val, packet_index * size * sizeof(T), size * sizeof(T))) == 0)
-      {
-        aq::fill_item<T>(item, val, this->size);
-      }
+      rc = this->thesaurusMapper->read(value, packet_index * size * sizeof(T), size * sizeof(T));
     }
     else if ((index >= mappedZone.second) && (readNextPacket))
     {
@@ -74,7 +70,7 @@ namespace aq
         this->thesaurusMapper.reset(new M(thesaurusFilename.c_str()));
         sizes.push_back(this->thesaurusMapper->size() / (size * sizeof(T)));
         mappedZone = std::make_pair(mappedZone.second, mappedZone.second + *sizes.rbegin());
-        rc = this->loadValue(index, item);
+        rc = this->loadValue(index, value);
       }
       else
       {
@@ -95,14 +91,14 @@ namespace aq
   }
   
   template <typename T, class M>
-  int ThesaurusReader<T, M>::setValue(size_t, aq::ColumnItem&)
+  int ThesaurusReader<T, M>::setValue(size_t, T * value)
   {
     throw aq::generic_error(aq::generic_error::NOT_IMPLEMENTED, "set value is not allowed in thesaurus reader");
     return 0;
   }
   
   template <typename T, class M>
-  int ThesaurusReader<T, M>::append(ColumnItem& value)
+  int ThesaurusReader<T, M>::append(T * value)
   {
     throw aq::generic_error(aq::generic_error::NOT_IMPLEMENTED, "append value is not allowed in thesaurus reader");
     return 0;

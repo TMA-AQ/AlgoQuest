@@ -28,9 +28,6 @@ namespace aq
     case K_AVG: v = new aq::verb::AvgVerb; break;
     case K_MIN: v = new aq::verb::MinVerb; break;
     case K_MAX: v = new aq::verb::MaxVerb; break;
-    case K_FIRST_VALUE: v = new aq::verb::FirstValueVerb; break;
-    case K_LAG: v = new aq::verb::LagVerb; break;
-    case K_ROW_NUMBER: v = new aq::verb::RowNumberVerb; break;
     
       // arithmetics verbs
     case K_MINUS: v = new aq::verb::MinusVerb; break;

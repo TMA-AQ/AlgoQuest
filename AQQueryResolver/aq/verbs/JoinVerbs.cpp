@@ -37,40 +37,6 @@ bool JoinVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* 
 	{
     addInnerOuter(pJoin, pJoin->left, this->leftTag());
     addInnerOuter(pJoin, pJoin->right, this->rightTag());
-
-  //  std::vector<std::string> tables;
-  //  std::vector<aq::tnode*> tablesNodes;
-  //  
-  //  if (pJoin->left->tag == K_IDENT)
-  //  {
-  //    tables.push_back(pJoin->left->getData().val_str);
-  //  }
-  //  else
-  //  {
-  //    joinlistToNodeArray(pJoin->left, tablesNodes);
-  //    for (auto& n : tablesNodes)
-  //    {
-  //      tables.push_back(n->getData().val_str);
-  //    }
-  //  }
-  //  aq::addInnerOuterNodes( pJoin->next->left, this->leftTag(), tables );
-
-  //  tables.clear();
-  //  tablesNodes.clear();
-  //  if (pJoin->right->tag == K_IDENT)
-  //  {
-  //    tables.push_back(pJoin->left->getData().val_str);
-  //  }
-  //  else
-  //  {
-  //    joinlistToNodeArray(pJoin->right, tablesNodes);
-  //    for (auto& n : tablesNodes)
-  //    {
-  //      tables.push_back(n->getData().val_str);
-  //    }
-  //  }
-		//aq::addInnerOuterNodes( pJoin->next->left, this->rightTag(), tables );
-		
     aq::addConditionsToWhere( pJoin->next->left, pStart );
 	}
   // FIXME
@@ -90,24 +56,10 @@ bool JoinVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* 
 }
 
 //------------------------------------------------------------------------------
-int JoinVerb::leftTag(){ return K_INNER; };
-int JoinVerb::rightTag(){ return K_INNER; };
-
-//------------------------------------------------------------------------------
 void JoinVerb::accept(VerbVisitor* visitor)
 {
   visitor->visit(this);
 }
-
-//------------------------------------------------------------------------------
-int LeftJoinVerb::leftTag(){ return K_OUTER; };
-
-//------------------------------------------------------------------------------
-int RightJoinVerb::rightTag(){ return K_OUTER; };
-
-//------------------------------------------------------------------------------
-int FullJoinVerb::leftTag(){ return K_OUTER; };
-int FullJoinVerb::rightTag(){ return K_OUTER; };
 
 }
 }

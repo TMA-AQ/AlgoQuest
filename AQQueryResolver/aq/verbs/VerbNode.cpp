@@ -77,58 +77,7 @@ void VerbNode::changeQuery()
 //------------------------------------------------------------------------------
 void VerbNode::changeResult( Table::Ptr table )
 {
-	if( this->Brother )
-		this->Brother->changeResult( table );
-//	if( pNode->inf == 1 ) //debug13 ! I cannot check this information because nodes are deleted by the time I check it
-//		return; //but i also need to make sure that I do not build Columns that appear in jeq
-	if( this->Disabled )
-		return;
-
-	//right first because partition by modifies the column pointers in table
-	//and it should be executed before order by collects his list of column pointers
-	if( this->Right )
-		this->Right->changeResult( table );
-	if( this->Left )
-		this->Left->changeResult( table );
-
-	VerbResult::Ptr param1 = this->Left ? this->Left->getResult() : NULL;
-	VerbResult::Ptr param2 = this->Right ? this->Right->getResult() : NULL;
-	VerbResult::Ptr param3 = this->Brother ? this->Brother->getResult() : NULL;
-	this->changeResult( table, param1, param2, param3 );
-
-	//add column results to the table, to be sorted/modified along with the other
-	//columns
-	if( this->Result && this->Result->getType() == VerbResult::COLUMN )
-	{
-		bool found = false;
-		for( size_t idx = 0; idx < table->Columns.size(); ++idx )
-			if( table->Columns[idx].get() == this->Result.get() )
-			{
-				found = true;
-				break;
-			}
-
-		if( !found )
-		{
-			Column::Ptr count;
-			if( table->HasCount )
-			{
-				count = table->Columns[table->Columns.size() - 1];
-				table->Columns.pop_back();
-			}
-			table->Columns.push_back( boost::static_pointer_cast<Column>(this->Result) );
-			if( table->HasCount )
-				table->Columns.push_back( count );
-		}
-	}
-	/*
-	//delete now so that if we have a big tree
-	//we don't delete it all by each node's destructor calling the
-	//child's destructor, there is stack overflow danger
-	this->Left = NULL;
-	this->Right = NULL;
-	this->Brother = NULL;
-	*/
+  assert(false);
 }
 
 //------------------------------------------------------------------------------

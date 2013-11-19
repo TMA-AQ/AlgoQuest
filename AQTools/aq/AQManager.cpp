@@ -34,124 +34,124 @@ namespace fs = boost::filesystem;
 int check_database(const aq::Settings& settings)
 {
   int rc = 0;
-  std::vector<std::string> errors;
-
-  aq::Logger::getInstance().log(AQ_NOTICE, "check base [%s]", settings.rootPath.c_str());
-
-  aq::Database db(settings.rootPath);
-  if (!db.isValid())
-  {
-    aq::Logger::getInstance().log(AQ_ERROR, "invalid database [%s]\n", settings.rootPath.c_str());
-    return EXIT_FAILURE;
-  }
-
-  aq::base_t b = db.getBaseDesc();
-
-  aq::ColumnItem item;
-  std::string value;
-  boost::shared_ptr<aq::ColumnMapper_Intf> m;
-  boost::shared_ptr<aq::ColumnMapper_Intf> tr;
-  for (auto& t : b.table)
-  {
-    aq::Logger::getInstance().log(AQ_NOTICE, "check table [id:%u;name:%s;cols:%u;records:%u]\n", t.id, t.name.c_str(), t.nb_cols, t.nb_record);
-    for (auto& c : t.colonne)
-    {
-      aq::Logger::getInstance().log(AQ_NOTICE, "check table [%u;%s] column [%u;%s] [records:%u]\n", t.id, t.name.c_str(), c.id, c.name.c_str(), t.nb_record);
-      for (size_t p = 0; p <= (t.nb_record / settings.packSize); p++)
-      {
-        std::string theFilename = aq::getThesaurusFileName(settings.dataPath.c_str(), t.id, c.id, p);
-        aq::Logger::getInstance().log(AQ_NOTICE, "check thesaurus [%s]\n", theFilename.c_str());
-        switch (c.type)
-        {
-        case aq::symbole::t_char:
-          tr.reset(new aq::ThesaurusReader<char, aq::FileMapper>(settings.dataPath.c_str(), t.id, c.id, c.size, settings.packSize, p, false));
-          break;
-        case aq::symbole::t_double: 
-          tr.reset(new aq::ThesaurusReader<double, aq::FileMapper>(settings.dataPath.c_str(), t.id, c.id, c.size, settings.packSize, p, false));
-          break;
-        case aq::symbole::t_int: 
-          tr.reset(new aq::ThesaurusReader<uint32_t, aq::FileMapper>(settings.dataPath.c_str(), t.id, c.id, c.size, settings.packSize, p, false));
-          break;
-        case aq::symbole::t_long_long: 
-        case aq::symbole::t_date1: 
-          tr.reset(new aq::ThesaurusReader<uint64_t, aq::FileMapper>(settings.dataPath.c_str(), t.id, c.id, c.size, settings.packSize, p, false));
-          break;
-        default:
-          aq::Logger::getInstance().log(AQ_ERROR, "type not supported [%s]\n", c.type);
-        }
-        size_t i = 0;
-        bool duplicatedValues = false;
-        std::set<std::string> values;
-        while (tr->loadValue(i++, item) != -1)
-        {
-          value = item.toString(tr->getType());
-          if (values.find(value) != values.end())
-          {
-            duplicatedValues = true;
-            aq::Logger::getInstance().log(AQ_ERROR, "duplicated values [%s] in thesaurus [%s]\n", value.c_str(), theFilename.c_str());
-          }
-          values.insert(value);
-        }
-        if (duplicatedValues)
-        {
-          std::stringstream ss;
-          ss << "duplicated values found in thesaurus [" << theFilename << "]";
-          errors.push_back(ss.str());
-        }
-        aq::Logger::getInstance().log(AQ_NOTICE, "%u unique values read in thesaurus [%s]\n", values.size(), theFilename.c_str());
-      }
-      aq::Logger::getInstance().log(AQ_NOTICE, "read full column\n");
-      switch (c.type)
-      {
-      case aq::symbole::t_char: 
-        m.reset(new aq::ColumnMapper<char, aq::FileMapper>(settings.dataPath.c_str(), t.id, c.id, c.size, settings.packSize, false)); 
-        break;
-      case aq::symbole::t_double: 
-        m.reset(new aq::ColumnMapper<double, aq::FileMapper>(settings.dataPath.c_str(), t.id, c.id, c.size, settings.packSize, false)); 
-        break;
-      case aq::symbole::t_int: 
-        m.reset(new aq::ColumnMapper<uint32_t, aq::FileMapper>(settings.dataPath.c_str(), t.id, c.id, c.size, settings.packSize, false)); 
-        break;
-      case aq::symbole::t_long_long: 
-      case aq::symbole::t_date1: 
-        m.reset(new aq::ColumnMapper<uint64_t, aq::FileMapper>(settings.dataPath.c_str(), t.id, c.id, c.size, settings.packSize, false)); 
-        break;
-      default:
-        aq::Logger::getInstance().log(AQ_ERROR, "type not supported [%s]\n", c.type);
-      }
-      for (size_t i = 0; i < t.nb_record; i++)
-      {
-        if (m->loadValue(i, item) != 0)
-        {
-          rc = EXIT_FAILURE;
-          aq::Logger::getInstance().log(AQ_ERROR, "bad index %u on table [%u;%s] column [%u;%s]\n", i, t.id, t.name.c_str(), c.id, c.name.c_str());
-          std::stringstream ss;
-          ss << "bad index " << i << " on table [" << t.id << ";" << t.name << "] column [" << c.id << ";" << c.name << "]";
-          errors.push_back(ss.str());
-        }
-        else if ((value = item.toString(m->getType())) == "")
-        {
-          rc = EXIT_FAILURE;
-          aq::Logger::getInstance().log(AQ_ERROR, "bad value on index %u on table [%u;%s] column [%u;%s]\n", i, t.id, t.name.c_str(), c.id, c.name.c_str());
-          std::stringstream ss;
-          ss << "bad value on index " << i << " on table [" << t.id << ";" << t.name << "] column [" << c.id << ";" << c.name << "]";
-          errors.push_back(ss.str());
-        }
-        else if ((i % ((t.nb_record / 10) + 1)) == 0)
-        {
-          aq::Logger::getInstance().log(AQ_INFO, "%s\n", value.c_str());
-        }
-      }
-    }
-  }
-
-  aq::Logger::getInstance().log(AQ_ERROR, "");
-  aq::Logger::getInstance().log(AQ_ERROR, "ERRORS:\n");
-
-  for (auto& error : errors)
-  {
-    aq::Logger::getInstance().log(AQ_ERROR, "%s\n", error.c_str());
-  }
+//  std::vector<std::string> errors;
+//
+//  aq::Logger::getInstance().log(AQ_NOTICE, "check base [%s]", settings.rootPath.c_str());
+//
+//  aq::Database db(settings.rootPath);
+//  if (!db.isValid())
+//  {
+//    aq::Logger::getInstance().log(AQ_ERROR, "invalid database [%s]\n", settings.rootPath.c_str());
+//    return EXIT_FAILURE;
+//  }
+//
+//  aq::base_t b = db.getBaseDesc();
+//
+//  aq::ColumnItem item;
+//  std::string value;
+//  boost::shared_ptr<aq::ColumnMapper_Intf> m;
+//  boost::shared_ptr<aq::ColumnMapper_Intf> tr;
+//  for (auto& t : b.table)
+//  {
+//    aq::Logger::getInstance().log(AQ_NOTICE, "check table [id:%u;name:%s;cols:%u;records:%u]\n", t.id, t.name.c_str(), t.nb_cols, t.nb_record);
+//    for (auto& c : t.colonne)
+//    {
+//      aq::Logger::getInstance().log(AQ_NOTICE, "check table [%u;%s] column [%u;%s] [records:%u]\n", t.id, t.name.c_str(), c.id, c.name.c_str(), t.nb_record);
+//      for (size_t p = 0; p <= (t.nb_record / settings.packSize); p++)
+//      {
+//        std::string theFilename = aq::getThesaurusFileName(settings.dataPath.c_str(), t.id, c.id, p);
+//        aq::Logger::getInstance().log(AQ_NOTICE, "check thesaurus [%s]\n", theFilename.c_str());
+//        switch (c.type)
+//        {
+//        case aq::symbole::t_char:
+//          tr.reset(new aq::ThesaurusReader<char, aq::FileMapper>(settings.dataPath.c_str(), t.id, c.id, c.size, settings.packSize, p, false));
+//          break;
+//        case aq::symbole::t_double: 
+//          tr.reset(new aq::ThesaurusReader<double, aq::FileMapper>(settings.dataPath.c_str(), t.id, c.id, c.size, settings.packSize, p, false));
+//          break;
+//        case aq::symbole::t_int: 
+//          tr.reset(new aq::ThesaurusReader<uint32_t, aq::FileMapper>(settings.dataPath.c_str(), t.id, c.id, c.size, settings.packSize, p, false));
+//          break;
+//        case aq::symbole::t_long_long: 
+//        case aq::symbole::t_date1: 
+//          tr.reset(new aq::ThesaurusReader<uint64_t, aq::FileMapper>(settings.dataPath.c_str(), t.id, c.id, c.size, settings.packSize, p, false));
+//          break;
+//        default:
+//          aq::Logger::getInstance().log(AQ_ERROR, "type not supported [%s]\n", c.type);
+//        }
+//        size_t i = 0;
+//        bool duplicatedValues = false;
+//        std::set<std::string> values;
+//        while (tr->loadValue(i++, item) != -1)
+//        {
+//          value = item.toString(tr->getType());
+//          if (values.find(value) != values.end())
+//          {
+//            duplicatedValues = true;
+//            aq::Logger::getInstance().log(AQ_ERROR, "duplicated values [%s] in thesaurus [%s]\n", value.c_str(), theFilename.c_str());
+//          }
+//          values.insert(value);
+//        }
+//        if (duplicatedValues)
+//        {
+//          std::stringstream ss;
+//          ss << "duplicated values found in thesaurus [" << theFilename << "]";
+//          errors.push_back(ss.str());
+//        }
+//        aq::Logger::getInstance().log(AQ_NOTICE, "%u unique values read in thesaurus [%s]\n", values.size(), theFilename.c_str());
+//      }
+//      aq::Logger::getInstance().log(AQ_NOTICE, "read full column\n");
+//      switch (c.type)
+//      {
+//      case aq::symbole::t_char: 
+//        m.reset(new aq::ColumnMapper<char, aq::FileMapper>(settings.dataPath.c_str(), t.id, c.id, c.size, settings.packSize, false)); 
+//        break;
+//      case aq::symbole::t_double: 
+//        m.reset(new aq::ColumnMapper<double, aq::FileMapper>(settings.dataPath.c_str(), t.id, c.id, c.size, settings.packSize, false)); 
+//        break;
+//      case aq::symbole::t_int: 
+//        m.reset(new aq::ColumnMapper<uint32_t, aq::FileMapper>(settings.dataPath.c_str(), t.id, c.id, c.size, settings.packSize, false)); 
+//        break;
+//      case aq::symbole::t_long_long: 
+//      case aq::symbole::t_date1: 
+//        m.reset(new aq::ColumnMapper<uint64_t, aq::FileMapper>(settings.dataPath.c_str(), t.id, c.id, c.size, settings.packSize, false)); 
+//        break;
+//      default:
+//        aq::Logger::getInstance().log(AQ_ERROR, "type not supported [%s]\n", c.type);
+//      }
+//      for (size_t i = 0; i < t.nb_record; i++)
+//      {
+//        if (m->loadValue(i, item) != 0)
+//        {
+//          rc = EXIT_FAILURE;
+//          aq::Logger::getInstance().log(AQ_ERROR, "bad index %u on table [%u;%s] column [%u;%s]\n", i, t.id, t.name.c_str(), c.id, c.name.c_str());
+//          std::stringstream ss;
+//          ss << "bad index " << i << " on table [" << t.id << ";" << t.name << "] column [" << c.id << ";" << c.name << "]";
+//          errors.push_back(ss.str());
+//        }
+//        else if ((value = item.toString(m->getType())) == "")
+//        {
+//          rc = EXIT_FAILURE;
+//          aq::Logger::getInstance().log(AQ_ERROR, "bad value on index %u on table [%u;%s] column [%u;%s]\n", i, t.id, t.name.c_str(), c.id, c.name.c_str());
+//          std::stringstream ss;
+//          ss << "bad value on index " << i << " on table [" << t.id << ";" << t.name << "] column [" << c.id << ";" << c.name << "]";
+//          errors.push_back(ss.str());
+//        }
+//        else if ((i % ((t.nb_record / 10) + 1)) == 0)
+//        {
+//          aq::Logger::getInstance().log(AQ_INFO, "%s\n", value.c_str());
+//        }
+//      }
+//    }
+//  }
+//
+//  aq::Logger::getInstance().log(AQ_ERROR, "");
+//  aq::Logger::getInstance().log(AQ_ERROR, "ERRORS:\n");
+//
+//  for (auto& error : errors)
+//  {
+//    aq::Logger::getInstance().log(AQ_ERROR, "%s\n", error.c_str());
+//  }
 
   return rc;
 }
@@ -256,7 +256,7 @@ int load_database(const aq::Settings& settings, aq::base_t& baseDesc, const std:
         continue;
       }
       aq::Logger::getInstance().log(AQ_INFO, "loading table %d\n", t + 1);
-      assert(baseDesc.table[t].id = (t + 1));
+      assert(baseDesc.table[t].id = (int)(t + 1));
       loader.load(t + 1);
     }
   }

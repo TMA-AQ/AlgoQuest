@@ -1151,72 +1151,31 @@ void getColumnTypes( aq::tnode* pNode, std::vector<Column::Ptr>& columnTypes, Ba
 }
 
 //------------------------------------------------------------------------------
-aq::ColumnItem GetItem( const aq::tnode& n )
-{
-  aq::ColumnItem item;
-  switch (n.getDataType())
-  {
-  case aq::tnode::tnodeDataType::NODE_DATA_INT:
-  case aq::tnode::tnodeDataType::NODE_DATA_NUMBER:
-    item.numval = static_cast<double>(n.getData().val_int);
-    break;
-  case aq::tnode::tnodeDataType::NODE_DATA_STRING:
-    item.strval = n.getData().val_str;
-    break;
-  }
-  return item;
-}
-
-//------------------------------------------------------------------------------
-aq::tnode* Getnode( ColumnItem::Ptr item, ColumnType type )
-{
-	aq::tnode	*pNode = NULL;
-	if( !item )
-		return pNode;
-	switch( type )
-	{
-	case COL_TYPE_INT:
-	case COL_TYPE_DATE:
-		pNode = new aq::tnode( K_INTEGER );
-		pNode->set_int_data( (llong) item->numval );
-		break;
-	case COL_TYPE_DOUBLE:
-		pNode = new aq::tnode( K_REAL );
-		pNode->set_double_data( item->numval );
-		break;
-	default:
-		pNode = new aq::tnode( K_STRING );
-		pNode->set_string_data( item->strval.c_str() );
-	}
-	return pNode;
-}
-
-//------------------------------------------------------------------------------
 aq::tnode* GetTree( Table& table )
 {
 	aq::tnode	*pNode = NULL;
 	aq::tnode	*pStart = NULL;
 
-	if( table.Columns.size() < 1 )
-		return NULL;
-	Column& column = *table.Columns[0];
-	if( column.Items.size() < 1 )
-		return NULL;
-	if( column.Items.size() < 2 )
-		return Getnode(column.Items[0], column.Type);
-
-	//we have a list
-	pNode = new aq::tnode( K_COMMA );
-	pStart = pNode;
-	size_t size = column.Items.size();
-	for( size_t idx = 0; idx < size - 2; ++idx )
-	{
-		pNode->right = new aq::tnode( K_COMMA );
-		pNode->left = Getnode(column.Items[idx], column.Type);
-		pNode = pNode->right;
-	}
-	pNode->left = Getnode(column.Items[size - 2], column.Type);
-	pNode->right = Getnode(column.Items[size - 1], column.Type);
+//	if( table.Columns.size() < 1 )
+//		return NULL;
+//	Column& column = *table.Columns[0];
+//	if( column.Items.size() < 1 )
+//		return NULL;
+//	if( column.Items.size() < 2 )
+//		return Getnode(column.Items[0], column.Type);
+//
+//	//we have a list
+//	pNode = new aq::tnode( K_COMMA );
+//	pStart = pNode;
+//	size_t size = column.Items.size();
+//	for( size_t idx = 0; idx < size - 2; ++idx )
+//	{
+//		pNode->right = new aq::tnode( K_COMMA );
+//		pNode->left = Getnode(column.Items[idx], column.Type);
+//		pNode = pNode->right;
+//	}
+//	pNode->left = Getnode(column.Items[size - 2], column.Type);
+//	pNode->right = Getnode(column.Items[size - 1], column.Type);
 	
 	return pStart;
 }

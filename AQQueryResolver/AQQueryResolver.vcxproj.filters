@@ -285,9 +285,6 @@
     <ClCompile Include="aq\AQMatrix.cpp">
       <Filter>Source Files\aq</Filter>
     </ClCompile>
-    <ClCompile Include="aq\ColumnItem.cpp">
-      <Filter>Source Files\aq</Filter>
-    </ClCompile>
     <ClCompile Include="aq\DumpVisitor.cpp">
       <Filter>Source Files\aq</Filter>
     </ClCompile>
@@ -353,9 +350,6 @@
     </ClCompile>
     <ClCompile Include="aq\RowTemporaryWritter.cpp">
       <Filter>Source Files\aq\row_solver</Filter>
-    </ClCompile>
-    <ClCompile Include="aq\TemporaryColumnMapper.cpp">
-      <Filter>Source Files\aq</Filter>
     </ClCompile>
     <ClCompile Include="aq\Row.cpp">
       <Filter>Source Files\aq\row_solver</Filter>

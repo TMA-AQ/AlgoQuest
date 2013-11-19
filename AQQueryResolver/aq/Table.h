@@ -48,9 +48,6 @@ public:
   ~Table();
   Table& operator=(const Table& source);
 
-  void load(const char * path, uint64_t packetSize);
-  void loadColumn(Column::Ptr col, const std::vector<size_t>& uniqueIndex, const std::vector<size_t>& mapToUniqueIndex, const Column::Ptr columnType, const Settings& pSettings, const Base& BaseDesc);
-  
 	int getColumnIdx(const std::string& name)  const;
   Column::Ptr getColumn(const std::string& columnName) const;
 	std::vector<Column::Ptr> getColumnsByName(std::vector<Column::Ptr>& columns) const;
@@ -69,8 +66,6 @@ public:
 	void dumpXml(std::ostream& os);
 
 private:
-	void computeUniqueRow(Table& aqMatrix, std::vector<std::vector<size_t> >& mapToUniqueIndex, std::vector<std::vector<size_t> >& uniqueIndex) const;
-
 	std::string		Name;
 	std::string		OriginalName;
   std::string   temporaryName;

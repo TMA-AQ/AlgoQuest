@@ -356,7 +356,7 @@ void delete_subtree( tnode*& pNode ) {
 		delete nodes[idx];
 	}
 
-  pNode = NULL;
+  // pNode = NULL;
 }
 
 //------------------------------------------------------------------------------

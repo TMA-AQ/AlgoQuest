@@ -25,13 +25,16 @@ namespace aq
     void addColumn(aq::Column::Ptr column);
 
   private:
+
+    template <typename T>
     struct col_handler_t
     {
-      aq::Column::Ptr column;
-      aq::ColumnItem  item;
-      boost::shared_ptr<aq::ColumnMapper_Intf> mapper;
+      aq::Column::Ptr                              column;
+      aq::ColumnItem<T>                            item;
+      boost::shared_ptr<aq::ColumnMapper_Intf<T> > mapper;
     };
-    typedef std::map<std::string, col_handler_t> columns_values_t;
+    typedef boost::variant<col_handler_t<int32_t>, col_handler_t<int64_t>, col_handler_t<double>, col_handler_t<char*> > col_handler_type_t;
+    typedef std::map<std::string, col_handler_type_t> columns_values_t;
 
     aq::tnode         * statement;
     aq::AQEngine_Intf * aqEngine;

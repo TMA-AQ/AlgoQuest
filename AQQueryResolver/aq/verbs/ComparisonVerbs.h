@@ -36,9 +36,9 @@ public:
 private:
 	Base * m_baseDesc;
 	Settings * m_settings;
-	virtual bool compare(	ColumnItem* item1, 
-							ColumnItem* item2, 
-							aq::ColumnType type );
+	//virtual bool compare(	ColumnItem* item1, 
+	//						ColumnItem* item2, 
+	//						aq::ColumnType type );
   std::string value;
 };
 
@@ -48,9 +48,9 @@ class EqVerb: public ComparisonVerb
 public:
 	virtual int getVerbType() const { return K_EQ; };
 private:
-	bool compare(	ColumnItem* item1, 
-					ColumnItem* item2, 
-					aq::ColumnType type );
+	//bool compare(	ColumnItem* item1, 
+	//				ColumnItem* item2, 
+	//				aq::ColumnType type );
   virtual void accept(VerbVisitor* visitor);
 };
 
@@ -75,9 +75,9 @@ class LtVerb: public ComparisonVerb
 public:
 	virtual int getVerbType() const { return K_LT; };
 private:
-	bool compare(	ColumnItem* item1, 
-					ColumnItem* item2, 
-					aq::ColumnType type );
+	//bool compare(	ColumnItem* item1, 
+	//				ColumnItem* item2, 
+	//				aq::ColumnType type );
 };
 
 //------------------------------------------------------------------------------
@@ -86,9 +86,9 @@ class LeqVerb: public ComparisonVerb
 public:
 	virtual int getVerbType() const { return K_LEQ; };
 private:
-	bool compare(	ColumnItem* item1, 
-					ColumnItem* item2, 
-					aq::ColumnType type );
+	//bool compare(	ColumnItem* item1, 
+	//				ColumnItem* item2, 
+	//				aq::ColumnType type );
 };
 
 //------------------------------------------------------------------------------
@@ -97,9 +97,9 @@ class GtVerb: public ComparisonVerb
 public:
 	virtual int getVerbType() const { return K_GT; };
 private:
-	bool compare(	ColumnItem* item1, 
-					ColumnItem* item2, 
-					aq::ColumnType type );
+	//bool compare(	ColumnItem* item1, 
+	//				ColumnItem* item2, 
+	//				aq::ColumnType type );
 };
 
 //------------------------------------------------------------------------------
@@ -108,9 +108,9 @@ class GeqVerb: public ComparisonVerb
 public:
 	virtual int getVerbType() const { return K_GEQ; };
 private:
-	bool compare(	ColumnItem* item1, 
-					ColumnItem* item2, 
-					aq::ColumnType type );
+	//bool compare(	ColumnItem* item1, 
+	//				ColumnItem* item2, 
+	//				aq::ColumnType type );
 };
 
 //------------------------------------------------------------------------------
@@ -175,9 +175,9 @@ class NeqVerb: public ComparisonVerb
 public:
 	virtual int getVerbType() const { return K_NEQ; };
 private:
-	bool compare(	ColumnItem* item1, 
-					ColumnItem* item2, 
-					aq::ColumnType type );
+	//bool compare(	ColumnItem* item1, 
+	//				ColumnItem* item2, 
+	//				aq::ColumnType type );
 };
 
 //------------------------------------------------------------------------------

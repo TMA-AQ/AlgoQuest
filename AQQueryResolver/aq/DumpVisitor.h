@@ -15,11 +15,8 @@ public:
 	virtual void visit(aq::verb::AggregateVerb*);
 	virtual void visit(aq::verb::AvgVerb*);
 	virtual void visit(aq::verb::CountVerb*);
-	virtual void visit(aq::verb::FirstValueVerb*);
-	virtual void visit(aq::verb::LagVerb*);
 	virtual void visit(aq::verb::MaxVerb*);
 	virtual void visit(aq::verb::MinVerb*);
-	virtual void visit(aq::verb::RowNumberVerb*);
 	virtual void visit(aq::verb::SumVerb*);
 	
 	// Arithmetics Verbs

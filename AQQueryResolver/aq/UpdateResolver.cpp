@@ -49,16 +49,20 @@ void UpdateResolver::solve()
       throw aq::generic_error(aq::generic_error::INVALID_QUERY, "right side of operator = in SET clause should be a value");
     }
     std::string column = n->left->getData().val_str;
-    col_handler_t ch;
-    ch.column = this->table->getColumn(column);
-    ch.item = aq::GetItem(*n->right);
-    bool cache = false;
-    ch.mapper = aq::build_column_mapper<aq::FileMapper>(ch.column->Type, settings.dataPath.c_str(), this->table->ID, ch.column->ID, ch.column->Size, settings.packSize, cache, aq::FileMapper::mode_t::WRITE);
+    
+    // col_handler_t ch;
+    // ch.column = this->table->getColumn(column);
+    // ch.item = aq::GetItem(*n->right);
+    // TODO
+    // bool cache = false;
+    // ch.mapper = aq::build_column_mapper<aq::FileMapper>(ch.column->Type, settings.dataPath.c_str(), this->table->ID, ch.column->ID, ch.column->Size, settings.packSize, cache, aq::FileMapper::mode_t::WRITE);
+    
     if (columns.find(column) != columns.end())
     {
       throw aq::generic_error(aq::generic_error::INVALID_QUERY, "column [%s] appears several times in SET clause", column.c_str());
     }
-    columns.insert(std::make_pair(column, ch));
+
+    // columns.insert(std::make_pair(column, ch));
   }
 
   //
@@ -99,11 +103,11 @@ int UpdateResolver::process(std::vector<Row>& rows)
         aq::Logger::getInstance().log(AQ_DEBUG, "update %s[%u]", this->table->getName().c_str(), index);
         for (auto& cv : columns)
         {
-          auto& col = cv.second.column;
-          auto& item = cv.second.item;
-          auto& mapper = cv.second.mapper;
-          aq::Logger::getInstance().log(AQ_DEBUG, "%s = %s", col->getName().c_str(), item.toString(col->Type).c_str());
-          mapper->setValue(index-1, item);
+          //auto& col = cv.second.column;
+          //auto& item = cv.second.item;
+          //auto& mapper = cv.second.mapper;
+          //aq::Logger::getInstance().log(AQ_DEBUG, "%s = %s", col->getName().c_str(), item.toString(col->Type).c_str());
+          //mapper->setValue(index-1, item);
         }
       }
     }

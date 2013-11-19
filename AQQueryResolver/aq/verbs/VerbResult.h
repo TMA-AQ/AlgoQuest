@@ -29,25 +29,66 @@ public:
 };
 
 //------------------------------------------------------------------------------
+template <typename T>
 class Scalar: public VerbResult
 {
 public:
-  typedef boost::intrusive_ptr<Scalar> Ptr;
+  typedef boost::intrusive_ptr<Scalar<T> > Ptr;
+  
+	Scalar(aq::ColumnType type)
+    : Type(type), aggFunc(aq::aggregate_function_t::NONE) 
+  {
+  }
+	
+  Scalar(aq::ColumnType type, unsigned int size)
+    : Type(type), Size(size), aggFunc(aq::aggregate_function_t::NONE) 
+  {
+  }
+	
+  Scalar(aq::ColumnType type, unsigned int size, const aq::ColumnItem<T>& item)
+    : Type(type), Item(item), Size(size), aggFunc(aq::aggregate_function_t::NONE) 
+  {
+  }
+	
+	virtual int getType() const 
+  { 
+    return VerbResult::SCALAR; 
+  }
 
-	virtual int getType() const { return VerbResult::SCALAR; }
 	const aq::data_holder_t getValue() const;
 
-	std::string				Name;
-
-	Scalar( aq::ColumnType type ): Type(type), aggFunc(aq::aggregate_function_t::NONE) {}
-	Scalar( aq::ColumnType type, unsigned int size ): Type(type), Size(size), aggFunc(aq::aggregate_function_t::NONE) {}
-	Scalar( aq::ColumnType type, unsigned int size, const ColumnItem& item ): Item(item), Type(type), Size(size), aggFunc(aq::aggregate_function_t::NONE) {}
-	ColumnItem	Item;
-	aq::ColumnType	Type;
-  unsigned int Size;
+	std::string				       Name;
+  aq::ColumnType           Type;
+  aq::ColumnItem<T>        Item;
+  unsigned int             Size;
   aq::aggregate_function_t aggFunc;
 
 };
+
+template <typename T>
+const aq::data_holder_t Scalar<T>::getValue() const
+{
+  aq::data_holder_t data;
+  data.val_int = Item.getValue();
+  return data;
+}
+
+template <> inline
+const aq::data_holder_t Scalar<double>::getValue() const
+{
+  aq::data_holder_t data;
+  data.val_number = Item.getValue();
+  return data;
+}
+
+template <> inline
+const aq::data_holder_t Scalar<char*>::getValue() const
+{
+  aq::data_holder_t data;
+  data.val_str = static_cast<char*>(::malloc((strlen(Item.getValue()) + 1) * sizeof(char)));
+  strcpy(data.val_str, Item.getValue());
+  return data;
+}
 
 //------------------------------------------------------------------------------
 class SubTable: public VerbResult

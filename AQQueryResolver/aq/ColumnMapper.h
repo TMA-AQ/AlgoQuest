@@ -16,17 +16,16 @@ namespace aq
   
 // ---------------------------------------------------------------------------------
 template <typename T, class M>
-class ColumnMapper : public ColumnMapper_Intf
+class ColumnMapper : public ColumnMapper_Intf<T>
 {
 public:
 	ColumnMapper(const char * path, size_t tableId, size_t columnId, size_t _size, size_t _packetSize, bool _cache = true, typename M::mode_t mode = M::mode_t::READ);
 	~ColumnMapper();
-	int loadValue(size_t index, ColumnItem& value);
-  int setValue(size_t index, ColumnItem& value);
-  int append(ColumnItem& value);
+	int loadValue(size_t index, T * value);
+  int setValue(size_t index, T * value);
+  int append(T * value);
 	const std::vector<size_t>& getSimilarIndex(size_t index) const;
 	const aq::ColumnType getType() const { return type_conversion<T>::type; }
-  static void fill_item(ColumnItem& item, T * value, size_t size);
 private:
   size_t setPrmThe(size_t index);
   uint32_t updateThesaurus(T * value, size_t size);
@@ -75,7 +74,7 @@ ColumnMapper<T, M>::~ColumnMapper()
 }
 
 template <typename T, class M>
-int ColumnMapper<T, M>::loadValue(size_t index, ColumnItem& value)
+int ColumnMapper<T, M>::loadValue(size_t index, T * value)
 {
   int rc = 0;
   size_t i = this->setPrmThe(index);
@@ -84,14 +83,14 @@ int ColumnMapper<T, M>::loadValue(size_t index, ColumnItem& value)
   {
     if ((rc = this->thesaurusMapper->read(val, offset * size * sizeof(T), size * sizeof(T))) == 0)
     {
-      aq::fill_item<T>(value, val, this->size);
+      memcpy(value, this->val, this->size * sizeof(T));
     }
   }
   return rc;
 }
 
 template <typename T, class M>
-int ColumnMapper<T, M>::setValue(size_t index, ColumnItem& value)
+int ColumnMapper<T, M>::setValue(size_t index, T * value)
 {
   int rc = 0;
   size_t i = this->setPrmThe(index);
@@ -104,9 +103,7 @@ int ColumnMapper<T, M>::setValue(size_t index, ColumnItem& value)
     throw aq::generic_error(aq::generic_error::INVALID_BASE_FILE, "cannot find prm index [%u] [error:%d]", index, rc);
   }
   
-  T * valTmp = new T[size];
-  aq::dump_item<T>(valTmp, this->size, value);
-  new_offset = this->updateThesaurus(valTmp, size);
+  new_offset = this->updateThesaurus(value, size);
 
   if ((rc = this->prmMapper->write(&new_offset, i * sizeof(uint32_t), sizeof(uint32_t))) != 0)
   {
@@ -146,11 +143,9 @@ int ColumnMapper<T, M>::setValue(size_t index, ColumnItem& value)
 }
 
 template <typename T, class M>
-int ColumnMapper<T, M>::append(ColumnItem& value)
+int ColumnMapper<T, M>::append(T * value)
 {
-  T * valTmp = new T[size];
-  aq::dump_item<T>(valTmp, this->size, value);
-  uint32_t index = this->updateThesaurus(valTmp, this->size);
+  uint32_t index = this->updateThesaurus(value, this->size);
   return this->prmMapper->write(&index, this->prmMapper->size(), sizeof(uint32_t));
 }
 
@@ -265,36 +260,36 @@ void ColumnMapper<T, M>::updatePrm(size_t offset, int gap)
   }
 }
 
-// factory
-template <class M>
-boost::shared_ptr<aq::ColumnMapper_Intf> build_column_mapper(const aq::ColumnType       type, 
-                                                             const char               * path, 
-                                                             const size_t               tableId, 
-                                                             const size_t               columnId, 
-                                                             const size_t               size, 
-                                                             const size_t               packetSize,
-                                                             const bool                 cache = false,
-                                                             const typename M::mode_t   mode = M::mode_t::READ)
-{      
-  boost::shared_ptr<aq::ColumnMapper_Intf> cm;
-  switch(type)
-  {
-  case aq::ColumnType::COL_TYPE_BIG_INT:
-  case aq::ColumnType::COL_TYPE_DATE:
-    cm.reset(new aq::ColumnMapper<int64_t, M>(path, tableId, columnId, size, packetSize, cache, mode));
-    break;
-  case aq::ColumnType::COL_TYPE_INT:
-    cm.reset(new aq::ColumnMapper<int32_t, M>(path, tableId, columnId, size, packetSize, cache, mode));
-    break;
-  case aq::ColumnType::COL_TYPE_DOUBLE:
-    cm.reset(new aq::ColumnMapper<double, M>(path, tableId, columnId, size, packetSize, cache, mode));
-    break;
-  case aq::ColumnType::COL_TYPE_VARCHAR:
-    cm.reset(new aq::ColumnMapper<char, M>(path, tableId, columnId, size, packetSize, cache, mode));
-    break;
-  }
-  return cm;
-}
+//// factory
+//template <class M>
+//boost::shared_ptr<aq::ColumnMapper_Intf> build_column_mapper(const aq::ColumnType       type, 
+//                                                             const char               * path, 
+//                                                             const size_t               tableId, 
+//                                                             const size_t               columnId, 
+//                                                             const size_t               size, 
+//                                                             const size_t               packetSize,
+//                                                             const bool                 cache = false,
+//                                                             const typename M::mode_t   mode = M::mode_t::READ)
+//{      
+//  boost::shared_ptr<aq::ColumnMapper_Intf> cm;
+//  switch(type)
+//  {
+//  case aq::ColumnType::COL_TYPE_BIG_INT:
+//  case aq::ColumnType::COL_TYPE_DATE:
+//    cm.reset(new aq::ColumnMapper<int64_t, M>(path, tableId, columnId, size, packetSize, cache, mode));
+//    break;
+//  case aq::ColumnType::COL_TYPE_INT:
+//    cm.reset(new aq::ColumnMapper<int32_t, M>(path, tableId, columnId, size, packetSize, cache, mode));
+//    break;
+//  case aq::ColumnType::COL_TYPE_DOUBLE:
+//    cm.reset(new aq::ColumnMapper<double, M>(path, tableId, columnId, size, packetSize, cache, mode));
+//    break;
+//  case aq::ColumnType::COL_TYPE_VARCHAR:
+//    cm.reset(new aq::ColumnMapper<char, M>(path, tableId, columnId, size, packetSize, cache, mode));
+//    break;
+//  }
+//  return cm;
+//}
 
 }
 

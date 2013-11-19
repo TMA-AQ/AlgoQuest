@@ -42,11 +42,8 @@ public:
 	virtual void visit(AggregateVerb*) = 0;
 	virtual void visit(AvgVerb*) = 0;
 	virtual void visit(CountVerb*) = 0;
-	virtual void visit(FirstValueVerb*) = 0;
-	virtual void visit(LagVerb*) = 0;
 	virtual void visit(MaxVerb*) = 0;
 	virtual void visit(MinVerb*) = 0;
-	virtual void visit(RowNumberVerb*) = 0;
 	virtual void visit(SumVerb*) = 0;
 	
 	// Arithmetics Verbs

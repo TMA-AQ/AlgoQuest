@@ -33,53 +33,6 @@ namespace
 		const std::vector<size_t>& m_lessThanColumn;
 	};
 
-	struct row_cmp_t
-	{
-	public:
-		row_cmp_t(std::vector<ColumnMapper_Intf::Ptr>& _columnMapper)
-			: columnMapper(_columnMapper),
-				row1(_columnMapper.size()),
-				row2(_columnMapper.size())
-		{
-		}
-		bool operator()(size_t idx1, size_t idx2)
-		{
-			// fill row to compare
-			size_t pos = 0;
-			ColumnItem item;
-			std::for_each(columnMapper.begin(), columnMapper.end(), [&] (ColumnMapper_Intf::Ptr& c) {
-				c->loadValue(idx1, *row1[pos]);
-				c->loadValue(idx2, *row2[pos]);
-				++pos;
-			});
-			// and compare
-			for (pos = 0; pos < row1.size(); ++pos)
-			{
-				if (ColumnItem::lessThan(*row1[pos], *row2[pos])) return true;
-				else if (ColumnItem::lessThan(*row2[pos], *row1[pos])) return false;
-			}
-			return false;
-		}
-	private:
-		std::vector<ColumnMapper_Intf::Ptr>& columnMapper;
-		std::vector<ColumnItem::Ptr> row1;
-		std::vector<ColumnItem::Ptr> row2;
-	};
-
-	struct index_holder_t
-	{
-		size_t index;
-		row_cmp_t& cmp;
-	};
-
-	struct index_holder_cmp_t
-	{
-		bool operator()(const index_holder_t& ih1, const index_holder_t& ih2)
-		{
-			return (ih1.cmp)(ih1.index, ih2.index);
-		}
-	};
-
 }
 
 uint64_t AQMatrix::uid_generator = 0;

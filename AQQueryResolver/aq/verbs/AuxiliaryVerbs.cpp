@@ -30,53 +30,19 @@ bool ColumnVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
   this->TableName = table->getName();
 
 	Column auxcol;
-	//auxcol.setName( string(pNode->left->data.val_str) + "." + string(pNode->right->data.val_str) );
 	auxcol.setName( pNode->right->getData().val_str );
 	this->ColumnOnlyName = auxcol.getName();
-	//debug13 - select will have changed the column names in the result table
-	//to fully qualified names by the time Order::changeResult is called and
-	//the changeResults of its columns are called. So until, identify columns by their
-	//unqualified name because that's how AQ_Engine returns them.
-	//but afterwards, identify them by their full name.
-	//Also, check if it isn't possible to always use fully qualified names.
-	//if( this->Context == K_ORDER || this->Context == K_GROUP )
-	//{
-		auxcol.setName( this->TableName + "." + this->ColumnOnlyName );
-		this->ColumnName = auxcol.getName();
-	//}
-	//update: it IS possible
+  auxcol.setName( this->TableName + "." + this->ColumnOnlyName );
+  this->ColumnName = auxcol.getName();
 
   boost::to_upper(this->TableName);
   boost::to_upper(this->ColumnOnlyName);
   boost::to_upper(this->ColumnName);
 
 	if( this->Context != K_WHERE )
-		return false; //must perform the query before we know the values
+		return false;
 
-	return false; //debug13 temporary tryout because of a hunch: there is no
-
-	//case in which obtaining a column in the WHERE clause is necessary
-	//the only exceptions (I can think of now) would be:
-	// - aggregate functions (but they are not allowed in WHERE)
-	// - columns with only 1 value (they should be read and turned into scalars)
-	//it is also damaging to obtain a column in the WHERE clause because
-	//it will need to be read from the table if the above operation cannot be
-	//solved now and it will not because Result will already be set.
-	//All this results in a simple rule: don't load columns in changeQuery
-
-	//TODO: only get a part at a time for a column
-
-	/* Loop on Thesaurus Parts (biggest nLoopCnt is 999, three digit !) */
-
-	//int pErr;
-	//Column::Ptr column = new Column();
-	//column->setName( auxcol.getName() );
-	//for ( int nLoopCnt = 0; nLoopCnt < 1000; nLoopCnt++ )
-	//	get_thesaurus_for_column_reference( *column, pNode, nLoopCnt, this->m_baseDesc, 
-	//		this->m_settings->szThesaurusPath, &pErr );
-	//this->Result = column;
-	//return false;
-
+	return false;
 }
 
 //------------------------------------------------------------------------------
@@ -84,26 +50,7 @@ void ColumnVerb::changeResult(	Table::Ptr table,
 								VerbResult::Ptr resLeft,
 								VerbResult::Ptr resRight, VerbResult::Ptr resNext )
 {
-	if( this->Result )
-		return;
-	for( size_t idx = 0; idx < table->Columns.size(); ++idx )
-  {
-    std::string name = table->Columns[idx]->getTableName() + "." + table->Columns[idx]->getName();
-		if( name == this->ColumnName )
-		{
-			Column::Ptr column = table->Columns[idx];
-			if( table->HasCount )
-				column->setCount( table->Columns[table->Columns.size()-1] );
-			this->Result = column;
-			switch( this->Context )
-			{
-			case K_GROUP: column->GroupBy = true; break;
-			case K_ORDER: column->OrderBy = true; break;
-			}
-			return;
-		}
-  }
-	// assert( (table->Columns.size() == 0) || (table->Columns.size() == 1) && table->HasCount ); // FIXME ??????
+  assert(false);
 }
 
 //------------------------------------------------------------------------------
@@ -140,7 +87,6 @@ void ColumnVerb::addResult(aq::Row& row)
   if (this->computed_index == -1)
   {
     row.computedRow.push_back(row_item);
-    (*row.computedRow.rbegin()).item.reset(new ColumnItem);
     assert(row.computedRow.size() <= std::numeric_limits<size_t>::max());
     this->computed_index = static_cast<int>(row.computedRow.size()) - 1;
   }
@@ -148,14 +94,13 @@ void ColumnVerb::addResult(aq::Row& row)
   if (static_cast<size_t>(this->computed_index) >= row.computedRow.size())
   {
     row.computedRow.push_back(row_item);
-    (*row.computedRow.rbegin()).item.reset(new ColumnItem);
     assert(static_cast<size_t>(this->computed_index) == (row.computedRow.size() - 1));
   }
 
   // this->Result.reset(new Scalar(row_item.type, row_item.size, *row_item.item.get()));
   aq::row_item_t& row_computed_item = row.computedRow[this->computed_index];
   row_computed_item.null = row_item.null; // row.initialRow[this->index].null;
-  *row_computed_item.item = *row_item.item; // perform copy
+  row_computed_item.item = row_item.item; // perform copy
 }
 
 //------------------------------------------------------------------------------
@@ -314,7 +259,7 @@ void InVerb::accept(VerbVisitor* visitor)
 bool IntValueVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
 	assert( pNode->getDataType() == aq::tnode::tnodeDataType::NODE_DATA_INT );
-	this->Result = new Scalar(COL_TYPE_INT, 4, ColumnItem((double)pNode->getData().val_int));
+	this->Result = new Scalar<int32_t>(COL_TYPE_INT, 4, aq::ColumnItem<int32_t>((int32_t)pNode->getData().val_int));
 	return false;
 }
 
@@ -328,7 +273,7 @@ void IntValueVerb::accept(VerbVisitor* visitor)
 bool DoubleValueVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
 	assert( pNode->getDataType() == aq::tnode::tnodeDataType::NODE_DATA_NUMBER );
-	this->Result = new Scalar(COL_TYPE_DOUBLE, 8, ColumnItem(pNode->getData().val_number));
+	this->Result = new Scalar<double>(COL_TYPE_DOUBLE, 8, aq::ColumnItem<double>(pNode->getData().val_number));
 	return false;
 }
 
@@ -342,7 +287,7 @@ void DoubleValueVerb::accept(VerbVisitor* visitor)
 bool StringValueVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
 	assert( pNode->getDataType() == aq::tnode::tnodeDataType::NODE_DATA_STRING );
-	this->Result = new Scalar(COL_TYPE_VARCHAR, 128, ColumnItem(pNode->getData().val_str)); // FIXME
+	this->Result = new Scalar<char*>(COL_TYPE_VARCHAR, 128, aq::ColumnItem<char*>(pNode->getData().val_str));
 	return false;
 }
 

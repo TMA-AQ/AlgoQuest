@@ -28,6 +28,7 @@ public:
 
 protected:
   virtual int process(Row& row);
+  void write_value(const aq::row_item_t& row_item) const;
   
   std::vector<size_t> widths;
   aq::verb::VerbNode::Ptr spTree;

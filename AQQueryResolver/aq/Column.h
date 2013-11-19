@@ -1,9 +1,7 @@
 #ifndef __AQ_COLUMN_H__
 #define __AQ_COLUMN_H__
 
-#include "verbs/VerbResult.h"
 #include "Settings.h"
-#include "TemporaryColumnMapper.h"
 
 #include <aq/Object.h>
 #include <aq/DBTypes.h>
@@ -17,31 +15,11 @@ namespace aq
 {
 
 //------------------------------------------------------------------------------
-class Column: public aq::verb::VerbResult
+class Column : public Object<Column>
 {
 public:
   
   typedef boost::intrusive_ptr<Column> Ptr;
-
-	struct inner_column_cmp_t
-	{
-	public:
-		inner_column_cmp_t(Column& lessThanColumn);
-		bool operator()(size_t idx1, size_t idx2);
-	private:
-		Column& m_lessThanColumn;
-	};
-
-	struct inner_column_cmp_2_t
-	{
-	public:
-		inner_column_cmp_2_t(Column& lessThanColumn);
-		bool operator()(ColumnItem::Ptr item1, ColumnItem::Ptr item2);
-	private:
-		Column& m_lessThanColumn;
-	};
-
-	virtual int getType() const { return VerbResult::COLUMN; }
 
 	Column();
 	Column(aq::ColumnType type);
@@ -59,15 +37,9 @@ public:
 	void setTableName(const std::string& name);
 	std::string& getTableName();
 
-  void loadFromTmp(aq::ColumnType eColumnType, aq::TemporaryColumnMapper::Ptr colMapper);
-	void increase(size_t newSize);
-	void setCount(Column::Ptr count);
-	Column::Ptr getCount();
-  
 	void dumpRaw(std::ostream& os);
 	void dumpXml(std::ostream& os);
 
-	std::vector<ColumnItem::Ptr> Items;
 	size_t	                     TableID;
 	size_t	                     ID;
 	size_t	                     Size;	///< maximum size of the text, not number of items

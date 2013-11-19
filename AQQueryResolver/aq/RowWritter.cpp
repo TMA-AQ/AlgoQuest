@@ -39,6 +39,29 @@ int RowWritter::process(std::vector<Row>& rows)
   return 0;
 }
 
+void RowWritter::write_value(const aq::row_item_t& row_item) const
+{
+  if (row_item.displayed)
+  {
+    switch(row_item.type)
+    {
+    case aq::ColumnType::COL_TYPE_INT:
+      boost::get<aq::ColumnItem<int32_t> >(row_item.item).toString(value);
+      break;
+    case aq::ColumnType::COL_TYPE_DOUBLE:
+      boost::get<aq::ColumnItem<double> >(row_item.item).toString(value);
+      break;
+    case aq::ColumnType::COL_TYPE_DATE:
+    case aq::ColumnType::COL_TYPE_BIG_INT:
+      boost::get<aq::ColumnItem<int64_t> >(row_item.item).toString(value);
+      break;
+    case aq::ColumnType::COL_TYPE_VARCHAR:
+      boost::get<aq::ColumnItem<char*> >(row_item.item).toString(value);
+      break;
+    }
+  }
+}
+
 int RowWritter::process(Row& row)
 {
 	if (this->firstRow)
@@ -47,22 +70,24 @@ int RowWritter::process(Row& row)
     bool first = true;
     for (Row::row_t::const_reverse_iterator it = row.computedRow.rbegin(); it != row.computedRow.rend(); ++it)
     {
-      if (!(*it).displayed)
-        continue;
-      size_t size = (*it).tableName != "" ? (*it).tableName.size() + 1 : 0;
-      size += (*it).columnName.size();
-      if (!first) 
-        fputs(" | ", pFOut);
-      for (size_t i = size; i < 8; i++)
-        fputs(" ", pFOut);
-      if ((*it).tableName != "")
+      auto& row_item = *it;
+      if (row_item.displayed)
       {
-        fputs((*it).tableName.c_str(), pFOut);
-        fputs(".", pFOut);
+        size_t size = row_item.tableName != "" ? row_item.tableName.size() + 1 : 0;
+        size += row_item.columnName.size();
+        if (!first) 
+          fputs(" | ", pFOut);
+        for (size_t i = size; i < 8; i++)
+          fputs(" ", pFOut);
+        if (row_item.tableName != "")
+        {
+          fputs(row_item.tableName.c_str(), pFOut);
+          fputs(".", pFOut);
+        }
+        fputs(row_item.columnName.c_str(), pFOut);
+        first = false;
+        widths.push_back(std::max(size, (size_t)8));
       }
-      fputs((*it).columnName.c_str(), pFOut);
-      first = false;
-      widths.push_back(std::max(size, (size_t)8));
 		}
 		fputc('\n', pFOut);
 		for (size_t w = 0; w < this->widths.size(); w++)
@@ -79,6 +104,7 @@ int RowWritter::process(Row& row)
     this->firstRow = false;
 	}
 
+  // write values
   if (row.completed)
   {
     this->totalCount += 1;
@@ -86,9 +112,6 @@ int RowWritter::process(Row& row)
     size_t k = 0;
     for (Row::row_t::const_reverse_iterator it = row.computedRow.rbegin(); it != row.computedRow.rend(); ++it)
     {
-      if (!(*it).displayed)
-        continue;
-      assert((*it).item != NULL);
       if (!first) 
         fputs(" | ", pFOut);
       if ((*it).null)
@@ -99,7 +122,7 @@ int RowWritter::process(Row& row)
       }
       else
       {
-        (*it).item->toString(value, (*it).type);
+        write_value(*it);
         for (size_t i = strlen(value); i < this->widths[k]; i++)
           fputs(" ", pFOut);
         fputs(value, pFOut);

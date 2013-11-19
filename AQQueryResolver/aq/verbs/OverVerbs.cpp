@@ -8,24 +8,6 @@ using namespace std;
 namespace aq {
 namespace verb {
 
-/*
-//------------------------------------------------------------------------------
-VERB_IMPLEMENT(OverVerb);
-
-//------------------------------------------------------------------------------
-OverVerb::OverVerb()
-{}
-
-//------------------------------------------------------------------------------
-void OverVerb::changeResult(	Table::Ptr table, 
-								VerbResult::Ptr resLeft, 
-								VerbResult::Ptr resRight, 
-								VerbResult::Ptr resNext )
-{
-	
-}
-*/
-
 //------------------------------------------------------------------------------
 bool PartitionVerb::changeQuery( aq::tnode* pStart, aq::tnode* pNode, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext )
 {

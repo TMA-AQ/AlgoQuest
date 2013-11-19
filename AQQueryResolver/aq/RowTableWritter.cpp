@@ -51,8 +51,11 @@ namespace aq
       for (auto it = rows.computedRow.begin(); it != rows.computedRow.end(); ++it)
       {
         assert(itColumn != this->table->Columns.end());
-        for (size_t i = 0; i < rows.count; ++i)
-          (*itColumn)->Items.push_back(new ColumnItem(*(*it).item));
+
+        // TODO
+        //for (size_t i = 0; i < rows.count; ++i)
+        //  (*itColumn)->Items.push_back(new ColumnItem(*(*it).item));
+
         ++itColumn;
       }
     }

@@ -18,9 +18,16 @@ class RowSolver
 public:
   struct column_infos_t
   {
+    typedef boost::variant<
+      aq::ColumnMapper_Intf<int32_t>::Ptr, 
+      aq::ColumnMapper_Intf<int64_t>::Ptr, 
+      aq::ColumnMapper_Intf<double>::Ptr, 
+      aq::ColumnMapper_Intf<char>::Ptr 
+    > mapper_type_t;
+
     column_infos_t() : table_index(0), grouped(false) {}
     Column::Ptr column; 
-    aq::ColumnMapper_Intf::Ptr mapper; 
+    mapper_type_t mapper; 
     size_t table_index; 
     bool grouped;
   };

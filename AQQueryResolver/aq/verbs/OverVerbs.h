@@ -5,18 +5,6 @@
 namespace aq {
 namespace verb {
 
-/*
-//------------------------------------------------------------------------------
-class OverVerb: public Verb
-{
-	VERB_DECLARE( OverVerb );
-public:
-	virtual int getVerbType() const { return K_OVER; };
-	virtual void changeResult( Table::Ptr table, 
-		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
-};
-*/
-
 //------------------------------------------------------------------------------
 class PartitionVerb: public VerbNode
 {

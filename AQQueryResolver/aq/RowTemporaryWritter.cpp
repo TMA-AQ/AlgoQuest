@@ -91,37 +91,36 @@ namespace aq
       {
         if (!(*it).displayed)
           continue;
-        assert((*it).item != NULL);
 
         switch (this->columnsWritter[c]->column->Type)
         {
         case ColumnType::COL_TYPE_BIG_INT:
         case ColumnType::COL_TYPE_DATE:
           {
-            int64_t value = static_cast<int64_t>((*it).item->numval);
+            int64_t value = boost::get<aq::ColumnItem<int64_t> >((*it).item).getValue();
             fwrite(&value, sizeof(int64_t), 1, this->columnsWritter[c]->file);
           }
           break;
         case ColumnType::COL_TYPE_DOUBLE:
           {
-            double value = (*it).item->numval;
+            double value = boost::get<aq::ColumnItem<double> >((*it).item).getValue();
             fwrite(&value, sizeof(double), 1, this->columnsWritter[c]->file);
           }
           break;
         case ColumnType::COL_TYPE_INT:
           {
-            int32_t value = static_cast<int32_t>((*it).item->numval);
+            int32_t value = boost::get<aq::ColumnItem<int32_t> >((*it).item).getValue();
             fwrite(&value, sizeof(int32_t), 1, this->columnsWritter[c]->file);
           }
           break;
         case ColumnType::COL_TYPE_VARCHAR:
           {
-            assert(strlen((*it).item->strval.c_str()) <= this->columnsWritter[c]->column->Size);
-            char * value = new char[this->columnsWritter[c]->column->Size + 1];
-            memset(value, 0, this->columnsWritter[c]->column->Size + 1);
-            strcpy(value, (*it).item->strval.c_str());
+            //assert(strlen((*it).item->strval.c_str()) <= this->columnsWritter[c]->column->Size);
+            //char * value = new char[this->columnsWritter[c]->column->Size + 1];
+            //memset(value, 0, this->columnsWritter[c]->column->Size + 1);
+            //strcpy(value, (*it).item->strval.c_str());
+            const char * value = boost::get<aq::ColumnItem<char*> >((*it).item).getValue();
             fwrite(value, sizeof(char) * this->columnsWritter[c]->column->Size, 1, this->columnsWritter[c]->file);
-            free(value);
           }
           break;
         }

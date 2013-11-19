@@ -16,7 +16,7 @@
 
 BOOST_AUTO_TEST_SUITE(ExprTransform)
 
-std::string transform(const char * ini, const char * query, int tag)
+std::string transform(const char * db_name, const char * query, int tag)
 { 
   int pErr;
   aq::tnode * tree = NULL;
@@ -24,7 +24,7 @@ std::string transform(const char * ini, const char * query, int tag)
   
   aq::Logger::getInstance().setLevel(2);
 
-  settings.load(ini);
+  settings.initPath("E:/AQ_DB/msalgoquest/");
   aq::Base base(settings.dbDesc.c_str());
   pErr = SQLParse(query, &tree);
   BOOST_REQUIRE(pErr == 0);
@@ -34,12 +34,14 @@ std::string transform(const char * ini, const char * query, int tag)
   aq::dateNodeToBigInt(tree);
   aq::solveIdentRequest(tree, base);
   aq::generate_parent(tree, NULL);
-
+  
   aq::tnode * cmpNode = aq::find_main_node(tree, K_WHERE);
   BOOST_REQUIRE(cmpNode != NULL);
   cmpNode = aq::find_first_node(cmpNode, tag);
   BOOST_REQUIRE(cmpNode != NULL);
   
+  std::cout << *cmpNode << std::endl;
+
   aq::expression_transform::transform<aq::WIN32FileMapper>(base, settings, cmpNode);
 
   std::string queryTransformed;
