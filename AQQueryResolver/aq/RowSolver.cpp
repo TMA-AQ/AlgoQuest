@@ -202,8 +202,9 @@ template <typename T>
 void set_value(const RowSolver::column_infos_t& infos, aq::row_item_t& item, size_t index)
 {
   T value;
-  boost::get<aq::ColumnMapper_Intf<T>::Ptr>(infos.mapper)->loadValue(index, &value);
-  boost::get<aq::ColumnItem<T> >(item.item).setValue(value);
+  typename aq::ColumnMapper_Intf<T>::Ptr mapper = boost::get<typename aq::ColumnMapper_Intf<T>::Ptr>(infos.mapper);
+  mapper->loadValue(index, &value);
+  boost::get<typename aq::ColumnItem<T> >(item.item).setValue(value);
 }
 
 template <> inline

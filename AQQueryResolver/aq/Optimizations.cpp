@@ -71,7 +71,7 @@ typename ColumnItem<T>::Ptr getMinMaxFromThesaurus(Column::Ptr column, size_t ta
 	case COL_TYPE_DATE:
 		{
 			int64_t *pItemData = (int64_t*)( pTmpBuf );
-			minMax = new ColumnItem<int64_t(*pItemData );
+			minMax = new ColumnItem<int64_t>(*pItemData );
 		}
 		break;
 	case COL_TYPE_DOUBLE:
