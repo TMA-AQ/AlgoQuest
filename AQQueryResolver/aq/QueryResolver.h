@@ -19,6 +19,27 @@ namespace aq
 class QueryResolver
 {
 public:
+  
+  static boost::mutex parserMutex;
+
+  /// TODO
+  static int prepareQuery(
+    const std::string  & query, 
+    const std::string  & ident,
+    aq::Settings       & settings,  
+    bool                 force);
+
+  /// TODO
+  static int processQuery(
+    const std::string & query, 
+    aq::Settings      & settings, 
+    aq::Base          & baseDesc, 
+    aq::AQEngine_Intf * aq_engine,
+    // const std::string & answer, 
+    boost::shared_ptr<aq::RowWritter_Intf> resultHandler,
+    bool                keepFiles);
+
+public:
 	QueryResolver(aq::tnode * _sqlStatement, Settings * _pSettings, AQEngine_Intf * _aq_engine, Base& _baseDesc, unsigned int& _id, unsigned int _level = 1);
 	~QueryResolver();
 

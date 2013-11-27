@@ -316,9 +316,9 @@ void RowSolver::solve_thread(boost::shared_ptr<aq::RowProcess_Intf> rowProcess,
 
     row.count = static_cast<unsigned>(aqMatrix->getCount()[i]);
 
-    if (((i + 1) % 1000000) == 0)
+    if (((i + 1) % aq::packet_size) == 0)
     {
-      aq::Logger::getInstance().log(AQ_INFO, "%uM rows proceed in %s\n", (i + 1) / 1000000, aq::Timer::getString(timer.getTimeElapsed()).c_str());
+      aq::Logger::getInstance().log(AQ_INFO, "%uM rows proceed in %s\n", (i + 1) / aq::packet_size, aq::Timer::getString(timer.getTimeElapsed()).c_str());
       timer.start();
     }
 
@@ -330,14 +330,6 @@ void RowSolver::solve_thread(boost::shared_ptr<aq::RowProcess_Intf> rowProcess,
       row.completed = true;
     }
     
-    //groupByCount += 1;
-    //if (aqMatrix.getGroupBy()[groupByIndex].second == groupByCount)
-    //{
-    //  ++groupByIndex;
-    //  groupByCount = 0;
-    //  row.completed = true;
-    //}
-
     if ((nrow + 1) == rows.size())
     {
       rowProcess->process(rows);

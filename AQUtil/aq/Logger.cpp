@@ -155,7 +155,7 @@ void Logger::log(int facility, const char * format, ...) const
 
   if (this->dateMode && ((this->mode & STDOUT) || (this->mode & LOCALFILE)))
   {
-    currentTime = ::time(NULL);
+    currentTime = ::time(nullptr);
     if ((localTime = ::localtime(&currentTime)) != 0)
     {
       ::strftime(date, sizeof(date), "%d/%b/%Y:%H-%M", localTime);
@@ -246,7 +246,7 @@ void Logger::printWithColor(const char * buf, int facility) const
 int Logger::openFile(const char * name)
 {
   this->localFile = fopen(name, "a");
-	if (localFile == NULL)
+	if (localFile == nullptr)
 		return -1;
 	return 0;
 }

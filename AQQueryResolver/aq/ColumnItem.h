@@ -50,13 +50,14 @@ namespace aq
   //------------------------------------------------------------------------------
   template <typename T>
   ColumnItem<T>::ColumnItem()
+    : count(0)
   {
   }
   
   //------------------------------------------------------------------------------
   template <typename T>
   ColumnItem<T>::ColumnItem(T _value)
-    : value(_value)
+    : value(_value), count(1)
   {
   }
   
@@ -65,6 +66,7 @@ namespace aq
   ColumnItem<T>::ColumnItem(const ColumnItem<T>& source)
   {
     this->value = source.value;
+    this->count = source.count;
   }
 
   //------------------------------------------------------------------------------
@@ -80,6 +82,7 @@ namespace aq
     if (this != &source)
     {
       this->value = source.value;
+      this->count = source.count;
     }
     return *this;
   }
@@ -89,6 +92,7 @@ namespace aq
   void ColumnItem<T>::setValue(const T& _value)
   {
     this->value = _value;
+    this->count = 1;
   }
 
   //------------------------------------------------------------------------------
@@ -162,12 +166,12 @@ namespace aq
   {
   public:
     ColumnItem()
-      : value(NULL)
+      : value(NULL), count(0)
     {
     }
 
     ColumnItem(const char * _value)
-      : value(NULL)
+      : value(NULL), count(1)
     {
       this->setValue(_value);
     }
@@ -176,6 +180,7 @@ namespace aq
       : value(NULL)
     {
       this->setValue(source.getValue());
+      this->count = source.getCount();
     }
 
     ~ColumnItem()
@@ -191,6 +196,7 @@ namespace aq
       if (this != &source)
       {
         this->setValue(source.getValue());
+        this->count = source.getCount();
       }
       return *this;
     }

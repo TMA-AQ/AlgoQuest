@@ -36,44 +36,44 @@ void * safecalloc(size_t nb, size_t size)
 
 //------------------------------------------------------------------------------
 char* LoadFile( const char *pszFN ) {
-	char* pszBuf = NULL;
-	FILE* pFIn = NULL;
+	char* pszBuf = nullptr;
+	FILE* pFIn = nullptr;
 	long  nFileSize = 0;
 	int   nPos = 0;
 
 	pFIn = fopenUTF8( pszFN, "rb" );
-	if ( pFIn == NULL )
-		return NULL;
+	if ( pFIn == nullptr )
+		return nullptr;
 
 	/* Get start position */
 	nPos = ftell( pFIn );
 	/* Seek to end */
 	if ( fseek( pFIn, 0, SEEK_END ) != 0 ) {
 		fclose( pFIn );
-		return NULL;
+		return nullptr;
 	}
 	/* Get File Size */
 	nFileSize = ftell( pFIn ) - nPos;
 	if ( nFileSize <= 0 ) {
 		fclose( pFIn );
-		return NULL;
+		return nullptr;
 	}
 	/* Seek to beginning */
 	if ( fseek( pFIn, nPos, SEEK_SET ) != 0 ) {
 		fclose( pFIn );
-		return NULL;
+		return nullptr;
 	}
 	/* Allocate Memory for the file content + '\0' character */	
 	pszBuf = new char[nFileSize + 1];
-	if ( pszBuf == NULL ) {
+	if ( pszBuf == nullptr ) {
 		fclose( pFIn );
-		return NULL;
+		return nullptr;
 	}
 	/* Read in the file content */
 	if ( fread( pszBuf, nFileSize, 1, pFIn ) != 1 ) {
 		fclose( pFIn );
 		delete[] pszBuf;
-		return NULL;
+		return nullptr;
 	}
 	/* '\0' terminate the string */
 	pszBuf[ nFileSize ] = '\0';
@@ -88,7 +88,7 @@ void SaveFile( const char *pszFN, const char* pszToSave ) {
 	FILE *pFOut;
 
 	pFOut = fopen( pszFN, "wt" );
-	if ( pFOut == NULL )
+	if ( pFOut == nullptr )
 		throw generic_error(generic_error::GENERIC, "");
 	if ( fputs( pszToSave, pFOut ) < 0 ) {
 		fclose( pFOut );
@@ -103,16 +103,16 @@ int FileCopy( char* pszSrcPath, char* pszDstPath )
 	if( strcmp(pszSrcPath, pszDstPath) == 0 )
 		return 0;
 
-	FILE *fsrc = NULL;
-	FILE *fdst = NULL;
+	FILE *fsrc = nullptr;
+	FILE *fdst = nullptr;
 	char c;
 
 	fsrc = fopen( pszSrcPath, "rb" );
-	if( fsrc == NULL )
+	if( fsrc == nullptr )
 		return -1;
 
 	fdst = fopen( pszDstPath, "wb" );
-	if( fdst == NULL )
+	if( fdst == nullptr )
 		return -1;
 
 	while( fread(&c, 1, 1, fsrc ) == 1 )
@@ -177,14 +177,14 @@ int GetFiles( const char* pszSrcPath, std::vector<std::string>& files )
 
 //------------------------------------------------------------------------------
 char* ReadValidLine( FILE* pFIn, char* pszTmpBuf, int nSize, int nTrimEnd ) {
-	char *psz = NULL;
+	char *psz = nullptr;
 	size_t  nLen;
 
 	/* Read a valid line */
 	pszTmpBuf[ 0 ] = '\0';
 	while ( pszTmpBuf[ 0 ] == '\0' ) {
-		if ( fgets( pszTmpBuf, nSize, pFIn ) == NULL )
-			return NULL;
+		if ( fgets( pszTmpBuf, nSize, pFIn ) == nullptr )
+			return nullptr;
 
 		/* Skip whitespace from the begin of the line ! */
 		psz = pszTmpBuf;
@@ -260,24 +260,24 @@ void DeleteFolder( const char * pszPath )
 //------------------------------------------------------------------------------
 FILE* fopenUTF8( const char* pszFlename, const char* pszMode )
 {
-	FILE	*fp = NULL;
+	FILE	*fp = nullptr;
 	unsigned char bom[3];
 	fp = fopen(pszFlename, pszMode);
-	if( fp == NULL )
-		return NULL;
+	if( fp == nullptr )
+		return nullptr;
 
 	/* Skip UTF-8 BOM if present */
 	if( fread( bom, 3, sizeof(char), fp ) != 1 )
 	{
 		fclose( fp );
-		return NULL;
+		return nullptr;
 	}
 	if( !((bom[0] == 0xEF) && (bom[1] == 0xBB) && (bom[2] == 0xBF)) )
 	{
 		/* BOM not present, return to the beginning */
 		if ( fseek( fp, 0, SEEK_SET ) != 0 ) {
 			fclose( fp );
-			return NULL;
+			return nullptr;
 		}
 	}
 	return fp;
@@ -294,7 +294,7 @@ FILE* fopenUTF8( const char* pszFlename, const char* pszMode )
 int StrToInt( const char* psz, llong* pnVal )
 {
 	char* pszIdx;
-	if( pnVal == NULL || psz == NULL )
+	if( pnVal == nullptr || psz == nullptr )
 		return -1;
 	if( psz[0] <= ' ' )
 		return -1;
@@ -310,7 +310,7 @@ int StrToInt( const char* psz, llong* pnVal )
 int StrToDouble( const char* psz, double* pdVal  )
 {
 	char* pszIdx;
-	if( pdVal == NULL || psz == NULL )
+	if( pdVal == nullptr || psz == nullptr )
 		return -1;
 	if( psz[0] <= ' ' )
 		return -1;
@@ -327,8 +327,8 @@ int StrToDouble( const char* psz, double* pdVal  )
 char* strtoupr( char* pszStr ) {
 	char *psz;
 
-	if ( pszStr == NULL )
-		return NULL;
+	if ( pszStr == nullptr )
+		return nullptr;
 
 	psz = pszStr;
 	while ( *psz != '\0' )
@@ -363,7 +363,7 @@ void ShowError( char *message ) {
 		fprintf( stderr, "%s", message );
 	if ( errno != 0 ) {
 		fprintf( stderr, " ( " );
-		perror( NULL );
+		perror( nullptr );
 		fprintf( stderr, " )\n" );
 	} else
 		fprintf( stderr, "\n" );
@@ -452,7 +452,7 @@ void getFileNames( const char* path, std::vector<std::string>& filenames, const 
 		boost::system::error_code ec;
     for (boost::filesystem::directory_iterator file(p); file != boost::filesystem::directory_iterator(); ++file)
     {
-      if ((prefix != NULL) && ((*file).path().string().find(prefix) != std::string::npos))
+      if ((prefix != nullptr) && ((*file).path().string().find(prefix) != std::string::npos))
       {
         filenames.push_back((*file).path().string());
       }
@@ -513,7 +513,7 @@ void ChangeCommaToDot (  char *string )
 	// seach first  ',' in string
 	p = strchr(string, ',' );
 	// modify string ',' become '.'  
-	if (p != NULL )  *p = '.' ;
+	if (p != nullptr )  *p = '.' ;
 }
 
 //------------------------------------------------------------------------------
@@ -569,13 +569,13 @@ void FileWriteEnreg( aq::ColumnType col_type, const int col_size, char *my_field
 	switch (  col_type )
 	{
 	case COL_TYPE_INT :
-		if ( strcmp ( my_field, "NULL")  ==   0 )  *my_int = 'NULL'; // FIXME
+		if ( strcmp ( my_field, "nullptr")  ==   0 )  *my_int = 'NULL'; // FIXME
 		else  *my_int = atoi ( my_field );
 		fwrite( my_int , sizeof(int), 1, fcol  );
 		break;
 
 	case COL_TYPE_BIG_INT :
-		if ( strcmp ( my_field, "NULL")  ==   0 )  *my_long_long  = 'NULL'; // FIXME
+		if ( strcmp ( my_field, "nullptr")  ==   0 )  *my_long_long  = 'NULL'; // FIXME
 #ifdef WIN32
 		else  *my_long_long  = _atoi64 (my_field );   
 #else
@@ -585,20 +585,20 @@ void FileWriteEnreg( aq::ColumnType col_type, const int col_size, char *my_field
 		break;
 
 	case COL_TYPE_DOUBLE :
-		if (  strcmp ( my_field, "NULL")  ==   0 )  *my_double = 'NULL'; // FIXME
+		if (  strcmp ( my_field, "nullptr")  ==   0 )  *my_double = 'NULL'; // FIXME
 		else
 		{
 			// step 1 convert ',' in '.'
 			ChangeCommaToDot (  my_field );
 			// step 2 : use strtod
-			*my_double =     strtod ( my_field, NULL );  // atof  ( field );
+			*my_double =     strtod ( my_field, nullptr );  // atof  ( field );
 		}
 		fwrite( my_double, sizeof(double), 1, fcol );
 		break;
 
 	case COL_TYPE_DATE:
 		{
-			if ( (strcmp ( my_field, "NULL")  ==   0) ||	(strcmp( my_field, "" ) == 0) )
+			if ( (strcmp ( my_field, "nullptr")  ==   0) ||	(strcmp( my_field, "" ) == 0) )
       {
         *my_long_long  = 'NULL'; // FIXME
       }

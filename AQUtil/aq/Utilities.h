@@ -88,7 +88,7 @@ void doubleToString( char* strVal, double dVal );
 std::string getPrmFileName( const char* path, size_t tableIdx, size_t columnIdx, size_t partIdx );
 std::string getThesaurusFileName( const char* path, size_t tableIdx, size_t columnIdx, size_t partIdx );
 std::string getTemporaryFileName( size_t tableIdx, size_t columnIdx, size_t partIdx, const char * type, size_t size );
-void getFileNames( const char* path, std::vector<std::string>& filenames, const char * prefix = NULL );
+void getFileNames( const char* path, std::vector<std::string>& filenames, const char * prefix = nullptr );
 
 //------------------------------------------------------------------------------
 aq::ColumnType symbole_to_column_type(aq::symbole s);
@@ -97,7 +97,7 @@ aq::ColumnType symbole_to_column_type(aq::symbole s);
 void cleanSpaceAtEnd(char * my_field);
 
 //-------------------------------------------------------------------------------
-char * cleanNameFast(char * strval); ///< return NULL when failure
+char * cleanNameFast(char * strval); ///< return nullptr when failure
 
 //-------------------------------------------------------------------------------
 /// assume input is a double

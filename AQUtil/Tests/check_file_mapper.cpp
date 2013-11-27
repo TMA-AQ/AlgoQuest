@@ -10,7 +10,7 @@ std::vector<int> offset_v;
 
 void ReadOffset(const char * pszFileName, size_t nb) 
 {
-	FILE* prmFile = NULL;
+	FILE* prmFile = nullptr;
 	prmFile = fopen( pszFileName, "rb" );
 	offset_v.resize(nb);
 	for (unsigned int i = 0; i < nb; i++)

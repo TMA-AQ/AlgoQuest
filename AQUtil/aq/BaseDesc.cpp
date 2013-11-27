@@ -158,7 +158,7 @@ int build_base_from_raw ( const char * fname, base_t& base )
 {
   int rc = 0;
   FILE * fp = fopenUTF8(fname, "r");
-  if (fp != NULL)
+  if (fp != nullptr)
   {
     build_base_from_raw(fp, base);
   }

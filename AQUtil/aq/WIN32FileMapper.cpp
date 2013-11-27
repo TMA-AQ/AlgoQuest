@@ -7,9 +7,9 @@ using namespace aq;
 
 WIN32FileMapper::WIN32FileMapper(const char * _filename, const WIN32FileMapper::mode_t _mode)
 	: filename(_filename),
-		pView(NULL),
-		hmap(NULL),
-		hfile(NULL),
+		pView(nullptr),
+		hmap(nullptr),
+		hfile(nullptr),
 		nbRemap(0),
     mode(_mode)
 {
@@ -23,11 +23,11 @@ WIN32FileMapper::WIN32FileMapper(const char * _filename, const WIN32FileMapper::
 
   if (mode == WIN32FileMapper::mode_t::READ)
   {
-    this->hfile = ::CreateFile(_filename, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
+    this->hfile = ::CreateFile(_filename, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr);
   }
   else if ((mode == WIN32FileMapper::mode_t::WRITE) || (mode == WIN32FileMapper::mode_t::READ_WRITE))
   {
-    this->hfile = ::CreateFile(_filename, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
+    this->hfile = ::CreateFile(_filename, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr);
   }
 
   if (hfile != INVALID_HANDLE_VALUE)
@@ -37,11 +37,11 @@ WIN32FileMapper::WIN32FileMapper(const char * _filename, const WIN32FileMapper::
     this->cbFile = static_cast<unsigned long long>(file_size.QuadPart);
     if (mode == WIN32FileMapper::mode_t::READ)
     {
-      this->hmap = ::CreateFileMappingW(hfile, NULL, PAGE_READONLY, 0, 0, NULL);
+      this->hmap = ::CreateFileMappingW(hfile, nullptr, PAGE_READONLY, 0, 0, nullptr);
     }
     else
     {
-      this->hmap = ::CreateFileMappingW(hfile, NULL, PAGE_READWRITE, 0, 0, NULL);
+      this->hmap = ::CreateFileMappingW(hfile, nullptr, PAGE_READWRITE, 0, 0, nullptr);
     }
   }
 	else 
@@ -53,17 +53,17 @@ WIN32FileMapper::WIN32FileMapper(const char * _filename, const WIN32FileMapper::
 WIN32FileMapper::~WIN32FileMapper()
 {
 	aq::Logger::getInstance().log(AQ_DEBUG, "%s: %u remaping\n", this->filename.c_str(), this->nbRemap);
-	if (this->pView != NULL)
+	if (this->pView != nullptr)
   {
     aq::Logger::getInstance().log(AQ_DEBUG, "UnmapViewOfFile\n");
 		::UnmapViewOfFile(this->pView);
   }
-  if (this->hmap != NULL)
+  if (this->hmap != nullptr)
 	{
     aq::Logger::getInstance().log(AQ_DEBUG, "CloseHandle\n");
     ::CloseHandle(hmap);
   }
-  if (this->hfile != NULL)
+  if (this->hfile != nullptr)
 	{
     aq::Logger::getInstance().log(AQ_DEBUG, "CloseHandle\n");
     ::CloseHandle(hfile);
@@ -79,13 +79,13 @@ int WIN32FileMapper::read(void * buffer, size_t offset, size_t len)
 
 	uint8_t * buf = static_cast<uint8_t*>(buffer);
 
-	if (hmap == NULL) 
+	if (hmap == nullptr) 
 	{
 		return -1;
 	}
 	
 	// Check if offset is in the current window
-	if ((pView == NULL ) || (offset < windowOffset) || ((offset + len) > (windowOffset + cbView)))
+	if ((pView == nullptr ) || (offset < windowOffset) || ((offset + len) > (windowOffset + cbView)))
 	{
 		size_t off_tmp = offset - (offset % cbView);
     aq::Logger::getInstance().log(AQ_DEBUG, "remap [pView:%x] [offset:%u] [len:%u] [winOff:%u] [cbView:%u]\n", pView, offset, len, windowOffset, cbView);
@@ -94,7 +94,7 @@ int WIN32FileMapper::read(void * buffer, size_t offset, size_t len)
 	
 	size_t new_offset = offset % cbView;
 
-	if (this->pView == NULL) 
+	if (this->pView == nullptr) 
 	{
 		return -2;
 	}
@@ -110,7 +110,7 @@ int WIN32FileMapper::read(void * buffer, size_t offset, size_t len)
 		new_offset = 0;
 	}
 	
-	if (this->pView == NULL) 
+	if (this->pView == nullptr) 
 	{
 		return -2;
 	}
@@ -133,13 +133,13 @@ int WIN32FileMapper::write(void * buffer, size_t offset, size_t len)
 
 	uint8_t * buf = static_cast<uint8_t*>(buffer);
 
-	if (hmap == NULL) 
+	if (hmap == nullptr) 
 	{
 		return -1;
 	}
 	
 	// Check if offset is in the current window
-	if ((pView == NULL ) || (offset < windowOffset) || ((offset + len) > (windowOffset + cbView)))
+	if ((pView == nullptr ) || (offset < windowOffset) || ((offset + len) > (windowOffset + cbView)))
 	{
 		size_t off_tmp = offset - (offset % cbView);
     aq::Logger::getInstance().log(AQ_DEBUG, "remap [pView:%x] [offset:%u] [len:%u] [winOff:%u] [cbView:%u]\n", pView, offset, len, windowOffset, cbView);
@@ -148,7 +148,7 @@ int WIN32FileMapper::write(void * buffer, size_t offset, size_t len)
 	
 	size_t new_offset = offset % cbView;
 
-	if (this->pView == NULL) 
+	if (this->pView == nullptr) 
 	{
 		return -2;
 	}
@@ -164,7 +164,7 @@ int WIN32FileMapper::write(void * buffer, size_t offset, size_t len)
 		new_offset = 0;
 	}
 	
-	if (this->pView == NULL) 
+	if (this->pView == nullptr) 
 	{
 		return -2;
 	}
@@ -199,25 +199,25 @@ void WIN32FileMapper::resize(size_t len)
 {
   
   // Check if offset is in the current window
-  if (pView != NULL)
+  if (pView != nullptr)
   {
     aq::Logger::getInstance().log(AQ_DEBUG, "UnmapViewOfFile\n");
     ::UnmapViewOfFile(this->pView);
   }
-  if (this->hmap != NULL)
+  if (this->hmap != nullptr)
   {
     aq::Logger::getInstance().log(AQ_DEBUG, "CloseHandle\n");
     ::CloseHandle(hmap);
   }
 
   ::SetFileValidData(this->hfile, len);
-  ::SetFilePointer(this->hfile, static_cast<long>(len), NULL, FILE_BEGIN);
+  ::SetFilePointer(this->hfile, static_cast<long>(len), nullptr, FILE_BEGIN);
   ::SetEndOfFile(this->hfile);
 
   LARGE_INTEGER file_size = {0};
   ::GetFileSizeEx(hfile, &file_size);
   this->cbFile = static_cast<unsigned long long>(file_size.QuadPart);
-  this->hmap = ::CreateFileMappingW(hfile, NULL, PAGE_READWRITE, 0, 0, NULL);
+  this->hmap = ::CreateFileMappingW(hfile, nullptr, PAGE_READWRITE, 0, 0, nullptr);
   this->remap(0); // FIXME
 }
 
@@ -231,7 +231,7 @@ void WIN32FileMapper::remap(unsigned long long offset)
 	if (offset + cbView > cbFile) {
 		new_cbView = static_cast<int>(cbFile - offset);
 	}
-	if (this->pView != NULL)
+	if (this->pView != nullptr)
 	{
     aq::Logger::getInstance().log(AQ_DEBUG, "UnmapViewOfFile\n");
 		::UnmapViewOfFile(this->pView);

@@ -17,7 +17,7 @@ GenericFileMapper::GenericFileMapper(const char * _filename, const mode_t _mode)
   {
     this->m_fd = fopen(_filename, "a+");
   }
-  if (this->m_fd != NULL)
+  if (this->m_fd != nullptr)
   {
     fseek(this->m_fd, 0, SEEK_END);
     this->m_size = ftell(this->m_fd);
@@ -34,7 +34,7 @@ int GenericFileMapper::read(void * buffer, size_t offset, size_t len)
 {
   assert(this->m_fd);
   assert(offset < std::numeric_limits<size_t>::max());
-  if (this->m_fd == NULL)
+  if (this->m_fd == nullptr)
   {
     throw aq::generic_error(aq::generic_error::COULD_NOT_OPEN_FILE, m_filename);
   }
@@ -54,7 +54,7 @@ int GenericFileMapper::write(void * buffer, size_t offset, size_t len)
 {
   assert(this->m_fd);
   assert(offset < std::numeric_limits<size_t>::max());
-  if (this->m_fd == NULL)
+  if (this->m_fd == nullptr)
   {
     throw aq::generic_error(aq::generic_error::COULD_NOT_OPEN_FILE, m_filename);
   }

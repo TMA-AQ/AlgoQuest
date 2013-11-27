@@ -12,6 +12,7 @@
 #include "RowVerbProcess.h"
 #include "RowTemporaryWritter.h"
 #include "RowSolver.h"
+#include "UpdateResolver.h"
 
 #include "verbs/Verb.h"
 #include "parser/JeqParser.h"
@@ -35,10 +36,17 @@
 #include <deque>
 #include <algorithm>
 #include <boost/scoped_array.hpp>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
+
+namespace fs = boost::filesystem;
 
 #ifdef AQ_TRACE
   std::string sql_query; // FIXME : should belong to class QueryResolver
 #endif
+
+boost::mutex aq::QueryResolver::parserMutex;
 
 namespace aq
 {
@@ -179,11 +187,14 @@ void QueryResolver::preProcess()
     }
     // add order
     tnode * orderNode = find_first_node(this->sqlStatement->left, K_ORDER);
-    std::vector<tnode*> orderByNodes;
-    aq::getColumnsList(orderNode->left->left, orderByNodes);
-    for (auto& n : orderByNodes)
+    if (orderNode)
     {
-      this->orderBy.push_back(aq::clone_subtree(n));
+      std::vector<tnode*> orderByNodes;
+      aq::getColumnsList(orderNode->left->left, orderByNodes);
+      for (auto& n : orderByNodes)
+      {
+        this->orderBy.push_back(aq::clone_subtree(n));
+      }
     }
   }
   aq::removePartitionBy(this->sqlStatement);
@@ -668,11 +679,11 @@ void QueryResolver::solveAQMatrix(aq::verb::VerbNode::Ptr spTree)
   }
   else
   {
-    if (!resultHandler)
+    if (resultHandler == nullptr)
     {
       resultHandler.reset(new aq::RowWritter(pSettings->outputFile == "stdout" ? pSettings->outputFile : pSettings->answerFile));
-      resultHandler->setColumn(columnTypes);
     }
+    resultHandler->setColumn(columnTypes);
     processes->addProcess(this->resultHandler);
     rowWritter = this->resultHandler;
   }
@@ -1053,6 +1064,149 @@ std::string QueryResolver::getOriginalColumn(const std::string& alias) const
     res = it->second->getOriginalColumn(alias);
   }
   return res;
+}
+
+// -------------------------------------------------------------------------------------------------
+int QueryResolver::prepareQuery(const std::string& query, const std::string & ident, aq::Settings& settings, bool force)
+{		
+	//
+	// generate ident and ini file
+  std::string queryIdent = ident;
+	if (queryIdent == "")
+  {
+    boost::uuids::uuid qi = boost::uuids::random_generator()();
+    std::ostringstream oss;
+    oss << qi;
+    queryIdent = oss.str();
+  }
+  settings.changeIdent(queryIdent);
+
+	//
+	// create directories
+	std::list<fs::path> lpaths;
+	lpaths.push_back(fs::path(settings.rootPath + "calculus/" + queryIdent));
+	lpaths.push_back(fs::path(settings.tmpPath));
+	lpaths.push_back(fs::path(settings.dpyPath));
+	for (std::list<fs::path>::const_iterator dir = lpaths.begin(); dir != lpaths.end(); ++dir)
+	{
+		if (fs::exists(*dir))
+		{
+      aq::Logger::getInstance().log(AQ_WARNING, "directory already exist '%s'\n", (*dir).string().c_str());
+      if (!force)
+      {
+        return EXIT_FAILURE;
+      }
+		}
+		else if (!fs::create_directory(*dir))
+		{
+			aq::Logger::getInstance().log(AQ_WARNING, "cannot create directory '%s'\n", (*dir).string().c_str());
+      if (!force)
+      {
+        return EXIT_FAILURE;
+      }
+		}
+	}
+
+  //
+  // write request file
+  std::string queryFilename(settings.rootPath + "calculus/" + queryIdent + "/Request.sql");
+  std::ofstream queryFile(queryFilename.c_str());
+  queryFile << query;
+  queryFile.close();
+
+	//
+	// write ini file (it is needed for now by AQEngine)
+	std::ofstream iniFile(settings.iniFile.c_str());
+	settings.writeAQEngineIni(iniFile);
+	iniFile.close();
+
+	return EXIT_SUCCESS;
+}
+
+// -------------------------------------------------------------------------------------------------
+int QueryResolver::processQuery(const std::string& query, aq::Settings& settings, aq::Base& baseDesc, aq::AQEngine_Intf * aq_engine,
+                                boost::shared_ptr<aq::RowWritter_Intf> resultHandler, bool keepFiles)
+{
+  int rc = EXIT_SUCCESS;
+
+	try
+	{
+	
+		aq::Logger::getInstance().log(AQ_INFO, "processing sql query\n");
+
+		aq::tnode	*pNode  = NULL;
+		int	nRet;
+
+		//
+		// Parse SQL request
+		{
+
+			boost::mutex::scoped_lock lock(parserMutex);
+			aq::Logger::getInstance().log(AQ_INFO, "parse sql query %s\n", query.c_str());
+			if ((nRet = SQLParse(query.c_str(), &pNode)) != 0 ) 
+			{
+				aq::Logger::getInstance().log(AQ_ERROR, "error parsing sql request '%s'\n", query.c_str());
+				return EXIT_FAILURE;
+			}
+
+#if defined(_DEBUG) && defined(_TRACE)
+			std::cout << *pNode << std::endl;
+#endif
+
+    }
+
+    //
+		// Transform SQL request in prefix form, 
+    if (pNode->tag == K_SELECT)
+    {
+      unsigned int id_generator = 1;
+      aq::Timer timer;
+      aq::QueryResolver queryResolver(pNode, &settings, aq_engine, baseDesc, id_generator);
+      aq::Table::Ptr result = queryResolver.solve(resultHandler);
+      timer.stop();
+      if (settings.cmdLine)
+      {
+        std::cout << queryResolver.getNbRows() << " rows processed in " << aq::Timer::getString(timer.getTimeElapsed()) << std::endl;
+        std::cout << std::endl;
+      }
+    }
+    else if (pNode->tag == K_UPDATE)
+    {
+      aq::UpdateResolver updateResolver(pNode, settings, aq_engine, baseDesc);
+      updateResolver.solve();
+    }
+    else 
+    {
+      aq::Logger::getInstance().log(AQ_INFO, "[%s] is not supported", aq::id_to_string(pNode->tag));
+    }
+
+		delete pNode;
+	}
+	catch (const aq::generic_error& ge)
+	{
+		aq::Logger::getInstance().log(AQ_ERROR, "%s\n", ge.what());
+		rc = EXIT_FAILURE;
+	}
+	catch (const std::exception& ex)
+	{
+		aq::Logger::getInstance().log(AQ_ERROR, "%s\n", ex.what());
+		rc = EXIT_FAILURE;
+	}
+	catch (...)
+	{
+		aq::Logger::getInstance().log(AQ_ERROR, "unknown exception\n");
+		rc = EXIT_FAILURE;
+	}
+
+  if (!keepFiles)
+  {
+    aq::Logger::getInstance().log(AQ_NOTICE, "remove temporary directory '%s'\n", settings.tmpPath.c_str());
+    aq::DeleteFolder(settings.tmpPath.c_str());
+    aq::Logger::getInstance().log(AQ_NOTICE, "remove working directory '%s'\n", settings.workingPath.c_str());
+    aq::DeleteFolder(settings.workingPath.c_str());
+  }
+
+	return rc;
 }
 
 }

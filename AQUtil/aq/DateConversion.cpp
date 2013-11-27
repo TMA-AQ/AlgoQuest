@@ -110,7 +110,7 @@ std::string DateConversion::bigIntToDate(long long intval)
 //------------------------------------------------------------------------------
 long long DateConversion::currentDate()
 {
-	time_t currentTime_t = time(NULL);
+	time_t currentTime_t = time(nullptr);
 	struct tm *currentTime = localtime( &currentTime_t );
 	int year = currentTime->tm_year + 1900;
 	int month = currentTime->tm_mon + 1;
