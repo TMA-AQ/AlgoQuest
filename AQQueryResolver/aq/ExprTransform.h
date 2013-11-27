@@ -14,12 +14,6 @@
 #include <boost/regex.hpp>
 #include <boost/static_assert.hpp>
 
-#if defined (WIN32)
-# define __AQ_FUNC_NAME__ __FUNCSIG__
-#else
-# define __AQ_FUNC_NAME__ __PRETTY_FUNCTION__
-#endif
-
 namespace 
 {
   
@@ -27,7 +21,7 @@ namespace
   template <typename T>
   void nodeToItem(const aq::tnode&, aq::ColumnItem<T>&)
   {
-    BOOST_STATIC_ASSERT_MSG(false, "missing "__AQ_FUNC_NAME__" definition");
+    BOOST_STATIC_ASSERT_MSG(sizeof(T) == 0, "missing specialisation");
   }
   
   template <> inline
@@ -58,7 +52,7 @@ namespace
   template <typename T>
   aq::tnode * itemToNode(const aq::ColumnItem<T>&, const aq::ColumnType)
   {
-    BOOST_STATIC_ASSERT_MSG(false, "missing "__AQ_FUNC_NAME__" definition");
+    BOOST_STATIC_ASSERT_MSG(sizeof(T) == 0, "missing specialisation");
   }
   
   template <> inline
@@ -227,7 +221,7 @@ namespace aq {
 class ExpressionTransform
 {
 public:
-  ExpressionTransform(const Base& _baseDesc, const Settings& _settings);
+  ExpressionTransform(const Base& _baseDesc, const Settings& _settings) : baseDesc(_baseDesc), settings(_settings) {}
   template <typename M> aq::tnode * transform(aq::tnode * pNode);
 private:
   enum transformation_type

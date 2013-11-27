@@ -8,6 +8,13 @@
 namespace aq
 {
 
+// helper function
+template <typename T> struct type_conversion { static const aq::ColumnType type = aq::ColumnType::COL_TYPE_INT; };
+template <> struct type_conversion<int32_t> { static const aq::ColumnType type = aq::ColumnType::COL_TYPE_INT; };
+template <> struct type_conversion<int64_t> { static const aq::ColumnType type = aq::ColumnType::COL_TYPE_BIG_INT; };
+template <> struct type_conversion<double> { static const aq::ColumnType type = aq::ColumnType::COL_TYPE_DOUBLE; };
+template <> struct type_conversion<char> { static const aq::ColumnType type = aq::ColumnType::COL_TYPE_VARCHAR; };
+
 template <typename T>
 class ColumnMapper_Intf
 {
@@ -19,13 +26,6 @@ public:
   virtual int append(T * value) = 0;
   const aq::ColumnType getType() const { return aq::type_conversion<T>::type; } ;
 };
-
-// helper function
-template <typename T> struct type_conversion { static const aq::ColumnType type = aq::ColumnType::COL_TYPE_INT; };
-template <> struct type_conversion<int32_t> { static const aq::ColumnType type = aq::ColumnType::COL_TYPE_INT; };
-template <> struct type_conversion<int64_t> { static const aq::ColumnType type = aq::ColumnType::COL_TYPE_BIG_INT; };
-template <> struct type_conversion<double> { static const aq::ColumnType type = aq::ColumnType::COL_TYPE_DOUBLE; };
-template <> struct type_conversion<char> { static const aq::ColumnType type = aq::ColumnType::COL_TYPE_VARCHAR; };
 
 //template <typename T> struct enum_to_type { typedef int32_t type; };
 //template <> struct enum_to_type<aq::ColumnType = aq::ColumnType::COL_TYPE_INT> { static const aq::ColumnType type = aq::ColumnType::COL_TYPE_INT; };
