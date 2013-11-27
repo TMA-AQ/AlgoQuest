@@ -382,7 +382,6 @@
     <ClCompile Include="aq\Column2Table.cpp" />
     <ClCompile Include="aq\db_loader\DatabaseLoader.cpp" />
     <ClCompile Include="aq\DumpVisitor.cpp" />
-    <ClCompile Include="aq\ExprTransform.cpp" />
     <ClCompile Include="aq\Optimizations.cpp" />
     <ClCompile Include="aq\parser\ID2Str.cpp" />
     <ClCompile Include="aq\parser\JeqParser.cpp" />

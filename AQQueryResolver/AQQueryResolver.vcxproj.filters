@@ -288,9 +288,6 @@
     <ClCompile Include="aq\DumpVisitor.cpp">
       <Filter>Source Files\aq</Filter>
     </ClCompile>
-    <ClCompile Include="aq\ExprTransform.cpp">
-      <Filter>Source Files\aq</Filter>
-    </ClCompile>
     <ClCompile Include="aq\Optimizations.cpp">
       <Filter>Source Files\aq</Filter>
     </ClCompile>
