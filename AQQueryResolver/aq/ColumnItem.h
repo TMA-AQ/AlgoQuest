@@ -152,6 +152,7 @@ namespace aq
       this->value = ((static_cast<T>(this->count) * this->value) + (static_cast<T>(item.getCount()) * item.getValue())) / static_cast<T>(this->count + item.getCount());
       break;
     case COUNT:
+    case NONE:
       break;
     }
     this->count += item.getCount();
@@ -258,6 +259,7 @@ namespace aq
         throw aq::generic_error(aq::generic_error::INVALID_QUERY, "cannot apply avg on char type");
         break;
       case COUNT:
+      case NONE:
         break;
       }
       this->count += item.getCount();

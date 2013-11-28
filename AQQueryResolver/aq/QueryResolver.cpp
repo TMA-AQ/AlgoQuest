@@ -35,6 +35,8 @@
 
 #include <deque>
 #include <algorithm>
+#include <fstream>
+
 #include <boost/scoped_array.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
