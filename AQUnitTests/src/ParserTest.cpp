@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(sql_to_aql)
 {
   std::string sql_query;
   sql_query  = " select t1.v1, t2.v2 ";
-  sql_query += " from t1 inner join t2 on t1.id = t2.id ";
+  sql_query += " from t1 left outer join t2 on t1.id = t2.id ";
   sql_query += " where t1.v2 in (1, 2, 3) and t2.v1 in (1, 2, 3) ";
   sql_query += " group by t1.v1, t2.v1 ";
   sql_query += " order by t2.v2, t1.v2 ";
@@ -102,6 +102,7 @@ BOOST_AUTO_TEST_CASE(sql_to_aql)
   {
     BOOST_REQUIRE(false);
   }
+  aq::util::generate_parent(tree);
 
   aq::core::SelectStatement ss;
   aq::util::tnodeToSelectStatement(*tree, ss);

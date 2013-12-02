@@ -1579,6 +1579,8 @@ void processNot( aq::tnode*& pNode, bool applyNot )
 
 void tnodeToSelectStatement(aq::tnode& tree, aq::core::SelectStatement& ss)
 {
+  std::cout << tree << std::endl;
+
   aq::tnode * selectNode = tree.find_main_node(K_SELECT);
   aq::tnode * fromNode = tree.find_main_node(K_FROM);
   aq::tnode * whereNode = tree.find_main_node(K_WHERE);
@@ -1629,18 +1631,58 @@ void tnodeToSelectStatement(aq::tnode& tree, aq::core::SelectStatement& ss)
     for (const auto& join : nodes)
     {
       std::cout << *join << std::endl;
-      //aq::core::JoinCondition jc;
-      //jc.op = aq::id_to_kstring(join->getTag());
-      //jc.jt_left = jc.jt_right = "K_INNER";
-      //jc.left.table.name = join->left->left->getData().val_str;
-      //jc.left.name = join->left->right->getData().val_str;
-      //jc.right.table.name = join->right->left->getData().val_str;
-      //jc.right.name = join->right->right->getData().val_str;
-      //boost::to_upper(jc.left.table.name);
-      //boost::to_upper(jc.left.name);
-      //boost::to_upper(jc.right.table.name);
-      //boost::to_upper(jc.right.name);
-      //ss.joinConditions.push_back(jc);
+      aq::core::JoinCondition jc;
+      
+      aq::tnode * on = join->next;
+      assert(on->getTag() == K_ON);
+      assert(on->left != nullptr);
+
+      jc.op = aq::id_to_kstring(on->getTag());
+      
+      aq::tnode * jtype = join->parent;
+      assert(jtype != nullptr);
+      if (jtype->getTag() == K_INNER)
+      {
+        jc.jt_left = jc.jt_right = "K_INNER";
+      }
+      else if (jtype->getTag() == K_OUTER)
+      {
+        aq::tnode * jway = jtype->parent;
+        assert(jway != nullptr);
+        switch (jway->getTag())
+        {
+        case K_LEFT:
+          jc.jt_left = "K_OUTER";
+          jc.jt_right = "K_INNER";
+          break;
+        case K_RIGHT:
+          jc.jt_left = "K_INNER";
+          jc.jt_right = "k_OUTER";
+          break;
+        case K_FULL:
+          jc.jt_left = "K_OUTER";
+          jc.jt_right = "k_OUTER";
+          break;
+        default:
+          assert(false);
+        }
+      }
+      else
+      {
+        assert(false);
+      }
+
+      aq::tnode * n = on->left;
+      jc.left.table.name = n->left->left->getData().val_str;
+      jc.left.name = n->left->right->getData().val_str;
+      jc.right.table.name = n->right->left->getData().val_str;
+      jc.right.name = n->right->right->getData().val_str;
+      
+      boost::to_upper(jc.left.table.name);
+      boost::to_upper(jc.left.name);
+      boost::to_upper(jc.right.table.name);
+      boost::to_upper(jc.right.name);
+      ss.joinConditions.push_back(jc);
     }
 
     //
