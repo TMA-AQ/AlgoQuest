@@ -1,6 +1,7 @@
 #include "CommandHandler.h"
 #include <aq/Database.h>
 #include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
@@ -24,8 +25,6 @@ int CommandHandler::process(const std::string& cmd)
       boost::trim(w);
       if ((w.size() >= 3) && ((*w.begin()) == '\'') && ((*w.rbegin()) == '\''))
         w = w.substr(1, w.size() - 2);
-      else
-        boost::to_upper(w);
     }
     std::string::size_type pos = (*words.rbegin()).find(';');
     if (pos != std::string::npos)
@@ -34,7 +33,7 @@ int CommandHandler::process(const std::string& cmd)
     }
 
     // process command
-    if (words.size() >= 2 && words[0] == "SHOW")
+    if (words.size() >= 2 && boost::iequals(words[0], "SHOW"))
     {
       if (words[1] == "TABLES")
       {
@@ -43,7 +42,7 @@ int CommandHandler::process(const std::string& cmd)
           std::cout << table->getName() << std::endl;
         }
       }
-      else if (words[1] == "DATABASES")
+      else if (boost::iequals(words[1], "DATABASES"))
       {
         boost::filesystem::path p(this->databasesPath);
         if (boost::filesystem::exists(p) && boost::filesystem::is_directory(p))
@@ -60,7 +59,7 @@ int CommandHandler::process(const std::string& cmd)
           }
         }
       }
-      else if (words[1] == "VARS")
+      else if (boost::iequals(words[1], "VARS"))
       {
         settings.dump(std::cout);
         std::cout << std::endl;
@@ -68,14 +67,14 @@ int CommandHandler::process(const std::string& cmd)
         std::cout << "ROOT_PATH: " << databasesPath << std::endl;
         std::cout << "DATABASE : " << databaseName << std::endl;
       }
-      else if (words.size() >= 3 && words[1] == "VAR")
+      else if (words.size() >= 3 && boost::iequals(words[1], "VAR"))
       {
         for (auto i = 2; i < words.size(); i++)
         {
         }
       }
     }
-    else if (words.size() >= 1 && words[0] == "DESC")
+    else if (words.size() >= 1 && boost::iequals(words[0], "DESC"))
     {
       if ((words.size() >= 2) && (words[1] != ""))
       {
@@ -89,18 +88,18 @@ int CommandHandler::process(const std::string& cmd)
         baseDesc.dumpRaw(std::cout);
       }
     }
-    else if (words.size() >= 3 && words[0] == "SET")
+    else if (words.size() >= 3 && boost::iequals(words[0], "SET"))
     {
-      if (words[1] == "AQ-ENGINE")
+      if (boost::iequals(words[1], "AQ-ENGINE"))
       {
         settings.aqEngine = words[2];
       }
-      else if (words[1] == "TRACE")
+      else if (boost::iequals(words[1], "TRACE"))
       {
-        settings.trace = !((words[2] == "0") || (words[2] == "FALSE"));
+        settings.trace = !((words[2] == "0") || boost::iequals(words[2], "FALSE"));
       }
     }
-    else if (words.size() >= 2 && words[0] == "CONNECT")
+    else if (words.size() >= 2 && boost::iequals(words[0], "CONNECT"))
     {
       databaseName = words[1];
       std::string s = databasesPath + databaseName + "/";
