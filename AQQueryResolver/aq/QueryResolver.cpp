@@ -35,7 +35,7 @@
 
 #include <deque>
 #include <algorithm>
-#include <fstream>
+#include <fstream>
 
 #include <boost/scoped_array.hpp>
 #include <boost/uuid/uuid.hpp>
@@ -56,8 +56,8 @@ namespace aq
 //------------------------------------------------------------------------------
 QueryResolver::QueryResolver(aq::tnode * _sqlStatement, Settings * _pSettings, AQEngine_Intf * _aq_engine, Base& _baseDesc, unsigned int& _id, unsigned int _level)
 	:	sqlStatement(_sqlStatement),
-    originalSqlStatement(NULL),
-    outerSelect(NULL),
+    originalSqlStatement(nullptr),
+    outerSelect(nullptr),
 		pSettings(_pSettings), 
 		aq_engine(_aq_engine), 
 		BaseDesc(_baseDesc), 
@@ -73,7 +73,7 @@ QueryResolver::QueryResolver(aq::tnode * _sqlStatement, Settings * _pSettings, A
     compressable(boost::none)
 {
   this->sqlStatement->to_upper();
-  this->originalSqlStatement = aq::clone_subtree(this->sqlStatement);
+  this->originalSqlStatement = this->sqlStatement->clone_subtree();
 	memset(szBuffer, 0, STR_BUF_SIZE);
   timer.start();
 }
@@ -81,8 +81,8 @@ QueryResolver::QueryResolver(aq::tnode * _sqlStatement, Settings * _pSettings, A
 //------------------------------------------------------------------------------
 QueryResolver::~QueryResolver()
 {
-  aq::delete_subtree(this->originalSqlStatement);
-  for (auto& v : this->aliases) { aq::delete_subtree(v.second); }
+  aq::tnode::delete_subtree(this->originalSqlStatement);
+  for (auto& v : this->aliases) { aq::tnode::delete_subtree(v.second); }
 	aq::Logger::getInstance().log(AQ_INFO, "Query Resolver: Time elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
 }
 
@@ -94,11 +94,11 @@ Table::Ptr QueryResolver::solve(boost::shared_ptr<aq::RowWritter_Intf> rowWritte
 
   this->preProcess();
 
-	this->solveNested(this->sqlStatement, this->level, NULL, false, false);
+	this->solveNested(this->sqlStatement, this->level, nullptr, false, false);
   // this->solveNested();
 
   aq::verb::VerbNode::Ptr spTree = this->postProcess();
-  if (spTree != NULL)
+  if (spTree != nullptr)
   {
     this->resolve(spTree);
   }
@@ -115,9 +115,9 @@ void QueryResolver::preProcess()
   }
   
   // post processing before solving nested queries
-	aq::solveIdentRequest(this->sqlStatement, BaseDesc);
-  aq::generate_parent(this->sqlStatement, NULL);
-  aq::addAlias(this->sqlStatement->left);
+	aq::util::solveIdentRequest(this->sqlStatement, BaseDesc);
+  aq::util::generate_parent(this->sqlStatement, nullptr);
+  aq::util::addAlias(this->sqlStatement->left);
 
 #if defined(AQ_TRACE)
   sql_query = "";
@@ -125,52 +125,52 @@ void QueryResolver::preProcess()
   std::cout << aq::syntax_tree_to_sql_form(this->sqlStatement, sql_query) << std::endl;
 #endif
 
-  bool hasWhere = find_main_node(this->sqlStatement, K_WHERE) != NULL;
-	this->hasGroupBy = find_main_node(this->sqlStatement, K_GROUP) != NULL;
-	this->hasOrderBy = find_main_node(this->sqlStatement, K_ORDER) != NULL;
+  bool hasWhere = this->sqlStatement->find_main_node(K_WHERE) != nullptr;
+	this->hasGroupBy = this->sqlStatement->find_main_node( K_GROUP) != nullptr;
+	this->hasOrderBy = this->sqlStatement->find_main_node(K_ORDER) != nullptr;
 
   std::list<tnode*> columns;
-  aq::toNodeListToStdList(this->sqlStatement, columns);
+  aq::util::toNodeListToStdList(this->sqlStatement, columns);
   for (auto& col : columns)
   {
-    this->aliases.insert(std::make_pair(col->right->getData().val_str, aq::clone_subtree(col->left)));
+    this->aliases.insert(std::make_pair(col->right->getData().val_str, col->left->clone_subtree()));
   }
 
   if (this->hasGroupBy)
   {
-    tnode * grpNode = find_main_node(this->sqlStatement, K_GROUP);
+    tnode * grpNode = this->sqlStatement->find_main_node(K_GROUP);
     std::vector<tnode*> cl;
-    aq::getColumnsList(grpNode->left->left, cl);
+    aq::util::getColumnsList(grpNode->left->left, cl);
     for (auto& n : cl) 
     {
-      this->groupBy.push_back(aq::clone_subtree(n));
+      this->groupBy.push_back(n->clone_subtree());
     }
 
     cl.clear();
-    aq::getColumnsList(this->sqlStatement->left, cl);
+    aq::util::getColumnsList(this->sqlStatement->left, cl);
     for (auto& n : cl) 
     {
       if ((n->tag == K_AS) && (n->left->tag == K_MIN)) // TODO : for all aggregate function
       {
         // FIXME : this suppose that the min aggregate function is applied to only one column
-        this->orderBy.push_back(aq::clone_subtree(n->left->left));
+        this->orderBy.push_back(n->left->left->clone_subtree());
       }
     }
   }
 
   if (this->hasOrderBy)
   {
-    tnode * grpNode = find_main_node(this->sqlStatement, K_ORDER);
+    tnode * grpNode = this->sqlStatement->find_main_node(K_ORDER);
     std::vector<tnode*> cl;
-    aq::getColumnsList(grpNode->left->left, cl);
+    aq::util::getColumnsList(grpNode->left->left, cl);
     for (auto& n : cl) 
     {
-      this->orderBy.push_back(aq::clone_subtree(n));
+      this->orderBy.push_back(n->clone_subtree());
     }
   }
 
   std::vector<tnode*> partitionsNodes;
-	find_nodes(this->sqlStatement->left, K_PARTITION, partitionsNodes);
+	this->sqlStatement->left->find_nodes(K_PARTITION, partitionsNodes);
   if (!partitionsNodes.empty())
   {
     // to solve a partition by we must perform an order on result
@@ -181,33 +181,33 @@ void QueryResolver::preProcess()
       this->partitions.push_back(std::vector<tnode*>());
       std::vector<tnode*>& v = *(this->partitions.rbegin());
       std::vector<tnode*> cl;
-      aq::getColumnsList(n->left->left, cl);
+      aq::util::getColumnsList(n->left->left, cl);
       for (auto& n : cl) 
       {
-        v.push_back(aq::clone_subtree(n));
+        v.push_back(n->clone_subtree());
       }
     }
     // add order
-    tnode * orderNode = find_first_node(this->sqlStatement->left, K_ORDER);
+    tnode * orderNode = this->sqlStatement->left->find_first_node(K_ORDER);
     if (orderNode)
     {
       std::vector<tnode*> orderByNodes;
-      aq::getColumnsList(orderNode->left->left, orderByNodes);
+      aq::util::getColumnsList(orderNode->left->left, orderByNodes);
       for (auto& n : orderByNodes)
       {
-        this->orderBy.push_back(aq::clone_subtree(n));
+        this->orderBy.push_back(n->clone_subtree());
       }
     }
   }
-  aq::removePartitionBy(this->sqlStatement);
+  aq::util::removePartitionBy(this->sqlStatement);
   
   if (!this->hasGroupBy && !this->hasPartitionBy/* && hasWhere*/) // FIXME : why where is needed ?
   {
     std::list<tnode*> aggregateColumns;
-    aq::findAggregateFunction(columns, aggregateColumns);
+    aq::util::findAggregateFunction(columns, aggregateColumns);
     if (!aggregateColumns.empty())
     {
-      aq::addEmptyGroupBy(this->sqlStatement);
+      aq::util::addEmptyGroupBy(this->sqlStatement);
       this->hasGroupBy = true;
     }
   }
@@ -224,8 +224,8 @@ aq::verb::VerbNode::Ptr QueryResolver::postProcess()
   std::cout << aq::multiline_query(aq::syntax_tree_to_sql_form(this->sqlStatement, sql_query)) << std::endl;
 #endif
 
-  aq::dateNodeToBigInt(this->sqlStatement);
-  aq::transformExpression(this->BaseDesc, *this->pSettings, this->sqlStatement);
+  aq::util::dateNodeToBigInt(this->sqlStatement);
+  aq::util::transformExpression(this->BaseDesc, *this->pSettings, this->sqlStatement);
 
 #if defined(AQ_TRACE)
 	sql_query = "";
@@ -234,8 +234,8 @@ aq::verb::VerbNode::Ptr QueryResolver::postProcess()
 #endif
 
   // if transform expression result to a K_FALSE in WHERE statement => the query answer is empty
-  aq::tnode * whereNode = aq::find_main_node(this->sqlStatement, K_WHERE);
-  if ((whereNode != NULL) && (whereNode->left->tag == K_FALSE))
+  aq::tnode * whereNode = this->sqlStatement->find_main_node(K_WHERE);
+  if ((whereNode != nullptr) && (whereNode->left->tag == K_FALSE))
   {
     return spTree;
   }
@@ -283,8 +283,8 @@ aq::verb::VerbNode::Ptr QueryResolver::postProcess()
 #endif
 
   std::set<aq::tnode*> nodes;
-  aq::checkTree( this->sqlStatement, nodes);
-	aq::cleanQuery( this->sqlStatement );
+  aq::tnode::checkTree( this->sqlStatement, nodes);
+	aq::util::cleanQuery( this->sqlStatement );
 	aq::Logger::getInstance().log(AQ_INFO, "Query Preprocessing: Time elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
   
 	//
@@ -294,7 +294,7 @@ aq::verb::VerbNode::Ptr QueryResolver::postProcess()
   if (this->result)
   {
     aq::Logger::getInstance().log(AQ_INFO, "Solve Optimal Min/Max: Time elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
-    return NULL;
+    return nullptr;
   }
 
   return spTree;
@@ -453,9 +453,9 @@ void QueryResolver::solveNested()
 {
 
   // solve from nested first
-  aq::tnode * from = aq::find_main_node(this->sqlStatement, K_FROM);
+  aq::tnode * from = this->sqlStatement->find_main_node(K_FROM);
   std::list<aq::tnode*> l;
-  toNodeListToStdList(from, l);
+  aq::util::toNodeListToStdList(from, l);
   for (auto& f : l)
   {
     if ((f->tag == K_AS) && (f->left && (f->left->tag == K_SELECT)))
@@ -466,14 +466,14 @@ void QueryResolver::solveNested()
   }
 
   // then solve where nested  
-  aq::tnode * where = aq::find_main_node(this->sqlStatement, K_WHERE);
+  aq::tnode * where = this->sqlStatement->find_main_node(K_WHERE);
   // todo
 }
 
 //------------------------------------------------------------------------------
 void QueryResolver::solveNested(aq::tnode*& pNode, unsigned int nSelectLevel, aq::tnode* pLastSelect, bool inFrom, bool inIn)
 {
-	if((pNode == NULL) || (pNode->tag == K_DELETED))
+	if((pNode == nullptr) || (pNode->tag == K_DELETED))
 		return;
 
 	aq::tnode* pNewLastSelect = pLastSelect;
@@ -514,17 +514,17 @@ void QueryResolver::solveNested(aq::tnode*& pNode, unsigned int nSelectLevel, aq
       // this->pSettings->useRowResolver = resolverMode;
 
       //delete old subtree and add new subtree containing answer
-      delete_subtree( pNode );
+      aq::tnode::delete_subtree(pNode);
       if( inIn )
       {
         pNode = new aq::tnode( K_IN_VALUES );
-        pNode->left = aq::GetTree( *table );
+        pNode->left = aq::util::GetTree( *table );
       }
       else
       {
         // table->load(this->pSettings->szTempPath1, this->pSettings->packSize);
-        pNode = aq::GetTree( *table );
-        if (pNode == NULL)
+        pNode = aq::util::GetTree( *table );
+        if (pNode == nullptr)
         {
           throw aq::generic_error(aq::generic_error::NOT_IMPLEMENTED, "empty nested result not supported");
         }
@@ -545,10 +545,10 @@ void QueryResolver::solveNested(aq::tnode*& pNode, unsigned int nSelectLevel, aq
 
     solveNested(pNode->next, nSelectLevel, pNewLastSelect, newInFrom, newInIn);
 
-    if( (pNode->tag == K_IN) && (pNode->right == NULL) )
+    if( (pNode->tag == K_IN) && (pNode->right == nullptr) )
     {
       /* If subquery evaluates to an empty set, IN evaluates to FALSE. */
-      delete_subtree( pNode );
+      aq::tnode::delete_subtree(pNode);
       pNode = new aq::tnode( K_FALSE );
     }
   }
@@ -561,7 +561,7 @@ void QueryResolver::executeNested(aq::tnode * pNode)
 
   std::string alias;
   aq::tnode * as = pNode->parent;
-  if ((as != NULL) && (as->tag == K_AS) && (as->right != NULL) && (as->right->getDataType() == aq::tnode::tnodeDataType::NODE_DATA_STRING))
+  if ((as != nullptr) && (as->tag == K_AS) && (as->right != nullptr) && (as->right->getDataType() == aq::tnode::tnodeDataType::NODE_DATA_STRING))
   {
     alias = pNode->parent->right->getData().val_str;
   }
@@ -575,7 +575,7 @@ void QueryResolver::executeNested(aq::tnode * pNode)
 
   // build table
   this->id_generator += 1;
-  boost::shared_ptr<QueryResolver> interiorQuery(new QueryResolver(aq::clone_subtree(pNode), pSettings, aq_engine, BaseDesc, this->id_generator, this->level + 1));
+  boost::shared_ptr<QueryResolver> interiorQuery(new QueryResolver(pNode->clone_subtree(), pSettings, aq_engine, BaseDesc, this->id_generator, this->level + 1));
   interiorQuery->setOuterSelect(this->sqlStatement);
   interiorQuery->setResultName(alias.c_str(), ""); // FIXME
   interiorQuery->solve();
@@ -588,13 +588,13 @@ void QueryResolver::executeNested(aq::tnode * pNode)
   }
 
   // update node tree
-  aq::delete_subtree(as->left);
-  aq::delete_subtree(as->right);
+  aq::tnode::delete_subtree(as->left);
+  aq::tnode::delete_subtree(as->right);
   as->tag = K_IDENT;
   as->set_string_data(alias.c_str());
-  as->left = NULL;
-  as->right = NULL;
-  as->next = NULL;
+  as->left = nullptr;
+  as->right = nullptr;
+  as->next = nullptr;
 }
 
 //------------------------------------------------------------------------------
@@ -630,7 +630,7 @@ void QueryResolver::solveAQMatrix(aq::verb::VerbNode::Ptr spTree)
 
 	// Prepare Columns
 	std::vector<Column::Ptr> columnTypes;
-	aq::getColumnTypes( this->sqlStatement, columnTypes, this->BaseDesc );
+	aq::util::getColumnTypes( this->sqlStatement, columnTypes, this->BaseDesc );
 	
   // build process to apply on each row
   boost::shared_ptr<aq::RowProcesses> processes(new aq::RowProcesses);
@@ -639,8 +639,8 @@ void QueryResolver::solveAQMatrix(aq::verb::VerbNode::Ptr spTree)
   std::vector<aq::tnode*> columnNodes;
 	if (this->hasGroupBy)
 	{
-		aq::tnode * nodeGroup = find_main_node(this->sqlStatement, K_GROUP);
-		aq::getAllColumnNodes(nodeGroup, columnNodes);
+		aq::tnode * nodeGroup = this->sqlStatement->find_main_node(K_GROUP);
+		aq::util::getAllColumnNodes(nodeGroup, columnNodes);
 	}
   else if (this->hasPartitionBy)
   {
@@ -793,19 +793,19 @@ void QueryResolver::renameResultTable()
 
   
 	// copy WHERE's conditions to outer select WHERE
-	aq::tnode* whereNode = find_main_node(this->sqlStatement, K_WHERE);
+	aq::tnode* whereNode = this->sqlStatement->find_main_node(K_WHERE);
 	if (whereNode)
 	{
     // keep only join
-    aq::tnode * joinNode = aq::clone_subtree(whereNode->left); // FIXME : possible memory leak
-    joinNode = aq::getJoin(joinNode);
+    aq::tnode * joinNode = whereNode->left->clone_subtree(); // FIXME : possible memory leak
+    joinNode = aq::util::getJoin(joinNode);
     if (joinNode)
     {
       // rename table in join by temporary table
 
       // look for K_IDENT (should be K_TABLE)
       std::vector<tnode*> ltables;
-      aq::find_nodes(joinNode, K_IDENT, ltables);
+      joinNode->find_nodes(K_IDENT, ltables);
       for (auto& n : ltables) 
       {
         aq::Table::Ptr table = this->BaseDesc.getTable(n->getData().val_str);
@@ -818,7 +818,7 @@ void QueryResolver::renameResultTable()
         }
       }
 
-      aq::addConditionsToWhere(joinNode, this->outerSelect);
+      aq::util::addConditionsToWhere(joinNode, this->outerSelect);
     }
 	}
 	// aq::addInnerOuterNodes(whereNode->left, K_INNER, K_INNER);
@@ -827,13 +827,13 @@ void QueryResolver::renameResultTable()
 //------------------------------------------------------------------------------
 void QueryResolver::changeTemporaryTableName(aq::tnode * pNode)
 {
-  if (pNode == NULL) return;
+  if (pNode == nullptr) return;
   if (pNode->tag == K_PERIOD)
   {
     aq::tnode * table = pNode->left;
     aq::tnode * column = pNode->right;
-    assert((table != NULL) && (table->tag == K_IDENT) && (table->getDataType() == aq::tnode::tnodeDataType::NODE_DATA_STRING));
-    assert((column != NULL) && (table->tag == K_IDENT) && (table->getDataType() == aq::tnode::tnodeDataType::NODE_DATA_STRING));
+    assert((table != nullptr) && (table->tag == K_IDENT) && (table->getDataType() == aq::tnode::tnodeDataType::NODE_DATA_STRING));
+    assert((column != nullptr) && (table->tag == K_IDENT) && (table->getDataType() == aq::tnode::tnodeDataType::NODE_DATA_STRING));
 
     // !!!!!!!!!!! FIXME !!!!!!!!!!!!! Hacking for testing (DEMO July 4 2013) !!!!!!!!!!!!!!!
     //if ((strcmp("B", table->getData().val_str) == 0) &&
@@ -1028,9 +1028,9 @@ bool QueryResolver::isCompressable()
     else
     {
       bool c = true;
-      tnode * select = aq::find_main_node(this->originalSqlStatement, K_SELECT);
+      tnode * select = this->originalSqlStatement->find_main_node(K_SELECT);
       std::vector<tnode*> nodes;
-      aq::getColumnsList(select->left, nodes);
+      aq::util::getColumnsList(select->left, nodes);
       for (auto it = nodes.begin(); (it != nodes.end()) && c; ++it)
       {
         c = isColumn(*it) || isMinMax(*it);
@@ -1048,7 +1048,7 @@ std::string QueryResolver::getOriginalColumn(const std::string& alias) const
     if (it->first == alias)
     {
       // TODO : check if tnode structure refer to only one column
-      tnode * n = aq::find_deeper_node(it->second, K_COLUMN);
+      tnode * n = it->second->find_deeper_node(K_COLUMN);
       assert(n);
       if (strcmp(n->getData().val_str, alias.c_str()) != 0)
       {
@@ -1136,7 +1136,7 @@ int QueryResolver::processQuery(const std::string& query, aq::Settings& settings
 	
 		aq::Logger::getInstance().log(AQ_INFO, "processing sql query\n");
 
-		aq::tnode	*pNode  = NULL;
+		aq::tnode	*pNode  = nullptr;
 		int	nRet;
 
 		//
@@ -1145,7 +1145,7 @@ int QueryResolver::processQuery(const std::string& query, aq::Settings& settings
 
 			boost::mutex::scoped_lock lock(parserMutex);
 			aq::Logger::getInstance().log(AQ_INFO, "parse sql query %s\n", query.c_str());
-			if ((nRet = SQLParse(query.c_str(), &pNode)) != 0 ) 
+			if ((nRet = SQLParse(query.c_str(), pNode)) != 0 ) 
 			{
 				aq::Logger::getInstance().log(AQ_ERROR, "error parsing sql request '%s'\n", query.c_str());
 				return EXIT_FAILURE;

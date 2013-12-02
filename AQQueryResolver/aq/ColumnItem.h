@@ -167,18 +167,18 @@ namespace aq
   {
   public:
     ColumnItem()
-      : value(NULL), count(0)
+      : value(nullptr), count(0)
     {
     }
 
     ColumnItem(const char * _value)
-      : value(NULL), count(1)
+      : value(nullptr), count(1)
     {
       this->setValue(_value);
     }
 
     ColumnItem(const ColumnItem<char*>& source)
-      : value(NULL)
+      : value(nullptr)
     {
       this->setValue(source.getValue());
       this->count = source.getCount();
@@ -207,7 +207,7 @@ namespace aq
       if (this->value)
       {
         delete this->value;
-        this->value = NULL;
+        this->value = nullptr;
       }
       if (_value)
       {

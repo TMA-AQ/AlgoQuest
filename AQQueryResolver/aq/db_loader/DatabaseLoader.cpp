@@ -70,9 +70,9 @@ namespace aq
       typedef typename boost::mpl::if_<boost::is_pointer<T>, ptr_handler, raw_handler>::type handler_type_t;
       typename handler_type_t::type value;
       
-      if (strcmp(field, "NULL") == 0)
+      if (strcmp(field, "nullptr") == 0)
       {
-        value = 0; // FIXME : handle NULL properly
+        value = 0; // FIXME : handle nullptr properly
       }
       else
       {
@@ -167,7 +167,7 @@ void DatabaseLoader::generate_ini()
 //-------------------------------------------------------------------------------
 void DatabaseLoader::load() 
 {	
-	time_t t = time (NULL);
+	time_t t = time (nullptr);
 	struct tm * tb = localtime(&t);
 	aq::Logger::getInstance().log(AQ_INFO, "Start loading database [%s] on  %d/%02d/%02d H %02d:%02d:%02d\n",
     this->my_base.name.c_str(),
@@ -184,7 +184,7 @@ void DatabaseLoader::load()
   grp.join_all();
 
 	// end time
-	t = time ( NULL );
+	t = time ( nullptr );
 	tb = localtime( &t );
 	aq::Logger::getInstance().log(AQ_INFO, "End on %d/%02d/%02d H %02d:%02d:%02d\n", 
     tb->tm_year +1900, tb->tm_mon +1 ,tb->tm_mday, tb->tm_hour, tb->tm_min, tb->tm_sec);
@@ -222,7 +222,7 @@ void DatabaseLoader::loadTable(const aq::base_t::table_t& table, const std::stri
 	int n_paquet = 0;
 
   // open source file and check if opened
-  if( (fd_table = aq::fopenUTF8(filename.c_str(), "r")) == NULL )
+  if( (fd_table = aq::fopenUTF8(filename.c_str(), "r")) == nullptr )
   {
     throw aq::generic_error(aq::generic_error::COULD_NOT_OPEN_FILE, "error opening file %s\n", filename.c_str());
   }
@@ -231,7 +231,7 @@ void DatabaseLoader::loadTable(const aq::base_t::table_t& table, const std::stri
   std::vector<struct aq::column_info_t> columns_infos;
   for (auto& col : table.colonne)
   {
-    struct aq::column_info_t infos = { col, "", NULL, NULL, NULL };
+    struct aq::column_info_t infos = { col, "", nullptr, nullptr, nullptr };
     columns_infos.push_back(infos);
   }
 
@@ -256,7 +256,7 @@ void DatabaseLoader::loadTable(const aq::base_t::table_t& table, const std::stri
         {
           sprintf(my_col, format_file_name.c_str(), rep_cible.c_str(), n_base, table.id, ci.col.id, n_paquet);
           ci.filename = my_col;
-          if ((ci.fd = fopen (my_col ,"w+b")) == NULL)
+          if ((ci.fd = fopen (my_col ,"w+b")) == nullptr)
           {
             throw aq::generic_error(aq::generic_error::COULD_NOT_OPEN_FILE, "error opening file %s\n", my_col);
           }
@@ -338,7 +338,7 @@ void DatabaseLoader::writeRecord(std::vector<struct aq::column_info_t>& columns_
       if (end_of_field)
       {
         if (indice_car == 0)  
-          strcpy(field, "NULL");
+          strcpy(field, "nullptr");
         else
           field[indice_car] = '\0';
         
@@ -363,7 +363,7 @@ void DatabaseLoader::buildPrmThesaurus(const aq::column_info_t& ci, size_t table
   // prm
   std::string prmFilename = aq::getPrmFileName(this->rep_cible.c_str(), table_id, ci.col.id, packet);
   FILE * prm = fopen(prmFilename.c_str(), "w");
-  if (prm == NULL)
+  if (prm == nullptr)
   {
     throw aq::generic_error(aq::generic_error::COULD_NOT_OPEN_FILE, "can't open file [%s]", prmFilename.c_str());
   }
@@ -376,7 +376,7 @@ void DatabaseLoader::buildPrmThesaurus(const aq::column_info_t& ci, size_t table
   // thesaurus
   std::string theFilename = aq::getThesaurusFileName(this->rep_cible.c_str(), table_id, ci.col.id, packet);
   FILE * the = fopen(theFilename.c_str(), "w");
-  if (the == NULL)
+  if (the == nullptr)
   {
     throw aq::generic_error(aq::generic_error::COULD_NOT_OPEN_FILE, "can't open file [%s]", theFilename.c_str());
   }
@@ -431,7 +431,7 @@ void DatabaseLoader::FileWriteEnreg(aq::column_info_t& ci, char * field) const
 	case aq::t_date1:
 	case aq::t_date2:
   case aq::t_date3:
-    if ((strcmp(field, "NULL") != 0) || (strcmp(field, "") != 0))  
+    if ((strcmp(field, "nullptr") != 0) || (strcmp(field, "") != 0))  
     {
       dateConverter.dateToBigInt(field);
     }

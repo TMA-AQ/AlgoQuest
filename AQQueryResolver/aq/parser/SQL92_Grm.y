@@ -52,7 +52,7 @@ using namespace aq;
 %token K_END K_EXISTS K_EXTRACT K_ESCAPE K_IMMEDIATE K_FOR K_FROM K_FULL
 %token K_GROUP K_HAVING K_IN K_INNER K_INSERT K_INTERVAL K_INTO
 %token K_IS K_JOIN K_LEFT K_LIKE K_MAX K_MIN K_MONTH K_NATURAL
-%token K_NULL K_ON K_ORDER K_OUTER K_RIGHT K_ROLLBACK K_SELECT K_SET 
+%token K_nullptr K_ON K_ORDER K_OUTER K_RIGHT K_ROLLBACK K_SELECT K_SET 
 %token K_SUBSTRING K_SUM K_TABLE K_THEN K_TRANSACTION K_UNION K_UPDATE
 %token K_VALUES K_WHEN K_WHERE K_WORK K_YEAR
 
@@ -131,7 +131,7 @@ select_stmt : K_SELECT
 				select_list 
 				table_expression			{	aq::tnode *pNode;
 												$$ = $1;
-												if ( $2 != NULL ) {
+												if ( $2 != nullptr ) {
 													pNode = $2;
 													$1->left = pNode;
 												} else {
@@ -151,7 +151,7 @@ query_exp	: select_stmt
 
 set_quantifier  : K_ALL
 				| K_DISTINCT 
-				| /* Nothing - ALL is implicit */	{ $$ = NULL; }
+				| /* Nothing - ALL is implicit */	{ $$ = nullptr; }
 				;
 
 select_list		: K_MUL	/* Asterisk */				{ $$ = $1; $$->setTag(K_STAR); }
@@ -179,7 +179,7 @@ select_sublist	: derived_column
 derived_column	: value_expression
 				| value_expression as_clause		{
 														/* $2.tag == K_AS */
-														if ( $2->left != NULL ) {
+														if ( $2->left != nullptr ) {
 															$2->right = $2->left;
 														}
 														$2->left = $1;
@@ -188,7 +188,7 @@ derived_column	: value_expression
  				| replace_clause
 				| replace_clause as_clause			{
 														/* $2.tag == K_AS */
-														if ( $2->left != NULL ) {
+														if ( $2->left != nullptr ) {
 															$2->right = $2->left;
 														}
 														$2->left = $1;
@@ -266,19 +266,19 @@ table_expression :  from_clause
 														aq::tnode *pNode;
 														$$		= $1;
 														pNode	= $1;
-														if ( $2 != NULL ) {
+														if ( $2 != nullptr ) {
 															pNode->next = $2;
 															pNode		= $2;
 														}
-														if ( $3 != NULL ) {
+														if ( $3 != nullptr ) {
 															pNode->next = $3;
 															pNode		= $3;
 														}
-														if ( $4 != NULL ) {
+														if ( $4 != nullptr ) {
 															pNode->next = $4;
 															pNode		= $4;
 														}
-														if ( $5 != NULL ) {
+														if ( $5 != nullptr ) {
 															pNode->next = $5;
 															pNode		= $5;
 														}
@@ -302,14 +302,14 @@ table_reference_list : joined_table
 joined_table : table_reference
 			| joined_table joined_type table_reference {
 														aq::tnode *pNode;
-														pNode = get_leftmost_child( $2 );
+														pNode = aq::tnode::get_leftmost_child( $2 );
 														pNode->left	= $1;
 														pNode->right= $3;
 														$$			= $2;
 													}
 			| joined_table joined_type table_reference K_ON search_condition {
 														aq::tnode *pNode;
-														pNode = get_leftmost_child( $2 );
+														pNode = aq::tnode::get_leftmost_child( $2 );
 														pNode->left	= $1;
 														pNode->right= $3;
 														pNode->next	= $4;
@@ -357,30 +357,28 @@ where_clause : K_WHERE search_condition				{
 														$1->left	= $2;
 														$$			= $1;
 													}
-			 | /* nothing */						{	$$ = NULL; }
+			 | /* nothing */						{	$$ = nullptr; }
 			 ;
 
 group_by_clause : K_GROUP K_BY column_name_list		{
-														$1->left = $2;
-														$2->left = $3;
+														$1->left = $3;
 														$$ = $1;
 													}
-				| /* nothing */						{	$$ = NULL; }
+				| /* nothing */						{	$$ = nullptr; }
 				;
 
 having_clause	: K_HAVING search_condition			{
 														$1->left = $2;
 														$$ = $1;
 													}
-				| /* nothing */						{	$$ = NULL; }
+				| /* nothing */						{	$$ = nullptr; }
 				;
 
 order_by_clause : K_ORDER K_BY sort_specification_list	{
-														$1->left = $2;
-														$2->left = $3;
+														$1->left = $3;
 														$$ = $1;
 													}
-				| /* nothing ???? */				{	$$ = NULL; }
+				| /* nothing ???? */				{	$$ = nullptr; }
 				;
 
 				/* This is a simplified version */
@@ -446,7 +444,7 @@ sort_specification_list : sort_specification
 						;
 
 sort_specification : sort_key ordering_specification	{
-														if ( $2 != NULL ) {
+														if ( $2 != nullptr ) {
 															$2->left = $1;
 															$$ = $2;
 														} else {
@@ -476,7 +474,7 @@ sort_key	: value_expression						{
 
 ordering_specification	: K_ASC 
 						| K_DESC
-						| /* nothing */				{ $$ = NULL; }
+						| /* nothing */				{ $$ = nullptr; }
 						;
 
 value_expression	: numeric_value_expression
@@ -632,7 +630,7 @@ count_all : K_COUNT K_LPAREN K_MUL K_RPAREN			{
 														$$			= $1;
 													}
 			| K_COUNT K_LPAREN set_quantifier value_expression K_RPAREN	{
-														if ( $3 != NULL ) {
+														if ( $3 != nullptr ) {
 															$1->left	= $3;
 															$1->right	= $4;
 														} else {
@@ -647,7 +645,7 @@ general_set_function	: set_function_type
 							set_quantifier 
 							value_expression 
 							K_RPAREN				{
-														if ( $3 != NULL ) {
+														if ( $3 != nullptr ) {
 															$1->left	= $3;
 															$1->right	= $4;
 														} else {
@@ -689,10 +687,10 @@ case_specification	: simple_case
 simple_case	: K_CASE case_operand simple_when_clause_list else_clause K_END	{
 														$1->left		= $2;
 														$1->right	= $3;
-														if ( $4 != NULL ) {
+														if ( $4 != nullptr ) {
 															aq::tnode *pNode;
 															pNode = $3;
-															while ( pNode->next != NULL )
+															while ( pNode->next != nullptr )
 																pNode = pNode->next;
 															pNode->next = $4;
 														}
@@ -714,10 +712,10 @@ simple_case	: K_CASE case_operand simple_when_clause_list else_clause K_END	{
 searched_case	: K_CASE searched_when_clause_list else_clause K_END {
 														$1->left	= $2;
 														/* $1->right	= $3; */
-														if ( $3 != NULL ) {
+														if ( $3 != nullptr ) {
 															aq::tnode *pNode;
 															pNode = $2;
-															while ( pNode->next != NULL )
+															while ( pNode->next != nullptr )
 																pNode = pNode->next;
 															pNode->next = $3;
 														}
@@ -760,7 +758,7 @@ else_clause	: K_ELSE result							{
 														$1->left	= $2;
 														$$			= $1;
 													}
-			| /* nothing */							{	$$ = NULL; }
+			| /* nothing */							{	$$ = nullptr; }
 			;
 
 case_operand	: value_expression
@@ -770,7 +768,7 @@ when_operand	: value_expression
 				;
 
 result	: result_expression 
-		| K_NULL
+		| K_nullptr
 		;
 
 result_expression	: value_expression
@@ -882,17 +880,17 @@ comparison_predicate	: row_value_constructor comp_op row_value_constructor	{
 														if ( $1->getTag() == K_IDENT || 
 															 $1->getTag() == K_COLUMN || 
 															( $1->getTag() == K_PERIOD && 
-															  $1->left != NULL &&
+															  $1->left != nullptr &&
 															  $1->left->getTag() == K_IDENT &&
-															  $1->right != NULL &&
+															  $1->right != nullptr &&
 															  ( $1->right->getTag() == K_IDENT || 
 															    $1->right->getTag() == K_COLUMN ) ) )
 															if ( $3->getTag() == K_IDENT || 
 																 $3->getTag() == K_COLUMN || 
 																( $3->getTag() == K_PERIOD && 
-																  $3->left != NULL &&
+																  $3->left != nullptr &&
 																  $3->left->getTag() == K_IDENT &&
-																  $3->right != NULL &&
+																  $3->right != nullptr &&
 																  ( $3->right->getTag() == K_IDENT ||
 																    $3->right->getTag() == K_COLUMN ) ) )
 																    switch( $2->getTag() )
@@ -1043,13 +1041,13 @@ escape_character	:  character_value_expression
 	*/
 
 //-----------------
-null_predicate	: row_value_constructor K_IS K_NOT K_NULL {
+null_predicate	: row_value_constructor K_IS K_NOT K_nullptr {
 														$2->left	= $1;
 														$2->right	= $3;
 														$3->left	= $4;
 														$$			= $2;
 													}
-				| row_value_constructor K_IS K_NULL		{
+				| row_value_constructor K_IS K_nullptr		{
 														$2->left	= $1;
 														$2->right	= $3;
 														$$			= $2;
@@ -1081,7 +1079,7 @@ row_value_constructor_list	: row_value_constructor_element
 							;
 
 row_value_constructor_element	: value_expression
-								| K_NULL
+								| K_nullptr
 								| K_DEFAULT
 								;
 
@@ -1123,7 +1121,7 @@ rank_function_type	: K_RANK
 */
 
 lead_or_lag_function	: lead_or_lag K_LPAREN lead_or_lag_extent offset_optional K_RPAREN {
-														if( $3 != NULL )
+														if( $3 != nullptr )
 														{
 															aq::tnode *pNode;
 															pNode			= new tnode( K_COMMA );
@@ -1147,7 +1145,7 @@ lead_or_lag_extent	: value_expression
 					;
 
 offset_optional	: K_COMMA offset default_expression_optional {
-														if( $3 != NULL )
+														if( $3 != nullptr )
 														{
 															aq::tnode *pNode;
 															pNode			= new tnode( K_COMMA );
@@ -1160,7 +1158,7 @@ offset_optional	: K_COMMA offset default_expression_optional {
 															$$				= $2;
 														}
 													}
-				| /* nothing */						{	$$ = NULL; }
+				| /* nothing */						{	$$ = nullptr; }
 				;
 
 offset	: K_INTEGER
@@ -1169,14 +1167,14 @@ offset	: K_INTEGER
 default_expression_optional	: K_COMMA default_expression {
 														$$	= $2;
 													}
-							| /* nothing */			{	$$ = NULL; }
+							| /* nothing */			{	$$ = nullptr; }
 							;
 
 default_expression	: value_expression
 
 /*
-null_treatment	: K_RESPECT_NULLS 
-				| K_IGNORE_NULLS
+null_treatment	: K_RESPECT_nullptrS 
+				| K_IGNORE_nullptrS
 */
 				
 first_or_last_value_function	: first_or_last_value
@@ -1207,9 +1205,9 @@ window_specification_details	: /* existing_window_name */
 								  window_partition_clause
 								  window_order_clause
 								  window_frame_clause {
-														if( $2 != NULL )
+														if( $2 != nullptr )
 														{
-															if( $1 != NULL )
+															if( $1 != nullptr )
 															{
 																$1->right	= $3;
 																$2->right	= $1;
@@ -1220,7 +1218,7 @@ window_specification_details	: /* existing_window_name */
 														}
 														else
 														{
-															if( $1 != NULL )
+															if( $1 != nullptr )
 															{
 																$1->right	= $3;
 																$$			= $1;
@@ -1233,7 +1231,7 @@ window_specification_details	: /* existing_window_name */
 
 /*
 existing_window_name	: window_name
-						| /* nothing */ /*			{	$$	= NULL; }
+						| /* nothing */ /*			{	$$	= nullptr; }
 */
 
 window_partition_clause	: K_PARTITION K_BY window_partition_column_reference_list {
@@ -1241,7 +1239,7 @@ window_partition_clause	: K_PARTITION K_BY window_partition_column_reference_lis
 														$2->left	= $3;
 														$$			= $1;
 													}
-						| /* nothing */				{	$$	= NULL; }
+						| /* nothing */				{	$$	= nullptr; }
 						;
 
 window_partition_column_reference_list	: window_partition_column_reference
@@ -1268,7 +1266,7 @@ window_frame_clause	: window_frame_units window_frame_extent /*[ <window frame e
 														pNode->right	= $2;
 														$$				= pNode;
 													}
-					| /* nothing */ 				{	$$ = NULL; }
+					| /* nothing */ 				{	$$ = nullptr; }
 
 window_frame_units	: K_ROWS
 					| K_RANGE
@@ -1622,31 +1620,31 @@ merge_stmt	: K_MERGE optional_into table_reference K_USING table_reference
 			;
 			
 optional_into	: K_INTO
-				| /* nothing */ 					{	$$	= NULL; }
+				| /* nothing */ 					{	$$	= nullptr; }
 				;
 
 when_matched	: K_WHEN K_MATCHED K_THEN merge_matched	{
 														$$	= $4;
 													}
-				| /* nothing */ 					{	$$	= NULL; }
+				| /* nothing */ 					{	$$	= nullptr; }
 				;
 
 when_not_matched	: K_WHEN K_NOT K_MATCHED optional_by_target
 					  K_THEN merge_not_matched		{
 														$$	= $5;
 													}
-					| /* nothing */ 				{	$$	= NULL; }
+					| /* nothing */ 				{	$$	= nullptr; }
 					;
 					
-optional_by_target	: K_BY K_TARGET					{	$$	= NULL; }
-					| /* nothing */ 				{	$$	= NULL; }
+optional_by_target	: K_BY K_TARGET					{	$$	= nullptr; }
+					| /* nothing */ 				{	$$	= nullptr; }
 					;
 					
 when_not_matched_by_source	: K_WHEN K_NOT K_MATCHED 
 							  K_BY K_SOURCE K_THEN merge_matched	{
 														$$	= $7;
 													}
-							| /* nothing */ 		{	$$	= NULL; }
+							| /* nothing */ 		{	$$	= nullptr; }
 							;
 							
 merge_matched	: K_UPDATE K_SET column_column_list	{
@@ -1684,12 +1682,15 @@ column_column_pair	: column_reference K_EQ column_reference	{
 //------------------------------------------------------------------------------
 #include "lex.yy.cpp"
 
+namespace aq
+{
+
 //------------------------------------------------------------------------------
 /* Returns 0 on success, 1 on error */
-int SQLParse( const char *pszStr, aq::tnode** ppNode ) {
+int SQLParse( const char *pszStr, aq::tnode*& pNode ) {
 	int rc = 0;
 	yy_scan_string( pszStr );
-	rc = yyparse( (void*)ppNode );
+	rc = yyparse( (void*)&pNode );
 
   // FIXME
 #ifndef __FreeBSD__ 
@@ -1697,6 +1698,8 @@ int SQLParse( const char *pszStr, aq::tnode** ppNode ) {
 #endif
 
 	return rc;
+}
+
 }
 
 //------------------------------------------------------------------------------

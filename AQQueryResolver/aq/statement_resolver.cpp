@@ -210,7 +210,7 @@
 //				if( pSettings->csvFormat )
 //					row += "\"";
 //				//if( reverseValuePos[idx2] < 0  ) // this is not possible
-//				//	row += "NULL";
+//				//	row += "nullptr";
 //				else
 //				{
 //					Column& column = *valuesToInsert->Columns[reverseValuePos[idx2]];
@@ -240,7 +240,7 @@
 //	if( firstPackSize > 0 )
 //	{
 //		Column nullColumn;
-//		nullColumn.Items.resize(firstPackSize, NULL);
+//		nullColumn.Items.resize(firstPackSize, nullptr);
 //		for( int idx = 0; idx < nrColumns; ++idx )
 //			SolveInsertAux( table, tableIdx, idx, packNumber, reverseValuePos, nullColumn, 
 //				*valuesToInsert, 0, firstPackSize, true, pSettings, aq_engine,BaseDesc );
@@ -252,7 +252,7 @@
 //	if( leftOverRows % pSettings->packSize > 0 )
 //		++nrPacks;
 //	Column nullColumn;
-//	nullColumn.Items.resize(pSettings->packSize, NULL);
+//	nullColumn.Items.resize(pSettings->packSize, nullptr);
 //	for( int idx = 0; idx < nrPacks; ++idx )
 //	{
 //		int firstIdx = firstPackSize + idx * pSettings->packSize;
@@ -260,7 +260,7 @@
 //		if( idx == nrPacks - 1 )
 //		{
 //			int lastPackSize = table.TotalCount % pSettings->packSize;
-//			nullColumn.Items.resize(lastPackSize, NULL);
+//			nullColumn.Items.resize(lastPackSize, nullptr);
 //			endIdx = firstIdx + lastPackSize;
 //		}
 //		for( int idx2 = 0; idx2 < nrColumns; ++idx2 )
@@ -280,12 +280,12 @@
 //	std::string tablePath = pSettings->szRootPath;
 //	tablePath += "data_orga\\tables\\" + table.getOriginalName() + ".txt";
 //	FILE* fOldTable = aq::fopenUTF8( tablePath.c_str(), "rt" );
-//	if( fOldTable == NULL )
+//	if( fOldTable == nullptr )
 //		throw aq::generic_error(aq::generic_error::COULD_NOT_OPEN_FILE, "");
 //
 //	std::string newTablePath = tablePath + "a"; //form unique table name
 //	FILE* fNewTable = fopen( newTablePath.c_str(), "wt" );
-//	if( fNewTable == NULL )
+//	if( fNewTable == nullptr )
 //		throw aq::generic_error(aq::generic_error::COULD_NOT_OPEN_FILE, "");
 //
 //	std::vector<aq::tnode*> updates;
@@ -317,7 +317,7 @@
 //	{	
 //		for( size_t idx = 0; idx < columns.size(); ++idx )
 //		{
-//			updates.push_back( NULL );
+//			updates.push_back( nullptr );
 //			updateToTableMap.push_back( idx );
 //			tableToUpdateMap.push_back( idx );
 //		}
@@ -461,7 +461,7 @@
 //					tColumn->ID, packNr );
 //				columnPath += "data_orga\\columns\\";
 //				columnPath += szBuffer;
-//				aq::tnode* pValNode = NULL;
+//				aq::tnode* pValNode = nullptr;
 //				if( pNode->tag == K_UPDATE )
 //					pValNode = updates[idx]->right;
 //				column->loadFromFile( columnPath );
@@ -483,7 +483,7 @@
 //								assert( 0 );
 //						}
 //						else
-//							column->Items[idx2] = NULL;
+//							column->Items[idx2] = nullptr;
 //				column->saveToFile( columnPath );
 //				sprintf( szBuffer, "\"%s %s %d %d %u\"\n", 
 //					pSettings->szLoaderPath, pSettings->iniFile.c_str(), tableIdx + 1, 
@@ -502,7 +502,7 @@
 //				for( size_t idx2 = 0; idx2 < fields.size(); ++idx2 )
 //				{
 //					if( pNode->tag == K_DELETE )
-//						fwrite( "NULL", sizeof(char), strlen("NULL"), fNewTable );
+//						fwrite( "nullptr", sizeof(char), strlen("nullptr"), fNewTable );
 //					else if( tableToUpdateMap[idx2] < 0 )
 //						fwrite( fields[idx2], sizeof(char), strlen(fields[idx2]), fNewTable );
 //					else
@@ -544,7 +544,7 @@
 //	aq::addUnionMinusNode( lastTag, queries, operation, pNode, pSettings, aq_engine,BaseDesc );
 //	reverse( queries.begin(), queries.end() );
 //	reverse( operation.begin(), operation.end() );
-//	Table::Ptr totalTable = NULL;
+//	Table::Ptr totalTable = nullptr;
 //	std::vector<size_t> deletedRows;
 //	for( size_t idx = 0; idx < queries.size(); ++idx )
 //	{
@@ -602,7 +602,7 @@
 //								//MINUS
 //								deletedRows.push_back( idx4 );
 //								for( size_t idx3 = 0; idx3 < nrColumns; ++idx3 )
-//                  totalTable->Columns[idx3]->Items[idx4] = NULL;
+//                  totalTable->Columns[idx3]->Items[idx4] = nullptr;
 //							}
 //						}
 //					}

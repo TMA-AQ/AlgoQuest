@@ -10,7 +10,7 @@ namespace aq
 template <typename T>
 typename ColumnItem<T>::Ptr getMinMaxFromThesaurus(Column::Ptr column, size_t tableID, size_t colIdx, size_t partIdx, bool min, Base& BaseDesc, Settings& Settings)
 {
-	typename ColumnItem<T>::Ptr minMax = NULL;
+	typename ColumnItem<T>::Ptr minMax = nullptr;
   size_t tableIdx = 0;
   for (tableIdx = 0; tableIdx < BaseDesc.getTables().size(); ++tableIdx)
   {
@@ -19,7 +19,7 @@ typename ColumnItem<T>::Ptr getMinMaxFromThesaurus(Column::Ptr column, size_t ta
   }
 	std::string fileName = getThesaurusFileName(Settings.dataPath.c_str(), tableIdx + 1, colIdx + 1, partIdx);
 	FILE* pFIn = fopen(fileName.c_str(), "rb");
-	if ( pFIn == NULL )
+	if ( pFIn == nullptr )
 		return minMax;
 	FileCloser fileCloser(pFIn);
 
@@ -96,29 +96,29 @@ Table::Ptr solveOptimalMinMax(aq::verb::VerbNode::Ptr spTree,
 {
 	if( !spTree->getLeftChild() )
   {
-    return NULL;
+    return nullptr;
 		// throw generic_error(generic_error::INVALID_QUERY, "");
   }
 	aq::verb::VerbNode::Ptr verb1 = spTree->getLeftChild();
-  aq::verb::VerbNode::Ptr verb2 = NULL;
+  aq::verb::VerbNode::Ptr verb2 = nullptr;
 	if( !verb1 ) 
-    return NULL;
+    return nullptr;
   if ((verb1->getVerbType() == K_MIN) || (verb1->getVerbType() == K_MAX))
     verb2 = verb1->getLeftChild();
   else if ((verb1->getVerbType() == K_AS) && ((verb1->getLeftChild()->getVerbType() == K_MIN) || (verb1->getLeftChild()->getVerbType() == K_MAX)))
     verb2 = verb1->getLeftChild()->getLeftChild();
   else
-    return NULL;
+    return nullptr;
 
 	if( verb2->getVerbType() != K_PERIOD )
-		return NULL;
-	if( spTree->getBrother() == NULL )
-		return NULL;
+		return nullptr;
+	if( spTree->getBrother() == nullptr )
+		return nullptr;
 	aq::verb::VerbNode::Ptr spNode = spTree;
 	do
 	{
 		if( spNode->getVerbType() == K_WHERE )
-			return NULL;
+			return nullptr;
 		spNode = spNode->getBrother();
 	} while( spNode->getBrother() );
 
@@ -134,7 +134,7 @@ Table::Ptr solveOptimalMinMax(aq::verb::VerbNode::Ptr spTree,
     break;
   }
 
-	// ColumnItem::Ptr minMax = NULL;
+	// ColumnItem::Ptr minMax = nullptr;
 	bool min = verb1->getVerbType() == K_MIN;
 	for( int partIdx = 0; ; ++partIdx )
 	{

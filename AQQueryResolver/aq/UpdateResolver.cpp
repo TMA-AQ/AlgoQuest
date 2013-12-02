@@ -28,12 +28,12 @@ void UpdateResolver::solve()
   //
   // get columns to update and there values
   aq::tnode * setNode = this->statement->next;
-  if (setNode == NULL)
+  if (setNode == nullptr)
   {
     throw aq::generic_error(aq::generic_error::INVALID_QUERY, "missing SET statement in UPDATE query");
   }
   std::list<aq::tnode*> set_list;
-  aq::toNodeListToStdList(setNode, set_list);
+  aq::util::toNodeListToStdList(setNode, set_list);
   for (auto& n : set_list)
   {
     if (n->tag != K_EQ)
@@ -69,7 +69,7 @@ void UpdateResolver::solve()
   // get rows to update
   std::vector<size_t> indexes;
   aq::tnode * whereNode = setNode->next;
-  if (whereNode != NULL)
+  if (whereNode != nullptr)
   {
     aq::tnode * select = new aq::tnode(K_SELECT);
     select->left = new aq::tnode(K_PERIOD);

@@ -26,18 +26,18 @@ std::string transform(const char * db_name, const char * query, int tag)
 
   settings.initPath("E:/AQ_DB/msalgoquest/");
   aq::Base base(settings.dbDesc.c_str());
-  pErr = SQLParse(query, &tree);
+  pErr = SQLParse(query, tree);
   BOOST_REQUIRE(pErr == 0);
   BOOST_REQUIRE(tree != NULL);
   
   // preprocessing
-  aq::dateNodeToBigInt(tree);
-  aq::solveIdentRequest(tree, base);
-  aq::generate_parent(tree, NULL);
+  aq::util::dateNodeToBigInt(tree);
+  aq::util::solveIdentRequest(tree, base);
+  aq::util::generate_parent(tree, NULL);
   
-  aq::tnode * cmpNode = aq::find_main_node(tree, K_WHERE);
+  aq::tnode * cmpNode = tree->find_main_node(K_WHERE);
   BOOST_REQUIRE(cmpNode != NULL);
-  cmpNode = aq::find_first_node(cmpNode, tag);
+  cmpNode = cmpNode->find_first_node(tag);
   BOOST_REQUIRE(cmpNode != NULL);
   
   std::cout << *cmpNode << std::endl;

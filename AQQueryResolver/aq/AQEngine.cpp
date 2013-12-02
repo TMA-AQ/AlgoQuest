@@ -249,7 +249,7 @@ namespace aq
     std::wstring warg = aq::string2Wstring(args);
     LPCWSTR prg_wstr = wprg.c_str();
     LPCWSTR arg_wstr = warg.c_str();
-    if (CreateProcessW(prg_wstr, (LPWSTR)arg_wstr, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi))
+    if (CreateProcessW(prg_wstr, (LPWSTR)arg_wstr, nullptr, nullptr, FALSE, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi))
     {
       rc = WaitForSingleObject(pi.hProcess, INFINITE);
       CloseHandle(pi.hProcess);

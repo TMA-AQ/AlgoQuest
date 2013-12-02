@@ -119,7 +119,7 @@ bool CommaVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 								VerbResult::Ptr resLeft,
 								VerbResult::Ptr resRight, VerbResult::Ptr resNext )
 {
-	VerbResultArray::Ptr resArray = NULL;
+	VerbResultArray::Ptr resArray = nullptr;
 	if( resLeft && resLeft->getType() == VerbResult::ARRAY )
 	{
 	  resArray = boost::static_pointer_cast<VerbResultArray>( resLeft );
@@ -178,7 +178,7 @@ void CommaVerb::changeResult(	Table::Ptr table,
 //------------------------------------------------------------------------------
 void CommaVerb::addResult( aq::Row& row )
 {
-  // this->changeResult(NULL, resLeft, resRight, resNext);
+  // this->changeResult(nullptr, resLeft, resRight, resNext);
 }
 
 //------------------------------------------------------------------------------
@@ -324,7 +324,7 @@ bool AsVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pS
 		assert( pNode && pNode->left );
 		replaceTableIdent( pStart, pNode->right->getData().val_str, pNode->left->getData().val_str );
 		delete pNode->right ;
-    pNode->right = NULL;
+    pNode->right = nullptr;
 		*pNode = *pNode->left; //no memory leaks
 		return true;
 	case K_SELECT:

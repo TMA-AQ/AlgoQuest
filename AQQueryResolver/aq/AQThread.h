@@ -22,7 +22,7 @@ namespace aq
     AQThread(aq::tnode* pNode, T* resolver) {
       this->_pNode = pNode;
       this->_queryResolver = resolver;
-      this->_patern = NULL;
+      this->_patern = nullptr;
       this->_end = false;
       this->_threading = false;
       this->_ready = false; 
@@ -36,7 +36,7 @@ namespace aq
     //--------------------------------------------------------------------------------------------
 
     bool  findNodeIn(aq::tnode* pNode, aq::tnode* tNode) {
-      if (pNode == NULL)
+      if (pNode == nullptr)
         return false;
 
       if (pNode == tNode)
@@ -129,7 +129,7 @@ namespace aq
 
 
       //launch the patern
-      if (this->_patern != NULL)
+      if (this->_patern != nullptr)
         if (this->_patern->isReady() == true && this->_patern->threadOver() == false && this->_patern->isThreading() == false)
         {
           std::cout << "--->  I call my patern to solveThread and:" <<std::endl;
@@ -226,7 +226,7 @@ namespace aq
       os << indent << "<time> #- " << this->getTime() << " -# </time>" << std::endl;
       os << indent << "<adress> #- [" << this->_pNode << "] -# </adress>" << std::endl;
       std::string str;
-      aq::generate_parent(this->_pNode, NULL);
+      aq::generate_parent(this->_pNode, nullptr);
       aq::syntax_tree_to_sql_form(this->_pNode, str);
       aq::multiline_query(str);
       this->secretModule(str, indent);

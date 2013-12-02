@@ -21,7 +21,7 @@ namespace aq
     AQThreadRequest(int nbrThread, aq::Settings* settings, aq::AQEngine_Intf* aqEngine, aq::Base& baseDesc)
       : _nbrThread(nbrThread), _settings(settings), _aqEngine(aqEngine), _baseDesc(baseDesc)
     {
-      srand(static_cast<unsigned int>(time(NULL))); //temporaire
+      srand(static_cast<unsigned int>(time(nullptr))); //temporaire
     }
 
     ~AQThreadRequest() {
@@ -42,7 +42,7 @@ namespace aq
     }
 
     void  parseAndCutThread(aq::tnode* pNode) {
-      if (pNode == NULL)
+      if (pNode == nullptr)
         return;
 
       if (pNode->getTag() == K_SELECT)
@@ -85,7 +85,7 @@ namespace aq
     }
 
     void  assignPatern() {
-      this->_thread.front()->assignPatern(NULL);
+      this->_thread.front()->assignPatern(nullptr);
     }
      
     //--------------------------------------------------------------------------------------------

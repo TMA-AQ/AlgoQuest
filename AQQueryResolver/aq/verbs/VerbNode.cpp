@@ -7,7 +7,7 @@ namespace aq {
 namespace verb {
 
 //------------------------------------------------------------------------------
-VerbNode::VerbNode(): pStart(NULL), pNode(NULL)
+VerbNode::VerbNode(): pStart(nullptr), pNode(nullptr)
 {	
 }
 
@@ -62,9 +62,9 @@ void VerbNode::changeQuery()
 	if( pNode->inf == 1 )
 		return;
 	
-	VerbResult::Ptr param1 = this->Left ? this->Left->getResult() : NULL;
-	VerbResult::Ptr param2 = this->Right ? this->Right->getResult() : NULL;
-	VerbResult::Ptr param3 = this->Brother ? this->Brother->getResult() : NULL;
+	VerbResult::Ptr param1 = this->Left ? this->Left->getResult() : nullptr;
+	VerbResult::Ptr param2 = this->Right ? this->Right->getResult() : nullptr;
+	VerbResult::Ptr param3 = this->Brother ? this->Brother->getResult() : nullptr;
 	if( this->changeQuery( this->pStart, this->pNode, param1, param2, param3 ) )
 	{
 		assert( this->pNode );
@@ -184,9 +184,9 @@ VerbNode::Ptr VerbNode::BuildVerbsTree( aq::tnode* pStart, const boost::array<un
 	if( pStart->tag != K_SELECT )
 		throw 0; // TODO
 
-	aq::tnode* pStartOriginal = aq::clone_subtree(pStart);
+	aq::tnode* pStartOriginal = pStart->clone_subtree();
 	
-	VerbNode::Ptr spLast = NULL;
+	VerbNode::Ptr spLast = nullptr;
 	for( size_t idx = 0; idx < categories_order.size(); ++idx )
 	{
 		aq::tnode* pNode = pStart;
@@ -199,7 +199,7 @@ VerbNode::Ptr VerbNode::BuildVerbsTree( aq::tnode* pStart, const boost::array<un
 		spNode->setBrother( spLast );
 		spLast = spNode;
 	}
-	delete_subtree( pStartOriginal );
+	aq::tnode::delete_subtree(pStartOriginal);
 	return spLast;
 }
 
@@ -263,7 +263,7 @@ VerbNode::Ptr VerbNode::BuildVerbsSubtree(	aq::tnode* pSelect, aq::tnode* pStart
 //------------------------------------------------------------------------------
 void VerbNode::dump(std::ostream& os, VerbNode::Ptr tree, std::string ident)
 {
-  if (tree != NULL)
+  if (tree != nullptr)
   {
     os << id_to_string(tree->getVerbType()) << " [" << tree.get() << "]" << std::endl;
     os << ident << "  left -> ";
@@ -275,7 +275,7 @@ void VerbNode::dump(std::ostream& os, VerbNode::Ptr tree, std::string ident)
   }
   else 
   {
-    os << "NULL" << std::endl;
+    os << "nullptr" << std::endl;
   }
 }
 

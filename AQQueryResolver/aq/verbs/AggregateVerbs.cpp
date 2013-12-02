@@ -24,7 +24,7 @@ bool AggregateVerb::changeQuery(aq::tnode* pStart,
 		throw generic_error( generic_error::AGGREGATE_NOT_IN_SELECT_OR_HAVING, "" );
   }
   pNode->tag = K_DELETED;
-	return resLeft != NULL;
+	return resLeft != nullptr;
 }
 
 //------------------------------------------------------------------------------
@@ -94,7 +94,7 @@ void AggregateVerb::addResult(aq::Row& row)
     this->count += row.count;
   }
 
-  if (this->getRightChild() != NULL)
+  if (this->getRightChild() != nullptr)
   {
     // FIXME : manage partition and Frame
     row_item.item = this->item;

@@ -16,13 +16,13 @@ static void addInnerOuter(aq::tnode * j, aq::tnode * n, int tag)
   }
   else
   {
-    joinlistToNodeArray(n, tablesNodes);
+    n->joinlistToNodeArray(tablesNodes);
     for (auto& n : tablesNodes)
     {
       tables.push_back(n->getData().val_str);
     }
   }
-  aq::addInnerOuterNodes(j->next->left, tag, tables );
+  aq::util::addInnerOuterNodes(j->next->left, tag, tables );
 }
 
 //------------------------------------------------------------------------------
@@ -37,17 +37,17 @@ bool JoinVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* 
 	{
     addInnerOuter(pJoin, pJoin->left, this->leftTag());
     addInnerOuter(pJoin, pJoin->right, this->rightTag());
-    aq::addConditionsToWhere( pJoin->next->left, pStart );
+    aq::util::addConditionsToWhere( pJoin->next->left, pStart );
 	}
   // FIXME
 	//assert( pJoin->left && (pJoin->left->tag == K_IDENT || pJoin->left->tag == K_AS && pJoin->left->left && pJoin->left->left->tag == K_IDENT ) );
 	//assert( pJoin->right && (pJoin->right->tag == K_IDENT || pJoin->right->tag == K_AS && pJoin->right->left && pJoin->right->left->tag == K_IDENT ) );
 	aq::tnode* table1 = pJoin->left;
-	pJoin->left = NULL;
+	pJoin->left = nullptr;
 	aq::tnode* table2 = pJoin->right;
-	pJoin->right = NULL;
-	delete_subtree( pNode->left );
-	delete_subtree( pNode->right );
+	pJoin->right = nullptr;
+	aq::tnode::delete_subtree(pNode->left);
+	aq::tnode::delete_subtree(pNode->right);
 	pNode->tag = K_COMMA;
 	pNode->left = table1;
 	pNode->right = table2;

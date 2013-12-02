@@ -22,12 +22,14 @@ using namespace std;
 namespace aq
 {
 
-tnode::tnode(short _tag)
+std::string tnode::indentStep("    ");
+
+tnode::tnode(tag_t _tag)
   : 
-  left(NULL),
-  right(NULL),
-  next(NULL),
-  parent(NULL),
+  left(nullptr),
+  right(nullptr),
+  next(nullptr),
+  parent(nullptr),
   inf(0),
   tag(_tag),
   eNodeDataType(NODE_DATA_INT),
@@ -38,10 +40,10 @@ tnode::tnode(short _tag)
 
 tnode::tnode(const tnode& source)
   :
-  left(NULL),
-  right(NULL),
-  next(NULL),
-  parent(NULL),
+  left(nullptr),
+  right(nullptr),
+  next(nullptr),
+  parent(nullptr),
   inf(source.inf),
   tag(source.tag),
   eNodeDataType(NODE_DATA_INT),
@@ -96,33 +98,33 @@ void tnode::set_string_data(const char* pszStr)
 {
   size_t nLen;
 
-  if ( pszStr == NULL ) 
+  if ( pszStr == nullptr ) 
   {
     /* Call free */
-    if ((this->eNodeDataType == NODE_DATA_STRING) && (this->nStrBufCb != 0) && (this->data.val_str != NULL)) 
+    if ((this->eNodeDataType == NODE_DATA_STRING) && (this->nStrBufCb != 0) && (this->data.val_str != nullptr)) 
     {
       free( this->data.val_str );
-      this->data.val_str = NULL;
+      this->data.val_str = nullptr;
       this->nStrBufCb	= 0;
     }
   }
   else
   {
-    nLen = strlen( pszStr ) + 1;		/* Include terminating NULL char */
+    nLen = strlen( pszStr ) + 1;		/* Include terminating nullptr char */
 
     if ((this->eNodeDataType != NODE_DATA_STRING) || (this->nStrBufCb < nLen)) 
     {
       /* Need to allocate or reallocate the data buffer */
 
       if (this->nStrBufCb > 0)
-        this->set_string_data(NULL); /* Free Old Buffer - avoid realloc */
+        this->set_string_data(nullptr); /* Free Old Buffer - avoid realloc */
 
       /* Round up the size to 4096 multiple - avoid and on bits */
       nLen = nLen + STR_BUF_SIZE_ROUND_UP - 1;
       nLen = nLen - nLen % STR_BUF_SIZE_ROUND_UP;
 
       this->data.val_str = (char*)malloc( sizeof( char ) * nLen );
-      if (this->data.val_str == NULL) 
+      if (this->data.val_str == nullptr) 
       {
         throw aq::generic_error(aq::generic_error::GENERIC, "Not enough memory [%u]", EXIT_ON_MEM_ERROR);
       }
@@ -139,7 +141,7 @@ void tnode::append_string_data(char* pszStr)
 {
   size_t nLen, nLen1;
 
-  if ((this->eNodeDataType != NODE_DATA_STRING) || (pszStr == NULL))
+  if ((this->eNodeDataType != NODE_DATA_STRING) || (pszStr == nullptr))
   {
     this->set_string_data(pszStr);
     return;
@@ -156,7 +158,7 @@ void tnode::append_string_data(char* pszStr)
   if ( nLen1 == 0 )	/* Empty String */
     return;	/* Nothing to do ! */
 
-  nLen += nLen1 + 1;	/* Include terminating NULL char */
+  nLen += nLen1 + 1;	/* Include terminating nullptr char */
 
   if (this->nStrBufCb < nLen) 
   {
@@ -168,12 +170,12 @@ void tnode::append_string_data(char* pszStr)
     nLen = nLen - nLen % STR_BUF_SIZE_ROUND_UP;
 
     pszBuf = (char*)malloc( sizeof( char ) * nLen );
-    if ( pszBuf == NULL ) {
+    if ( pszBuf == nullptr ) {
       throw aq::generic_error(aq::generic_error::GENERIC, "Not enough memory [%u]", EXIT_ON_MEM_ERROR);
     }
 
     strcpy( pszBuf, this->data.val_str );	/* Keep the old string */
-    set_string_data( NULL );	/* Free Old Buffer - avoid realloc */
+    set_string_data( nullptr );	/* Free Old Buffer - avoid realloc */
     this->data.val_str = pszBuf;	/* Set the new buffer */
 
     this->nStrBufCb		= nLen;				/* Set Buffer Len */
@@ -189,7 +191,7 @@ void tnode::append_string_data(char* pszStr)
 void tnode::set_int_data( llong nVal ) 
 {
   if ( this->eNodeDataType == NODE_DATA_STRING )
-			set_string_data( NULL );		/* Free the String Buffer */
+			set_string_data( nullptr );		/* Free the String Buffer */
 
   this->data.val_int	 = nVal;
   this->eNodeDataType = NODE_DATA_INT;
@@ -200,22 +202,11 @@ void tnode::set_int_data( llong nVal )
 void tnode::set_double_data( double dVal ) 
 {
   if ( this->eNodeDataType == NODE_DATA_STRING )
-    set_string_data( NULL );		/* Free the String Buffer */
+    set_string_data( nullptr );		/* Free the String Buffer */
 
   this->data.val_number	= dVal;
   this->eNodeDataType	= NODE_DATA_NUMBER;
   this->nStrBufCb = 0;
-}
-
-//------------------------------------------------------------------------------
-tnode* get_leftmost_child( tnode *pNode ) {
-	if ( pNode == NULL )
-		return NULL;
-	if ( pNode->left != NULL )
-		return get_leftmost_child( pNode->left );
-	else if ( pNode->right != NULL )
-		return get_leftmost_child( pNode->right );
-	return pNode;
 }
 
 //------------------------------------------------------------------------------
@@ -296,11 +287,11 @@ bool tnode::cmp(const tnode * n2) const
 }
 
 //------------------------------------------------------------------------------
-tnode* clone_subtree(tnode* pNode)
+tnode* tnode::clone_subtree()
 {
 	stack<tnode*> nodes;
-	nodes.push(pNode);
-	tnode* pClone = new tnode(*pNode);
+	nodes.push(this);
+	tnode* pClone = new tnode(*this);
 	stack<tnode*> clones;
 	clones.push( pClone );
 	while( !nodes.empty() )
@@ -332,63 +323,205 @@ tnode* clone_subtree(tnode* pNode)
 }
 
 //------------------------------------------------------------------------------
-void delete_subtree( tnode*& pNode ) {
-	if( !pNode )
-		return;
-
-	deque<tnode*> nodes;
-	nodes.push_back( pNode );
-	size_t idx = 0;
-	while( idx < nodes.size() )
+void tnode::treeListToNodeArray(std::vector<tnode*>& nodes, tag_t tag)
+{
+	if (this->getTag() == tag)
 	{
-		pNode = nodes[idx];
-		if ( pNode->left )
-			nodes.push_back( pNode->left );
-		if ( pNode->right )
-			nodes.push_back( pNode->right );
-		if ( pNode->next )
-			nodes.push_back( pNode->next );
-		++idx;
+		this->right->treeListToNodeArray(nodes, tag);
+		this->left->treeListToNodeArray(nodes, tag);
 	}
-	for( idx = 0; idx < nodes.size(); ++idx )
-	{
-		nodes[idx]->set_string_data( NULL );	/* Delete String Buffer if any */
-		delete nodes[idx];
-	}
-
-  // pNode = NULL;
+	else
+  {
+		nodes.push_back(this);
+  }
 }
 
 //------------------------------------------------------------------------------
-void treeListToNodeArray( tnode* pNode, std::vector<tnode*>& nodes, int tag )
+void tnode::joinlistToNodeArray(std::vector<tnode*>& nodes)
 {
-	if( pNode->getTag() == tag )
-	{
-		// nodes.push_back( pNode->right );
-		treeListToNodeArray( pNode->right, nodes, tag );
-		treeListToNodeArray( pNode->left, nodes, tag );
-	}
-	else
-		nodes.push_back( pNode );
+  aq::tnode * join = this->find_first_node(K_JOIN);
+  aq::tnode * join2 = nullptr;
+  while (join != nullptr)
+  {
+    nodes.push_back(join->right->clone_subtree());
+    if ((join2 = join->left->find_deeper_node(K_JOIN)) == nullptr)
+    {
+      nodes.push_back(join->left->clone_subtree());
+    }
+    join = join2;
+  }
 }
 
-void treeListToNodeArraySecond( tnode* pNode, std::vector<tnode*>& nodes, int tag )
+//------------------------------------------------------------------------------
+void tnode::find_nodes(tag_t tag, std::vector<tnode*>& l)
 {
-	if( pNode->getTag() == tag )
-	{
-		// nodes.push_back( pNode->right );
-		treeListToNodeArraySecond( pNode->right, nodes, tag );
-		treeListToNodeArraySecond( pNode->left, nodes, tag );
-    delete pNode;
-	}
-	else
-		nodes.push_back( pNode );
+  if (this->getTag() == tag)
+    l.push_back(this);
+  if (this->left != nullptr) 
+    this->left->find_nodes(tag, l);
+  if (this->right != nullptr)
+    this->right->find_nodes(tag, l);
+  if (this->next != nullptr)
+    this->next->find_nodes(tag, l);
+}
+
+//------------------------------------------------------------------------------
+tnode* tnode::find_main_node(tag_t tag)
+{
+	if (this->getTag() == tag)
+		return this;
+	if (this->next != nullptr) 
+    return this->next->find_main_node(tag);
+	return nullptr;
+}
+
+//------------------------------------------------------------------------------
+tnode* tnode::find_first_node(tag_t tag)
+{	
+  tnode * pNodeFound = nullptr;
+	if (this->getTag() == tag)
+		return this;
+
+ 	if ((this->left != nullptr) && ((pNodeFound = this->left->find_first_node(tag)) != nullptr))
+ 		return pNodeFound;
+
+ 	if ((this->right != nullptr) && ((pNodeFound = this->right->find_first_node(tag)) != nullptr))
+		return pNodeFound;
+
+	return nullptr;
 }
 //------------------------------------------------------------------------------
-tnode* nodeArrayToTreeList( const std::vector<tnode*>& nodes, int tag )
+tnode* tnode::findOut_IDENT(const std::string& name)
+{	
+  tnode * pNodeFound = nullptr;
+
+	if ((this->getTag() == K_COLUMN || this->getTag() == K_IDENT) && this->getData().val_str == name)
+		return this;
+
+ 	if ((this->left != nullptr) && ((pNodeFound = this->left->findOut_IDENT(name)) != nullptr))
+ 		return pNodeFound;
+
+ 	if ((this->right != nullptr) && ((pNodeFound = this->right->findOut_IDENT(name)) != nullptr))
+		return pNodeFound;
+
+	return nullptr;
+}
+//------------------------------------------------------------------------------
+tnode* tnode::find_first_node_diffTag(tag_t tag, int diffTag)
+{	
+  tnode * pNodeFound = nullptr;
+  
+  if (this->getTag() == tag && this->parent && this->parent->getTag() != diffTag)
+		return this;
+
+ 	if ((this->left != nullptr) && ((pNodeFound = this->left->find_first_node_diffTag(tag, diffTag)) != nullptr))
+ 		return pNodeFound;
+
+ 	if ((this->right != nullptr) && ((pNodeFound = this->right->find_first_node_diffTag(tag, diffTag)) != nullptr))
+		return pNodeFound;
+
+	return nullptr;
+}
+//------------------------------------------------------------------------------
+tnode* tnode::find_deeper_node(tag_t tag) 
+{
+	tnode * pNodeFound = nullptr;
+
+ 	if ((this->left != nullptr) && ((pNodeFound = this->left->find_deeper_node(tag)) != nullptr))
+ 		return pNodeFound;
+
+ 	if ((this->right != nullptr) && ((pNodeFound = this->right->find_deeper_node(tag)) != nullptr))
+		return pNodeFound;
+
+	if (this->getTag() == tag)
+		return this;
+
+	return nullptr;
+}
+
+//------------------------------------------------------------------------------
+void tnode::dump(std::ostream& os, std::string indent) const
+{
+  if (indent.size() > 100) 
+  {
+      os << indent << "..."; 
+      return;
+  }
+
+	os << "[address:" << this << "] " << indent << id_to_kstring(this->getTag()) << " [" << this->getTag() << "] : " << this->to_string() << std::endl;
+
+  if ((this->left != nullptr) || (this->right != nullptr))
+  {
+    if (this->left != nullptr) 
+      this->left->dump(os, indent + tnode::indentStep);
+    else 
+      os << "[address:" << (void*)0 << "] " << indent << tnode::indentStep << "[EMPTY LEFT]" << std::endl;
+
+    if (this->right != nullptr) 
+      this->right->dump(os, indent + "    ");
+    else
+      os << "[address:" << (void*)0 << "] " << indent << tnode::indentStep << "[EMPTY RIGHT]" << std::endl;
+  }
+	
+	if (this->next != nullptr) 
+	{
+		os << "[address:" << this->next << "] " << indent << "NEXT ->" << std::endl;
+		this->next->dump(os, indent);
+	}
+}
+
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+
+// STATIC METHODS
+
+//------------------------------------------------------------------------------
+tnode* tnode::get_leftmost_child(tnode * pNode) {
+	if ( pNode == nullptr )
+		return nullptr;
+	if ( pNode->left != nullptr )
+		return get_leftmost_child( pNode->left );
+	else if ( pNode->right != nullptr )
+		return get_leftmost_child( pNode->right );
+	return pNode;
+}
+
+//------------------------------------------------------------------------------
+void tnode::checkTree(tnode * tree, std::set<tnode*>& nodes)
+{
+
+  if (tree == nullptr) return;
+
+  std::set<tnode*>::iterator it = nodes.find(tree);
+  assert(it == nodes.end());
+  if (it != nodes.end())
+  {
+    throw aq::generic_error(aq::generic_error::INVALID_QUERY, "recurse in tnode structure is not allowed");
+  }
+  nodes.insert(tree);
+
+  switch (tree->getDataType())
+  {
+  case aq::tnode::tnodeDataType::NODE_DATA_INT: break;
+  case aq::tnode::tnodeDataType::NODE_DATA_NUMBER: break;
+  case aq::tnode::tnodeDataType::NODE_DATA_STRING: 
+    //assert(tree->data.val_str != nullptr); 
+    //assert((tree->nStrBufCb % STR_BUF_SIZE_ROUND_UP) == 0);
+    //assert(tree->nStrBufCb >= strlen(tree->data.val_str));
+    break;
+  }
+
+  checkTree(tree->left, nodes);
+  checkTree(tree->right, nodes);
+  checkTree(tree->next, nodes);
+
+}
+
+//------------------------------------------------------------------------------
+tnode* tnode::nodeArrayToTreeList( const std::vector<tnode*>& nodes, tag_t tag )
 {
 	if( nodes.size() < 1 )
-		return NULL;
+		return nullptr;
 	if( nodes.size() == 1 )
 		return nodes[0];
 
@@ -406,216 +539,34 @@ tnode* nodeArrayToTreeList( const std::vector<tnode*>& nodes, int tag )
 }
 
 //------------------------------------------------------------------------------
-void commaListToNodeArray( tnode* pNode, std::vector<tnode*>& nodes )
+void tnode::delete_subtree(tnode *& pNode) 
 {
-	treeListToNodeArray( pNode, nodes, K_COMMA );
-}
-void commaListToNodeArraySecond( tnode* pNode, std::vector<tnode*>& nodes )
-{
-	treeListToNodeArraySecond( pNode, nodes, K_COMMA );
-}
-tnode* nodeArrayToCommaList( const std::vector<tnode*>& nodes )
-{
-	return nodeArrayToTreeList( nodes, K_COMMA );
-}
-void andListToNodeArray( tnode* pNode, std::vector<tnode*>& nodes )
-{
-	treeListToNodeArray( pNode, nodes, K_AND );
-}
-tnode* nodeArrayToAndList( const std::vector<tnode*>& nodes )
-{
-	return nodeArrayToTreeList( nodes, K_AND );
-}
-
-//------------------------------------------------------------------------------
-void joinlistToNodeArray(tnode* pNode, std::vector<tnode*>& nodes)
-{
-  aq::tnode * clone = aq::clone_subtree(pNode);
-  aq::tnode * join = aq::find_first_node(clone, K_JOIN);
-  aq::tnode * join2 = NULL;
-  while (join != NULL)
-  {
-    nodes.push_back(join->right);
-    if ((join2 = aq::find_deeper_node(join->left, K_JOIN)) == NULL)
-    {
-      nodes.push_back(join->left);
-    }
-    join = join2;
-  }
-}
-
-//------------------------------------------------------------------------------
-void find_nodes(tnode * pNode, int tag, std::vector<tnode*>& l)
-{
-	if (pNode != NULL)
-  {
-    if (pNode->getTag() == tag)
-      l.push_back(pNode);
-    find_nodes(pNode->left, tag, l);
-    find_nodes(pNode->right, tag, l);
-    find_nodes(pNode->next, tag, l);
-  }
-}
-
-//------------------------------------------------------------------------------
-tnode* find_main_node(tnode * pNode, int tag ) {
-	tnode *pNodeFound;
-
-	if ( pNode == NULL )
-		return NULL;
-	if ( pNode->getTag() == tag )
-		return pNode;
-	if ( ( pNodeFound = find_main_node( pNode->next, tag ) ) != NULL )
-		return pNodeFound;
-// 	if ( ( pNodeFound = find_main_node( pNode->left, tag ) ) != NULL )
-// 		return pNodeFound;
-// 	if ( ( pNodeFound = find_main_node( pNode->right, tag ) ) != NULL )
-// 		return pNodeFound;
-	return NULL;
-}
-
-//------------------------------------------------------------------------------
-tnode* find_first_node(tnode * pNode, int tag )
-{	
-  tnode *pNodeFound;
-
-	if ( pNode == NULL )
-    return NULL;
-  
-	if ( pNode->getTag() == tag )
-		return pNode;
-
- 	if ( ( pNodeFound = find_first_node( pNode->left, tag ) ) != NULL )
- 		return pNodeFound;
-
- 	if ( ( pNodeFound = find_first_node( pNode->right, tag ) ) != NULL )
-		return pNodeFound;
-
-	return NULL;
-}
-//------------------------------------------------------------------------------
-tnode* findOut_IDENT(tnode * pNode, std::string name )
-{	
-  tnode *pNodeFound;
-
-	if ( pNode == NULL )
-    return NULL;
-  
-	if ( ( pNode->getTag() == K_COLUMN || pNode->getTag() == K_IDENT ) && pNode->getData().val_str == name )
-		return pNode;
-
- 	if ( ( pNodeFound = findOut_IDENT( pNode->left, name ) ) != NULL )
- 		return pNodeFound;
-
- 	if ( ( pNodeFound = findOut_IDENT( pNode->right, name ) ) != NULL )
-		return pNodeFound;
-
-	return NULL;
-}
-//------------------------------------------------------------------------------
-tnode* find_first_node_diffTag(tnode * pNode, int tag, int diffTag )
-{	
-  tnode *pNodeFound;
-
-	if ( pNode == NULL )
-    return NULL;
-  
-  if ( pNode->getTag() == tag && pNode->parent && pNode->parent->getTag() != diffTag )
-		return pNode;
-
- 	if ( ( pNodeFound = find_first_node_diffTag( pNode->left, tag, diffTag ) ) != NULL )
- 		return pNodeFound;
-
- 	if ( ( pNodeFound = find_first_node_diffTag( pNode->right, tag, diffTag ) ) != NULL )
-		return pNodeFound;
-
-	return NULL;
-}
-//------------------------------------------------------------------------------
-tnode* find_deeper_node(tnode * pNode, int tag, bool with_next ) {
-	tnode *pNodeFound;
-
-	if ( pNode == NULL )
-		return NULL;
-
-	//if ( with_next && (( pNodeFound = find_deeper_node( pNode->next, tag ) ) != NULL ))
-	//	return pNodeFound;
-
- 	if ( ( pNodeFound = find_deeper_node( pNode->left, tag ) ) != NULL )
- 		return pNodeFound;
-
- 	if ( ( pNodeFound = find_deeper_node( pNode->right, tag ) ) != NULL )
-		return pNodeFound;
-
-	if ( pNode->getTag() == tag )
-		return pNode;
-
-	return NULL;
-}
-
-//------------------------------------------------------------------------------
-void dump(const tnode * const pNode, std::ostream& os, std::string indent)
-{
-  if (indent.size() > 100) 
-  {
-      os << indent << "..."; 
-      return;
-  }
-
-	os << indent << "'" << id_to_kstring(pNode->getTag()) << "' [" << pNode->getTag() << ", " << pNode->inf << "] : " << pNode->to_string() << " [address:" << pNode << "] " << std::endl;
-
-  if ((pNode->left != NULL) || (pNode->right != NULL))
-  {
-    if (pNode->left) dump(pNode->left, os, indent + "  ");
-    else os << indent << "  NULL [empty left]" << std::endl;
-
-    if (pNode->right) dump(pNode->right, os, indent + "  ");
-    else os << indent << "  NULL [empty right]" << std::endl;
-  }
-	
-	if (pNode->next) 
+	deque<tnode*> nodes;
+	nodes.push_back(pNode);
+	size_t idx = 0;
+	while( idx < nodes.size() )
 	{
-		os << indent << "next ->" << std::endl;
-		dump(pNode->next, os, indent);
+		pNode = nodes[idx];
+		if ( pNode->left )
+			nodes.push_back( pNode->left );
+		if ( pNode->right )
+			nodes.push_back( pNode->right );
+		if ( pNode->next )
+			nodes.push_back( pNode->next );
+		++idx;
 	}
+	for( idx = 0; idx < nodes.size(); ++idx )
+	{
+		nodes[idx]->set_string_data(nullptr);	/* Delete String Buffer if any */
+		delete nodes[idx];
+	}
+  pNode = nullptr;
 }
 
 //------------------------------------------------------------------------------
-std::ostream& operator<<(std::ostream& os, const tnode& pNode)
+bool tnode::isJoinTag(tag_t tag)
 {
-	dump(&pNode, os);
-	return os;
-}
-
-//------------------------------------------------------------------------------
-void checkTree( tnode * tree, std::set<tnode*>& nodes)
-{
-
-  if (tree == NULL) return;
-
-  std::set<tnode*>::iterator it = nodes.find(tree);
-  assert(it == nodes.end());
-  if (it != nodes.end())
-  {
-    throw aq::generic_error(aq::generic_error::INVALID_QUERY, "recurse in tnode structure is not allowed");
-  }
-  nodes.insert(tree);
-
-  switch (tree->getDataType())
-  {
-  case aq::tnode::tnodeDataType::NODE_DATA_INT: break;
-  case aq::tnode::tnodeDataType::NODE_DATA_NUMBER: break;
-  case aq::tnode::tnodeDataType::NODE_DATA_STRING: 
-    //assert(tree->data.val_str != NULL); 
-    //assert((tree->nStrBufCb % STR_BUF_SIZE_ROUND_UP) == 0);
-    //assert(tree->nStrBufCb >= strlen(tree->data.val_str));
-    break;
-  }
-
-  checkTree(tree->left, nodes);
-  checkTree(tree->right, nodes);
-  checkTree(tree->next, nodes);
-
+  return tag == K_JAUTO || tag == K_JEQ || tag == K_JIEQ || tag == K_JINF || tag == K_JNEQ || tag == K_JNEQ || tag == K_JNO || tag == K_JSEQ || tag == K_JSUP;
 }
 
 }

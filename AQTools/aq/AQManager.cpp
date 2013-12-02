@@ -168,7 +168,7 @@ int process_aq_matrix(const std::string& query, const std::string& aqMatrixFileN
     
 		boost::mutex::scoped_lock lock(parserMutex);
 		aq::Logger::getInstance().log(AQ_INFO, "parse sql query: '%s'\n", query.c_str());
-		if ((nRet = SQLParse(query.c_str(), &pNode)) != 0 ) 
+		if ((nRet = SQLParse(query.c_str(), pNode)) != 0 ) 
 		{
 			aq::Logger::getInstance().log(AQ_ERROR, "error parsing sql request '%s'\n", query.c_str());
 			return EXIT_FAILURE;
@@ -179,7 +179,7 @@ int process_aq_matrix(const std::string& query, const std::string& aqMatrixFileN
   boost::array<uint32_t, 6> categories_order = { K_FROM, K_WHERE, K_SELECT, K_GROUP, K_HAVING, K_ORDER };
 	aq::verb::VerbNode::Ptr spTree = aq::verb::VerbNode::BuildVerbsTree(pNode, categories_order, baseDesc, &settings );
 	spTree->changeQuery();
-	aq::cleanQuery( pNode );
+	aq::util::cleanQuery( pNode );
 
 	settings.answerFile = aqMatrixFileName;
 
@@ -221,7 +221,7 @@ int transform_query(const std::string& query, aq::Settings& settings, aq::Base& 
 
 		boost::mutex::scoped_lock lock(parserMutex);
 		aq::Logger::getInstance().log(AQ_INFO, "parse sql query %s\n", query.c_str());
-		if ((nRet = SQLParse(query.c_str(), &pNode)) != 0 ) 
+		if ((nRet = SQLParse(query.c_str(), pNode)) != 0 ) 
 		{
 			aq::Logger::getInstance().log(AQ_ERROR, "error parsing sql request '%s'\n", query.c_str());
 			return EXIT_FAILURE;
@@ -232,7 +232,7 @@ int transform_query(const std::string& query, aq::Settings& settings, aq::Base& 
   boost::array<uint32_t, 6> categories_order = { K_FROM, K_WHERE, K_SELECT, K_GROUP, K_HAVING, K_ORDER };
 	aq::verb::VerbNode::Ptr spTree = aq::verb::VerbNode::BuildVerbsTree(pNode, categories_order, baseDesc, &settings );
 	spTree->changeQuery();
-	aq::cleanQuery( pNode );
+	aq::util::cleanQuery( pNode );
 	
 	std::string str;
 	aq::syntax_tree_to_aql_form(pNode, str);
@@ -406,7 +406,7 @@ int processQuery(const std::string& query, aq::Settings& settings, aq::Base& bas
 
 			boost::mutex::scoped_lock lock(parserMutex);
 			aq::Logger::getInstance().log(AQ_INFO, "parse sql query %s\n", query.c_str());
-			if ((nRet = SQLParse(query.c_str(), &pNode)) != 0 ) 
+			if ((nRet = SQLParse(query.c_str(), pNode)) != 0 ) 
 			{
 				aq::Logger::getInstance().log(AQ_ERROR, "error parsing sql request '%s'\n", query.c_str());
 				return EXIT_FAILURE;

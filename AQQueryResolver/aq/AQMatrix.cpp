@@ -151,13 +151,13 @@ void AQMatrix::loadHeader(const char * filePath, std::vector<long long>& tableID
   std::string answertHeader(filePath);
   answertHeader += "/AnswerHeader.a";
   FILE * fd = fopen(answertHeader.c_str(), "rb");
-  if (fd == NULL)
+  if (fd == nullptr)
   {
     // try old name
     std::string answertHeader(filePath);
     answertHeader += "/AnswerHeader00000.a";
     fd = fopen(answertHeader.c_str(), "rb");
-    if (fd == NULL)
+    if (fd == nullptr)
     {
       throw aq::generic_error(aq::generic_error::AQ_ENGINE, "cannot find aq matrix header file");
     }
@@ -231,7 +231,7 @@ void AQMatrix::loadNextPacket()
   char * answerData = (char*)::malloc(this->answerFormat.size() + 1);
   sprintf(answerData, this->answerFormat.c_str(), this->packet);
   FILE * fd = fopen(answerData, "rb");
-  if (fd == NULL)
+  if (fd == nullptr)
   {
     throw aq::generic_error(aq::generic_error::AQ_ENGINE, "cannot find aq matrix data file %s", answerData);
   }
@@ -344,7 +344,7 @@ void AQMatrix::writeTemporaryTable()
       {
         sprintf(filename, "%s/B001REG%.4uTMP%.4uP%.12u.TMP", this->settings.tmpPath.c_str(), this->matrix[c].table_id, this->uid, packet);
         fd = fopen(filename, "wb");
-        if (fd == NULL)
+        if (fd == nullptr)
         {
           throw aq::generic_error(aq::generic_error::COULD_NOT_OPEN_FILE, "cannot create temporary table file '%s'", filename);
         }

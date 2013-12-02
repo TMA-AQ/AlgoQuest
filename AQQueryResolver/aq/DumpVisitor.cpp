@@ -95,7 +95,7 @@ void DumpVisitor::visit(ColumnVerb* c)
 void DumpVisitor::visit(CommaVerb* cv)
 {
   cv->getLeftChild()->accept(this);
-  if (cv->getRightChild() != NULL)
+  if (cv->getRightChild() != nullptr)
   {
     this->query += ", ";
     cv->getRightChild()->accept(this);
@@ -280,7 +280,7 @@ void DumpVisitor::visit(FromVerb* from)
 
   this->fromStr = "FROM " + this->query + "\n";
   this->query = "";
-  if (from->getBrother() != NULL)
+  if (from->getBrother() != nullptr)
     from->getBrother()->accept(this);
 }
 
@@ -298,7 +298,7 @@ void DumpVisitor::visit(SelectVerb* sv)
 {
   this->query = "SELECT ";
   sv->getLeftChild()->accept(this);
-  assert(sv->getRightChild() == NULL);
+  assert(sv->getRightChild() == nullptr);
   this->selectStr = this->query + "\n";
   this->query = "";
   sv->getBrother()->accept(this);

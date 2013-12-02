@@ -177,13 +177,14 @@ namespace aq {
     {
       return aq::parser::aq_parse(query, queryStr, qi::space);
     }
+
   }
 }
 
 #else
 
 namespace aq {
-  namespace util {
+  namespace parser {
 
     // --------------------------------------------------------
     bool parse(const std::string& queryStr, aq::core::SelectStatement& query)

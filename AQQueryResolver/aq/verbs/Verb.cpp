@@ -15,7 +15,7 @@ verb_error::verb_error( EType type, int verbTag ):
 }
 
 //------------------------------------------------------------------------------
-Verb::Verb(): Result(NULL), Context(0), Disabled(false)
+Verb::Verb(): Result(nullptr), Context(0), Disabled(false)
 {
 }
 
@@ -45,7 +45,7 @@ void addColumn( aq::tnode* pNode, aq::tnode* pColumnNode )
 		return;
 	if( pNode->tag != K_SELECT )
 		return;
-	assert( pNode->right == NULL );
+	assert( pNode->right == nullptr );
 	
 	if( !pNode->left )
 	{

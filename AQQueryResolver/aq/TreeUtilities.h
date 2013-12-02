@@ -11,13 +11,14 @@
 #include <algorithm>
 #include <aq/ParsException.h>
 #include <aq/SQLPrefix.h> //  a delete
+#include <aq/AQLQuery.h>
 
 extern const int nrJoinTypes;
 extern const int joinTypes[];
 extern const int inverseTypes[];
 
-namespace aq
-{
+namespace aq {
+namespace util {
  
 void addAlias( aq::tnode* pNode );
 void addConditionsToWhere( aq::tnode* pCond, aq::tnode* pStart );
@@ -60,7 +61,7 @@ void getTablesList( aq::tnode* pNode, std::list<std::string>& tables );
 /// search a subtree for a node and return the last node that had a certain tag
 aq::tnode* getLastTag( aq::tnode*& pNode, aq::tnode* pLastTag, aq::tnode* pCheckNode, int tag );
 
-void generate_parent(aq::tnode* pNode, aq::tnode* parent = NULL);
+void generate_parent(aq::tnode* pNode, aq::tnode* parent = nullptr);
 
 void getColumnTypes( aq::tnode* pNode, std::vector<Column::Ptr>& columnTypes, Base& baseDesc );
 
@@ -86,7 +87,7 @@ template <typename T> aq::ColumnItem<T> GetItem(const aq::tnode& n)
 //------------------------------------------------------------------------------
 //template <typename T> aq::tnode * Getnode(ColumnItem<T>::Ptr item, ColumnType type)
 //{
-//	aq::tnode	* pNode = NULL;
+//	aq::tnode	* pNode = nullptr;
 //	if( !item )
 //		return pNode;
 //	switch( type )
@@ -143,4 +144,7 @@ void extractName(aq::tnode* pNode, std::string& name);
 /// AND: change to OR, apply NOT on children
 void processNot(aq::tnode*& pNode, bool applyNot);
 
+void tnodeToSelectStatement(aq::tnode& tree, aq::core::SelectStatement& ss);
+
+}
 }

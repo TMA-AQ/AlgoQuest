@@ -61,7 +61,7 @@ TID2String g_id2str[] = {
 	{ K_MONTH,			"MONTH"			},
 	{ K_NATURAL,		"NATURAL"		},
 	{ K_OR,				"OR"			},
-	{ K_NULL,			"NULL"			},
+	{ K_nullptr,			"nullptr"			},
 	{ K_ON,				"ON"			},
 	{ K_ORDER,			"ORDER"			},
 	{ K_OUTER,			"K_OUTER"		},
@@ -118,7 +118,7 @@ TID2String g_id2str[] = {
 /*
 	{ K_PARPAIR,		"PARPAIR"		},
 	{ K_BLOCK ,			"BLOCK"			},
-	{ K_NULL_POINTER,	"NULL_POINTER"	},
+	{ K_nullptr_POINTER,	"nullptr_POINTER"	},
 */
 	{ K_TO_DATE,		"TO_DATE"		},
 	{ K_TRUE,			"K_TRUE"		},
@@ -263,7 +263,7 @@ TID2String g_id2kstr[] = {
   { K_NOT, "K_NOT" },
   { K_NOT_BETWEEN, "K_NOT_BETWEEN" },
   { K_NOT_LIKE, "K_NOT_LIKE" },
-  { K_NULL, "K_NULL" },
+  { K_nullptr, "K_nullptr" },
   { K_NVL, "K_NVL" },
   { K_ON, "K_ON" },
   { K_OR, "K_OR" },
@@ -333,7 +333,7 @@ const char* id_to_string( unsigned int nID ) {
 	}
   //throw aq::generic_error(aq::generic_error::VERB_TYPE_MISMATCH, "cannot find type %u", nID);
 	//return "K_UNKNOW";
-  return NULL;
+  return nullptr;
 }
 
 //------------------------------------------------------------------------------
@@ -345,7 +345,7 @@ const char* id_to_kstring( unsigned int nID ) {
 		}
 	}
   assert(false);
-  return NULL;
+  return nullptr;
 }
 
 //------------------------------------------------------------------------------

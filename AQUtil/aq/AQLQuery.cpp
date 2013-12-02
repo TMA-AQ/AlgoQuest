@@ -179,49 +179,57 @@ void print_sql(std::ostream& os, const aq::core::SelectStatement& ss)
   os << std::endl;
 
   // From
-  os << "FROM " << *ss.fromTables.begin() << std::endl;
-  auto p = (*ss.fromTables.begin());
   std::vector<aq::core::InCondition> condToAddToWhere;
   std::vector<aq::core::InCondition> condToRemoveFromWhere;
-  for (auto it = ss.fromTables.begin() + 1; it != ss.fromTables.end(); ++it)
+  if (ss.joinConditions.empty())
   {
-    auto t = *it;
-    for (auto& j : ss.joinConditions)
+    os << "FROM ";
+    print_list(os, ss.fromTables);
+  }
+  else
+  {
+    os << "FROM " << *ss.fromTables.begin() << std::endl;
+    auto p = (*ss.fromTables.begin());
+    for (auto it = ss.fromTables.begin() + 1; it != ss.fromTables.end(); ++it)
     {
-      if ((j.right.table == p) && (j.left.table == t))
+      auto t = *it;
+      for (auto& j : ss.joinConditions)
       {
-        os << "  " << join_str_2_join_t(j.jt_left, j.jt_right) << " ";
-        os << j.left.table << " on (";
-        os << j.right << " " << op_str_2_op_t(j.op) << " " << j.left;
-        // os << j.right << " " << j.op << " " << j.left;
-
-        // add conditions from inConditionsTmp if needed and remove it from inConditionsTmp
-        auto it = inConditionsTmp.begin();
-        std::vector<aq::core::InCondition> addConditions;
-        while (it != inConditionsTmp.end())
+        if ((j.right.table == p) && (j.left.table == t))
         {
-          auto cond = *it;
-          if ((cond.column == j.left) || (cond.column == j.right))
-          {
-            addConditions.push_back(cond);
-            condToRemoveFromWhere.push_back(cond);
-            condToAddToWhere.push_back(cond);
-          }
-          ++it;
-        }
+          os << "  " << join_str_2_join_t(j.jt_left, j.jt_right) << " ";
+          os << j.left.table << " on (";
+          os << j.right << " " << op_str_2_op_t(j.op) << " " << j.left;
+          // os << j.right << " " << j.op << " " << j.left;
 
-        if (!addConditions.empty())
-        {
-          for (auto& cond : addConditions)
+          // add conditions from inConditionsTmp if needed and remove it from inConditionsTmp
+          auto it = inConditionsTmp.begin();
+          std::vector<aq::core::InCondition> addConditions;
+          while (it != inConditionsTmp.end())
           {
-            os << " and " << cond.column << " in (";
-            print_list(os, cond.values, "'");
-            os << ")";
+            auto cond = *it;
+            if ((cond.column == j.left) || (cond.column == j.right))
+            {
+              addConditions.push_back(cond);
+              condToRemoveFromWhere.push_back(cond);
+              condToAddToWhere.push_back(cond);
+            }
+            ++it;
           }
-        }
 
-        os << ")" << std::endl;
-        p = t;
+          if (!addConditions.empty())
+          {
+            for (auto& cond : addConditions)
+            {
+              os << " and " << cond.column << " in (";
+              print_list(os, cond.values, "'");
+              os << ")";
+            }
+          }
+
+          os << ")" << std::endl;
+          p = t;
+        }
       }
     }
   }
@@ -285,7 +293,7 @@ void print_sql(std::ostream& os, const aq::core::SelectStatement& ss)
   // Group
   if (!ss.groupedColumns.empty())
   {
-    os << "GROUP ";
+    os << "GROUP BY ";
     print_list(os, ss.groupedColumns);
     os << std::endl;
   }
@@ -293,7 +301,7 @@ void print_sql(std::ostream& os, const aq::core::SelectStatement& ss)
   // Order
   if (!ss.orderedColumns.empty())
   {
-    os << "ORDER ";
+    os << "ORDER BY ";
     print_list(os, ss.orderedColumns);
     os << std::endl;
   }
@@ -301,10 +309,13 @@ void print_sql(std::ostream& os, const aq::core::SelectStatement& ss)
   os << ";" << std::endl;
 }
 
-std::string aq::core::SelectStatement::to_string() const
+std::string aq::core::SelectStatement::to_string(output_t o) const
 {
+  output_t obak = this->output;
+  this->output = o;
   std::stringstream ss;
   ss << *this;
+  this->output = obak;
   return ss.str();
 }
 

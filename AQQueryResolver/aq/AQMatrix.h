@@ -106,7 +106,7 @@ void AQMatrix::readData(CB& cb)
   char * answerData = (char*)::malloc(this->answerFormat.size() + 1);
   sprintf(answerData, this->answerFormat.c_str(), this->packet);
   FILE * fd = fopen(answerData, "rb");
-  if (fd == NULL)
+  if (fd == nullptr)
   {
     throw aq::generic_error(aq::generic_error::AQ_ENGINE, "cannot find aq matrix data file %s", answerData);
   }

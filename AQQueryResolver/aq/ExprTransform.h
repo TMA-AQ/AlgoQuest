@@ -93,7 +93,7 @@ namespace
     aq::tnode *pNode = new aq::tnode(K_IN);
 
     if (items.empty())
-      return NULL;
+      return nullptr;
 
     if (items.size() < 2)
     {
@@ -137,7 +137,7 @@ namespace
       n->right->set_string_data(item.strval.c_str());
       break;
     }
-    assert(n != NULL);
+    assert(n != nullptr);
     return n;
   }
   
@@ -186,7 +186,7 @@ namespace
   bool check_between_for_transform(const aq::tnode& n) 
   {
     return (((n.tag == K_BETWEEN) || (n.tag == K_NOT_BETWEEN)) && 
-      is_column_reference(n.left) && 
+      aq::util::is_column_reference(n.left) && 
       n.right && (n.right->tag == K_AND) && 
       n.right->left && ((n.right->left->tag == K_STRING) || (n.right->left->tag == K_INTEGER)) && 
       n.right->right && ((n.right->right->tag == K_STRING) || (n.right->right->tag == K_INTEGER))); 
@@ -195,7 +195,7 @@ namespace
   bool check_like_for_transform(const aq::tnode& n) 
   {
     return (((n.tag == K_LIKE) || (n.tag == K_NOT_LIKE)) &&
-      (is_column_reference(n.left)) && 
+      (aq::util::is_column_reference(n.left)) && 
       n.right && 
       ((n.right->tag == K_STRING) || 
        ((n.right->tag == K_ESCAPE) && ((n.right->left) && (n.right->left->tag == K_STRING) && 
@@ -210,8 +210,8 @@ namespace
     } 
      
     return (((n.tag == K_EQ) || (n.tag == K_NEQ) || (n.tag == K_LT) || (n.tag == K_GT) || (n.tag == K_LEQ) || (n.tag == K_GEQ)) && 
-      ((is_column_reference(n.left)) && ((n.right) && ((n.right->tag == K_STRING) || (n.right->tag == K_INTEGER) || (n.right->tag == K_REAL))) ||
-       (is_column_reference(n.right)) && ((n.left) && ((n.left->tag == K_STRING) || (n.left->tag == K_INTEGER) || (n.left->tag == K_REAL)))));
+      ((aq::util::is_column_reference(n.left)) && ((n.right) && ((n.right->tag == K_STRING) || (n.right->tag == K_INTEGER) || (n.right->tag == K_REAL))) ||
+       (aq::util::is_column_reference(n.right)) && ((n.left) && ((n.left->tag == K_STRING) || (n.left->tag == K_INTEGER) || (n.left->tag == K_REAL)))));
   }
 
 }
@@ -327,7 +327,7 @@ void check_cmp_op<T>::init()
     reverseOp = !reverseOp;
   }
 
-  if (is_column_reference( pNode->left ) != 0) 
+  if (aq::util::is_column_reference( pNode->left ) != 0) 
   {
     // Left is column reference -> check for strings at right 
     pNodeColumnRef = pNode->left;
@@ -335,7 +335,7 @@ void check_cmp_op<T>::init()
     bLeftColumnRef = true;
     op_tag = pNode->tag;
   } 
-  else if (is_column_reference(pNode->right) != 0) 
+  else if (aq::util::is_column_reference(pNode->right) != 0) 
   {
     // Right is column reference -> check for strings at left
     pNodeColumnRef = pNode->right;
@@ -350,7 +350,7 @@ void check_cmp_op<T>::init()
     throw aq::generic_error(aq::generic_error::INVALID_QUERY, "");
   }
 
-  if (is_column_reference(pNodeColumnRef) == 0) 
+  if (aq::util::is_column_reference(pNodeColumnRef) == 0) 
   {
     throw aq::generic_error(aq::generic_error::INVALID_QUERY, "");
   }
@@ -414,9 +414,9 @@ void check_cmp_op<T>::success(aq::tnode * node)
     node->left = this->pNodeColumnRef;	// which can be pNode->left or right !
     // Remove reference from the original subtree which will be deleted !
     if (this->bLeftColumnRef)
-      this->pNode->left = NULL;
+      this->pNode->left = nullptr;
     else
-      this->pNode->right = NULL;
+      this->pNode->right = nullptr;
   }
 }
 
@@ -435,7 +435,7 @@ void check_between<T>::init()
   pNodeColumnRef = pNodeTmp->left;
   pNodeLeftBound = pNodeTmp->right->left;
   pNodeRightBound = pNodeTmp->right->right;
-  pNodeRes = NULL;
+  pNodeRes = nullptr;
   bNotBetween = pNodeTmp->tag == K_NOT_BETWEEN;
 
   if (pNodeLeftBound->getDataType() != pNodeRightBound->getDataType())
@@ -469,7 +469,7 @@ void check_between<T>::success(aq::tnode * node)
     // Move the column reference subtree into the newly created subtree !
     node->left = pNodeColumnRef;	// which is pNodeTmp->left; !
     // Remove reference from the original subtree which will be deleted !
-    pNodeTmp->left = NULL;
+    pNodeTmp->left = nullptr;
   }
 }
 
@@ -487,10 +487,10 @@ void check_like<T>::init()
 {
   pNodeColumnRef = pNodeTmp->left;
   pNodeStr = pNodeTmp->right;
-  pNodeRes = NULL;
+  pNodeRes = nullptr;
   bNotLike = (pNodeTmp->tag == K_NOT_LIKE);
 
-  if (pNodeStr == NULL)
+  if (pNodeStr == nullptr)
     throw aq::generic_error(aq::generic_error::INVALID_QUERY, "");
 
   this->rgx = boost::regex(pNodeStr->getData().val_str);
@@ -520,7 +520,7 @@ void check_like<T>::success(aq::tnode * node)
     // Move the column reference subtree into the newly created subtree !
     node->left = pNodeColumnRef;	// which is pNodeTmp->left; !
     // Remove reference from the original subtree which will be deleted !
-    pNodeTmp->left = NULL;
+    pNodeTmp->left = nullptr;
   }
 }
 
@@ -558,16 +558,16 @@ aq::tnode * ExpressionTransform::transform(aq::tnode * pNode)
 	// delete_subtree(pNode); // FIXME
 
   //// Call recursively
-  //if (pNode->next != NULL)
+  //if (pNode->next != nullptr)
   //{
   //  pNode->next = this->transform<M>(pNode->next);
   //}
-  //if (pNode->left != NULL)
+  //if (pNode->left != nullptr)
   //{
   //  pNode->left = this->transform<M>(pNode->left);
   //}
   //// Do not call on K_PERIOD's node right branch if the right tag is K_COLUMN !
-  //if ((pNode->right != NULL) && ((pNode->tag != K_PERIOD) || (pNode->right->tag != K_COLUMN))) 
+  //if ((pNode->right != nullptr) && ((pNode->tag != K_PERIOD) || (pNode->right->tag != K_COLUMN))) 
   //{
   //  pNode->right = this->transform<M>(pNode->right);
   //}
@@ -617,7 +617,7 @@ struct column_item_cmp_t
 template <typename T, typename M, class CMP>
 aq::tnode * ExpressionTransform::transform(CMP& cmp) 
 {
-  aq::tnode * pNodeRes = NULL;
+  aq::tnode * pNodeRes = nullptr;
   size_t index = 0;
   size_t matched = 0;
   T value;
@@ -667,7 +667,7 @@ aq::tnode * ExpressionTransform::transform(CMP& cmp)
     std::merge(resultTmp1.begin(), resultTmp1.end(), resultTmp2.begin(), resultTmp2.end(), std::back_inserter(result), column_cmp);
     pNodeRes = ::getResult(result, cType);
   }
-	if (pNodeRes == NULL) 
+	if (pNodeRes == nullptr) 
   {
     throw aq::generic_error(aq::generic_error::INVALID_QUERY, "");
 	}
@@ -682,18 +682,18 @@ namespace expression_transform {
   template <class M>
   aq::tnode * transform(const aq::Base& base, const aq::Settings& settings, aq::tnode * node)
   {
-    aq::tnode * newNode = aq::clone_subtree(node);
+    aq::tnode * newNode = node->clone_subtree();
     aq::ExpressionTransform expTr(base, settings);
     newNode = expTr.transform<M>(newNode);
 
     *node = *newNode;
-    aq::delete_subtree(node->left);
-    aq::delete_subtree(node->right);
-    aq::delete_subtree(node->next);
+    aq::tnode::delete_subtree(node->left);
+    aq::tnode::delete_subtree(node->right);
+    aq::tnode::delete_subtree(node->left);
     node->left = newNode->left;
     node->right = newNode->right;
     node->next = newNode->next;
-    node->parent = NULL;
+    node->parent = nullptr;
     
     return node;
   }

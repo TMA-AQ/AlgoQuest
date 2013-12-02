@@ -100,7 +100,7 @@ MIN				[Mm][Ii][Nn]
 MINUS			[Mm][Ii][Nn][Uu][Ss]
 MONTH			[Mm][Oo][Nn][Tt][Hh]
 NATURAL			[Nn][Aa][Tt][Uu][Rr][Aa][Ll]
-NULL			[Nn][Uu][Ll][Ll]
+nullptr			[Nn][Uu][Ll][Ll]
 NVL				[Nn][Vv][Ll]
 ON				[Oo][Nn]
 ORDER			[Oo][Rr][Dd][Ee][Rr]
@@ -210,7 +210,7 @@ UNKNOWN			[Uu][Nn][Kk][Nn][Oo][Ww][Nn]
 	/* SPECIAL CHARACTERS */
 "."				{ yylval = new tnode( K_PERIOD ); return K_PERIOD; /* K_DOT; */ }
 ","				{ yylval = new tnode( K_COMMA ); return K_COMMA; }
-";"				{ yylval = NULL; return K_SEMICOLON; }
+";"				{ yylval = nullptr; return K_SEMICOLON; }
 
 	/* PARENTHESIS, BRACKET, BRACE (ACCOLADE) */
 	/*	'(', ')'    parenthesis ( Round brackets )				*/
@@ -218,12 +218,12 @@ UNKNOWN			[Uu][Nn][Kk][Nn][Oo][Ww][Nn]
 	/*	'{', '}'    braces ( Brace brackets, curly brackets )	*/
 	/*	'<', '>'	Angle brackets - NOT used					*/					
 
-"("				{ yylval = NULL; return K_LPAREN; }
-")"				{ yylval = NULL; return K_RPAREN; }
-"{"				{ yylval = NULL; return K_LBRACE; }
-"}"				{ yylval = NULL; return K_RBRACE; }
-"["				{ yylval = NULL; return K_LBRACKETS; }
-"]"				{ yylval = NULL; return K_RBRACKETS; }
+"("				{ yylval = nullptr; return K_LPAREN; }
+")"				{ yylval = nullptr; return K_RPAREN; }
+"{"				{ yylval = nullptr; return K_LBRACE; }
+"}"				{ yylval = nullptr; return K_RBRACE; }
+"["				{ yylval = nullptr; return K_LBRACKETS; }
+"]"				{ yylval = nullptr; return K_RBRACKETS; }
 
 	/* CONSTANTS */
 
@@ -338,7 +338,7 @@ UNKNOWN			[Uu][Nn][Kk][Nn][Oo][Ww][Nn]
 {MINUS}			{ yylval = new tnode( K_SEL_MINUS ); return K_SEL_MINUS; }
 {MONTH}			{ yylval = new tnode( K_MONTH ); return K_MONTH; }
 {NATURAL}		{ yylval = new tnode( K_NATURAL ); return K_NATURAL; }
-{NULL}			{ yylval = new tnode( K_NULL ); return K_NULL; }
+{nullptr}			{ yylval = new tnode( K_nullptr ); return K_nullptr; }
 {NVL}			{ yylval = new tnode( K_NVL ); return K_NVL; }
 {ON}			{ yylval = new tnode( K_ON ); return K_ON; }
 {ORDER}			{ yylval = new tnode( K_ORDER ); return K_ORDER; }

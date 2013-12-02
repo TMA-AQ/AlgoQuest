@@ -17,11 +17,11 @@ namespace aq
 
 //------------------------------------------------------------------------------
 bool IsColumnReference( aq::tnode *pNode ) {
-	if ( pNode != NULL ) {
+	if ( pNode != nullptr ) {
 		if ( pNode->tag == K_COLUMN )
 			return true;
 		if ( pNode->tag == K_PERIOD ) {
-			if ( pNode->left != NULL && pNode->right != NULL ) {
+			if ( pNode->left != nullptr && pNode->right != nullptr ) {
 				if ( pNode->left->tag == K_IDENT ) {
 					if ( pNode->right->tag == K_IDENT || pNode->right->tag == K_COLUMN )
 						return true;
@@ -35,14 +35,14 @@ bool IsColumnReference( aq::tnode *pNode ) {
 //------------------------------------------------------------------------------
 void getTableAndColumnName(aq::tnode * n, std::string& table, std::string& column) 
 {
-	if (n == NULL) return;
+	if (n == nullptr) return;
 	
 	if (n->tag == K_COLUMN)
 	{
 		column = n->getData().val_str;
 	}
 	else if (( n->tag == K_PERIOD ) &&
-					 ( (n->left != NULL) && (n->right != NULL) ) &&
+					 ( (n->left != nullptr) && (n->right != nullptr) ) &&
 					 ( n->left->tag == K_IDENT ) &&
 					 ( (n->right->tag == K_IDENT) || (n->right->tag == K_COLUMN) ) )
 	{
@@ -62,7 +62,7 @@ std::string syntax_tree_to_aql_form(aq::tnode * pNode)
 //------------------------------------------------------------------------------
 std::string& syntax_tree_to_aql_form( aq::tnode *pNode, std::string& query )
 {
-  if ( pNode == NULL ) return query;
+  if ( pNode == nullptr ) return query;
 
 	if (	pNode->tag == K_SELECT || pNode->tag == K_FROM 
 		 || pNode->tag == K_WHERE  || pNode->tag == K_GROUP
@@ -143,7 +143,7 @@ std::string syntax_tree_to_sql_form(aq::tnode * pNode, unsigned int level)
 //------------------------------------------------------------------------------
 std::string& syntax_tree_to_sql_form(aq::tnode * pNode, std::string& query, unsigned int level)
 {
-	if ( pNode == NULL ) return query;
+	if ( pNode == nullptr ) return query;
 
 	if ( level > 100 )
 	{
@@ -219,7 +219,7 @@ std::string& syntax_tree_to_sql_form(aq::tnode * pNode, std::string& query, unsi
 //------------------------------------------------------------------------------
 std::string& syntax_tree_to_sql_form_nonext(aq::tnode * pNode, std::string& query, unsigned int level)
 {
-	if (pNode == NULL) return query;
+	if (pNode == nullptr) return query;
 
 	if (level > 100)
 	{
@@ -274,6 +274,7 @@ std::string& syntax_tree_to_sql_form_nonext(aq::tnode * pNode, std::string& quer
 //------------------------------------------------------------------------------
 std::string& multiline_query(std::string& query)
 {
+  boost::erase_all(query, "\n");
   std::string::size_type pos = std::string::npos;
   pos = query.find("FROM");
   if (pos != std::string::npos)

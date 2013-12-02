@@ -17,7 +17,7 @@ public:
 
   void clear() { this->n = 0; }
   void inc() { this->n++; }
-  bool full() const { return (rows != NULL) && (this->n + 1) == rows->size(); }
+  bool full() const { return (rows != nullptr) && (this->n + 1) == rows->size(); }
   
 	// Aggregate Verbs
 	void visit(verb::AggregateVerb*);

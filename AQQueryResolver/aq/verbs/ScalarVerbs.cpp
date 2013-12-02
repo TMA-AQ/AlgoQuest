@@ -26,7 +26,7 @@ void ScalarVerb::computeResult( VerbResult::Ptr param )
 
 	////debug13 - there should be an easier way to do this
 	//VerbResultArray::Ptr resArray = boost::dynamic_pointer_cast<VerbResultArray>(param);
-	//Column::Ptr column = NULL;
+	//Column::Ptr column = nullptr;
 	//if( resArray )
 	//{
 	//	assert(resArray->Results.size() > 0);
@@ -47,7 +47,7 @@ void ScalarVerb::computeResult( VerbResult::Ptr param )
 	//		this->transformItem( *column->Items[idx], *newColumn->Items[idx] );
 	//	}
 	//	else
-	//		newColumn->Items[idx] = NULL;
+	//		newColumn->Items[idx] = nullptr;
 
 	//newColumn->setCount( column->getCount() );
 	//this->Result = newColumn;
@@ -64,7 +64,7 @@ bool ScalarVerb::changeQuery(aq::tnode* pStart,
 
   //debug13 - there should be an easier way to do this
   // VerbResultArray::Ptr resArray = boost::dynamic_pointer_cast<VerbResultArray>(resLeft);
-  //Scalar::Ptr scalar = NULL;
+  //Scalar::Ptr scalar = nullptr;
   //if (resArray)
   //{
   //	assert(resArray->Results.size() > 0);
@@ -86,8 +86,8 @@ bool ScalarVerb::changeQuery(aq::tnode* pStart,
 	
   pNode->inf = 1;
 	this->Disabled = true;
-	delete_subtree(pNode->left);
-	delete_subtree(pNode->right);
+  aq::tnode::delete_subtree(pNode->left);
+	aq::tnode::delete_subtree(pNode->right);
 	// pNode->set_data(scalar->getValue(), scalar->Type);
 	return true;
 }

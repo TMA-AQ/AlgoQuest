@@ -22,7 +22,7 @@ bool ComparisonVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 	int pErr = 0;
 	//the argument given to expression_transform will be destroyed if the function
 	//is successful
-	aq::tnode* pNodeClone = aq::clone_subtree(pNode);
+	aq::tnode* pNodeClone = pNode->clone_subtree();
 	aq::tnode* newNode = pNodeClone;
 	if( this->Context == K_WHERE )
 	{
@@ -106,10 +106,10 @@ bool IsVerb::preprocessQuery(	aq::tnode* pStart, aq::tnode* pNode,
 
 	if( !pNode->right ||
 		!(pNode->right->tag == K_NOT && pNode->right->left &&
-		pNode->right->left->tag == K_NULL ||
-		pNode->right->tag == K_NULL) )
+		pNode->right->left->tag == K_nullptr ||
+		pNode->right->tag == K_nullptr) )
 		throw generic_error(generic_error::NOT_IMPLEMENTED, "");
-	if( pNode->right->tag == K_NOT && pNode->right->left->tag == K_NULL )
+	if( pNode->right->tag == K_NOT && pNode->right->left->tag == K_nullptr )
 		this->IsNot = true;
 	return false;
 }

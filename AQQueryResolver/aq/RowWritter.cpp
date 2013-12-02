@@ -118,7 +118,7 @@ int RowWritter::process(Row& row)
       {
         for (size_t i = 4; i < this->widths[k]; i++)
           fputs(" ", pFOut);
-        fputs("NULL", pFOut);
+        fputs("nullptr", pFOut);
       }
       else
       {

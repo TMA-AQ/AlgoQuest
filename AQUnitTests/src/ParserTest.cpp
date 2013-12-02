@@ -37,27 +37,27 @@ void runParserTest( std::string query, std::string expected, std::string baseFil
   aq::Base baseDesc(baseFilename.c_str());
 
   aq::tnode * pNode;
-  if ((SQLParse(query.c_str(), &pNode)) != 0 ) 
+  if ((SQLParse(query.c_str(), pNode)) != 0 ) 
   {
     BOOST_REQUIRE(false);
   }
 
   std::string new_query;
-  aq::tnode * n = aq::clone_subtree(pNode);
+  aq::tnode * n = pNode->clone_subtree();
   try
   {
-    aq::solveIdentRequest(n, baseDesc);
+    aq::util::solveIdentRequest(n, baseDesc);
     //std::cout << *n << std::endl;
-    aq::generate_parent( n, NULL );
+    aq::util::generate_parent( n, NULL );
     aq::syntax_tree_to_sql_form(n, new_query);
     //std::cout << new_query << std::endl;
   }
   catch ( const std::exception & e )
   {
-    aq::generate_parent( n, NULL );
+    aq::util::generate_parent( n, NULL );
     aq::syntax_tree_to_sql_form(n, new_query);
-    delete_subtree(n);
-    delete_subtree(pNode);
+    aq::tnode::delete_subtree(n);
+    aq::tnode::delete_subtree(pNode);
     if ( expected == e.what())
       BOOST_REQUIRE(true);
     else
@@ -70,8 +70,8 @@ void runParserTest( std::string query, std::string expected, std::string baseFil
     return;
   }
   
-  delete_subtree(n);
-  delete_subtree(pNode);
+  aq::tnode::delete_subtree(n);
+  aq::tnode::delete_subtree(pNode);
 
   if ( new_query == expected )
     BOOST_CHECK(true);
@@ -86,6 +86,48 @@ void runParserTest( std::string query, std::string expected, std::string baseFil
 #define BOOST_TEST_DETECT_MEMORY_LEAK 0
 
 BOOST_AUTO_TEST_SUITE(Parser)
+  
+BOOST_AUTO_TEST_CASE(sql_to_aql)
+{
+  std::string sql_query;
+  sql_query  = " select t1.v1, t2.v2 ";
+  sql_query += " from t1 inner join t2 on t1.id = t2.id ";
+  sql_query += " where t1.v2 in (1, 2, 3) and t2.v1 in (1, 2, 3) ";
+  sql_query += " group by t1.v1, t2.v1 ";
+  sql_query += " order by t2.v2, t1.v2 ";
+  sql_query += " ; ";
+
+  aq::tnode * tree = nullptr;
+  if ((SQLParse(sql_query.c_str(), tree)) != 0 ) 
+  {
+    BOOST_REQUIRE(false);
+  }
+
+  aq::core::SelectStatement ss;
+  aq::util::tnodeToSelectStatement(*tree, ss);
+
+  BOOST_CHECK(ss.selectedTables.size() == 2);
+  BOOST_CHECK(ss.selectedTables[0].table.name == "T1");
+  BOOST_CHECK(ss.selectedTables[0].name == "V1");
+  BOOST_CHECK(ss.selectedTables[1].table.name == "T2");
+  BOOST_CHECK(ss.selectedTables[1].name == "V2");
+
+  BOOST_CHECK(ss.fromTables.size() == 2);
+  BOOST_CHECK(ss.fromTables[0].name == "T1");
+  BOOST_CHECK(ss.fromTables[1].name == "T2");
+
+  BOOST_CHECK(ss.joinConditions.size() == 1);
+  BOOST_CHECK(ss.inConditions.size() == 2);
+  BOOST_CHECK(ss.groupedColumns.size() == 2);
+  BOOST_CHECK(ss.orderedColumns.size() == 2);
+
+  ss.output = aq::core::SelectStatement::output_t::SQL;
+  std::cout << ss << std::endl;
+
+  ss.output = aq::core::SelectStatement::output_t::AQL;
+  std::cout << ss << std::endl;
+
+}
 
 BOOST_AUTO_TEST_CASE(existance_simple)
 {

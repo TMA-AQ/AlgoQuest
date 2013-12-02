@@ -8,9 +8,9 @@ namespace aq
   {
     std::ostringstream oss;
     oss << "Problem detected: Parsing: " << Msg;
-    if ( pNode != NULL )
+    if ( pNode != nullptr )
     {
-      aq::generate_parent( pNode, NULL );
+      aq::util::generate_parent( pNode, nullptr );
       std::string str;
       if ( next == false )
         syntax_tree_to_sql_form_nonext( pNode, str );
