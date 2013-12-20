@@ -62,7 +62,7 @@ void Database::create(aq::base_t& base)
 
   boost::filesystem::path bdFile(this->getBaseDescFile());
   std::string fname = this->getBaseDescFile();
-  std::ofstream f(fname, std::ios::trunc);
+  std::ofstream f(fname.c_str(), std::ios::trunc);
   aq::dump_raw_base(f, base);
   f.close();
 

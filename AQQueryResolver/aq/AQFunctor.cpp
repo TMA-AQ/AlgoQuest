@@ -1,7 +1,14 @@
 #include "AQFunctor.h"
 
-#include <aq\parser\sql92_grm_tab.hpp>
-#include <aq\TreeUtilities.h>
+#include <aq/parser/sql92_grm_tab.hpp>
+#include <aq/TreeUtilities.h>
+
+#ifndef WIN32
+
+void * LoadLibrary(const char *) { return 0; }
+void FreeLibrary(void *) {}
+
+#endif
 
 namespace aq
 {

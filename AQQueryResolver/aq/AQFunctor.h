@@ -1,12 +1,23 @@
 #ifndef __AQFUNCTOR_H__
 #define __AQFUNCTOR_H__
 
-#include <Windows.h>
+#ifdef WIN32
+# include <Windows.h>
+#else
+# define HINSTANCE void * // TODO
+# define DWORD int // TODO
+
+HINSTANCE GetProcAddress(int, const char *) { return nullptr; } // TODO
+int GetLastError() { return 0; }
+
+#endif
+
+
 #include <stdio.h>
 #include <ostream>
 #include <iostream>
 
-#include <aq\parser\SQLParser.h>
+#include <aq/parser/SQLParser.h>
 
 namespace aq
 {
@@ -28,12 +39,14 @@ namespace aq
       this->_ident = ident;
       try
       {
+#ifdef WIN32
         this->_func = (func_t)GetProcAddress(lib, _ident.c_str());
         if (this->_func == NULL)
         {
           DWORD rc = GetLastError();
           throw;
         }
+#endif
       }
       catch (...)
       {

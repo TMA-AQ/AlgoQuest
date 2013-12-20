@@ -1,4 +1,5 @@
 #include "DatabaseGenerator.h"
+#include <cmath>
 #include <numeric>
 #include <cassert>
 #include <boost/array.hpp>
@@ -121,14 +122,14 @@ size_t DatabaseGenerator::getNbDB() const
   }
   else if (mode == point_mode_t::MIN_MAX)
   {
-    nb = std::pow(gen_mode == gen_mode_t::ALL ? 15 : 6, this->tables_bound.size() - 1);
+    nb = (double)std::pow(gen_mode == gen_mode_t::ALL ? (double)15 : (double)6, (double)(this->tables_bound.size() - 1));
   }
   return nb;
 }
 
 boost::array<size_t, 2> getSlices(size_t n, size_t s)
 {
-  boost::array<size_t, 2> slices = { s, n };
+  boost::array<size_t, 2> slices = { {s, n} };
   for (size_t j = 0; slices[0] <= slices[1]; j++)
   {
     slices[1] -= slices[0];
