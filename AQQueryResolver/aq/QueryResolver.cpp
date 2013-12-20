@@ -9,6 +9,7 @@
 #include "RowWritter.h"
 #include "RowTableWritter.h"
 #include "RowBinaryWritter.h"
+#include "NodeWritter.h"
 #include "RowVerbProcess.h"
 #include "RowTemporaryWritter.h"
 #include "RowSolver.h"
@@ -398,7 +399,7 @@ void QueryResolver::resolve(aq::verb::VerbNode::Ptr spTree)
     {
       for (auto& tname : joinPath)
       {
-	aq::Table::Ptr table = BaseDesc.getTable(tname);
+        aq::Table::Ptr table = BaseDesc.getTable(tname);
         for (auto& tm : aqMatrix->getMatrix())
         {
           if (tm.table_id == table->ID)
@@ -502,33 +503,17 @@ void QueryResolver::solveNested(aq::tnode*& pNode, unsigned int nSelectLevel, aq
     {
       this->executeNested(pNode);
     }
-    else // if ( inIn )
+    else // inIn
     {
-      // Resolve SubQuery
-      // bool resolverMode = this->pSettings->useRowResolver; // FIXME: pSettings should be clone
-      // this->pSettings->useRowResolver = false;
+      assert(inIn);
       QueryResolver queryResolver(pNode, this->pSettings, this->aq_engine, this->BaseDesc, nSelectLevel, ++this->nestedId);
       queryResolver.setInWereClause();
-      queryResolver.solve();
-      Table::Ptr table = queryResolver.getResult();
-      // this->pSettings->useRowResolver = resolverMode;
-
-      //delete old subtree and add new subtree containing answer
-      aq::tnode::delete_subtree(pNode);
-      if( inIn )
-      {
-        pNode = new aq::tnode( K_IN_VALUES );
-        pNode->left = aq::util::GetTree( *table );
-      }
-      else
-      {
-        // table->load(this->pSettings->szTempPath1, this->pSettings->packSize);
-        pNode = aq::util::GetTree( *table );
-        if (pNode == nullptr)
-        {
-          throw aq::generic_error(aq::generic_error::NOT_IMPLEMENTED, "empty nested result not supported");
-        }
-      }
+      aq::tnode * result = new aq::tnode(K_IN_VALUES);
+      boost::shared_ptr<aq::NodeWritter> writter(new aq::NodeWritter(*result));
+      queryResolver.solve(writter);
+      aq::tnode::delete_subtree(pNode); // delete old subtree and add new subtree containing answer
+      pNode = result;
+      std::cout << *pNode << std::endl;
     }
   }
   else
@@ -664,31 +649,29 @@ void QueryResolver::solveAQMatrix(aq::verb::VerbNode::Ptr spTree)
 
   ////
   //// Output Processing
-  boost::shared_ptr<aq::RowWritter_Intf> rowWritter;
-  if (this->nested)
+  if (this->resultHandler == nullptr)
   {
-    if (this->inWhereClause)
+    if (this->nested)
     {
-      this->result.reset(new Table("tmp", static_cast<unsigned>(this->BaseDesc.getTables().size() + 1), true));
-      rowWritter.reset(new aq::RowTableWritter(this->result));
-      processes->addProcess(rowWritter);
+      if (this->inWhereClause)
+      {
+        this->result.reset(new Table("tmp", static_cast<unsigned>(this->BaseDesc.getTables().size() + 1), true));
+        this->resultHandler.reset(new aq::RowTableWritter(this->result));
+        processes->addProcess(this->resultHandler);
+      }
+      else
+      {
+        this->resultHandler.reset(new aq::RowTemporaryWritter(static_cast<unsigned>(BaseDesc.getTables().size() + 1), this->pSettings->tmpPath.c_str(), pSettings->packSize));
+        processes->addProcess(this->resultHandler);
+      }
     }
     else
     {
-      rowWritter.reset(new aq::RowTemporaryWritter(static_cast<unsigned>(BaseDesc.getTables().size() + 1), this->pSettings->tmpPath.c_str(), pSettings->packSize));
-      processes->addProcess(rowWritter);
-    }
-  }
-  else
-  {
-    if (resultHandler == nullptr)
-    {
       resultHandler.reset(new aq::RowWritter(pSettings->outputFile == "stdout" ? pSettings->outputFile : pSettings->answerFile));
     }
-    resultHandler->setColumn(columnTypes);
-    processes->addProcess(this->resultHandler);
-    rowWritter = this->resultHandler;
   }
+  this->resultHandler->setColumn(columnTypes);
+  processes->addProcess(this->resultHandler);
 
   //
   // build joinPath
@@ -704,7 +687,7 @@ void QueryResolver::solveAQMatrix(aq::verb::VerbNode::Ptr spTree)
   // build table result (need by nested query)
   if (this->nested && !this->inWhereClause)
   {
-    const std::vector<Column::Ptr>& columnsWritter = rowWritter->getColumns();
+    const std::vector<Column::Ptr>& columnsWritter = this->resultHandler->getColumns();
     std::copy(columnsWritter.begin(), columnsWritter.end(), std::back_inserter(this->columns));
 
     std::string name = (this->resultTables.size() == 1) ? this->resultTables[0].first : "tmp";
@@ -715,7 +698,7 @@ void QueryResolver::solveAQMatrix(aq::verb::VerbNode::Ptr spTree)
       column->setTableName(name);
       this->result->Columns.push_back(column);
     }
-    this->result->TotalCount = rowWritter->getTotalCount();
+    this->result->TotalCount = this->resultHandler->getTotalCount();
   }
 }
 

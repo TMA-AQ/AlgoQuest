@@ -22,6 +22,7 @@
     <ProjectGuid>{AEF01BF3-3E36-4D80-97C5-850489FC9483}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>TestAQEngine</RootNamespace>
+    <ProjectName>AQTests</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -31,10 +32,10 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v110</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -44,11 +45,11 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v110</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -71,14 +72,16 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <TargetName>aq-tests</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
+    <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>aq-tests</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
+    <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -140,6 +143,7 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>..\AQQueryResolver;..\AQUtil;$(BOOST_INSTALL_INCLUDE);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -150,19 +154,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="aq\DatabaseGenerator.cpp" />
+    <ClCompile Include="aq\DatabaseHelper.cpp" />
     <ClCompile Include="aq\FunctionalTests.cpp" />
     <ClCompile Include="aq\AQEngineTests.cpp" />
+    <ClCompile Include="aq\QueryGenerator.cpp" />
+    <ClCompile Include="aq\TestRunner.cpp" />
     <ClCompile Include="aq\Util.cpp" />
-    <ClCompile Include="aq\WhereComparator.cpp" />
-    <ClCompile Include="aq\WhereIn.cpp" />
-    <ClCompile Include="aq\WhereValidator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aq\AWhereCondition.h" />
+    <ClInclude Include="aq\DatabaseGenerator.h" />
+    <ClInclude Include="aq\DatabaseHelper.h" />
+    <ClInclude Include="aq\QueryGenerator.h" />
+    <ClInclude Include="aq\TestRunner.h" />
     <ClInclude Include="aq\Util.h" />
-    <ClInclude Include="aq\WhereComparator.h" />
-    <ClInclude Include="aq\WhereIn.h" />
-    <ClInclude Include="aq\WhereValidator.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AQQueryResolver\AQQueryResolver.vcxproj">

@@ -17,6 +17,7 @@
 #include <aq/UpdateResolver.h>
 #include <aq/ThesaurusReader.h>
 #include <aq/TreeUtilities.h>
+#include <aq/AQFunctor.h>
 
 #include <fstream>
 
@@ -397,7 +398,7 @@ int processQuery(const std::string& query, aq::Settings& settings, aq::Base& bas
 	
 		aq::Logger::getInstance().log(AQ_INFO, "processing sql query\n");
 
-		aq::tnode	*pNode  = NULL;
+		aq::tnode	*pNode  = nullptr;
 		int	nRet;
 
 		//
@@ -417,25 +418,6 @@ int processQuery(const std::string& query, aq::Settings& settings, aq::Base& bas
 #endif
 
     }
-
-    //---------------------------------------------------------------------------------------
-    // test du functor
-    //---------------------------------------------------------------------------------------
-#if defined(_FUNCTOR)
-    try
-    {
-      aq::AQFunctor test(pNode, "C:/Users/AlgoQuest/Documents/AlgoQuest/AQSuite/x64/Debug/AQFunctionTest.dll");
-      test.dump(std::cout);
-      test.callFunctor();
-    }
-    catch (...)
-    {
-      throw;
-    }
-#endif
-
-    //---------------------------------------------------------------------------------------
-
 
     //
 		// Transform SQL request in prefix form, 
@@ -489,4 +471,39 @@ int processQuery(const std::string& query, aq::Settings& settings, aq::Base& bas
   }
 
 	return rc;
+}
+
+// -------------------------------------------------------------------------------------------------
+int test_plugins(const std::string& plugins_path, const std::string& query, const aq::Settings& settings, const aq::Base& base)
+{   
+
+  aq::tnode * tree = nullptr;
+  if (SQLParse(query.c_str(), tree) != 0 )
+  {
+    return EXIT_FAILURE;
+  }
+
+  std::cout << *tree << std::endl;
+
+  try
+  {
+    aq::AQFunctor test(tree, plugins_path);
+    test.dump(std::cout);
+    test.callFunctor();
+  }
+  catch (const aq::generic_error& ge)
+  {
+    std::cerr << ge.what() << std::endl;
+  }
+  catch (const std::exception& ex)
+  {
+    std::cerr << ex.what() << std::endl;
+  }
+  catch (...)
+  {
+    std::cerr << "UNCATCHED EXCEPTION" << std::endl;
+    throw;
+  }
+
+  return EXIT_SUCCESS;
 }

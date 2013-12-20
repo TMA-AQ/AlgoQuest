@@ -14,16 +14,23 @@ public:
   Database(const std::string& _path);
   void dump(std::ostream& os) const;
   bool isValid() const;
-  void create();
+  void create(aq::base_t& base);
+  void erase();
   std::string getName() const;
   aq::base_t getBaseDesc() const;
+  
+  std::string getRootPath() const;
 
-private:
-  int load();
   std::string getWorkingPath() const;
   std::string getDataPath() const;
   std::string getBaseDescFile() const;
 
+  std::string getTemporaryWorkingPath() const;
+  std::string getTemporaryTableLoadPath() const;
+  std::string getTemporaryColumnLoadPath() const;
+
+private:
+  int load();
   std::string path;
   aq::base_t baseDesc;
 };

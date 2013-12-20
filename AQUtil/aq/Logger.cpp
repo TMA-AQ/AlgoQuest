@@ -205,7 +205,11 @@ void Logger::log(int facility, const char * format, ...) const
 
 void Logger::printStdOut(const char * buf, int facility) const
 {
-  if (this->colorLog)
+  if (this->out != nullptr)
+  {
+    (*this->out) << buf;
+  }
+  else if (this->colorLog)
   {
     this->printWithColor(buf, facility);
   }

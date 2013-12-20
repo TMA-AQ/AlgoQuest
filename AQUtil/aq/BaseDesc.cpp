@@ -17,7 +17,6 @@ namespace // anonymous namespace
   
 void clean(base_t& base)
 {
-  base.nb_tables = 0;
   base.name = "";
   base.id = -1;
   base.table.clear();
@@ -106,10 +105,11 @@ void construis_colonne ( std::istream& iss, base_t::table_t::col_t *colonne )
 void construis_table ( FILE* fp, base_t::table_t * table )
 {
 	char name[k_size_max];
-	fscanf(fp,"%s %d %d %d", name, &(table->id), &(table->nb_record), &(table->nb_cols));
+  int nb_cols;
+	fscanf(fp,"%s %d %d %d", name, &(table->id), &(table->nb_record), &nb_cols);
 	table->name = name;
   boost::trim_if(table->name, boost::is_any_of("\""));
-	for (int i = 0 ; i < table->nb_cols ; i++)
+	for (int i = 0 ; i < nb_cols ; i++)
 	{
     base_t::table_t::col_t c;
 		construis_colonne(fp, &c);
@@ -120,12 +120,13 @@ void construis_table ( FILE* fp, base_t::table_t * table )
 //-----------------------------------------------------------
 void construis_table ( std::istream& iss, base_t::table_t * table )
 {
+  int nb_cols;
   iss >> table->name;
   iss >> table->id;
   iss >> table->nb_record;
-  iss >> table->nb_cols;
+  iss >> nb_cols;
   boost::trim_if(table->name, boost::is_any_of("\""));
-	for (int i = 0 ; i < table->nb_cols ; i++)
+	for (int i = 0 ; i < nb_cols ; i++)
 	{
     base_t::table_t::col_t c;
 		construis_colonne(iss, &c);
@@ -174,10 +175,11 @@ void build_base_from_raw ( FILE* fp, base_t& base )
 {
   clean(base);
 	char name[k_size_max];
-	fscanf(fp, "%s %d", name, &(base.nb_tables));
+  int nb_tables;
+	fscanf(fp, "%s %d", name, &nb_tables);
 	base.name = name;
 	base.id = 1;
-	for (int i = 0 ; i < base.nb_tables ; i++)
+	for (int i = 0 ; i < nb_tables ; i++)
 	{
     base_t::table_t table;
 		construis_table(fp, &table);
@@ -187,11 +189,12 @@ void build_base_from_raw ( FILE* fp, base_t& base )
 
 void build_base_from_raw ( std::istream& iss, base_t& base )
 {
+  int nb_tables;
   clean(base);
 	iss >> base.name;
-  iss >> base.nb_tables;
+  iss >> nb_tables;
 	base.id = 1;
-	for (int i = 0 ; i < base.nb_tables ; i++)
+	for (int i = 0 ; i < nb_tables ; i++)
 	{
     base_t::table_t table;
 		construis_table(iss, &table);
@@ -202,13 +205,16 @@ void build_base_from_raw ( std::istream& iss, base_t& base )
 
 void dump_raw_base(std::ostream& oss, const base_t& base)
 {
-  oss << base.name << std::endl;
-  std::for_each(base.table.begin(), base.table.end(), [&] (const base_t::table_t& table) {
-    oss << "  " << table.name << std::endl;
-    std::for_each(table.colonne.begin(), table.colonne.end(), [&] (const base_t::table_t::col_t& column) {
-      oss << "  " << "  " << column.name << std::endl;
-    });
-  });
+  oss << base.name << " " << base.table.size() << std::endl << std::endl;
+  for (const auto& table : base.table) 
+  {
+    oss << "\"" << table.name << "\"" << " " << table.id << " " <<  table.nb_record << " " << table.colonne.size() << std::endl;
+    for (const auto& column : table.colonne) 
+    {
+      oss << "\"" << column.name << "\"" << " " << column.id << " " << column.size << " " << type_to_string(column.type) << std::endl;
+    }
+    oss << std::endl;
+  }
 }
 
 void build_base_from_xml ( std::istream& is, base_t& base )
@@ -235,10 +241,8 @@ void build_base_from_xml ( std::istream& is, base_t& base )
       fill_column_type(&col, type.c_str());
       table.colonne.push_back(col);
     }
-    table.nb_cols = static_cast<int>(table.colonne.size());
     base.table.push_back(table);
   }
-  base.nb_tables = static_cast<int>(base.table.size());
 }
 
 void dump_xml_base(std::ostream& oss, const base_t& base)

@@ -11,10 +11,10 @@ namespace aq
     try
     {
       this->_lib = LoadLibrary(path.c_str());
-      if (this->_lib == NULL)
+      if (this->_lib == nullptr)
       {
         DWORD rc = GetLastError();
-        wprintf(L"Format message failed with 0x%x\n", GetLastError());
+        wprintf(L"Format message failed with %d\n", GetLastError());
       }
       this->assignFunctor(node);
     }
@@ -30,17 +30,19 @@ namespace aq
     FreeLibrary(this->_lib);
   }
 
-  void        AQFunctor::assignFunctor(aq::tnode *node)
+  void AQFunctor::assignFunctor(aq::tnode *node)
   {
     try
     {
       if (!node || (node->tag == K_SELECT && !node->left))
         throw;
-      aq::generate_parent(node, NULL);
+      aq::util::generate_parent(node, NULL);
       vectorNode listSave;
-      aq::find_nodes(node, K_FUNC, listSave);
+      node->find_nodes(K_FUNC, listSave);
       for (auto& it : listSave)
+      {
         this->createFunctor(it);
+      }
     }
     catch (...)
     {
@@ -49,7 +51,7 @@ namespace aq
     }
   }
 
-  void        AQFunctor::createFunctor(aq::tnode *node)
+  void AQFunctor::createFunctor(aq::tnode *node)
   {
     try
     {
@@ -57,7 +59,7 @@ namespace aq
         throw;
       vectorString  arg;
       std::string   ident = node->getData().val_str;
-      aq::tnode*  pNode = aq::clone_subtree(node->left);
+      aq::tnode*  pNode = node->left->clone_subtree();
 
       while (pNode)
       {
@@ -92,31 +94,31 @@ namespace aq
     }
   }
 
-  void        AQFunctor::dump(std::ostream& os)
+  void AQFunctor::dump(std::ostream& os)
   {
     for (auto& it : this->_funtor)
       it->dump(os);
   }
 
-  void        AQFunctor::callFunctor()
+  void AQFunctor::callFunctor()
   {
     for (auto& it : this->_funtor)
       it->callFunc();
   }
 
-  void        AQFunctor::callFunctor(const std::string& ident)
+  void AQFunctor::callFunctor(const std::string& ident)
   {
     for (auto& it : this->_funtor)
       if (it->getIdent() == ident)
         it->callFunc();
   }
 
-  void        AQFunctor::setArgChanged()
+  void AQFunctor::setArgChanged()
   {
     
   }
 
-  void        AQFunctor::setArgChanged(const std::string& ident)
+  void AQFunctor::setArgChanged(const std::string& ident)
   {
      
   }

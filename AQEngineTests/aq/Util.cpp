@@ -8,6 +8,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/variant.hpp>
 
 #if defined(WIN32)
 # include <aq/WIN32FileMapper.h>
@@ -21,7 +22,32 @@ namespace aq
 {
   
   // ----------------------------------------------------------------------------
-  typedef std::vector<std::pair<aq::ColumnItem::Ptr, aq::ColumnType> > v_item_t;
+  typedef boost::variant<
+    aq::ColumnItem<int32_t>::Ptr, 
+    aq::ColumnItem<int64_t>::Ptr, 
+    aq::ColumnItem<double>::Ptr, 
+    aq::ColumnItem<char*>::Ptr 
+  > item_t;
+  typedef std::vector<std::pair<item_t, aq::ColumnType> > v_item_t;
+  typedef boost::variant<
+    aq::ColumnMapper_Intf<int32_t>::Ptr, 
+    aq::ColumnMapper_Intf<int64_t>::Ptr, 
+    aq::ColumnMapper_Intf<double>::Ptr, 
+    aq::ColumnMapper_Intf<char>::Ptr
+  > column_mapper_t;
+
+  // ----------------------------------------------------------------------------
+  template <typename T>
+  bool cmp_item(const typename aq::ColumnItem<T>::Ptr& i1, const typename aq::ColumnItem<T>::Ptr& i2)
+  {
+    if (aq::ColumnItem<T>::lessThan(*i1, *i2))
+      return true;
+    else if (!aq::ColumnItem<T>::equal(*i1, *i2))
+      return false;
+    return false;
+  }
+
+  // ----------------------------------------------------------------------------
   struct grp_cmp
   {
     bool operator()(const v_item_t& v1, const v_item_t& v2)
@@ -30,10 +56,22 @@ namespace aq
       for (size_t i = 0; i < v1.size(); ++i)
       {
         assert(v1[i].second == v2[i].second);
-        if (aq::ColumnItem::lessThan(v1[i].first.get(), v2[i].first.get(), v1[i].second))
-          return true;
-        else if (!aq::ColumnItem::equal(v1[i].first.get(), v2[i].first.get(), v1[i].second))
-          return false;
+        switch (v1[i].second)
+        {
+        case aq::ColumnType::COL_TYPE_BIG_INT:
+        case aq::ColumnType::COL_TYPE_DATE:
+          return cmp_item<int64_t>(boost::get<aq::ColumnItem<int64_t>::Ptr>(v1[i].first), boost::get<aq::ColumnItem<int64_t>::Ptr>(v2[i].first));
+        break;
+        case aq::ColumnType::COL_TYPE_DOUBLE:
+          return cmp_item<double>(boost::get<aq::ColumnItem<double>::Ptr>(v1[i].first), boost::get<aq::ColumnItem<double>::Ptr>(v2[i].first));
+        break;
+        case aq::ColumnType::COL_TYPE_INT:
+          return cmp_item<int32_t>(boost::get<aq::ColumnItem<int32_t>::Ptr>(v1[i].first), boost::get<aq::ColumnItem<int32_t>::Ptr>(v2[i].first));
+        break;
+        case aq::ColumnType::COL_TYPE_VARCHAR:
+          return cmp_item<char*>(boost::get<aq::ColumnItem<char*>::Ptr>(v1[i].first), boost::get<aq::ColumnItem<char*>::Ptr>(v2[i].first));
+        break;
+        }
       }
       return false;
     }
@@ -207,6 +245,140 @@ void get_columns(std::vector<std::string>& columns, const std::string& query, co
   }
 }
 
+
+typedef std::vector<bool> selected_t;
+typedef std::vector<std::pair<item_t, bool> > grouped_t;
+typedef std::vector<std::pair<item_t, bool> > ordered_t;
+typedef std::map<size_t, std::map<size_t, std::pair<aq::ColumnType, column_mapper_t> > > column_mappers_t;
+
+template <typename T>
+int check_item(column_mapper_t mapper, aq::ColumnType type, size_t pos, std::ostream& os, v_item_t& grp, 
+               grouped_t::value_type::first_type& itGrouped,
+               ordered_t::value_type::first_type& itOrdered,
+               bool display, bool isSelected, bool isGrouped, bool isOrdered, bool new_group, size_t i)
+{
+  T value;
+  aq::ColumnItem<T>::Ptr item(new aq::ColumnItem<T>);
+  auto m = boost::get<aq::ColumnMapper_Intf<T>::Ptr>(mapper);
+  m->loadValue(pos - 1, &value);
+  item->setValue(value);
+
+  if (display && isSelected)
+  {
+    if (pos > 0)
+    {
+      os << item->toString() << " ; ";
+    }
+    else
+    {
+      os << "NULL ; ";
+    }
+  }
+
+  auto& itemGroup = boost::get<aq::ColumnItem<T> >(itGrouped);
+  auto& itemOrder = boost::get<aq::ColumnItem<T> >(itOrdered);
+
+  if (isGrouped)
+  {
+    if (new_group || (i == 0))
+    {
+      itemGroup = *item;
+      grp.push_back(std::make_pair(item_t(item), type));
+    }
+    else if (!aq::ColumnItem<T>::equal(*item, itemGroup))
+    {
+      aq::Logger::getInstance().log(AQ_ERROR, "BAD GROUPING: get '%s', expect '%s'\n", item->toString().c_str(), itemGroup.toString().c_str());
+      return -1;
+    }
+  }
+
+  if (isOrdered)
+  {
+    if (new_group || (i == 0))
+    {
+      itemOrder = *item;
+    }
+    else if (!aq::ColumnItem<T>::equal(*item, itemOrder) && !aq::ColumnItem<T>::lessThan(itemOrder, *item.get()))
+    {
+      aq::Logger::getInstance().log(AQ_ERROR, "BAD ORDERING: get '%s', expect '%s'\n", item->toString().c_str(), itemGroup.toString().c_str());
+      return -1;
+    }
+  }
+
+  return 0;
+}
+
+template <typename T>
+void register_item(const std::string& vdgPath,
+                   const std::string& columnName,
+                   size_t tableId,
+                   size_t colId,
+                   size_t size,
+                   size_t packetSize,
+                   const std::vector<std::string>& groupedColumns, 
+                   const std::vector<std::string>& orderedColumns,
+                   grouped_t& isGrouped, 
+                   ordered_t& isOrdered,
+                   column_mapper_t& cm)
+{
+  aq::ColumnMapper_Intf<T>::Ptr m(new aq::ColumnMapper<T, FileMapper>(vdgPath.c_str(), tableId, colId, size, packetSize));
+  cm = m;
+  bool isGrouping = std::find(groupedColumns.begin(), groupedColumns.end(), std::string(columnName)) != groupedColumns.end();
+  isGrouped.push_back(std::make_pair(new aq::ColumnItem<T>, isGrouping));
+  bool isOrdering = std::find(orderedColumns.begin(), orderedColumns.end(), std::string(columnName)) != orderedColumns.end();
+  isOrdered.push_back(std::make_pair(new aq::ColumnItem<T>, isOrdering));
+}
+
+template <> 
+inline void register_item<char>(const std::string& vdgPath,
+                                const std::string& columnName,
+                                size_t tableId,
+                                size_t colId,
+                                size_t size,
+                                size_t packetSize,
+                                const std::vector<std::string>& groupedColumns, 
+                                const std::vector<std::string>& orderedColumns,
+                                grouped_t& isGrouped, 
+                                ordered_t& isOrdered,
+                                column_mapper_t& cm)
+{
+  aq::ColumnMapper_Intf<char>::Ptr m(new aq::ColumnMapper<char, FileMapper>(vdgPath.c_str(), tableId, colId, size, packetSize));
+  cm = m;
+  bool isGrouping = std::find(groupedColumns.begin(), groupedColumns.end(), std::string(columnName)) != groupedColumns.end();
+  isGrouped.push_back(std::make_pair(new aq::ColumnItem<char*>, isGrouping));
+  bool isOrdering = std::find(orderedColumns.begin(), orderedColumns.end(), std::string(columnName)) != orderedColumns.end();
+  isOrdered.push_back(std::make_pair(new aq::ColumnItem<char*>, isOrdering));
+}
+
+template <typename T>
+std::string get_string_value(const item_t& item)
+{
+  const auto& i = boost::get<aq::ColumnItem<T>::Ptr>(item);
+  return i->toString();
+}
+
+std::string get_string_value(const item_t& item, aq::ColumnType type)
+{
+  std::string v;
+  switch (type)
+  {
+  case aq::ColumnType::COL_TYPE_BIG_INT:
+  case aq::ColumnType::COL_TYPE_DATE:
+    return get_string_value<int64_t>(item);
+    break;
+  case aq::ColumnType::COL_TYPE_DOUBLE:
+    return get_string_value<double>(item);
+    break;
+  case aq::ColumnType::COL_TYPE_INT:
+    return get_string_value<int32_t>(item);
+    break;
+  case aq::ColumnType::COL_TYPE_VARCHAR:
+    return get_string_value<char*>(item);
+    break;
+  }
+  return v;
+}
+
 // ------------------------------------------------------------------------------
 int check_answer_data(std::ostream& os,
                       const std::string& answerPath,
@@ -237,10 +409,10 @@ int check_answer_data(std::ostream& os,
 
   // check size, print column name and prepare column mapping
   size_t size = 0;
-  std::vector<bool> isSelected;
-  std::vector<std::pair<aq::ColumnItem::Ptr, bool> > isGrouped;
-  std::vector<std::pair<aq::ColumnItem::Ptr, bool> > isOrdered;
-  std::map<size_t, std::map<size_t, boost::shared_ptr<aq::ColumnMapper_Intf> > > columnMappers;
+  selected_t isSelected;
+  grouped_t isGrouped;
+  ordered_t isOrdered;
+  column_mappers_t columnMappers;
   for (auto it = m.begin(); it != m.end(); ++it)
   {
     if (size == 0)
@@ -253,35 +425,32 @@ int check_answer_data(std::ostream& os,
       exit(-1);
     }
     
-    std::map<size_t, boost::shared_ptr<aq::ColumnMapper_Intf> > tableColumnMappers;
+    std::map<size_t, std::pair<aq::ColumnType, column_mapper_t> > tableColumnMappers;
     const aq::AQMatrix::matrix_t::value_type t = *it;
     aq::Table::Ptr table = baseDesc.getTable(t.table_id);
     for (auto itCol = table->Columns.begin(); itCol != table->Columns.end(); ++itCol)
     {
-      boost::shared_ptr<aq::ColumnMapper_Intf> cm;
+      column_mapper_t cm;
+      std::string columnName = table->getName() + "." + (*itCol)->getName();
       switch((*itCol)->Type)
       {
       case aq::ColumnType::COL_TYPE_INT:
-        cm.reset(new aq::ColumnMapper<int32_t, FileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, 1/*(*itCol)->Size*/, o.packetSize));
+        register_item<int32_t>(vdgPath, columnName, t.table_id, (*itCol)->ID, 1, o.packetSize, groupedColumns, orderedColumns, isGrouped, isOrdered, cm);
         break;
       case aq::ColumnType::COL_TYPE_BIG_INT:
       case aq::ColumnType::COL_TYPE_DATE:
-        cm.reset(new aq::ColumnMapper<int64_t, FileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, 1/*(*itCol)->Size*/, o.packetSize));
+        register_item<int64_t>(vdgPath, columnName, t.table_id, (*itCol)->ID, 1, o.packetSize, groupedColumns, orderedColumns, isGrouped, isOrdered, cm);
         break;
       case aq::ColumnType::COL_TYPE_DOUBLE:
-        cm.reset(new aq::ColumnMapper<double, FileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, 1/*(*itCol)->Size*/, o.packetSize));
+        register_item<double>(vdgPath, columnName, t.table_id, (*itCol)->ID, 1, o.packetSize, groupedColumns, orderedColumns, isGrouped, isOrdered, cm);
         break;
       case aq::ColumnType::COL_TYPE_VARCHAR:
-        cm.reset(new aq::ColumnMapper<char, FileMapper>(vdgPath.c_str(), t.table_id, (*itCol)->ID, (*itCol)->Size, o.packetSize));
+        register_item<char>(vdgPath, columnName, t.table_id, (*itCol)->ID, 1, o.packetSize, groupedColumns, orderedColumns, isGrouped, isOrdered, cm);
         break;
       }
-      tableColumnMappers[(*itCol)->ID] = cm;
+      tableColumnMappers[(*itCol)->ID] = std::make_pair((*itCol)->Type, cm);
       bool isSelecting = std::find(selectedColumns.begin(), selectedColumns.end(), std::string(table->getName() + "." + (*itCol)->getName())) != selectedColumns.end();
       isSelected.push_back(isSelecting);
-      bool isGrouping = std::find(groupedColumns.begin(), groupedColumns.end(), std::string(table->getName() + "." + (*itCol)->getName())) != groupedColumns.end();
-      isGrouped.push_back(std::make_pair(new aq::ColumnItem, isGrouping));
-      bool isOrdering = std::find(orderedColumns.begin(), orderedColumns.end(), std::string(table->getName() + "." + (*itCol)->getName())) != orderedColumns.end();
-      isOrdered.push_back(std::make_pair(new aq::ColumnItem, isOrdering));
 
       if (o.display && isSelecting)
         os << table->getName() << "." << (*itCol)->getName() << " ; ";
@@ -304,7 +473,7 @@ int check_answer_data(std::ostream& os,
   std::vector<size_t> groupCount(matrix.getGroupBy().size(), 0);
   for (size_t i = 0; i < size && ((o.limit == 0) || (i < o.limit)); ++i)
   {
-    v_item_t v;
+    v_item_t grp;
     bool new_group = false;
     assert(groupCount[groupIndex] <= matrix.getGroupBy()[groupIndex].first);
     if (groupCount[groupIndex] == matrix.getGroupBy()[groupIndex].first)
@@ -323,51 +492,24 @@ int check_answer_data(std::ostream& os,
         os << t.table_id << "[" << t.indexes[i] << "] => ";
       for (auto& cm : columnMappers[t.table_id])
       {
-        aq::ColumnItem::Ptr item(new aq::ColumnItem);
-        cm.second->loadValue(t.indexes[i] - 1, *item);
-        
-        if (o.display && *itSelected)
-        {
-          if (t.indexes[i] > 0)
-          {
-            item->toString(buf, cm.second->getType());
-            os << buf << " ; ";
-          }
-          else
-          {
-            os << "NULL ; ";
-          }
-        }
+        auto& type = cm.second.first;
+        auto& mapper = cm.second.second;
 
-        assert(itGrouped != isGrouped.end());
-        if (itGrouped->second)
+        switch (type)
         {
-          if (new_group || (i == 0))
-          {
-            *itGrouped->first = *item;
-            v.push_back(std::make_pair(item, cm.second->getType()));
-          }
-          else if (!aq::ColumnItem::equal(item.get(), itGrouped->first.get(), cm.second->getType()))
-          {
-            aq::Logger::getInstance().log(AQ_ERROR, "BAD GROUPING: get '%s', expect '%s'\n", item->toString(cm.second->getType()).c_str(), itGrouped->first->toString(cm.second->getType()).c_str());
-            return -1;
-          }
-        }
-
-        assert(itOrdered != isOrdered.end());
-        if (itOrdered->second)
-        {
-          if (new_group || (i == 0))
-          {
-            *itOrdered->first = *item;
-          }
-          else if (
-            !aq::ColumnItem::equal(item.get(), itGrouped->first.get(), cm.second->getType()) && 
-            !aq::ColumnItem::lessThan(itGrouped->first.get(), item.get(), cm.second->getType()))
-          {
-            aq::Logger::getInstance().log(AQ_ERROR, "BAD ORDERING: get '%s', expect '%s'\n", item->toString(cm.second->getType()).c_str(), itGrouped->first->toString(cm.second->getType()).c_str());
-            return -1;
-          }
+        case aq::ColumnType::COL_TYPE_BIG_INT:
+        case aq::ColumnType::COL_TYPE_DATE:
+          check_item<int64_t>(mapper, type, t.indexes[i], os, grp, itGrouped->first, itOrdered->first, o.display, *itSelected, itGrouped->second, itOrdered->second, new_group, i);
+          break;
+        case aq::ColumnType::COL_TYPE_DOUBLE:
+          check_item<double>(mapper, type, t.indexes[i], os, grp, itGrouped->first, itOrdered->first, o.display, *itSelected, itGrouped->second, itOrdered->second, new_group, i);
+          break;
+        case aq::ColumnType::COL_TYPE_INT:
+          check_item<int32_t>(mapper, type, t.indexes[i], os, grp, itGrouped->first, itOrdered->first, o.display, *itSelected, itGrouped->second, itOrdered->second, new_group, i);
+          break;
+        case aq::ColumnType::COL_TYPE_VARCHAR:
+          check_item<char*>(mapper, type, t.indexes[i], os, grp, itGrouped->first, itOrdered->first, o.display, *itSelected, itGrouped->second, itOrdered->second, new_group, i);
+          break;
         }
 
         ++itSelected;
@@ -382,16 +524,18 @@ int check_answer_data(std::ostream& os,
     if (o.display)
       os << std::endl;
 
-    if (!v.empty())
+    if (!grp.empty())
     {
-      if (groups.size() == 0 || groups.find(v) == groups.end())
-        groups.insert(v);
+      if (groups.size() == 0 || groups.find(grp) == groups.end())
+        groups.insert(grp);
       else
       {
-        std::string group = "[ ";
-        for (auto& g : v)
+        std::string group;
+        group = "[ ";
+        for (auto& g : grp)
         {
-          group += g.first->toString(g.second) + " ";
+          group += get_string_value(g.first, g.second);
+          group += " ";
         }
         group += "]" ;
         aq::Logger::getInstance().log(AQ_ERROR, "BAD GROUPING: group %s already insert\n", group.c_str());
@@ -410,14 +554,41 @@ int check_answer_data(std::ostream& os,
   return 0;
 }
 
+template <typename T>
+void push_to_cb(char * buf, display_cb * cb, size_t index, column_mapper_t& cm)
+{
+  aq::ColumnItem<T>::Ptr item(new aq::ColumnItem<T>);
+  auto m = boost::get<aq::ColumnMapper_Intf<T>::Ptr>(cm);
+  T item_value;
+  m->loadValue(index - 1, &item_value);
+  item->setValue(item_value);
+  item->toString(buf);
+  cb->push(buf);
+}
+
+template <> inline
+void push_to_cb<char*>(char * buf, display_cb * cb, size_t index, column_mapper_t& cm)
+{
+  aq::ColumnItem<char*>::Ptr item(new aq::ColumnItem<char*>);
+  auto m = boost::get<aq::ColumnMapper_Intf<char>::Ptr>(cm);
+  char * item_value = new char[128];
+  m->loadValue(index - 1, item_value);
+  item->setValue(item_value);
+  item->toString(buf);
+  cb->push(buf);
+}
+
 // ------------------------------------------------------------------------------
 class print_data
 {
 public:
+  typedef std::vector<std::tuple<size_t, aq::ColumnType, column_mapper_t> > display_order_t;
+
+public:
   print_data(
     const struct opt& _o,
     display_cb * _cb, 
-    std::vector<std::pair<size_t, boost::shared_ptr<aq::ColumnMapper_Intf> > >& _display_order) 
+    display_order_t& _display_order) 
     : o(_o), cb(_cb), display_order(_display_order)
   {
   }
@@ -440,8 +611,9 @@ public:
     {
       for (auto& c : display_order)
       {
-        auto& tindex = c.first;
-        auto& cm = c.second;
+        auto& tindex = std::get<0>(c);
+        auto& type = std::get<1>(c);
+        auto& cm = std::get<2>(c);
         auto index = rows[tindex];
         if (index == 0)
         {
@@ -449,10 +621,22 @@ public:
         }
         else
         {
-          aq::ColumnItem::Ptr item(new aq::ColumnItem);
-          cm->loadValue(index - 1, *item);
-          item->toString(buf, cm->getType());
-          cb->push(buf);
+          switch (type)
+          {
+          case aq::ColumnType::COL_TYPE_BIG_INT:
+          case aq::ColumnType::COL_TYPE_DATE:
+            push_to_cb<int64_t>(buf, cb, index, cm);
+            break;
+          case aq::ColumnType::COL_TYPE_DOUBLE:
+            push_to_cb<double>(buf, cb, index, cm);
+            break;
+          case aq::ColumnType::COL_TYPE_INT:
+            push_to_cb<int32_t>(buf, cb, index, cm);
+            break;
+          case aq::ColumnType::COL_TYPE_VARCHAR:
+            push_to_cb<char*>(buf, cb, index, cm);
+            break;
+          }
         }
       }
     } while (--i > 0);
@@ -470,7 +654,7 @@ private:
   std::stringstream ss;
   const struct opt& o;
   display_cb * cb;
-  std::vector<std::pair<size_t, boost::shared_ptr<aq::ColumnMapper_Intf> > >& display_order;
+  std::vector<std::tuple<size_t, aq::ColumnType, column_mapper_t> >& display_order;
 };
 
 // ------------------------------------------------------------------------------
@@ -502,7 +686,7 @@ int display(display_cb * cb,
 
   // check size, print column name and prepare column mapping
   size_t size = 0;
-  std::vector<std::pair<size_t, boost::shared_ptr<aq::ColumnMapper_Intf> > > display_order(selectedColumns.size());
+  std::vector<std::tuple<size_t, aq::ColumnType, column_mapper_t> > display_order(selectedColumns.size());
   for (size_t tindex = 0; tindex < matrix.size(); tindex++)
   {
     auto& t = matrix[tindex];
@@ -522,24 +706,36 @@ int display(display_cb * cb,
       auto it = std::find(selectedColumns.begin(), selectedColumns.end(), std::string(table->getName() + "." + col->getName()));
       if (it != selectedColumns.end())
       {
-        boost::shared_ptr<aq::ColumnMapper_Intf> cm;
+        column_mapper_t cm;
         switch(col->Type)
         {
         case aq::ColumnType::COL_TYPE_INT:
-          cm.reset(new aq::ColumnMapper<int32_t, FileMapper>(vdgPath.c_str(), t.table_id, col->ID, 1/*(*itCol)->Size*/, o.packetSize));
+          {
+            aq::ColumnMapper_Intf<int32_t>::Ptr m(new aq::ColumnMapper<int32_t, FileMapper>(vdgPath.c_str(), t.table_id, col->ID, 1/*(*itCol)->Size*/, o.packetSize));
+            cm = m;
+          }
           break;
         case aq::ColumnType::COL_TYPE_BIG_INT:
         case aq::ColumnType::COL_TYPE_DATE:
-          cm.reset(new aq::ColumnMapper<int64_t, FileMapper>(vdgPath.c_str(), t.table_id, col->ID, 1/*(*itCol)->Size*/, o.packetSize));
+          {
+            aq::ColumnMapper_Intf<int64_t>::Ptr m(new aq::ColumnMapper<int64_t, FileMapper>(vdgPath.c_str(), t.table_id, col->ID, 1/*(*itCol)->Size*/, o.packetSize));
+            cm = m;
+          }
           break;
         case aq::ColumnType::COL_TYPE_DOUBLE:
-          cm.reset(new aq::ColumnMapper<double, FileMapper>(vdgPath.c_str(), t.table_id, col->ID, 1/*(*itCol)->Size*/, o.packetSize));
+          {
+            aq::ColumnMapper_Intf<double>::Ptr m(new aq::ColumnMapper<double, FileMapper>(vdgPath.c_str(), t.table_id, col->ID, 1/*(*itCol)->Size*/, o.packetSize));
+            cm = m;
+          }
           break;
         case aq::ColumnType::COL_TYPE_VARCHAR:
-          cm.reset(new aq::ColumnMapper<char, FileMapper>(vdgPath.c_str(), t.table_id, col->ID, col->Size, o.packetSize));
+          {
+            aq::ColumnMapper_Intf<char>::Ptr m(new aq::ColumnMapper<char, FileMapper>(vdgPath.c_str(), t.table_id, col->ID, col->Size, o.packetSize));
+            cm = m;
+          }
           break;
         }
-        display_order[std::distance(selectedColumns.begin(), it)] = std::make_pair(tindex, cm);
+        display_order[std::distance(selectedColumns.begin(), it)] = std::make_tuple(tindex, col->Type, cm);
       }
     }
   }
@@ -586,8 +782,9 @@ int display(display_cb * cb,
 
       for (auto& c : display_order)
       {
-        auto& tindex = c.first;
-        auto& cm = c.second;
+        auto& tindex = std::get<0>(c);
+        auto& type = std::get<1>(c);
+        auto& cm = std::get<2>(c);
         auto index = matrix[tindex].indexes[i];
         if (index == 0)
         {
@@ -595,15 +792,21 @@ int display(display_cb * cb,
         }
         else
         {
-          aq::ColumnItem::Ptr item(new aq::ColumnItem);
-          if (cm->loadValue(index - 1, *item) == 0)
+          switch (type)
           {
-            item->toString(buf, cm->getType());
-            cb->push(buf);
-          }
-          else
-          {
-            throw aq::generic_error(aq::generic_error::INVALID_TABLE, "");
+          case aq::ColumnType::COL_TYPE_BIG_INT:
+          case aq::ColumnType::COL_TYPE_DATE:
+            push_to_cb<int64_t>(buf, cb, index, cm);
+            break;
+          case aq::ColumnType::COL_TYPE_DOUBLE:
+            push_to_cb<double>(buf, cb, index, cm);
+            break;
+          case aq::ColumnType::COL_TYPE_INT:
+            push_to_cb<int32_t>(buf, cb, index, cm);
+            break;
+          case aq::ColumnType::COL_TYPE_VARCHAR:
+            push_to_cb<char*>(buf, cb, index, cm);
+            break;
           }
         }
       }

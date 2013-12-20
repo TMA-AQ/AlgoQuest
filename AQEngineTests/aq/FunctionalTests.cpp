@@ -1,5 +1,4 @@
 #include "Util.h"
-#include "WhereValidator.h"
 #include <aq/QueryReader.h>
 #include <aq/AQLParser.h>
 #include <aq/Base.h>
@@ -241,14 +240,14 @@ uint64_t functional_tests(const struct opt& o)
       queryFile.close();
 
       // check for Whering
-      aq::WhereValidator whereValidator;
-      if (o.checkCondition)
-      {
-        whereValidator.addJoinConditions(ss.joinConditions);
-        whereValidator.addInConditions(ss.inConditions);
-        // whereValidator.parseQuery(query);
-        // whereValidator.dump(std::cout);
-      }
+      //aq::WhereValidator whereValidator;
+      //if (o.checkCondition)
+      //{
+      //  whereValidator.addJoinConditions(ss.joinConditions);
+      //  whereValidator.addInConditions(ss.inConditions);
+      //  // whereValidator.parseQuery(query);
+      //  // whereValidator.dump(std::cout);
+      //}
 
       aq::Logger::getInstance().log(AQ_INFO, "checking '%s'\n", reader->getFullIdent().c_str());
       aq::Logger::getInstance().log(AQ_INFO, "expecting: %s\n", reader->getExpected());
@@ -278,7 +277,7 @@ uint64_t functional_tests(const struct opt& o)
         {
           std::string answerPath(o.dbPath);
           answerPath += "/data_orga/tmp/" + std::string(o.queryIdent) + "/dpy/";
-          rc = aq::check_answer_data(std::cout, answerPath, o, selectedColumns, groupedColumns, orderedColumns /*, whereValidator*/);
+          // rc = aq::check_answer_data(std::cout, answerPath, o, selectedColumns, groupedColumns, orderedColumns /*, whereValidator*/);
         }
         else
         {

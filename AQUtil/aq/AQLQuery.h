@@ -87,7 +87,7 @@ struct SelectStatement
     SQL,
   };
   mutable output_t output;
-  inline void setOutput(output_t o) { this->output = o; }
+  inline void setOutput(output_t o) const { this->output = o; }
   std::string to_string(output_t o = output_t::SQL) const;
   void to_string(std::string& str) const;
 

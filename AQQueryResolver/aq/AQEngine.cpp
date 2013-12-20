@@ -245,7 +245,9 @@ namespace aq
     si.cb = sizeof(si);
     ZeroMemory(&pi, sizeof(pi));
 
-    std::wstring wprg = aq::string2Wstring(prg);
+    std::string prg_s("E:/AQ_Bin/bin/aq-engine.exe");
+
+    std::wstring wprg = aq::string2Wstring(prg_s);
     std::wstring warg = aq::string2Wstring(args);
     LPCWSTR prg_wstr = wprg.c_str();
     LPCWSTR arg_wstr = warg.c_str();

@@ -332,7 +332,7 @@ void tnode::treeListToNodeArray(std::vector<tnode*>& nodes, tag_t tag)
 	}
 	else
   {
-		nodes.push_back(this);
+		nodes.push_back(this->clone_subtree());
   }
 }
 
@@ -541,6 +541,8 @@ tnode* tnode::nodeArrayToTreeList( const std::vector<tnode*>& nodes, tag_t tag )
 //------------------------------------------------------------------------------
 void tnode::delete_subtree(tnode *& pNode) 
 {
+  if (pNode == nullptr)
+    return;
 	deque<tnode*> nodes;
 	nodes.push_back(pNode);
 	size_t idx = 0;

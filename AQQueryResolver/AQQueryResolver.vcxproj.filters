@@ -241,6 +241,12 @@
     <ClInclude Include="aq\UpdateResolver.h">
       <Filter>Header Files\aq</Filter>
     </ClInclude>
+    <ClInclude Include="aq\NodeWritter.h">
+      <Filter>Header Files\aq\row_solver</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\AQFunctor.h">
+      <Filter>Header Files\aq</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="aq\verbs\AggregateVerbs.cpp">
@@ -373,6 +379,12 @@
       <Filter>Source Files\aq\row_solver</Filter>
     </ClCompile>
     <ClCompile Include="aq\UpdateResolver.cpp">
+      <Filter>Source Files\aq</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\NodeWritter.cpp">
+      <Filter>Source Files\aq\row_solver</Filter>
+    </ClCompile>
+    <ClCompile Include="aq\AQFunctor.cpp">
       <Filter>Source Files\aq</Filter>
     </ClCompile>
   </ItemGroup>

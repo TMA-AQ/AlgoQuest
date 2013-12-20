@@ -11,7 +11,6 @@
 #include "AQEngineSimulate.h"
 
 // #include <aq/AQThreadRequest.h>
-// #include <aq/AQFunctor.h>
 
 #if defined (WIN32)
 #  include <io.h>
@@ -228,6 +227,7 @@ int main(int argc, char**argv)
     bool checkDatabase = false;
 		bool simulateAQEngine = false;
 		bool skipNestedQuery = false;
+    bool testPlugins = false;
 
     // load option
     std::string tableNameToLoad;
@@ -318,6 +318,7 @@ int main(int argc, char**argv)
 			("skip-nested-query", po::value<bool>(&settings.skipNestedQuery), "")
 			("aq-matrix", po::value<std::string>(&aqMatrixFileName), "")
       ("check-database", po::bool_switch(&checkDatabase), "")
+      ("test-plugins", po::bool_switch(&testPlugins), "")
       ;
 
     po::options_description external("External");
@@ -438,6 +439,16 @@ int main(int argc, char**argv)
         aq::Logger::getInstance().log(AQ_CRITICAL, "cannot find database desc file '%s'\n", settings.dbDesc.c_str());
         return EXIT_FAILURE;
       }
+    }
+
+    //
+    // Test plugins
+    if (testPlugins)
+    {
+      aq::Base bd(settings.dbDesc);
+      std::string plugins_path = "C:/Users/AlgoQuest/Documents/Visual Studio 2012/Projects/AQPlugin/x64/Debug/AQPlugin.dll";
+      std::string query = "select aq_func1(t1.id), aq_func2(t1.v1) from t1;";
+      return test_plugins(plugins_path, query, settings, bd);
     }
 
     //

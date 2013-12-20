@@ -80,6 +80,7 @@
     <IntDir>build\$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
+    <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
@@ -177,7 +178,7 @@
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention />
       <TargetMachine>MachineX64</TargetMachine>
-      <AdditionalLibraryDirectories>C:\Boost\install\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(BOOST_INSTALL_LIB);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -317,6 +318,7 @@
     <ClInclude Include="aq\ApplyRowVisitor.h" />
     <ClInclude Include="aq\AQEngine.h" />
     <ClInclude Include="aq\AQEngine_Intf.h" />
+    <ClInclude Include="aq\AQFunctor.h" />
     <ClInclude Include="aq\AQMatrix.h" />
     <ClInclude Include="aq\AQThread.h" />
     <ClInclude Include="aq\AQThreadRequest.h" />
@@ -330,6 +332,7 @@
     <ClInclude Include="aq\db_loader\DatabaseLoader.h" />
     <ClInclude Include="aq\DumpVisitor.h" />
     <ClInclude Include="aq\ExprTransform.h" />
+    <ClInclude Include="aq\NodeWritter.h" />
     <ClInclude Include="aq\Optimizations.h" />
     <ClInclude Include="aq\parser\ID2Str.h" />
     <ClInclude Include="aq\parser\JeqParser.h" />
@@ -376,12 +379,14 @@
   <ItemGroup>
     <ClCompile Include="aq\ApplyRowVisitor.cpp" />
     <ClCompile Include="aq\AQEngine.cpp" />
+    <ClCompile Include="aq\AQFunctor.cpp" />
     <ClCompile Include="aq\AQMatrix.cpp" />
     <ClCompile Include="aq\Base.cpp" />
     <ClCompile Include="aq\Column.cpp" />
     <ClCompile Include="aq\Column2Table.cpp" />
     <ClCompile Include="aq\db_loader\DatabaseLoader.cpp" />
     <ClCompile Include="aq\DumpVisitor.cpp" />
+    <ClCompile Include="aq\NodeWritter.cpp" />
     <ClCompile Include="aq\Optimizations.cpp" />
     <ClCompile Include="aq\parser\ID2Str.cpp" />
     <ClCompile Include="aq\parser\JeqParser.cpp" />
