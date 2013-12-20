@@ -15,6 +15,24 @@ namespace aq
     typedef std::shared_ptr<TestCase> Ptr;
     struct opt_t
     {
+      opt_t()
+        : 
+        generator_filename("queries.gen"),
+        nb_tables(2),
+        nb_rows(10),
+        min_value(1000),
+        max_value(1100),
+        point_mode(DatabaseGenerator::point_mode_t::FULL),
+        gen_mode(DatabaseGenerator::gen_mode_t::ALL),
+        value_mode(DatabaseGenerator::value_mode_t::ALL_UNIQUE),
+        aq_path(""),
+        aq_name("algoquest"),
+        mysql_host("localhost"),
+        mysql_user("algoquest"),
+        mysql_pass("algoquest"),
+        mysql_name("algoquest")
+      {
+      }
       std::string generator_filename;
       size_t nb_tables;
       size_t nb_rows;
