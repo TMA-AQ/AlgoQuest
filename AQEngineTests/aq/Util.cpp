@@ -5,6 +5,7 @@
 #include <aq/Exceptions.h>
 #include <algorithm>
 #include <fstream>
+#include <boost/tuple/tuple.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 #include <boost/algorithm/string.hpp>
@@ -257,8 +258,8 @@ int check_item(column_mapper_t mapper, aq::ColumnType type, size_t pos, std::ost
                bool display, bool isSelected, bool isGrouped, bool isOrdered, bool new_group, size_t i)
 {
   T value;
-  aq::ColumnItem<T>::Ptr item(new aq::ColumnItem<T>);
-  auto m = boost::get<aq::ColumnMapper_Intf<T>::Ptr>(mapper);
+  typename aq::ColumnItem<T>::Ptr item(new aq::ColumnItem<T>);
+  auto m = boost::get<typename aq::ColumnMapper_Intf<T>::Ptr>(mapper);
   m->loadValue(pos - 1, &value);
   item->setValue(value);
 
@@ -314,13 +315,13 @@ void register_item(const std::string& vdgPath,
                    size_t colId,
                    size_t size,
                    size_t packetSize,
-                   const std::vector<std::string>& groupedColumns, 
+                   const std::vector<std::string>& groupedColumns,
                    const std::vector<std::string>& orderedColumns,
                    grouped_t& isGrouped, 
                    ordered_t& isOrdered,
                    column_mapper_t& cm)
 {
-  aq::ColumnMapper_Intf<T>::Ptr m(new aq::ColumnMapper<T, FileMapper>(vdgPath.c_str(), tableId, colId, size, packetSize));
+  typename aq::ColumnMapper_Intf<T>::Ptr m(new aq::ColumnMapper<T, FileMapper>(vdgPath.c_str(), tableId, colId, size, packetSize));
   cm = m;
   bool isGrouping = std::find(groupedColumns.begin(), groupedColumns.end(), std::string(columnName)) != groupedColumns.end();
   isGrouped.push_back(std::make_pair(new aq::ColumnItem<T>, isGrouping));
@@ -352,7 +353,7 @@ inline void register_item<char>(const std::string& vdgPath,
 template <typename T>
 std::string get_string_value(const item_t& item)
 {
-  const auto& i = boost::get<aq::ColumnItem<T>::Ptr>(item);
+  const auto& i = boost::get<typename aq::ColumnItem<T>::Ptr>(item);
   return i->toString();
 }
 
@@ -556,8 +557,8 @@ int check_answer_data(std::ostream& os,
 template <typename T>
 void push_to_cb(char * buf, display_cb * cb, size_t index, column_mapper_t& cm)
 {
-  aq::ColumnItem<T>::Ptr item(new aq::ColumnItem<T>);
-  auto m = boost::get<aq::ColumnMapper_Intf<T>::Ptr>(cm);
+  typename aq::ColumnItem<T>::Ptr item(new aq::ColumnItem<T>);
+  auto m = boost::get<typename aq::ColumnMapper_Intf<T>::Ptr>(cm);
   T item_value;
   m->loadValue(index - 1, &item_value);
   item->setValue(item_value);
@@ -581,7 +582,7 @@ void push_to_cb<char*>(char * buf, display_cb * cb, size_t index, column_mapper_
 class print_data
 {
 public:
-  typedef std::vector<std::tuple<size_t, aq::ColumnType, column_mapper_t> > display_order_t;
+  typedef std::vector<boost::tuple<size_t, aq::ColumnType, column_mapper_t> > display_order_t;
 
 public:
   print_data(
@@ -610,9 +611,9 @@ public:
     {
       for (auto& c : display_order)
       {
-        auto& tindex = std::get<0>(c);
-        auto& type = std::get<1>(c);
-        auto& cm = std::get<2>(c);
+        auto& tindex = boost::get<0>(c);
+        auto& type = boost::get<1>(c);
+        auto& cm = boost::get<2>(c);
         auto index = rows[tindex];
         if (index == 0)
         {
@@ -653,7 +654,7 @@ private:
   std::stringstream ss;
   const struct opt& o;
   display_cb * cb;
-  std::vector<std::tuple<size_t, aq::ColumnType, column_mapper_t> >& display_order;
+  std::vector<boost::tuple<size_t, aq::ColumnType, column_mapper_t> >& display_order;
 };
 
 // ------------------------------------------------------------------------------
@@ -685,7 +686,7 @@ int display(display_cb * cb,
 
   // check size, print column name and prepare column mapping
   size_t size = 0;
-  std::vector<std::tuple<size_t, aq::ColumnType, column_mapper_t> > display_order(selectedColumns.size());
+  std::vector<boost::tuple<size_t, aq::ColumnType, column_mapper_t> > display_order(selectedColumns.size());
   for (size_t tindex = 0; tindex < matrix.size(); tindex++)
   {
     auto& t = matrix[tindex];
@@ -734,7 +735,7 @@ int display(display_cb * cb,
           }
           break;
         }
-        display_order[std::distance(selectedColumns.begin(), it)] = std::make_tuple(tindex, col->Type, cm);
+        display_order[std::distance(selectedColumns.begin(), it)] = boost::make_tuple(tindex, col->Type, cm);
       }
     }
   }
@@ -781,9 +782,9 @@ int display(display_cb * cb,
 
       for (auto& c : display_order)
       {
-        auto& tindex = std::get<0>(c);
-        auto& type = std::get<1>(c);
-        auto& cm = std::get<2>(c);
+        auto& tindex = boost::get<0>(c);
+        auto& type = boost::get<1>(c);
+        auto& cm = boost::get<2>(c);
         auto index = matrix[tindex].indexes[i];
         if (index == 0)
         {
