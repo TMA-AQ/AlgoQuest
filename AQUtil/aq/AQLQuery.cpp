@@ -110,7 +110,7 @@ void print_list(std::ostream& os, T& l, const char * delim = "")
 void print_aql(std::ostream& os, const aq::core::SelectStatement& query)
 {
   os << "SELECT ";
-  for (size_t i = 1; i < query.fromTables.size(); ++i) os << ", ";
+  for (size_t i = 1; i < query.selectedTables.size(); ++i) os << ", ";
   for (auto& c : query.selectedTables) os << ". " << c.table.name << " " << c.name << " ";
   os << std::endl;
 
