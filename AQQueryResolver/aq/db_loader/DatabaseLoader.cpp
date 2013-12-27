@@ -453,13 +453,15 @@ void DatabaseLoader::runLoader(size_t table, column_info_t& ci, size_t packet) c
 #else
     int rc;
     char exec_cmd[1024];
-    sprintf(exec_cmd, "%s %s %lu %d %lu", k_batch_loader.c_str(), ini_filename.c_str(), table , ci.col.id, packet);
+    sprintf(exec_cmd, "%s %s %lu %d %lu > log.txt", k_batch_loader.c_str(), ini_filename.c_str(), table , ci.col.id, packet);
     aq::Logger::getInstance().log(AQ_INFO, exec_cmd);
+    // freopen("tmp.log", "w", stdout);
     rc = system(exec_cmd);
     if (rc != 0)
     {
       aq::Logger::getInstance().log(AQ_ERROR, "loader error [%s] return exit code [%d]\n", exec_cmd, rc);
     }
+    // freopen("CON", "w", stdout);
 #endif
   }
 }

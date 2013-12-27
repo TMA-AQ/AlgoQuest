@@ -271,7 +271,10 @@ namespace aq
   int AQEngineSystem::run(const char * prg, const char * args) const
   {
     aq::Logger::getInstance().log(AQ_NOTICE, "call: '%s %s'\n", prg, args);
-    return system((std::string(prg) + " " + std::string(args)).c_str());
+    // freopen("tmp.log", "w", stdout);
+    int rc = system((std::string(prg) + " " + std::string(args) + " > log.txt").c_str());
+    // freopen("CON", "w", stdout);
+    return rc;
   }
 
 }
