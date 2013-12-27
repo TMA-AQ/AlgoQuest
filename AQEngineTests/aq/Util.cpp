@@ -130,7 +130,6 @@ int generate_working_directories(const struct opt& o, std::string& iniFilename)
     }
     else
     {
-      // std::cerr << p << " already exist" << std::endl;
       throw aq::generic_error(aq::generic_error::INVALID_FILE, std::string(p.string() + " already exist").c_str());
     }
   }

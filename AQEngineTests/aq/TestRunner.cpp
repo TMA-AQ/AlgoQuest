@@ -1,6 +1,65 @@
 #include "TestRunner.h"
 
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/ini_parser.hpp>
+
 using namespace aq;
+
+namespace helper
+{
+  template <class T>
+  T get_opt_value(boost::property_tree::ptree& pt, const char * key, T default_value)
+  {
+    boost::optional<T> opt = pt.get_optional<T>(boost::property_tree::ptree::path_type(key));
+    if (opt.is_initialized()) return opt.get();
+    else return default_value;
+  }
+
+  bool get_opt_value(boost::property_tree::ptree& pt, const char * key, bool default_value)
+  {
+    boost::optional<std::string> opt = pt.get_optional<std::string>(boost::property_tree::ptree::path_type(key));
+    if (opt.is_initialized()) 
+    {
+      std::string s = opt.get();
+      boost::to_upper(s);
+      return s == "TRUE" || s == "YES" || s == "1";
+    }
+    else return default_value;
+  }
+}
+
+void TestCase::opt_t::parse(std::istream& is)
+{
+  try
+  {
+    boost::property_tree::ptree pt;
+    boost::property_tree::ini_parser::read_ini(is, pt);
+
+    // algoquest options
+    this->aq_name = helper::get_opt_value(pt, "algoquest.db-name", this->aq_name);
+    this->aq_path = helper::get_opt_value(pt, "algoquest.db-path", this->aq_path);
+
+    // mysql options
+    this->mysql_host = helper::get_opt_value(pt, "mysql.db-host", this->mysql_host);
+    this->mysql_name = helper::get_opt_value(pt, "mysql.db-name", this->mysql_name);
+    this->mysql_user = helper::get_opt_value(pt, "mysql.user", this->mysql_pass);
+    this->mysql_pass = helper::get_opt_value(pt, "mysql.pass", this->mysql_user);
+
+    // generation options
+    this->generator_filename = helper::get_opt_value(pt, "generator.filename", this->generator_filename);
+    this->max_value = helper::get_opt_value(pt, "generator.max-value", this->max_value);
+    this->min_value = helper::get_opt_value(pt, "generator.min-value", this->min_value);
+    this->nb_rows = helper::get_opt_value(pt, "generator.nb-rows", this->nb_rows);
+    this->nb_tables = helper::get_opt_value(pt, "generator.nb-tables", this->nb_tables);
+    this->point_mode = DatabaseGenerator::point_mode_t::MIN_MAX; // TODO
+    this->gen_mode = DatabaseGenerator::gen_mode_t::INTERSECT; // TODO
+    this->value_mode = DatabaseGenerator::value_mode_t::RANDOM; // TODO
+  }
+  catch (const boost::property_tree::ptree_error& e)
+  {
+    // TODO
+  }
+}
 
 TestCase::TestCase()
 {

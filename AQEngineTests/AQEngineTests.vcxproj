@@ -106,7 +106,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\AQQueryResolver;..\AQUtil;$(BOOST_INSTALL_INCLUDE);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files\MySQL\MySQL Connector C++ 1.1.3 Bin\include;C:\Program Files\MySQL\MySQL Connector C++ 1.1.3 Bin\include\cppconn;$(BOOST_INSTALL_INCLUDE);..\AQQueryResolver;..\AQUtil;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -141,7 +141,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\AQQueryResolver;..\AQUtil;$(BOOST_INSTALL_INCLUDE);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files\MySQL\MySQL Connector C++ 1.1.3 Bin\include;C:\Program Files\MySQL\MySQL Connector C++ 1.1.3 Bin\include\cppconn;$(BOOST_INSTALL_INCLUDE);..\AQQueryResolver;..\AQUtil;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -154,21 +154,26 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="aq\AQEngineTests.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="aq\DatabaseGenerator.cpp" />
     <ClCompile Include="aq\DatabaseHelper.cpp" />
     <ClCompile Include="aq\FunctionalTests.cpp" />
-    <ClCompile Include="aq\AQEngineTests.cpp" />
+    <ClCompile Include="aq\MySQLHelper.cpp" />
     <ClCompile Include="aq\QueryGenerator.cpp" />
     <ClCompile Include="aq\TestRunner.cpp" />
     <ClCompile Include="aq\Util.cpp" />
+    <ClCompile Include="aq\VerbBuilder.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="aq\AWhereCondition.h" />
     <ClInclude Include="aq\DatabaseGenerator.h" />
     <ClInclude Include="aq\DatabaseHelper.h" />
+    <ClInclude Include="aq\MySQLHelper.h" />
     <ClInclude Include="aq\QueryGenerator.h" />
     <ClInclude Include="aq\TestRunner.h" />
     <ClInclude Include="aq\Util.h" />
+    <ClInclude Include="aq\VerbBuilder.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AQQueryResolver\AQQueryResolver.vcxproj">

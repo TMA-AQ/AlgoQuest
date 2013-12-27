@@ -33,6 +33,7 @@ namespace aq
         mysql_name("algoquest")
       {
       }
+      void parse(std::istream& is);
       std::string generator_filename;
       size_t nb_tables;
       size_t nb_rows;

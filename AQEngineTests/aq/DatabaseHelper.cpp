@@ -1,4 +1,5 @@
 #include "DatabaseHelper.h"
+#include "Util.h"
 
 #include <aq/Database.h>
 #include <aq/db_loader/DatabaseLoader.h>
@@ -12,8 +13,8 @@
 
 using namespace aq;
 
-AlgoQuestDatabase::AlgoQuestDatabase(aq::Settings& _settings)
-  : db(_settings.rootPath), settings(_settings)
+AlgoQuestDatabase::AlgoQuestDatabase(aq::Settings& _settings, bool _onlyEngine)
+  : db(_settings.rootPath), settings(_settings), onlyEngine(_onlyEngine)
 {
   base.id = 1; // fixme
   base.name = settings.rootPath;
@@ -156,32 +157,97 @@ private:
   DatabaseIntf::result_t& result;
 };
 
+struct result_handler_t : public aq::display_cb
+{
+  result_handler_t(DatabaseIntf::result_t& _result)
+    : result(_result)
+  {
+    it = result.rend();
+  }
+  void push(const std::string& value)
+  {
+    if (it != result.rend())
+      (*it).push_back(value);
+  }
+  void next()
+  {
+    result.push_back(DatabaseIntf::result_t::value_type());
+    it = result.rbegin();
+  }
+  DatabaseIntf::result_t& result;
+  DatabaseIntf::result_t::reverse_iterator it;
+};
+
 bool AlgoQuestDatabase::execute(const aq::core::SelectStatement& ss, DatabaseIntf::result_t& result)
 {
-  std::string         query;
-  aq::Base            bd;
-  aq::AQEngine_Intf * aqEngine = nullptr;
-  const std::string   ident; 
-  bool                keepFiles = false;
-  bool                force = false;
   
-  aq::Base::load(settings.dbDesc, bd);
-  aqEngine = new aq::AQEngineSystem(bd, settings);
-  // aqEngine = new aq::AQEngineWindows(bd, settings);
-
+  std::string query;
   ss.setOutput(aq::core::SelectStatement::output_t::SQL);
   ss.to_string(query);
-  
+
   if (query.find("full outer join") != std::string::npos)
   {
     return true;
   }
 
-  result.clear();
-  boost::shared_ptr<aq::RowWritter_Intf> resultHandler(new ResultHandler(result));
-  aq::QueryResolver::prepareQuery(query, ident, settings, force);
-  aq::QueryResolver::processQuery(query, settings, bd, aqEngine, resultHandler, keepFiles);
 
-  delete aqEngine;
+  if (onlyEngine)
+  {
+    aq::opt o; // TODO
+    o.withCount = o.withIndex = false;
+    o.dbPath = o.workingPath = this->settings.rootPath;
+    o.aqEngine = this->settings.aqEngine;
+    o.queryIdent = "test";
+    o.force = true;
+    aq::display_cb * cb = new result_handler_t(result); 
+    std::string answerPath(this->settings.rootPath);
+    answerPath += "/data_orga/tmp/" + o.queryIdent + "/dpy/";
+
+    std::string iniFilename;
+    aq::generate_working_directories(o, iniFilename);
+
+    ss.setOutput(aq::core::SelectStatement::output_t::AQL);
+    ss.to_string(query);
+    std::string query_filename = o.dbPath + "/calculus/" + o.queryIdent + "/New_Request.txt";
+    std::ofstream f(query_filename);
+    if (f.is_open())
+      f << query;
+    f.close();
+
+    // TODO : fill selected columns
+    columns.clear();
+    for (const auto& c : ss.selectedTables)
+      columns.push_back(c.table.name + "." + c.name);
+
+    if (aq::run_aq_engine(o.aqEngine, iniFilename, o.queryIdent) == 0)
+      aq::display(cb, answerPath, o, columns);
+  }
+  else
+  {
+    aq::Base            bd;
+    aq::AQEngine_Intf * aqEngine = nullptr;
+    const std::string   ident; 
+    bool                keepFiles = false;
+    bool                force = false;
+
+    aq::Base::load(settings.dbDesc, bd);
+    aqEngine = new aq::AQEngineSystem(bd, settings);
+    // aqEngine = new aq::AQEngineWindows(bd, settings);
+
+    ss.setOutput(aq::core::SelectStatement::output_t::SQL);
+    ss.to_string(query);
+
+    if (query.find("full outer join") != std::string::npos)
+    {
+      return true;
+    }
+
+    result.clear();
+    boost::shared_ptr<aq::RowWritter_Intf> resultHandler(new ResultHandler(result));
+    aq::QueryResolver::prepareQuery(query, ident, settings, force);
+    aq::QueryResolver::processQuery(query, settings, bd, aqEngine, resultHandler, keepFiles);
+
+    delete aqEngine;
+  }
   return true;
 }
