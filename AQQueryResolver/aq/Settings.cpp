@@ -2,8 +2,8 @@
 #include <aq/Utilities.h>
 #include <aq/Exceptions.h>
 #include <aq/BaseDesc.h>
-#include <fstream>
 #include <aq/Logger.h>
+#include <fstream>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 #include <boost/algorithm/string/trim.hpp>

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "AQMatrix.h"
-#include "Settings.h"
 #include <aq/AQLQuery.h>
 
 namespace aq

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "AQEngine_Intf.h"
+#include "Settings.h"
+#include <aq/Base.h>
 #include <aq/Utilities.h>
 
 namespace aq
