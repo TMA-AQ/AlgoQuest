@@ -1,9 +1,9 @@
 #ifndef __AQ_COLUMN_H__
 #define __AQ_COLUMN_H__
 
-#include <aq/Object.h>
-#include <aq/DBTypes.h>
-#include <aq/FileMapper.h>
+#include "Object.h"
+#include "DBTypes.h"
+#include "FileMapper.h"
 
 #include <vector>
 #include <string>

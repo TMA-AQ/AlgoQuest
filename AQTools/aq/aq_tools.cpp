@@ -22,6 +22,7 @@
 #include <iostream>
 #include <fstream>
 #include <boost/thread.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 #include <boost/algorithm/string/replace.hpp>
 

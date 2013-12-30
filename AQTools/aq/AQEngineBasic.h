@@ -9,11 +9,10 @@ namespace aq
 class AQEngineBasic : public AQEngine_Intf
 {
 public:
+  void prepare() const {}
+  void clean() const {}
   void call(const std::string& query, aq::AQEngine_Intf::mode_t mode);
-	void call(Settings& settings, 
-		tnode *pNode, 
-		aq::AQEngine_Intf::mode_t mode, 
-		int selectLevel);
+	void call(const aq::core::SelectStatement& stmt, aq::AQEngine_Intf::mode_t mode);
   
   void renameResult(unsigned int id, std::vector<std::pair<std::string, std::string> >& resultTables) 
     {

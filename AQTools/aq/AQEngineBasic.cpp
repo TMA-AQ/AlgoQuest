@@ -6,10 +6,7 @@ void AQEngineBasic::call(const std::string&, aq::AQEngine_Intf::mode_t)
 {
 }
 
-void AQEngineBasic::call(Settings&, 
-												 tnode *, 
-												 aq::AQEngine_Intf::mode_t , 
-												 int)
+void AQEngineBasic::call(const aq::core::SelectStatement& stmt, aq::AQEngine_Intf::mode_t mode)
 {
 }
 

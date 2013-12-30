@@ -1,9 +1,9 @@
 #ifndef __ROW_WRITTER_H__
 #define __ROW_WRITTER_H__
 
-#include "Table.h"
 #include "verbs/VerbNode.h"
 #include "RowWritter_Intf.h"
+#include <aq/Table.h>
 #include <vector>
 
 namespace aq

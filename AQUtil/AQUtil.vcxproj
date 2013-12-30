@@ -163,6 +163,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aq\Algo.h" />
+    <ClInclude Include="aq\Base.h" />
+    <ClInclude Include="aq\Column.h" />
     <ClInclude Include="aq\Database.h" />
     <ClInclude Include="aq\DBTypes.h" />
     <ClInclude Include="aq\BaseDesc.h" />
@@ -178,6 +180,7 @@
     <ClInclude Include="aq\AQLQuery.h" />
     <ClInclude Include="aq\QueryReader.h" />
     <ClInclude Include="aq\Symbole.h" />
+    <ClInclude Include="aq\Table.h" />
     <ClInclude Include="aq\Timer.h" />
     <ClInclude Include="aq\Utilities.h" />
     <ClInclude Include="aq\WIN32FileMapper.h" />
@@ -185,7 +188,9 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="aq\Base.cpp" />
     <ClCompile Include="aq\BaseDesc.cpp" />
+    <ClCompile Include="aq\Column.cpp" />
     <ClCompile Include="aq\Database.cpp" />
     <ClCompile Include="aq\DateConversion.cpp" />
     <ClCompile Include="aq\DBTypes.cpp" />
@@ -195,6 +200,7 @@
     <ClCompile Include="aq\AQLQuery.cpp" />
     <ClCompile Include="aq\AQLSpiritParser.cpp" />
     <ClCompile Include="aq\QueryReader.cpp" />
+    <ClCompile Include="aq\Table.cpp" />
     <ClCompile Include="aq\Timer.cpp" />
     <ClCompile Include="aq\Utilities.cpp" />
     <ClCompile Include="aq\WIN32FileMapper.cpp" />

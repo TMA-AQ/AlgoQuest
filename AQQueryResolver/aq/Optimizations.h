@@ -1,8 +1,9 @@
 #pragma once
 
-#include "Base.h"
-#include "Table.h"
 #include "verbs/VerbNode.h"
+
+#include <aq/Base.h>
+#include <aq/Table.h>
 
 namespace aq
 {

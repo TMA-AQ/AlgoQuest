@@ -3,11 +3,6 @@
 
 #include "Table.h"
 
-#include <aq/Object.h>
-#include <aq/BaseDesc.h>
-#include <aq/DBTypes.h>
-#include <aq/Utilities.h>
-
 #include <vector>
 #include <string>
 #include <deque>

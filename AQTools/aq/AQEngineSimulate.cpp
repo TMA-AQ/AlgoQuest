@@ -24,44 +24,13 @@ namespace aq
       std::cout << "[" << tid << "]" << std::endl;
     }
 
-    this->aqMatrix->simulate( rand() % 1000, this->tableIDs );
+    // this->aqMatrix->simulate( rand() % 1000, this->tableIDs );
   }
 
-  void AQEngineSimulate::call(aq::tnode * pNode, aq::AQEngine_Intf::mode_t mode, int selectLevel)
+  void AQEngineSimulate::call(const aq::core::SelectStatement& query, aq::AQEngine_Intf::mode_t mode)
   {
-    //
-    // Get prefix form of query.
-    std::string str;
-
-    aq::util::generate_parent( pNode, NULL );
-    aq::syntax_tree_to_aql_form( pNode, str );
-
-    aq::Logger::getInstance().log(AQ_INFO, "---\n");
-    aq::Logger::getInstance().log(AQ_INFO, "Get prefix form of query\n");
-    aq::Logger::getInstance().log(AQ_INFO, "%s\n", str.c_str());
-
-    //
-    // Process with parse jeq
-    ParseJeq(str);
-
-    aq::Logger::getInstance().log(AQ_INFO, "---\n");
-    aq::Logger::getInstance().log(AQ_INFO, "Get prefix form of query after jeq parser\n");
-    aq::Logger::getInstance().log(AQ_INFO, "%s\n", str.c_str());
-
-    this->aqMatrix.reset(new aq::AQMatrix(this->settings, this->baseDesc));
-
-    this->createTableIDs( pNode );
-
-    std::cout << "TableIDs value =" << std::endl;
-    for (auto& tid : this->tableIDs) 
-    {
-      std::cout << "[" << tid << "]" << std::endl;
-    }
-
-    this->aqMatrix->simulate( rand() % 1000, this->tableIDs );
-
   }
-  
+
   void AQEngineSimulate::renameResult(unsigned int id, std::vector<std::pair<std::string, std::string> >& resultTables)
   {
     // TODO

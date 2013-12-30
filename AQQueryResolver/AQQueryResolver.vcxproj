@@ -322,8 +322,6 @@
     <ClInclude Include="aq\AQMatrix.h" />
     <ClInclude Include="aq\AQThread.h" />
     <ClInclude Include="aq\AQThreadRequest.h" />
-    <ClInclude Include="aq\Base.h" />
-    <ClInclude Include="aq\Column.h" />
     <ClInclude Include="aq\Column2Table.h" />
     <ClInclude Include="aq\ColumnItem.h" />
     <ClInclude Include="aq\ColumnMapper.h" />
@@ -354,7 +352,6 @@
     <ClInclude Include="aq\Settings.h" />
     <ClInclude Include="aq\SQLPrefix.h" />
     <ClInclude Include="aq\statement_resolver.h" />
-    <ClInclude Include="aq\Table.h" />
     <ClInclude Include="aq\TemporaryColumnMapper.h" />
     <ClInclude Include="aq\ThesaurusReader.h" />
     <ClInclude Include="aq\TreeUtilities.h" />
@@ -381,8 +378,6 @@
     <ClCompile Include="aq\AQEngine.cpp" />
     <ClCompile Include="aq\AQFunctor.cpp" />
     <ClCompile Include="aq\AQMatrix.cpp" />
-    <ClCompile Include="aq\Base.cpp" />
-    <ClCompile Include="aq\Column.cpp" />
     <ClCompile Include="aq\Column2Table.cpp" />
     <ClCompile Include="aq\db_loader\DatabaseLoader.cpp" />
     <ClCompile Include="aq\DumpVisitor.cpp" />
@@ -408,7 +403,6 @@
     <ClCompile Include="aq\Settings.cpp" />
     <ClCompile Include="aq\SQLPrefix.cpp" />
     <ClCompile Include="aq\statement_resolver.cpp" />
-    <ClCompile Include="aq\Table.cpp" />
     <ClCompile Include="aq\TreeUtilities.cpp" />
     <ClCompile Include="aq\UpdateResolver.cpp" />
     <ClCompile Include="aq\verbs\AggregateVerbs.cpp" />

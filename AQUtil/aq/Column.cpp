@@ -1,8 +1,8 @@
 #include "Column.h"
+#include "Utilities.h"
+#include "Exceptions.h"
 #include <cstring>
 #include <sstream>
-#include <aq/Utilities.h>
-#include <aq/Exceptions.h>
 #include <boost/scoped_array.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/case_conv.hpp>

@@ -2,9 +2,9 @@
 
 #include "parser/SQLParser.h"
 #include "parser/sql92_grm_tab.hpp"
-#include "Base.h"
 #include "Settings.h"
 
+#include <aq/Base.h>
 #include <aq/ColumnItem.h>
 #include <aq/ParsException.h>
 #include <aq/SQLPrefix.h> //  a delete

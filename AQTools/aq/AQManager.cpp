@@ -273,7 +273,7 @@ int generate_tmp_table(const aq::Settings& settings, aq::base_t& baseDesc, unsig
 {
   if (minValue > maxValue)
     return -1;
-  size_t tableIndex = baseDesc.nb_tables + 1;
+  size_t tableIndex = baseDesc.table.size() + 1;
   size_t columnIndex = 1;
   size_t partIndex = 0;
   size_t size = 0;
@@ -303,13 +303,11 @@ int generate_tmp_table(const aq::Settings& settings, aq::base_t& baseDesc, unsig
     fwrite(&value, sizeof(value), 1, fd);
   }
   fclose(fd);
-  baseDesc.nb_tables += 1;
   baseDesc.table.push_back(aq::base_t::table_t());
   auto& table = *baseDesc.table.rbegin();
   std::stringstream ss;
   ss << "TMP" << tableIndex;
   table.name = ss.str();
-  table.nb_cols = 1;
   table.id = (unsigned int)tableIndex;
   table.nb_record = nbValues;
   table.colonne.push_back(aq::base_t::table_t::col_t());

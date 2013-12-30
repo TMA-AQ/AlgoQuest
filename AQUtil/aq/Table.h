@@ -2,11 +2,8 @@
 #define __AQ_TABLE_H__
 
 #include "Column.h"
-
-#include <aq/Object.h>
-#include <aq/BaseDesc.h>
-#include <aq/DBTypes.h>
-#include <aq/Utilities.h>
+#include "BaseDesc.h"
+#include "Utilities.h"
 
 #include <vector>
 #include <string>

@@ -4,8 +4,8 @@
 #include "parser/SQLParser.h"
 #include "AQEngine_Intf.h"
 #include "RowWritter_Intf.h"
-#include "Table.h"
 #include "verbs/VerbNode.h"
+#include <aq/Table.h>
 #include <aq/Timer.h>
 #include <aq/Utilities.h>
 #include <vector>

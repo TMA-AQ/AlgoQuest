@@ -2,8 +2,8 @@
 #define __AQ_MATRIX_H__
 
 #include "Settings.h"
-#include "Base.h"
 
+#include <aq/Base.h>
 #include <aq/Exceptions.h>
 #include <aq/BaseDesc.h>
 #include <aq/DBTypes.h>

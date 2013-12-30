@@ -2,7 +2,7 @@
 #define __ROW_WRITTER_INTF_H__
 
 #include "RowProcess_Intf.h"
-#include "Column.h"
+#include <aq/Column.h>
 
 namespace aq
 {

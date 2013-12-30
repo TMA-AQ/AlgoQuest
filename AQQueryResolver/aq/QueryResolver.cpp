@@ -2,8 +2,6 @@
 #include "SQLPrefix.h"
 #include "QueryAnalyzer.h"
 #include "parser/sql92_grm_tab.hpp"
-#include "Base.h"
-#include "Table.h"
 
 #include "RowProcesses.h"
 #include "RowWritter.h"
@@ -25,6 +23,8 @@
 #include "ColumnMapper.h"
 #include "DumpVisitor.h"
 
+#include <aq/Base.h>
+#include <aq/Table.h>
 #include <aq/Exceptions.h>
 #include <aq/Logger.h>
 #include <aq/DateConversion.h>
