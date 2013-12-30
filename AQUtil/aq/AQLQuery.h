@@ -63,7 +63,9 @@ struct JoinCondition
   ColumnReference left, right;
 
   JoinCondition() {}
-  JoinCondition(const JoinCondition& o) : op(o.op), jt_left(o.jt_left), jt_right(o.jt_left), left(o.left), right(o.right) {}
+  JoinCondition(const JoinCondition& o) : op(o.op), jt_left(o.jt_left), jt_right(o.jt_right), left(o.left), right(o.right) 
+  {
+  }
   JoinCondition& operator=(const JoinCondition& o)
   {
     if (this != &o)

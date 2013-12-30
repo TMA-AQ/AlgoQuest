@@ -74,7 +74,7 @@ namespace aq {
           unary_join
           |
           join_condition [ phx::bind(&aq_parser::add_join_condition, this, qi::_1) ] 
-        | 
+          | 
           in_condition [ phx::bind(&aq_parser::add_in_condition, this, qi::_1) ]      
         ) 
           ;

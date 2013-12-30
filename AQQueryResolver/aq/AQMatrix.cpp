@@ -228,12 +228,12 @@ void AQMatrix::prepareData(const char * filePath)
 
 void AQMatrix::loadNextPacket()
 {
-  char * answerData = (char*)::malloc(this->answerFormat.size() + 1);
-  sprintf(answerData, this->answerFormat.c_str(), this->packet);
-  FILE * fd = fopen(answerData, "rb");
+  boost::scoped_array<char> answerData(new char[this->answerFormat.size() + 128]); // FIXME
+  sprintf(answerData.get(), this->answerFormat.c_str(), this->packet);
+  FILE * fd = fopen(answerData.get(), "rb");
   if (fd == nullptr)
   {
-    throw aq::generic_error(aq::generic_error::AQ_ENGINE, "cannot find aq matrix data file %s", answerData);
+    throw aq::generic_error(aq::generic_error::AQ_ENGINE, "cannot find aq matrix data file %s", answerData.get());
   }
   uint64_t value;
   for (size_t i = 0; (i < aq::packet_size) && this->count.size() < nbRows; ++i)
