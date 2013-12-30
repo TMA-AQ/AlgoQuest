@@ -2,7 +2,6 @@
 
 #include "AQEngine_Intf.h"
 #include <aq/Utilities.h>
-#include "Table.h"
 
 namespace aq
 {
@@ -13,17 +12,20 @@ public:
 	AQEngine(Base& _baseDesc, Settings& _settings);
 	~AQEngine();
   
-  void call(const std::string& query, mode_t mode);
-	void call(aq::tnode *pNode, mode_t mode, int selectLevel);
-  virtual int run(const char * prg, const char * args) const = 0;
+  void call(const std::string& query, mode_t mode = aq::AQEngine_Intf::mode_t::REGULAR);
+  void call(const aq::core::SelectStatement& query, mode_t mode = mode_t::REGULAR);
   
   void renameResult(unsigned int id, std::vector<std::pair<std::string, std::string> >& resultTables);
 	boost::shared_ptr<aq::AQMatrix> getAQMatrix() { return aqMatrix; }
 	const std::vector<llong>& getTablesIDs() const { return tableIDs; }
 
-private:
-	void generateAQMatrixFromPRM(const std::string prmFile, aq::tnode * whereNode);
+  void prepare() const;
+  void clean() const;
 
+protected:
+  virtual int run(const char * prg, const char * args) const = 0;
+
+private:
 	const Base& baseDesc;
 	const Settings& settings;
   boost::shared_ptr<aq::AQMatrix> aqMatrix;
@@ -36,6 +38,7 @@ class AQEngineWindows : public AQEngine
 {
 public:
   AQEngineWindows(Base& _baseDesc, Settings& settings);
+protected:
   int run(const char * prg, const char * args) const;
 };
 
@@ -45,6 +48,7 @@ class AQEngineSystem : public AQEngine
 {
 public:
   AQEngineSystem(Base& _baseDesc, Settings& settings);
+protected:
   int run(const char * prg, const char * args) const;
 };
 

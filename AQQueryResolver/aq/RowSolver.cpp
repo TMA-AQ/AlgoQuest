@@ -1,12 +1,13 @@
 #include "RowSolver.h"
 #include "TemporaryColumnMapper.h"
+#include "ColumnMapper.h"
 #include <aq/FileMapper.h>
 #include <aq/Exceptions.h>
 #include <aq/Timer.h>
 #include <aq/Logger.h>
+#include <aq/FileMapper.h>
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
-#include <aq/FileMapper.h>
 
 namespace  
 {

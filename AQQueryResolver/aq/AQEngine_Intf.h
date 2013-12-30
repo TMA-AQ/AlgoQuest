@@ -1,8 +1,8 @@
 #pragma once
 
-#include "parser/SQLParser.h"
 #include "AQMatrix.h"
 #include "Settings.h"
+#include <aq/AQLQuery.h>
 
 namespace aq
 {
@@ -25,14 +25,15 @@ public:
 
 	virtual ~AQEngine_Intf() {}
   
-  virtual void call(const std::string& query, mode_t mode) = 0;
-	virtual void call(aq::tnode *pNode, mode_t mode, int selectLevel) = 0;
+  virtual void prepare() const = 0;
+  virtual void clean() const = 0;
+  
+  virtual void call(const std::string& query, mode_t mode = mode_t::REGULAR) = 0;
+  virtual void call(const aq::core::SelectStatement& query, mode_t mode = mode_t::REGULAR) = 0;
 
   virtual void renameResult(unsigned int id, std::vector<std::pair<std::string, std::string> >& resultTables) = 0;
 	virtual boost::shared_ptr<aq::AQMatrix> getAQMatrix() = 0;
 	virtual const std::vector<llong>& getTablesIDs() const = 0;
-
-	// virtual void run(Base& BaseDesc, const char * query, AQEngineCallback_Intf * callback);
 };
 
 }

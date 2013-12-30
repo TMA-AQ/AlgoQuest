@@ -22,7 +22,7 @@ public:
 private:
 	VerbFactory(){};
 	VerbFactory(const VerbFactory& source);
-	~VerbFactory(){};
+	~VerbFactory();
 	VerbFactory& operator=( const VerbFactory& source );
 
 	Builder_Intf const * builder;

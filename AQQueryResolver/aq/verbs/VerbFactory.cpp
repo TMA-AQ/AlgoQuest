@@ -3,6 +3,15 @@
 
 namespace aq {
 namespace verb {
+  
+//------------------------------------------------------------------------------
+VerbFactory::~VerbFactory()
+{
+  if (this->builder != nullptr)
+  {
+    delete this->builder;
+  }
+}
 
 //------------------------------------------------------------------------------
 VerbFactory& VerbFactory::GetInstance()

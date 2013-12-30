@@ -29,6 +29,8 @@ namespace aq
         value_mode(DatabaseGenerator::value_mode_t::ALL_UNIQUE),
         aq_path(""),
         aq_name("algoquest"),
+        aq_engine("aq-engine"),
+        aq_loader("aq-loader"),
         mysql_host("localhost"),
         mysql_user("algoquest"),
         mysql_pass("algoquest"),
@@ -46,6 +48,8 @@ namespace aq
       DatabaseGenerator::value_mode_t value_mode;
       std::string aq_path;
       std::string aq_name;
+      std::string aq_engine;
+      std::string aq_loader;
       std::string mysql_host;
       std::string mysql_user;
       std::string mysql_pass;
@@ -61,10 +65,18 @@ namespace aq
     void createTable(const DatabaseGenerator::handle_t::tables_t::key_type& table);
     void insertValues(const DatabaseGenerator::handle_t::tables_t::value_type& values);
     bool execute(const aq::core::SelectStatement& ss, DatabaseIntf::result_t& r1);
+    size_t getNbResult() const { return nb_result / (2 * nb_tests); }
+    size_t getNbTests() const { return nb_tests; }
+    size_t getNbSuccess() const { return nb_success; }
+    size_t getNbFailure() const { return nb_failure; }
   protected:
     bool compare(const DatabaseIntf::result_t& r1, const DatabaseIntf::result_t& r2);
   private:
     std::list<boost::shared_ptr<DatabaseIntf> > databases;
+    size_t nb_result;
+    size_t nb_tests;
+    size_t nb_success;
+    size_t nb_failure;
   };
 }
 

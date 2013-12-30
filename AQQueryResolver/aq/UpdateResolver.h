@@ -6,6 +6,7 @@
 #include "AQEngine_Intf.h"
 #include "parser/SQLParser.h"
 #include "RowWritter_Intf.h"
+#include "ColumnMapper_Intf.h"
 
 namespace aq
 {

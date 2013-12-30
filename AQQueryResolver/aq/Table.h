@@ -1,11 +1,7 @@
 #ifndef __AQ_TABLE_H__
 #define __AQ_TABLE_H__
 
-#include "Settings.h"
-#include "ColumnItem.h"
 #include "Column.h"
-#include "AQMatrix.h"
-#include "ColumnMapper.h"
 
 #include <aq/Object.h>
 #include <aq/BaseDesc.h>
@@ -21,12 +17,6 @@
 // Forward declaration (need because of a conflict #define in header)
 namespace aq 
 {
-
-//------------------------------------------------------------------------------
-class Base;
-
-//------------------------------------------------------------------------------
-class RowProcess_Intf;
 
 //------------------------------------------------------------------------------
 class Table: public Object<Table>

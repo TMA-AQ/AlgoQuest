@@ -1,6 +1,7 @@
 #include "DatabaseHelper.h"
 #include "Util.h"
 
+#include <aq/Logger.h>
 #include <aq/Database.h>
 #include <aq/db_loader/DatabaseLoader.h>
 
@@ -164,6 +165,10 @@ struct result_handler_t : public aq::display_cb
   {
     it = result.rend();
   }
+  ~result_handler_t()
+  {
+    it = result.rend();
+  }
   void push(const std::string& value)
   {
     if (it != result.rend())
@@ -180,50 +185,36 @@ struct result_handler_t : public aq::display_cb
 
 bool AlgoQuestDatabase::execute(const aq::core::SelectStatement& ss, DatabaseIntf::result_t& result)
 {
-  
-  std::string query;
-  ss.setOutput(aq::core::SelectStatement::output_t::SQL);
-  ss.to_string(query);
-
-  if (query.find("full outer join") != std::string::npos)
-  {
-    return true;
-  }
-
-
   if (onlyEngine)
   {
-    aq::opt o; // TODO
-    o.withCount = o.withIndex = false;
-    o.dbPath = o.workingPath = this->settings.rootPath;
-    o.aqEngine = this->settings.aqEngine;
-    o.queryIdent = "test";
-    o.force = true;
-    aq::display_cb * cb = new result_handler_t(result); 
-    std::string answerPath(this->settings.rootPath);
-    answerPath += "/data_orga/tmp/" + o.queryIdent + "/dpy/";
-
-    std::string iniFilename;
-    aq::generate_working_directories(o, iniFilename);
-
-    ss.setOutput(aq::core::SelectStatement::output_t::AQL);
-    ss.to_string(query);
-    std::string query_filename = o.dbPath + "/calculus/" + o.queryIdent + "/New_Request.txt";
-    std::ofstream f(query_filename);
-    if (f.is_open())
-      f << query;
-    f.close();
-
-    // TODO : fill selected columns
-    columns.clear();
-    for (const auto& c : ss.selectedTables)
-      columns.push_back(c.table.name + "." + c.name);
-
-    if (aq::run_aq_engine(o.aqEngine, iniFilename, o.queryIdent) == 0)
-      aq::display(cb, answerPath, o, columns);
+    try
+    {
+      aq::Base base(settings.dbDesc);
+      aq::AQEngineSystem engine(base, settings);
+      engine.prepare();
+      engine.call(ss);
+      engine.clean();
+      auto matrix = engine.getAQMatrix();
+      if (matrix != nullptr)
+      {
+        boost::shared_ptr<aq::display_cb> cb(new result_handler_t(result)); 
+        std::vector<std::string> columns;
+        aq::opt o;
+        o.withCount = o.withIndex = false;
+        for (const auto& c : ss.selectedTables)
+          columns.push_back(c.table.name + "." + c.name);
+        aq::display(cb.get(), *matrix, base, settings, o, columns);
+      }
+    }
+    catch (const aq::generic_error& ge)
+    {
+      aq::Logger::getInstance().log(AQ_NOTICE, "%s\n", ge.what());
+      result.clear();
+    }
   }
   else
   {
+    std::string         query;
     aq::Base            bd;
     aq::AQEngine_Intf * aqEngine = nullptr;
     const std::string   ident; 

@@ -3,15 +3,20 @@
 #include "parser/SQLParser.h"
 #include "parser/sql92_grm_tab.hpp"
 #include "Base.h"
-#include <vector>
-#include <list>
-#include <exception>
-#include <boost/algorithm/string.hpp>
-#include <string>
-#include <algorithm>
+#include "Settings.h"
+
+#include <aq/ColumnItem.h>
 #include <aq/ParsException.h>
 #include <aq/SQLPrefix.h> //  a delete
 #include <aq/AQLQuery.h>
+#include <aq/Exceptions.h>
+
+#include <vector>
+#include <list>
+#include <string>
+#include <algorithm>
+
+#include <boost/algorithm/string.hpp>
 
 extern const int nrJoinTypes;
 extern const int joinTypes[];

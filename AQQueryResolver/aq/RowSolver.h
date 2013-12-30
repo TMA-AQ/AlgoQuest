@@ -6,10 +6,12 @@
 #include "Column.h"
 #include "AQMatrix.h"
 #include "RowProcess_Intf.h"
+#include "ColumnMapper_Intf.h"
 #include "parser/SQLParser.h"
 #include <aq/BaseDesc.h>
 #include <vector>
 #include <boost/tuple/tuple.hpp>
+#include <boost/thread/mutex.hpp>
 
 namespace aq {
 

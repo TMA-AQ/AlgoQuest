@@ -2,7 +2,7 @@
 #define __AQ_MATRIX_H__
 
 #include "Settings.h"
-#include "ColumnMapper.h"
+#include "Base.h"
 
 #include <aq/Exceptions.h>
 #include <aq/BaseDesc.h>
@@ -11,6 +11,8 @@
 #include <string.h>
 #include <map>
 #include <vector>
+
+#include <boost/scoped_array.hpp>
 
 namespace aq
 {
@@ -42,7 +44,7 @@ public:
 
 	// 
 	// testing purpose (to remove)
-	void simulate(size_t rows, const std::vector<long long>& tableIDs);
+	// void simulate(size_t rows, const std::vector<long long>& tableIDs);
   
   void clear();
   void setJoinPath(const std::vector<std::string>& jp) { this->joinPath = jp; }
@@ -103,12 +105,12 @@ private:
 template <class CB>
 void AQMatrix::readData(CB& cb)
 {
-  char * answerData = (char*)::malloc(this->answerFormat.size() + 1);
-  sprintf(answerData, this->answerFormat.c_str(), this->packet);
-  FILE * fd = fopen(answerData, "rb");
+  boost::scoped_array<char> answerData(new char[this->answerFormat.size() + 128]); // FIXME
+  sprintf(answerData.get(), this->answerFormat.c_str(), this->packet);
+  FILE * fd = fopen(answerData.get(), "rb");
   if (fd == nullptr)
   {
-    throw aq::generic_error(aq::generic_error::AQ_ENGINE, "cannot find aq matrix data file %s", answerData);
+    throw aq::generic_error(aq::generic_error::AQ_ENGINE, "cannot find aq matrix data file %s", answerData.get());
   }
   uint64_t value;
   std::vector<size_t> rows(this->matrix.size() + 1, 0);

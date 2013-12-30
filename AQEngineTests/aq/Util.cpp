@@ -3,6 +3,9 @@
 #include <aq/Base.h>
 #include <aq/Timer.h>
 #include <aq/Exceptions.h>
+#include <aq/ColumnItem.h>
+#include <aq/ColumnMapper.h>
+#include <aq/FileMapper.h>
 #include <algorithm>
 #include <fstream>
 #include <boost/tuple/tuple.hpp>
@@ -10,14 +13,6 @@
 #include <boost/program_options.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/variant.hpp>
-
-#if defined(WIN32)
-# include <aq/WIN32FileMapper.h>
-typedef aq::WIN32FileMapper FileMapper;
-#else
-# include <aq/FileMapper.h>
-typedef aq::FileMapper FileMapper;
-#endif
 
 namespace aq
 {
@@ -467,7 +462,6 @@ int check_answer_data(std::ostream& os,
   }
 
   // print data and check group
-  char buf[128];
   size_t groupIndex = 0;
   std::set<v_item_t, grp_cmp> groups;
   std::vector<size_t> groupCount(matrix.getGroupBy().size(), 0);
@@ -659,30 +653,15 @@ private:
 
 // ------------------------------------------------------------------------------
 int display(display_cb * cb,
-            const std::string& answerPath,
+            // const std::string& answerPath,
+            aq::AQMatrix& aqMatrix,
+            const aq::Base& baseDesc,
+            const aq::Settings& settings,
             const struct opt& o,
             const std::vector<std::string>& selectedColumns)
 {
   std::stringstream ss;
-  std::string baseFilename(o.dbPath);
-  baseFilename += "/base_struct/base.aqb";
-  std::string vdgPath(o.dbPath);
-  vdgPath += "/data_orga/vdg/data/";
-
-  aq::Settings settings;
-  aq::Base baseDesc(baseFilename);
-
-  aq::AQMatrix aqMatrix(settings, baseDesc);
-  
-  std::vector<long long> tableIDs;
-  aqMatrix.load(answerPath.c_str(), tableIDs);
-  //aqMatrix.loadHeader(answerPath.c_str(), tableIDs);
-  //aqMatrix.prepareData(answerPath.c_str());
-
-  for (auto& tid : tableIDs) { ss << tid << " "; };
-  aq::Logger::getInstance().log(AQ_INFO, "AQMatrix's Tables: [ %s]", ss.str().c_str());
-  
-  const aq::AQMatrix::matrix_t& matrix = aqMatrix.getMatrix();
+  const auto& matrix = aqMatrix.getMatrix();
 
   // check size, print column name and prepare column mapping
   size_t size = 0;
@@ -711,26 +690,26 @@ int display(display_cb * cb,
         {
         case aq::ColumnType::COL_TYPE_INT:
           {
-            aq::ColumnMapper_Intf<int32_t>::Ptr m(new aq::ColumnMapper<int32_t, FileMapper>(vdgPath.c_str(), t.table_id, col->ID, 1/*(*itCol)->Size*/, o.packetSize));
+            aq::ColumnMapper_Intf<int32_t>::Ptr m(new aq::ColumnMapper<int32_t, FileMapper>(settings.dataPath.c_str(), t.table_id, col->ID, 1/*(*itCol)->Size*/, o.packetSize));
             cm = m;
           }
           break;
         case aq::ColumnType::COL_TYPE_BIG_INT:
         case aq::ColumnType::COL_TYPE_DATE:
           {
-            aq::ColumnMapper_Intf<int64_t>::Ptr m(new aq::ColumnMapper<int64_t, FileMapper>(vdgPath.c_str(), t.table_id, col->ID, 1/*(*itCol)->Size*/, o.packetSize));
+            aq::ColumnMapper_Intf<int64_t>::Ptr m(new aq::ColumnMapper<int64_t, FileMapper>(settings.dataPath.c_str(), t.table_id, col->ID, 1/*(*itCol)->Size*/, o.packetSize));
             cm = m;
           }
           break;
         case aq::ColumnType::COL_TYPE_DOUBLE:
           {
-            aq::ColumnMapper_Intf<double>::Ptr m(new aq::ColumnMapper<double, FileMapper>(vdgPath.c_str(), t.table_id, col->ID, 1/*(*itCol)->Size*/, o.packetSize));
+            aq::ColumnMapper_Intf<double>::Ptr m(new aq::ColumnMapper<double, FileMapper>(settings.dataPath.c_str(), t.table_id, col->ID, 1/*(*itCol)->Size*/, o.packetSize));
             cm = m;
           }
           break;
         case aq::ColumnType::COL_TYPE_VARCHAR:
           {
-            aq::ColumnMapper_Intf<char>::Ptr m(new aq::ColumnMapper<char, FileMapper>(vdgPath.c_str(), t.table_id, col->ID, col->Size, o.packetSize));
+            aq::ColumnMapper_Intf<char>::Ptr m(new aq::ColumnMapper<char, FileMapper>(settings.dataPath.c_str(), t.table_id, col->ID, col->Size, o.packetSize));
             cm = m;
           }
           break;
@@ -756,7 +735,7 @@ int display(display_cb * cb,
     cb->push("COUNT");
   
   // print data
-  if (size == 0)
+  if (size == 0) // FIXME : size can be 0 if there is no result
   {
     print_data pd_cb(o, cb, display_order);
     aqMatrix.readData<print_data>(pd_cb);

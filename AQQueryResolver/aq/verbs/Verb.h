@@ -1,6 +1,9 @@
 #ifndef __AQ_VERB_H__
 #define __AQ_VERB_H__
 
+#include <aq/Base.h>
+#include <aq/Settings.h>
+
 #include "VerbResult.h"
 
 #include <aq/Object.h>

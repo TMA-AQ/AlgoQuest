@@ -1,11 +1,6 @@
 #ifndef __AQ_BASE_H__
 #define __AQ_BASE_H__
 
-#include "Settings.h"
-#include "ColumnItem.h"
-#include "Column.h"
-#include "AQMatrix.h"
-#include "ColumnMapper.h"
 #include "Table.h"
 
 #include <aq/Object.h>

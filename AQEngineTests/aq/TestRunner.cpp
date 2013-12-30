@@ -1,5 +1,6 @@
 #include "TestRunner.h"
 
+#include <boost/algorithm/string/case_conv.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 
@@ -62,6 +63,10 @@ void TestCase::opt_t::parse(std::istream& is)
 }
 
 TestCase::TestCase()
+  : nb_result(0),
+  nb_tests(0),
+  nb_success(0),
+  nb_failure(0)
 {
 }
 
@@ -80,6 +85,10 @@ TestCase& TestCase::operator=(const TestCase& o)
 
 void TestCase::clean()
 {
+  nb_result = 0;
+  nb_tests = 0;
+  nb_success = 0;
+  nb_failure = 0;
   for (auto& db : databases)
   {
     db->clean();
@@ -106,6 +115,7 @@ bool TestCase::execute(const aq::core::SelectStatement& ss, aq::DatabaseIntf::re
 {
   if (this->databases.empty())
     return true;
+  nb_tests += 1;
   auto it = this->databases.begin();
   aq::DatabaseIntf::result_t r1, r2;
   (*it)->execute(ss, r1);
@@ -113,9 +123,15 @@ bool TestCase::execute(const aq::core::SelectStatement& ss, aq::DatabaseIntf::re
   for (;it != this->databases.end(); ++it)
   {
     (*it)->execute(ss, r2);
+    nb_result += std::max(r1.size(), r2.size());
+    // std::cout << nb_result << std::endl;
     if (!this->compare(r1, r2))
+    {
+      nb_failure += 1;
       return false;
+    }
   }
+  nb_success += 1;
   return true;
 }
 
@@ -138,7 +154,12 @@ bool TestCase::compare(const DatabaseIntf::result_t& result1, const DatabaseIntf
       }
     }
     if (!find)
+    {
+      std::cout << "tuple r1(";
+      std::copy(r1.begin(), r1.end(), std::ostream_iterator<std::string>(std::cout, " "));
+      std::cout << ") not find in r2";
       return false;
+    }
   }
   return true;
 }

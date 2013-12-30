@@ -1,8 +1,6 @@
 #ifndef __AQ_COLUMN_H__
 #define __AQ_COLUMN_H__
 
-#include "Settings.h"
-
 #include <aq/Object.h>
 #include <aq/DBTypes.h>
 #include <aq/FileMapper.h>

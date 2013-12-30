@@ -1,6 +1,8 @@
 #include "Column2Table.h"
 #include "Base.h"
 #include "parser/sql92_grm_tab.hpp"
+#include <aq/Logger.h>
+#include <aq/Exceptions.h>
 #include <boost/algorithm/string/case_conv.hpp>
 
 namespace aq

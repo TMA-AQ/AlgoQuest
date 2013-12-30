@@ -41,6 +41,7 @@ struct opt
 
 struct display_cb
 {
+  virtual ~display_cb() {}
   virtual void push(const std::string& value) = 0;
   virtual void next() = 0;
 };
@@ -63,7 +64,10 @@ int check_answer_validity(const struct opt& o, aq::AQMatrix& matrix,
 //                      // WhereValidator& whereValidator
 //                      );
 int display(display_cb *,
-            const std::string& answerPath,
+            // const std::string& answerPath,
+            aq::AQMatrix& aqMatrix,
+            const aq::Base& baseDesc,
+            const aq::Settings& vdgPath,
             const struct opt& o,
             const std::vector<std::string>& selectedColumns);
 int print_temporary_table(const std::string& tablePath, const std::string& dbPath, const size_t limit, const size_t packetSize);

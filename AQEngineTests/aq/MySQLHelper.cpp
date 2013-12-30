@@ -58,17 +58,11 @@ void MySQLDatabase::insertValues(const DatabaseGenerator::handle_t::tables_t::va
 
 bool MySQLDatabase::execute(const aq::core::SelectStatement& ss, DatabaseIntf::result_t& result)
 {
-  std::string query;
-  ss.setOutput(aq::core::SelectStatement::output_t::SQL);
-  ss.to_string(query);
-  
-  if (query.find("full outer join") != std::string::npos)
-  {
-    return true;
-  }
-
   try
   {
+    std::string query;
+    ss.setOutput(aq::core::SelectStatement::SQL);
+    ss.to_string(query);
     sql::ResultSet * res = stmt->executeQuery(query);
     sql::ResultSetMetaData * meta = res->getMetaData();
     this->columns.clear();
@@ -86,7 +80,7 @@ bool MySQLDatabase::execute(const aq::core::SelectStatement& ss, DatabaseIntf::r
       for (size_t c = 1; c <= columns.size(); c++)
       {
         auto & s = res->getString(c);
-        r.push_back(s);
+        r.push_back(s == "" ? "NULL" : s);
       }
     }
   }

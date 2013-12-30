@@ -1,5 +1,4 @@
 #include "AQMatrix.h"
-#include "Base.h"
 #include <aq/Logger.h>
 #include <aq/Utilities.h>
 #include <aq/Exceptions.h>
@@ -82,23 +81,23 @@ AQMatrix& AQMatrix::operator=(const AQMatrix& source)
 	return *this;
 }
 
-void AQMatrix::simulate(size_t rows, const std::vector<long long>& tableIDs)
-{
-	this->hasCount = true;
-	this->totalCount = rows;
-	this->nbRows = rows;
-	this->matrix.resize(tableIDs.size());
-
-  for ( size_t idx = 0; idx < tableIDs.size(); ++idx )
-    this->matrix[idx].table_id = static_cast<size_t>( tableIDs[idx] );
-
-	for (std::vector<column_t>::iterator it = this->matrix.begin(); it != this->matrix.end(); ++it)
-    for (size_t idx = 0; idx < rows; ++idx)
-      (*it).indexes.push_back(rand() % this->baseDesc.getTable((*it).table_id)->TotalCount);
-	this->count.resize(rows, 1);
-
-  this->groupByIndex.push_back(std::make_pair(rows, rows));
-}
+//void AQMatrix::simulate(size_t rows, const std::vector<long long>& tableIDs)
+//{
+//	this->hasCount = true;
+//	this->totalCount = rows;
+//	this->nbRows = rows;
+//	this->matrix.resize(tableIDs.size());
+//
+//  for ( size_t idx = 0; idx < tableIDs.size(); ++idx )
+//    this->matrix[idx].table_id = static_cast<size_t>( tableIDs[idx] );
+//
+//	for (std::vector<column_t>::iterator it = this->matrix.begin(); it != this->matrix.end(); ++it)
+//    for (size_t idx = 0; idx < rows; ++idx)
+//      (*it).indexes.push_back(rand() % this->baseDesc.getTable((*it).table_id)->TotalCount);
+//	this->count.resize(rows, 1);
+//
+//  this->groupByIndex.push_back(std::make_pair(rows, rows));
+//}
 
 void AQMatrix::clear()
 {

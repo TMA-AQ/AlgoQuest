@@ -3,6 +3,7 @@
 #include <aq/AQLParser.h>
 #include <aq/Base.h>
 #include <aq/Timer.h>
+#include <aq/Logger.h>
 #include <aq/Exceptions.h>
 #include <aq/parser/JeqParser.h>
 
@@ -284,7 +285,7 @@ uint64_t functional_tests(const struct opt& o)
           display_cb * cb = new stream_cb(std::cout); 
           std::string answerPath(o.dbPath);
           answerPath += "/data_orga/tmp/" + std::string(o.queryIdent) + "/dpy/";
-          rc = aq::display(cb, answerPath, o, selectedColumns);
+          // rc = aq::display(cb, answerPath, o, selectedColumns); // TODO
           std::cout << std::endl << std::endl;
         }
       }

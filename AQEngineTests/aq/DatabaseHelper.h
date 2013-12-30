@@ -36,7 +36,6 @@ namespace aq {
     aq::base_t               base;
     aq::Database             db;
     aq::Settings             settings;
-    std::vector<std::string> columns;
     bool                     onlyEngine;
   };
 
