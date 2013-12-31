@@ -6,7 +6,7 @@
 #include <aq/db_loader/DatabaseLoader.h>
 
 #include <aq/Base.h>
-#include <aq/AQEngine.h>
+#include <aq/AQEngine_Intf.h>
 #include <aq/RowWritter_Intf.h>
 #include <aq/QueryResolver.h>
 
@@ -190,11 +190,12 @@ bool AlgoQuestDatabase::execute(const aq::core::SelectStatement& ss, DatabaseInt
     try
     {
       aq::Base base(settings.dbDesc);
-      aq::AQEngineSystem engine(base, settings);
-      engine.prepare();
-      engine.call(ss);
-      engine.clean();
-      auto matrix = engine.getAQMatrix();
+      aq::AQEngine_Intf * engine = getAQEngineSystem(base, settings);
+      engine->prepare();
+      engine->call(ss);
+      engine->clean();
+      auto matrix = engine->getAQMatrix();
+      delete engine;
       if (matrix != nullptr)
       {
         boost::shared_ptr<aq::display_cb> cb(new result_handler_t(result)); 
@@ -222,8 +223,7 @@ bool AlgoQuestDatabase::execute(const aq::core::SelectStatement& ss, DatabaseInt
     bool                force = false;
 
     aq::Base::load(settings.dbDesc, bd);
-    aqEngine = new aq::AQEngineSystem(bd, settings);
-    // aqEngine = new aq::AQEngineWindows(bd, settings);
+    aqEngine = aq::getAQEngineSystem(bd, settings);
 
     ss.setOutput(aq::core::SelectStatement::output_t::SQL);
     ss.to_string(query);

@@ -1,6 +1,16 @@
 #ifndef __AQ_SETTINGS_H__
 #define __AQ_SETTINGS_H__
 
+#if defined (WIN32)
+# ifdef AQENGINE_EXPORTS
+#  define AQENGINE_API __declspec(dllexport)
+# else
+#  define AQENGINE_API __declspec(dllimport)
+# endif
+#else
+# define AQLIB_API __stdcall
+#endif
+
 #include <string>
 #include <sstream>
 #include <boost/shared_ptr.hpp>
@@ -55,19 +65,19 @@ struct Settings
   bool cmdLine;
   bool trace;
 
-	Settings();
-	Settings(const Settings&);
-	~Settings();
-	Settings& operator=(const Settings&);
+	AQENGINE_API Settings();
+	AQENGINE_API Settings(const Settings&);
+	AQENGINE_API ~Settings();
+	AQENGINE_API Settings& operator=(const Settings&);
 
-  void initPath(const std::string& root);
-  void load(const std::string& iniFile, const std::string& queryIdent);
-	void load(const std::string& iniFile);
-	void load(std::istream& is);
-	void changeIdent(const std::string& queryIdent);
-  void dump(std::ostream& os) const;
-  std::string to_string() const;
-  void writeAQEngineIni(std::ostream& os) const;
+  AQENGINE_API void initPath(const std::string& root);
+  AQENGINE_API void load(const std::string& iniFile, const std::string& queryIdent);
+	AQENGINE_API void load(const std::string& iniFile);
+	AQENGINE_API void load(std::istream& is);
+	AQENGINE_API void changeIdent(const std::string& queryIdent);
+  AQENGINE_API void dump(std::ostream& os) const;
+  AQENGINE_API std::string to_string() const;
+  AQENGINE_API void writeAQEngineIni(std::ostream& os) const;
 };
 
 }

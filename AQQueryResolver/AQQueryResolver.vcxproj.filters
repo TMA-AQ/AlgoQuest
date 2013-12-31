@@ -61,15 +61,6 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="aq\AQEngine.h">
-      <Filter>Header Files\aq</Filter>
-    </ClInclude>
-    <ClInclude Include="aq\AQEngine_Intf.h">
-      <Filter>Header Files\aq</Filter>
-    </ClInclude>
-    <ClInclude Include="aq\AQMatrix.h">
-      <Filter>Header Files\aq</Filter>
-    </ClInclude>
     <ClInclude Include="aq\ColumnItem.h">
       <Filter>Header Files\aq</Filter>
     </ClInclude>
@@ -86,9 +77,6 @@
       <Filter>Header Files\aq</Filter>
     </ClInclude>
     <ClInclude Include="aq\QueryAnalyzer.h">
-      <Filter>Header Files\aq</Filter>
-    </ClInclude>
-    <ClInclude Include="aq\Settings.h">
       <Filter>Header Files\aq</Filter>
     </ClInclude>
     <ClInclude Include="aq\SQLPrefix.h">
@@ -270,19 +258,10 @@
     <ClCompile Include="aq\db_loader\DatabaseLoader.cpp">
       <Filter>Source Files\aq\db_loader</Filter>
     </ClCompile>
-    <ClCompile Include="aq\AQEngine.cpp">
-      <Filter>Source Files\aq</Filter>
-    </ClCompile>
-    <ClCompile Include="aq\AQMatrix.cpp">
-      <Filter>Source Files\aq</Filter>
-    </ClCompile>
     <ClCompile Include="aq\DumpVisitor.cpp">
       <Filter>Source Files\aq</Filter>
     </ClCompile>
     <ClCompile Include="aq\Optimizations.cpp">
-      <Filter>Source Files\aq</Filter>
-    </ClCompile>
-    <ClCompile Include="aq\Settings.cpp">
       <Filter>Source Files\aq</Filter>
     </ClCompile>
     <ClCompile Include="aq\SQLPrefix.cpp">

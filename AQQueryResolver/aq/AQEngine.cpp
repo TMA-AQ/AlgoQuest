@@ -255,5 +255,15 @@ namespace aq
     // freopen("CON", "w", stdout);
     return rc;
   }
+  
+AQEngine_Intf * getAQEngineSystem(aq::Base& base, aq::Settings& settings)
+{
+  return new AQEngineSystem(base, settings);
+}
+
+AQEngine_Intf * getAQEngineWindow(aq::Base& base, aq::Settings& settings)
+{
+  return new AQEngineWindows(base, settings);
+}
 
 }

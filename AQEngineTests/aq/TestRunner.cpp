@@ -1,5 +1,7 @@
 #include "TestRunner.h"
 
+#include <iostream>
+
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>

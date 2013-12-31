@@ -4,7 +4,7 @@
 #include <aq/Logger.h>
 #include <aq/Timer.h>
 #include <aq/QueryReader.h>
-#include <aq/AQEngine.h>
+#include <aq/AQEngine_intf.h>
 #include "VerbBuilder.h"
 #include "AQManager.h"
 #include "CommandHandler.h"
@@ -68,7 +68,7 @@ int processSQLQueries(const std::string  & query,
   else
   {
     aq::Logger::getInstance().log(AQ_INFO, "Use aq engine: '%s'\n", settings.aqEngine.c_str());
-    aq_engine = new aq::AQEngineSystem(baseDesc, settings);
+    aq_engine = aq::getAQEngineSystem(baseDesc, settings);
   }
 
   //
