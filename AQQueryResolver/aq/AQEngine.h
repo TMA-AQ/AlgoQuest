@@ -1,16 +1,6 @@
 #ifndef __AQ_ENGINE_H__
 #define __AQ_ENGINE_H__
 
-#if defined (WIN32)
-# ifdef AQENGINE_EXPORTS
-#  define AQENGINE_API __declspec(dllexport)
-# else
-#  define AQENGINE_API __declspec(dllimport)
-# endif
-#else
-# define AQLIB_API __stdcall
-#endif
-
 #include "AQEngine_Intf.h"
 #include "Settings.h"
 #include <aq/Base.h>

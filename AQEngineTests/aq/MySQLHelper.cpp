@@ -1,5 +1,5 @@
 #include "MySQLHelper.h"
-
+#include <aq/Exceptions.h>
 #include <mysql_connection.h>
 #include <cppconn/driver.h>
 #include <cppconn/exception.h>
@@ -15,14 +15,14 @@ MySQLDatabase::MySQLDatabase(const std::string& _host, const std::string& _user,
 {
   driver = get_driver_instance();
   if (driver == nullptr)
-    throw std::exception("[mysql-connector] : cannot get mysql driver");
+    throw aq::generic_error(aq::generic_error::GENERIC, "[mysql-connector] : cannot get mysql driver");
   con = driver->connect(host, user, pass);
   if (con == nullptr)
-    throw std::exception("[mysql-connector] : cannot connect to mysql driver");
+    throw aq::generic_error(aq::generic_error::GENERIC, "[mysql-connector] : cannot connect to mysql driver");
   con->setSchema(name);
   stmt = con->createStatement();
   if (stmt == nullptr)
-    throw std::exception("[mysql-connector] : cannot create statement");
+    throw aq::generic_error(aq::generic_error::GENERIC, "[mysql-connector] : cannot create statement");
 }
 
 void MySQLDatabase::createTable(const DatabaseGenerator::handle_t::tables_t::key_type& table)
@@ -68,7 +68,7 @@ bool MySQLDatabase::execute(const aq::core::SelectStatement& ss, DatabaseIntf::r
     this->columns.clear();
     for (size_t c = 1; c <= meta->getColumnCount(); c++)
     {
-      auto & s = meta->getColumnName(c);
+      const auto & s = meta->getColumnName(c);
       this->columns.push_back(s.c_str());
     }
     result.clear();
@@ -79,7 +79,7 @@ bool MySQLDatabase::execute(const aq::core::SelectStatement& ss, DatabaseIntf::r
       // for (const auto& c : columns)
       for (size_t c = 1; c <= columns.size(); c++)
       {
-        auto & s = res->getString(c);
+        const auto & s = res->getString(c);
         r.push_back(s == "" ? "NULL" : s);
       }
     }

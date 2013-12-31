@@ -8,7 +8,8 @@
 #  define AQENGINE_API __declspec(dllimport)
 # endif
 #else
-# define AQLIB_API __stdcall
+// # define AQENGINE_API __stdcall
+# define AQENGINE_API
 #endif
 
 #include <string>

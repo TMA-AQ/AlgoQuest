@@ -8,7 +8,8 @@
 #  define AQENGINE_API __declspec(dllimport)
 # endif
 #else
-# define AQLIB_API __stdcall
+// # define AQENGINE_API __stdcall
+# define AQENGINE_API
 #endif
 
 #include "AQMatrix.h"
@@ -47,8 +48,11 @@ public:
 };
 
 AQENGINE_API AQEngine_Intf * getAQEngineSystem(aq::Base& base, aq::Settings& settings);
+  
+#if defined (WIN32)
 AQENGINE_API AQEngine_Intf * getAQEngineWindow(aq::Base& base, aq::Settings& settings);
-
+#endif
+  
 }
 
 #endif

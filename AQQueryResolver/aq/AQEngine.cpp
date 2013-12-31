@@ -3,6 +3,7 @@
 #include <string>
 #include <aq/Logger.h>
 #include <aq/Timer.h>
+#include <fstream>
 #include <boost/filesystem.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
@@ -238,6 +239,12 @@ namespace aq
     }
     return rc;
   }
+  
+  AQEngine_Intf * getAQEngineWindow(aq::Base& base, aq::Settings& settings)
+  {
+    return new AQEngineWindows(base, settings);
+  }
+  
 
 #endif
 
@@ -259,11 +266,6 @@ namespace aq
 AQEngine_Intf * getAQEngineSystem(aq::Base& base, aq::Settings& settings)
 {
   return new AQEngineSystem(base, settings);
-}
-
-AQEngine_Intf * getAQEngineWindow(aq::Base& base, aq::Settings& settings)
-{
-  return new AQEngineWindows(base, settings);
 }
 
 }
