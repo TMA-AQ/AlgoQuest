@@ -2,10 +2,12 @@
 #define __AQ_UPDATE_RESOLVER_H__
 
 #include "Settings.h"
-#include "Base.h"
 #include "AQEngine_Intf.h"
 #include "parser/SQLParser.h"
 #include "RowWritter_Intf.h"
+#include "ColumnMapper_Intf.h"
+
+#include <aq/Base.h>
 
 namespace aq
 {

@@ -1,13 +1,8 @@
-#include "Base.h"
 #include "Table.h"
-#include "RowProcess_Intf.h"
-
-#include <aq/Utilities.h>
-#include <aq/Exceptions.h>
-#include <aq/DateConversion.h>
-#include <aq/FileMapper.h>
-#include <aq/Timer.h>
-#include <aq/Logger.h>
+#include "Exceptions.h"
+#include "DateConversion.h"
+#include "Timer.h"
+#include "Logger.h"
 
 #include <cassert>
 #include <memory>

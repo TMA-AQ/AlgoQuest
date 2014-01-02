@@ -1,16 +1,11 @@
 #include "AQEngine.h"
 #include <aq/Exceptions.h>
-#include "parser/JeqParser.h"
-#include "SQLPrefix.h"
-#include "TreeUtilities.h"
 #include <string>
 #include <aq/Logger.h>
 #include <aq/Timer.h>
+#include <fstream>
+#include <boost/filesystem.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
-
-#ifdef WIN32
-#include <direct.h>
-#endif
 
 namespace aq
 {
@@ -43,12 +38,6 @@ namespace aq
     //
     std::string new_request_file = settings.workingPath + "New_Request.txt";
     aq::SaveFile(new_request_file.c_str(), query.c_str());
-
-#ifdef WIN32
-    // create folders for the engine
-    // mkdir( settings.szTempPath1 );
-    mkdir( settings.dpyPath.c_str() );
-#endif
 
     aq::Timer timer;
     if ((mode == 0) || (!settings.skipNestedQuery))
@@ -104,46 +93,15 @@ namespace aq
     }
 
   }
-
-  void AQEngine::call(aq::tnode *pNode, mode_t mode, int selectLevel)
-  {
-    std::string query;
-    aq::syntax_tree_to_aql_form( pNode, query );
-
-    // a group is an order in aq engine => change ORDER by GROUP
-    std::string::size_type pos = query.find("GROUP");
-    if (pos != std::string::npos)
-    {
-      query.replace(pos, 5, "ORDER");
-    }
-
-    pos = query.find("ORDER");
-    if (pos != std::string::npos)
-    {
-      std::string queryTmp = query.substr(0, pos);
-      std::string group = query.substr(pos);
-      ParseJeq( queryTmp );
-      query = queryTmp;
-      if (group.size() > 5) // check if Group By is not empty
-        query += group;
-    }
-    else
-    {
-      ParseJeq( query );
-    }
-	
-    this->call(query, mode);
-  }
-
-  void AQEngine::generateAQMatrixFromPRM(const std::string tableName, aq::tnode * whereNode)
-  {
-    Table::Ptr table = this->baseDesc.getTable(tableName);
-    this->aqMatrix.reset(new aq::AQMatrix(this->settings, this->baseDesc));
-    //this->aqMatrix->simulate(table->TotalCount, 2);
-    this->tableIDs.clear();
-    this->tableIDs.push_back(table->ID);
-  }
   
+  void AQEngine::call(const aq::core::SelectStatement& query, mode_t mode)
+  {
+    std::string query_str;
+    query.setOutput(aq::core::SelectStatement::output_t::AQL);
+    query.to_string(query_str);
+    this->call(query_str, mode);
+  }
+
   void AQEngine::renameResult(unsigned int id, std::vector<std::pair<std::string, std::string> >& resultTables)
   {
     std::vector<std::string> files;
@@ -224,6 +182,28 @@ namespace aq
     }
 
   }
+  
+  void AQEngine::prepare() const
+  {
+    boost::filesystem::path p;
+    p = boost::filesystem::path(settings.workingPath);
+    boost::filesystem::create_directory(p);
+    p = boost::filesystem::path(settings.tmpPath + "/dpy");
+    boost::filesystem::create_directories(p);
+
+    std::ofstream ini(settings.iniFile.c_str());
+    ini << "export.filename.final=" << settings.dbDesc << std::endl;
+    ini << "step1.field.separator=;" << std::endl;
+    ini << "k_rep_racine=" << settings.rootPath << std::endl;
+    ini << "k_rep_racine_tmp=" << settings.rootPath << std::endl;
+    ini.close();
+  }
+
+  void AQEngine::clean() const
+  {
+    aq::DeleteFolder(settings.workingPath.c_str());
+    aq::DeleteFolder(settings.tmpPath.c_str());
+  }
 
 #ifdef WIN32
 
@@ -245,7 +225,9 @@ namespace aq
     si.cb = sizeof(si);
     ZeroMemory(&pi, sizeof(pi));
 
-    std::wstring wprg = aq::string2Wstring(prg);
+    std::string prg_s("E:/AQ_Bin/bin/aq-engine.exe");
+
+    std::wstring wprg = aq::string2Wstring(prg_s);
     std::wstring warg = aq::string2Wstring(args);
     LPCWSTR prg_wstr = wprg.c_str();
     LPCWSTR arg_wstr = warg.c_str();
@@ -257,6 +239,12 @@ namespace aq
     }
     return rc;
   }
+  
+  AQEngine_Intf * getAQEngineWindow(aq::Base& base, aq::Settings& settings)
+  {
+    return new AQEngineWindows(base, settings);
+  }
+  
 
 #endif
 
@@ -269,7 +257,15 @@ namespace aq
   int AQEngineSystem::run(const char * prg, const char * args) const
   {
     aq::Logger::getInstance().log(AQ_NOTICE, "call: '%s %s'\n", prg, args);
-    return system((std::string(prg) + " " + std::string(args)).c_str());
+    // freopen("tmp.log", "w", stdout);
+    int rc = system((std::string(prg) + " " + std::string(args) + " > log.txt").c_str());
+    // freopen("CON", "w", stdout);
+    return rc;
   }
+  
+AQEngine_Intf * getAQEngineSystem(aq::Base& base, aq::Settings& settings)
+{
+  return new AQEngineSystem(base, settings);
+}
 
 }

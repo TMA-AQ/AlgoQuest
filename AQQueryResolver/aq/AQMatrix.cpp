@@ -1,5 +1,4 @@
 #include "AQMatrix.h"
-#include "Base.h"
 #include <aq/Logger.h>
 #include <aq/Utilities.h>
 #include <aq/Exceptions.h>
@@ -82,23 +81,23 @@ AQMatrix& AQMatrix::operator=(const AQMatrix& source)
 	return *this;
 }
 
-void AQMatrix::simulate(size_t rows, const std::vector<long long>& tableIDs)
-{
-	this->hasCount = true;
-	this->totalCount = rows;
-	this->nbRows = rows;
-	this->matrix.resize(tableIDs.size());
-
-  for ( size_t idx = 0; idx < tableIDs.size(); ++idx )
-    this->matrix[idx].table_id = static_cast<size_t>( tableIDs[idx] );
-
-	for (std::vector<column_t>::iterator it = this->matrix.begin(); it != this->matrix.end(); ++it)
-    for (size_t idx = 0; idx < rows; ++idx)
-      (*it).indexes.push_back(rand() % this->baseDesc.getTable((*it).table_id)->TotalCount);
-	this->count.resize(rows, 1);
-
-  this->groupByIndex.push_back(std::make_pair(rows, rows));
-}
+//void AQMatrix::simulate(size_t rows, const std::vector<long long>& tableIDs)
+//{
+//	this->hasCount = true;
+//	this->totalCount = rows;
+//	this->nbRows = rows;
+//	this->matrix.resize(tableIDs.size());
+//
+//  for ( size_t idx = 0; idx < tableIDs.size(); ++idx )
+//    this->matrix[idx].table_id = static_cast<size_t>( tableIDs[idx] );
+//
+//	for (std::vector<column_t>::iterator it = this->matrix.begin(); it != this->matrix.end(); ++it)
+//    for (size_t idx = 0; idx < rows; ++idx)
+//      (*it).indexes.push_back(rand() % this->baseDesc.getTable((*it).table_id)->TotalCount);
+//	this->count.resize(rows, 1);
+//
+//  this->groupByIndex.push_back(std::make_pair(rows, rows));
+//}
 
 void AQMatrix::clear()
 {
@@ -228,12 +227,12 @@ void AQMatrix::prepareData(const char * filePath)
 
 void AQMatrix::loadNextPacket()
 {
-  char * answerData = (char*)::malloc(this->answerFormat.size() + 1);
-  sprintf(answerData, this->answerFormat.c_str(), this->packet);
-  FILE * fd = fopen(answerData, "rb");
+  boost::scoped_array<char> answerData(new char[this->answerFormat.size() + 128]); // FIXME
+  sprintf(answerData.get(), this->answerFormat.c_str(), this->packet);
+  FILE * fd = fopen(answerData.get(), "rb");
   if (fd == nullptr)
   {
-    throw aq::generic_error(aq::generic_error::AQ_ENGINE, "cannot find aq matrix data file %s", answerData);
+    throw aq::generic_error(aq::generic_error::AQ_ENGINE, "cannot find aq matrix data file %s", answerData.get());
   }
   uint64_t value;
   for (size_t i = 0; (i < aq::packet_size) && this->count.size() < nbRows; ++i)

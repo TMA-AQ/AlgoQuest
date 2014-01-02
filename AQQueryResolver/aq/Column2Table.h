@@ -2,7 +2,7 @@
 #define __AQ_COLUMN2TABLE_H__
 
 #include "parser/SQLParser.h"
-#include "Base.h"
+#include <aq/Base.h>
 
 namespace aq
 {

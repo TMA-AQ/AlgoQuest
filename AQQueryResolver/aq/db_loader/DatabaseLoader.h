@@ -43,8 +43,10 @@ public:
   DatabaseLoader(const aq::base_t bd, const std::string& _path, const size_t _packet_size, const char _end_of_field_c, bool _csv_format);
   DatabaseLoader(const aq::base_t bd, const std::string& _loader, const std::string& _path, const size_t _packet_size, const char _end_of_field, bool _csv_format);
   void generate_ini();
-  void load();
-  void load(const size_t table_id);
+  void load(); ///< load from table_name.txt file (can be a csv file)
+  void load(const size_t table_id); ///< load from table_name.txt file (can be a csv file)
+  void loadAllColumns() const; ///< load from column prepared files
+  void loadColumn(const size_t table_id, const size_t column_id) const; ///< load from column prepared file
 
 protected:
   void buildPrmThesaurus(const column_info_t& ci, size_t table_id, size_t packet) const;

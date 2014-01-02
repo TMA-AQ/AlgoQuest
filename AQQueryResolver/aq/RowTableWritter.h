@@ -2,7 +2,7 @@
 #define __ROW_TABLE_WRITTER_H__
 
 #include "RowWritter_Intf.h"
-#include "Table.h"
+#include <aq/Table.h>
 
 namespace aq
 {

@@ -295,6 +295,30 @@ void DatabaseLoader::loadTable(const aq::base_t::table_t& table, const std::stri
 
   aq::Logger::getInstance().log(AQ_INFO, "%u rows recorded in table [%s]\n", total_nb_enreg, filename.c_str());
 }
+  
+// --------------------------------------------------------------------------------------------
+void DatabaseLoader::loadAllColumns() const
+{
+  char filename[1024];
+  ::memset(filename, 0, 1024);
+  for (const auto& table : this->my_base.table)
+  {
+    for (const auto& column : table.colonne)
+    {
+      sprintf(filename, format_file_name.c_str(), rep_cible.c_str(), 1, table.id, column.id, 0);
+      aq::column_info_t ci = { column, filename, nullptr, nullptr, nullptr };
+      this->runLoader(table.id, ci, 0); // FIXME : manage multi packet
+    }
+  }
+}
+
+// --------------------------------------------------------------------------------------------
+void DatabaseLoader::loadColumn(const size_t table_id, const size_t column_id) const
+{
+  // TODO
+  (void)table_id;
+  (void)column_id;
+}
 
 // --------------------------------------------------------------------------------------------
 void DatabaseLoader::writeRecord(std::vector<struct aq::column_info_t>& columns_infos, const char * record) const
@@ -396,17 +420,49 @@ void DatabaseLoader::runLoader(size_t table, column_info_t& ci, size_t packet) c
   }
   else
   {
-    fflush(ci.fd);
-    fclose(ci.fd);
+    if (ci.fd != nullptr)
+    {
+      fflush(ci.fd);
+      fclose(ci.fd);
+    }
+
+#if defined(WIN32) && (__FALSE__)
+      
+    int rc = 0;
+    STARTUPINFOW si;
+    PROCESS_INFORMATION pi;
+    ZeroMemory(&si, sizeof(si));
+    si.cb = sizeof(si);
+    ZeroMemory(&pi, sizeof(pi));
+
+    std::string prg("E:/AQ_Bin/bin/aq-loader.exe");
+    std::ostringstream args;
+    args << ini_filename << " " << table << " " << ci.col.id << " " << packet;
+
+    std::wstring wprg = aq::string2Wstring(prg);
+    std::wstring warg = aq::string2Wstring(args.str());
+    LPCWSTR prg_wstr = wprg.c_str();
+    LPCWSTR arg_wstr = warg.c_str();
+    if (CreateProcessW(prg_wstr, (LPWSTR)arg_wstr, nullptr, nullptr, FALSE, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi))
+    {
+      rc = WaitForSingleObject(pi.hProcess, INFINITE);
+      CloseHandle(pi.hProcess);
+      CloseHandle(pi.hThread);
+    }
+
+#else
     int rc;
     char exec_cmd[1024];
-    sprintf(exec_cmd, "%s %s %lu %d %lu", k_batch_loader.c_str(), ini_filename.c_str(), table , ci.col.id, packet);
+    sprintf(exec_cmd, "%s %s %lu %d %lu > log.txt", k_batch_loader.c_str(), ini_filename.c_str(), table , ci.col.id, packet);
     aq::Logger::getInstance().log(AQ_INFO, exec_cmd);
+    // freopen("tmp.log", "w", stdout);
     rc = system(exec_cmd);
     if (rc != 0)
     {
       aq::Logger::getInstance().log(AQ_ERROR, "loader error [%s] return exit code [%d]\n", exec_cmd, rc);
     }
+    // freopen("CON", "w", stdout);
+#endif
   }
 }
 

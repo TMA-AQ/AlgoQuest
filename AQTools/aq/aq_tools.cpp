@@ -4,14 +4,13 @@
 #include <aq/Logger.h>
 #include <aq/Timer.h>
 #include <aq/QueryReader.h>
-#include <aq/AQEngine.h>
+#include <aq/AQEngine_intf.h>
 #include "VerbBuilder.h"
 #include "AQManager.h"
 #include "CommandHandler.h"
 #include "AQEngineSimulate.h"
 
 // #include <aq/AQThreadRequest.h>
-// #include <aq/AQFunctor.h>
 
 #if defined (WIN32)
 #  include <io.h>
@@ -23,6 +22,7 @@
 #include <iostream>
 #include <fstream>
 #include <boost/thread.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 #include <boost/algorithm/string/replace.hpp>
 
@@ -68,7 +68,7 @@ int processSQLQueries(const std::string  & query,
   else
   {
     aq::Logger::getInstance().log(AQ_INFO, "Use aq engine: '%s'\n", settings.aqEngine.c_str());
-    aq_engine = new aq::AQEngineSystem(baseDesc, settings);
+    aq_engine = aq::getAQEngineSystem(baseDesc, settings);
   }
 
   //
@@ -228,6 +228,7 @@ int main(int argc, char**argv)
     bool checkDatabase = false;
 		bool simulateAQEngine = false;
 		bool skipNestedQuery = false;
+    bool testPlugins = false;
 
     // load option
     std::string tableNameToLoad;
@@ -245,8 +246,8 @@ int main(int argc, char**argv)
 
     //
     // initialize verb builder
-    aq::VerbBuilder vb;
-    aq::verb::VerbFactory::GetInstance().setBuilder(&vb);
+    aq::VerbBuilder * vb = new aq::VerbBuilder;
+    aq::verb::VerbFactory::GetInstance().setBuilder(vb);
 
     //
     // if aq.ini exists in current directory, use it as default settings
@@ -318,6 +319,7 @@ int main(int argc, char**argv)
 			("skip-nested-query", po::value<bool>(&settings.skipNestedQuery), "")
 			("aq-matrix", po::value<std::string>(&aqMatrixFileName), "")
       ("check-database", po::bool_switch(&checkDatabase), "")
+      ("test-plugins", po::bool_switch(&testPlugins), "")
       ;
 
     po::options_description external("External");
@@ -438,6 +440,16 @@ int main(int argc, char**argv)
         aq::Logger::getInstance().log(AQ_CRITICAL, "cannot find database desc file '%s'\n", settings.dbDesc.c_str());
         return EXIT_FAILURE;
       }
+    }
+
+    //
+    // Test plugins
+    if (testPlugins)
+    {
+      aq::Base bd(settings.dbDesc);
+      std::string plugins_path = "C:/Users/AlgoQuest/Documents/Visual Studio 2012/Projects/AQPlugin/x64/Debug/AQPlugin.dll";
+      std::string query = "select aq_func1(t1.id), aq_func2(t1.v1) from t1;";
+      return test_plugins(plugins_path, query, settings, bd);
     }
 
     //

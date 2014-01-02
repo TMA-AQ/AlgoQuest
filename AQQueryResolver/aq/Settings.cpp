@@ -2,8 +2,8 @@
 #include <aq/Utilities.h>
 #include <aq/Exceptions.h>
 #include <aq/BaseDesc.h>
-#include <fstream>
 #include <aq/Logger.h>
+#include <fstream>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 #include <boost/algorithm/string/trim.hpp>
@@ -163,8 +163,6 @@ void Settings::load(std::istream& is)
     boost::property_tree::ptree pt;
     boost::property_tree::ini_parser::read_ini(is, pt);
 
-    std::cout << is << std::endl;
-    
     // all option are optional
     this->aqHome = get_opt_value(pt, "aq-home", this->aqHome);
     boost::algorithm::replace_all(this->aqHome, "\\", "/");

@@ -29,14 +29,12 @@ struct base_t
     std::string name;
     int id;
     int nb_record;
-    int nb_cols;
     cols_t colonne;
   };
   typedef std::vector<table_t> tables_t;
 
 	std::string name;
 	int id;
-	int nb_tables;
 	tables_t table;
 };
 

@@ -1,11 +1,14 @@
 #include "CommandHandler.h"
 #include <aq/Database.h>
+#include <aq/Exceptions.h>
+#include <iostream>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/replace.hpp>
+#include <boost/filesystem.hpp>
 
 namespace aq
 {

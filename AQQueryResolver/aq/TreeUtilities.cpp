@@ -1637,7 +1637,7 @@ void tnodeToSelectStatement(aq::tnode& tree, aq::core::SelectStatement& ss)
       assert(on->getTag() == K_ON);
       assert(on->left != nullptr);
 
-      jc.op = aq::id_to_kstring(on->getTag());
+      jc.op = aq::id_to_kstring(on->left->getTag());
       
       aq::tnode * jtype = join->parent;
       assert(jtype != nullptr);

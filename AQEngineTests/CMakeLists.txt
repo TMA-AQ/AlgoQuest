@@ -5,7 +5,7 @@ project(AQEngineTests)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib/${CMAKE_BUILD_TYPE})
 set(EXECUTABLE_OUTPUT_PATH bin/${CMAKE_BUILD_TYPE})
 
-find_package(Boost 1.50.0 COMPONENTS program_options thread filesystem system timer python REQUIRED)
+find_package(Boost 1.50.0 COMPONENTS program_options thread filesystem system timer python regex REQUIRED)
 
 include_directories(
   ${PROJECT_SOURCE_DIR}
@@ -25,28 +25,16 @@ link_directories(
 
 set(CMAKE_CXX_FLAGS "-O0 -ggdb -std=c++11")
 
-file(
-  GLOB_RECURSE
-  source_files
-  aq/*.cpp
-)
+file(GLOB_RECURSE source_files aq/*.cpp)
+file(GLOB_RECURSE exclude_files aq/Where*.cpp aq/AQEngineTests.cpp)
+list(REMOVE_ITEM source_files ${exclude_files})
+add_library(aq-tests STATIC ${source_files})
+target_link_libraries(aq-tests aq_query_resolver aq_util ${Boost_LIBRARIES})
 
-add_executable(
-  aq-tests
-  ${source_files}
-)
-
-target_link_libraries( 
-  aq-tests
-  aq_query_resolver
-  aq_util
-  ${Boost_LIBRARIES}
-)
-
-file(GLOB_RECURSE py_bind_src python_binding/*.cpp)
-file(GLOB exclude_files "python_binding/dllmain.cpp")
-list(REMOVE_ITEM py_bind_src ${exclude_files})
-add_library(AlgoQuestDB SHARED ${source_files} ${py_bind_src})
-target_link_libraries(AlgoQuestDB aq_query_resolver aq_util ${Boost_LIBRARIES} python)
-set_target_properties(AlgoQuestDB PROPERTIES PREFIX '')
-set_target_properties(AlgoQuestDB PROPERTIES SUFFIX .so)
+# file(GLOB_RECURSE py_bind_src python_binding/*.cpp)
+# file(GLOB exclude_files "python_binding/dllmain.cpp")
+# list(REMOVE_ITEM py_bind_src ${exclude_files})
+# add_library(AlgoQuestDB SHARED ${source_files} ${py_bind_src})
+# target_link_libraries(AlgoQuestDB aq_query_resolver aq_util ${Boost_LIBRARIES} python)
+# set_target_properties(AlgoQuestDB PROPERTIES PREFIX '')
+# set_target_properties(AlgoQuestDB PROPERTIES SUFFIX .so)

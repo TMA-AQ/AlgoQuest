@@ -169,6 +169,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AQEngine\AQEngine.vcxproj">
+      <Project>{a633f379-5466-4895-b88e-aaa99dcc7917}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\AQQueryResolver\AQQueryResolver.vcxproj">
       <Project>{c29821bb-e679-400f-8f68-20934a012a85}</Project>
     </ProjectReference>

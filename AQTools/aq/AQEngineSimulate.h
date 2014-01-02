@@ -15,8 +15,12 @@ namespace aq
   {
   public:
     AQEngineSimulate(Base& _baseDesc, Settings& settings);
+
+    void prepare() const {}
+    void clean() const {}
+
     void call(const std::string& query, aq::AQEngine_Intf::mode_t mode); 
-    void call(aq::tnode * pNode, aq::AQEngine_Intf::mode_t mode, int selectLevel);
+    void call(const aq::core::SelectStatement& query, aq::AQEngine_Intf::mode_t mode); 
     
     void renameResult(unsigned int id, std::vector<std::pair<std::string, std::string> >& resultTables);
 

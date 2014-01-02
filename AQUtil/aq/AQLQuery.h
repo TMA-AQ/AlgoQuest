@@ -63,7 +63,9 @@ struct JoinCondition
   ColumnReference left, right;
 
   JoinCondition() {}
-  JoinCondition(const JoinCondition& o) : op(o.op), jt_left(o.jt_left), jt_right(o.jt_left), left(o.left), right(o.right) {}
+  JoinCondition(const JoinCondition& o) : op(o.op), jt_left(o.jt_left), jt_right(o.jt_right), left(o.left), right(o.right) 
+  {
+  }
   JoinCondition& operator=(const JoinCondition& o)
   {
     if (this != &o)
@@ -87,7 +89,7 @@ struct SelectStatement
     SQL,
   };
   mutable output_t output;
-  inline void setOutput(output_t o) { this->output = o; }
+  inline void setOutput(output_t o) const { this->output = o; }
   std::string to_string(output_t o = output_t::SQL) const;
   void to_string(std::string& str) const;
 

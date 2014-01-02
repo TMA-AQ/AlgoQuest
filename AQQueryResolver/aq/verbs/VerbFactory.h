@@ -9,6 +9,7 @@ namespace verb {
 //--------------------------------------------------------------------------
 struct Builder_Intf
 {
+  virtual ~Builder_Intf() {}
   virtual VerbNode::Ptr build(unsigned int type) const = 0;
 };
 
@@ -22,7 +23,7 @@ public:
 private:
 	VerbFactory(){};
 	VerbFactory(const VerbFactory& source);
-	~VerbFactory(){};
+	~VerbFactory();
 	VerbFactory& operator=( const VerbFactory& source );
 
 	Builder_Intf const * builder;

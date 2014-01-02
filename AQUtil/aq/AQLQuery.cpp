@@ -109,20 +109,20 @@ void print_list(std::ostream& os, T& l, const char * delim = "")
 
 void print_aql(std::ostream& os, const aq::core::SelectStatement& query)
 {
-  os << "select ";
-  for (size_t i = 1; i < query.fromTables.size(); ++i) os << ", ";
+  os << "SELECT ";
+  for (size_t i = 1; i < query.selectedTables.size(); ++i) os << ", ";
   for (auto& c : query.selectedTables) os << ". " << c.table.name << " " << c.name << " ";
   os << std::endl;
 
-  os << "from ";
+  os << "FROM ";
   for (size_t i = 1; i < query.fromTables.size(); ++i) os << ", ";
   for (auto& t : query.fromTables) os << t.name << " ";
   os << std::endl;
 
   if (!query.joinConditions.empty())
   {
-    os << "where ";
-    for (size_t i = 1; i < query.joinConditions.size() + query.inConditions.size(); ++i) os << "and ";
+    os << "WHERE ";
+    for (size_t i = 1; i < query.joinConditions.size() + query.inConditions.size(); ++i) os << "AND ";
     os << std::endl;
     for (auto& w : query.joinConditions) 
     {
@@ -133,7 +133,7 @@ void print_aql(std::ostream& os, const aq::core::SelectStatement& query)
     }
     for (auto& w : query.inConditions)
     {
-      os << "  " << "in . " << w.column.table.name << " " << w.column.name;
+      os << "  " << "IN . " << w.column.table.name << " " << w.column.name;
       for (auto it = w.values.begin(); it != w.values.end(); ++it)
       {
         auto it_tmp = it;
@@ -150,7 +150,7 @@ void print_aql(std::ostream& os, const aq::core::SelectStatement& query)
 
   if (!query.groupedColumns.empty())
   {
-    os << "group ";
+    os << "GROUP ";
     for (size_t i = 1; i < query.groupedColumns.size(); ++i) os << ", ";
     for (auto& c : query.groupedColumns) os << ". " << c.table.name << " " << c.name << " ";
     os << std::endl;
@@ -158,7 +158,7 @@ void print_aql(std::ostream& os, const aq::core::SelectStatement& query)
 
   if (!query.orderedColumns.empty())
   {
-    os << "order ";
+    os << "ORDER ";
     for (size_t i = 1; i < query.orderedColumns.size(); ++i) os << ", ";
     for (auto& c : query.orderedColumns) os << ". " << c.table.name << " " << c.name << " ";
     os << std::endl;
@@ -198,7 +198,7 @@ void print_sql(std::ostream& os, const aq::core::SelectStatement& ss)
         if ((j.right.table == p) && (j.left.table == t))
         {
           os << "  " << join_str_2_join_t(j.jt_left, j.jt_right) << " ";
-          os << j.left.table << " on (";
+          os << j.left.table << " ON (";
           os << j.right << " " << op_str_2_op_t(j.op) << " " << j.left;
           // os << j.right << " " << j.op << " " << j.left;
 
@@ -221,7 +221,7 @@ void print_sql(std::ostream& os, const aq::core::SelectStatement& ss)
           {
             for (auto& cond : addConditions)
             {
-              os << " and " << cond.column << " in (";
+              os << " AND " << cond.column << " IN (";
               print_list(os, cond.values, "'");
               os << ")";
             }
@@ -256,20 +256,20 @@ void print_sql(std::ostream& os, const aq::core::SelectStatement& ss)
     for (auto it = condToAddToWhere.begin(); it != condToAddToWhere.end();)
     {
       auto& cond = *it;
-      os << "  " << "  " << cond.column << " in (";
+      os << "  " << "  " << cond.column << " IN (";
       print_list(os, cond.values, "'");
       os << ")";
       ++it;
       if (it != condToAddToWhere.end())
       {
-        os << " or";
+        os << " OR";
       }
       os << std::endl;
     }
     os << "  )"; 
     if (!inConditionsTmp.empty())
     {
-      os << " and";
+      os << " AND";
     } 
     os << std::endl;
   }
@@ -278,13 +278,13 @@ void print_sql(std::ostream& os, const aq::core::SelectStatement& ss)
     for (auto it = inConditionsTmp.begin(); it != inConditionsTmp.end();)
     {
       auto& cond = *it;
-      os << "  " << cond.column << " in (";
+      os << "  " << cond.column << " IN (";
       print_list(os, cond.values, "'");
       os << ")";
       ++it;
       if (it != inConditionsTmp.end())
       {
-        os << " and";
+        os << " AND";
       }
       os << std::endl;
     }

@@ -2,16 +2,21 @@
 
 #include "parser/SQLParser.h"
 #include "parser/sql92_grm_tab.hpp"
-#include "Base.h"
-#include <vector>
-#include <list>
-#include <exception>
-#include <boost/algorithm/string.hpp>
-#include <string>
-#include <algorithm>
+#include "Settings.h"
+
+#include <aq/Base.h>
+#include <aq/ColumnItem.h>
 #include <aq/ParsException.h>
 #include <aq/SQLPrefix.h> //  a delete
 #include <aq/AQLQuery.h>
+#include <aq/Exceptions.h>
+
+#include <vector>
+#include <list>
+#include <string>
+#include <algorithm>
+
+#include <boost/algorithm/string.hpp>
 
 extern const int nrJoinTypes;
 extern const int joinTypes[];
@@ -85,28 +90,28 @@ template <typename T> aq::ColumnItem<T> GetItem(const aq::tnode& n)
 //}
 
 //------------------------------------------------------------------------------
-//template <typename T> aq::tnode * Getnode(ColumnItem<T>::Ptr item, ColumnType type)
-//{
-//	aq::tnode	* pNode = nullptr;
-//	if( !item )
-//		return pNode;
-//	switch( type )
-//	{
-//	case COL_TYPE_INT:
-//	case COL_TYPE_DATE:
-//		pNode = new aq::tnode( K_INTEGER );
-//		pNode->set_int_data( (llong) item->getValue() );
-//		break;
-//	case COL_TYPE_DOUBLE:
-//		pNode = new aq::tnode( K_REAL );
-//		pNode->set_double_data( item->getValue() );
-//		break;
-//	default:
-//		pNode = new aq::tnode( K_STRING );
-//		pNode->set_string_data( item->getValue() );
-//	}
-//	return pNode;
-//}
+template <typename T> aq::tnode * GetNode(const aq::ColumnItem<T>& item)
+{
+	aq::tnode	* n = new aq::tnode(K_INTEGER);
+  n->set_int_data(item.getValue());
+	return n;
+}
+
+template <>
+inline aq::tnode * GetNode<double>(const aq::ColumnItem<double>& item)
+{
+  aq::tnode * n = new aq::tnode(K_REAL);
+  n->set_double_data(item.getValue());
+  return n;
+}
+
+template <>
+inline aq::tnode * GetNode<char*>(const aq::ColumnItem<char*>& item)
+{
+  aq::tnode * n = new aq::tnode(K_STRING);
+  n->set_string_data(item.getValue());
+  return n;
+}
 
 aq::tnode* GetTree( Table& table );
 

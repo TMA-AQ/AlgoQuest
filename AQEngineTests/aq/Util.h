@@ -41,6 +41,7 @@ struct opt
 
 struct display_cb
 {
+  virtual ~display_cb() {}
   virtual void push(const std::string& value) = 0;
   virtual void next() = 0;
 };
@@ -54,16 +55,19 @@ int run_aq_engine(const std::string& aq_engine, const std::string& iniFilename, 
 void get_columns(std::vector<std::string>& columns, const std::string& query, const std::string& key);
 int check_answer_validity(const struct opt& o, aq::AQMatrix& matrix, 
                           const uint64_t count, const uint64_t nbRows, const uint64_t nbGroups);
-int check_answer_data(std::ostream& os,
-                      const std::string& answerPath,
-                      const struct opt& o,
-                      const std::vector<std::string>& selectedColumns,
-                      const std::vector<std::string>& groupedColumns,
-                      const std::vector<std::string>& orderedColumns
-                      // WhereValidator& whereValidator
-                      );
+//int check_answer_data(std::ostream& os,
+//                      const std::string& answerPath,
+//                      const struct opt& o,
+//                      const std::vector<std::string>& selectedColumns,
+//                      const std::vector<std::string>& groupedColumns,
+//                      const std::vector<std::string>& orderedColumns
+//                      // WhereValidator& whereValidator
+//                      );
 int display(display_cb *,
-            const std::string& answerPath,
+            // const std::string& answerPath,
+            aq::AQMatrix& aqMatrix,
+            const aq::Base& baseDesc,
+            const aq::Settings& vdgPath,
             const struct opt& o,
             const std::vector<std::string>& selectedColumns);
 int print_temporary_table(const std::string& tablePath, const std::string& dbPath, const size_t limit, const size_t packetSize);

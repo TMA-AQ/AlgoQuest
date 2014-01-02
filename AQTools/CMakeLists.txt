@@ -12,6 +12,7 @@ include_directories(
   ${Boost_INCLUDE_DIRS}
   $ENV{AQUTIL_SOURCE_DIR}
   $ENV{AQQUERY_RESOLVER_SOURCE_DIR}
+  $ENV{AQTESTS_SOURCE_DIR}
 )
 
 link_directories(
@@ -19,6 +20,7 @@ link_directories(
   ${Boost_LIBRARY_DIRS}
   $ENV{AQUTIL_LIBRARY_DIR}
   $ENV{AQQUERY_RESOLVER_LIBRARY_DIR}
+  $ENV{AQTESTS_LIBRARY_DIR}
 )
 
 set(CMAKE_CXX_FLAGS "-O0 -ggdb -std=c++0x -Wall")
@@ -33,11 +35,9 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
 
 ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
 
-file(
-  GLOB_RECURSE
-  source_files
-  aq/*.cpp
-)
+file(GLOB_RECURSE source_files aq/*.cpp)
+file(GLOB exclude_files aq/aq_tests_batch.cpp)
+list(REMOVE_ITEM source_files ${exclude_files})
 
 add_executable(
   aq-tools
@@ -47,6 +47,22 @@ add_executable(
 target_link_libraries( 
   aq-tools
   aq_query_resolver
+  aq_engine
   aq_util
   ${Boost_LIBRARIES}
+)
+
+add_executable(
+  aq-tests-batch
+  aq/aq_tests_batch.cpp
+)
+
+target_link_libraries(
+  aq-tests-batch
+  aq-tests
+  aq_query_resolver
+  aq_engine
+  aq_util
+  ${Boost_LIBRARIES}
+  mysqlcppconn
 )

@@ -1,9 +1,19 @@
 #ifndef __AQ_MATRIX_H__
 #define __AQ_MATRIX_H__
 
-#include "Settings.h"
-#include "ColumnMapper.h"
+#if defined (WIN32)
+# ifdef AQENGINE_EXPORTS
+#  define AQENGINE_API __declspec(dllexport)
+# else
+#  define AQENGINE_API __declspec(dllimport)
+# endif
+#else
+# define AQLIB_API __stdcall
+#endif
 
+#include "Settings.h"
+
+#include <aq/Base.h>
 #include <aq/Exceptions.h>
 #include <aq/BaseDesc.h>
 #include <aq/DBTypes.h>
@@ -11,6 +21,8 @@
 #include <string.h>
 #include <map>
 #include <vector>
+
+#include <boost/scoped_array.hpp>
 
 namespace aq
 {
@@ -35,50 +47,50 @@ public:
 	typedef std::vector<column_t> matrix_t;
   typedef std::vector<std::pair<uint64_t, uint64_t> > group_by_t;
 
-	AQMatrix(const Settings& settings, const Base& baseDesc);
-	AQMatrix(const AQMatrix& source);
-	~AQMatrix();
-	AQMatrix& operator=(const AQMatrix& source);
+	AQENGINE_API AQMatrix(const Settings& settings, const Base& baseDesc);
+	AQENGINE_API AQMatrix(const AQMatrix& source);
+	AQENGINE_API ~AQMatrix();
+	AQENGINE_API AQMatrix& operator=(const AQMatrix& source);
 
 	// 
 	// testing purpose (to remove)
-	void simulate(size_t rows, const std::vector<long long>& tableIDs);
+	// void simulate(size_t rows, const std::vector<long long>& tableIDs);
   
-  void clear();
-  void setJoinPath(const std::vector<std::string>& jp) { this->joinPath = jp; }
-  void write(const char * filePath);
-	void load(const char * filePath, std::vector<long long>& tableIDs);
-  void loadHeader(const char * filePath, std::vector<long long>& tableIDs);
-  void loadData(const char * filePath);
-  void prepareData(const char * filePath);
-  void loadNextPacket();
+  AQENGINE_API void clear();
+  AQENGINE_API void setJoinPath(const std::vector<std::string>& jp) { this->joinPath = jp; }
+  AQENGINE_API void write(const char * filePath);
+	AQENGINE_API void load(const char * filePath, std::vector<long long>& tableIDs);
+  AQENGINE_API void loadHeader(const char * filePath, std::vector<long long>& tableIDs);
+  AQENGINE_API void loadData(const char * filePath);
+  AQENGINE_API void prepareData(const char * filePath);
+  AQENGINE_API void loadNextPacket();
   template <class CB> void readData(CB& cb);
 
 	/// Each column in the table holds a list of row indexes.
 	/// Compute a column containing unique and sorted row indexes.
 	/// Also compute a mapping between the original row indexes and the sorted and unique indexes
-	void computeUniqueRow(std::vector<std::vector<size_t> >& mapToUniqueIndex, std::vector<std::vector<size_t> >& uniqueIndex) const;
+	AQENGINE_API void computeUniqueRow(std::vector<std::vector<size_t> >& mapToUniqueIndex, std::vector<std::vector<size_t> >& uniqueIndex) const;
 
-	const group_by_t& getGroupBy() const { return this->groupByIndex; }
-
-  ///
-  void compress();
+	AQENGINE_API const group_by_t& getGroupBy() const { return this->groupByIndex; }
 
   ///
-  void writeTemporaryTable();
+  AQENGINE_API void compress();
 
-  const std::vector<std::string>& getJoinPath() { return this->joinPath; }
-  const matrix_t& getMatrix() const { return this->matrix; }
-  const size_t getTableId(size_t c) const { return this->matrix[c].table_id; }
-	const v_size_t& getColumn(size_t c) const { return this->matrix[c].indexes; }
-	const v_size_t& getCount() const { return this->count; }
-	size_t getNbColumn() const { return this->matrix.size(); }
-	uint64_t getTotalCount() const { return this->totalCount; }
-	uint64_t getNbRows() const { return this->nbRows; }
-	bool hasCountColumn() const { return this->hasCount; }
+  ///
+  AQENGINE_API void writeTemporaryTable();
+
+  AQENGINE_API const std::vector<std::string>& getJoinPath() { return this->joinPath; }
+  AQENGINE_API const matrix_t& getMatrix() const { return this->matrix; }
+  AQENGINE_API const size_t getTableId(size_t c) const { return this->matrix[c].table_id; }
+	AQENGINE_API const v_size_t& getColumn(size_t c) const { return this->matrix[c].indexes; }
+	AQENGINE_API const v_size_t& getCount() const { return this->count; }
+	AQENGINE_API size_t getNbColumn() const { return this->matrix.size(); }
+	AQENGINE_API uint64_t getTotalCount() const { return this->totalCount; }
+	AQENGINE_API uint64_t getNbRows() const { return this->nbRows; }
+	AQENGINE_API bool hasCountColumn() const { return this->hasCount; }
 
   /// Debug purpose
-  void dump(std::ostream& os) const;
+  AQENGINE_API void dump(std::ostream& os) const;
 
 private:
 
@@ -103,12 +115,12 @@ private:
 template <class CB>
 void AQMatrix::readData(CB& cb)
 {
-  char * answerData = (char*)::malloc(this->answerFormat.size() + 1);
-  sprintf(answerData, this->answerFormat.c_str(), this->packet);
-  FILE * fd = fopen(answerData, "rb");
+  boost::scoped_array<char> answerData(new char[this->answerFormat.size() + 128]); // FIXME
+  sprintf(answerData.get(), this->answerFormat.c_str(), this->packet);
+  FILE * fd = fopen(answerData.get(), "rb");
   if (fd == nullptr)
   {
-    throw aq::generic_error(aq::generic_error::AQ_ENGINE, "cannot find aq matrix data file %s", answerData);
+    throw aq::generic_error(aq::generic_error::AQ_ENGINE, "cannot find aq matrix data file %s", answerData.get());
   }
   uint64_t value;
   std::vector<size_t> rows(this->matrix.size() + 1, 0);

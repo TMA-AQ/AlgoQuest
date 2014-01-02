@@ -39,31 +39,39 @@ bool Database::isValid() const
   return true;
 }
 
-void Database::create()
+void Database::create(aq::base_t& base)
 {
-  boost::filesystem::path p(this->path);
-  if (!boost::filesystem::exists(p))
+  boost::filesystem::path paths[] = 
   {
-    boost::filesystem::create_directories(p);
+    boost::filesystem::path(this->path),
+    boost::filesystem::path(this->path + "base_struct"),
+    boost::filesystem::path(this->getWorkingPath()),
+    boost::filesystem::path(this->getDataPath()),
+    boost::filesystem::path(this->getTemporaryColumnLoadPath()),
+    boost::filesystem::path(this->getTemporaryTableLoadPath()),
+    boost::filesystem::path(this->getTemporaryWorkingPath()),
+  };
+
+  for (auto& p : paths)
+  {
+    if (!boost::filesystem::exists(p))
+    {
+      boost::filesystem::create_directories(p);
+    }
   }
 
   boost::filesystem::path bdFile(this->getBaseDescFile());
-  if (!boost::filesystem::exists(bdFile))
-  {
-    boost::filesystem::create_directories(bdFile);
-  }
+  std::string fname = this->getBaseDescFile();
+  std::ofstream f(fname.c_str(), std::ios::trunc);
+  aq::dump_raw_base(f, base);
+  f.close();
 
-  boost::filesystem::path workingPath(this->getWorkingPath());
-  if (!boost::filesystem::exists(workingPath))
-  {
-    boost::filesystem::create_directories(workingPath);
-  }
+}
 
-  boost::filesystem::path dataPath(this->getDataPath());
-  if (!boost::filesystem::exists(dataPath))
-  {
-    boost::filesystem::create_directories(dataPath);
-  }
+void Database::erase()
+{
+  boost::filesystem::path root(this->path);
+  boost::filesystem::remove_all(root);
 }
 
 std::string Database::getName() const
@@ -87,6 +95,8 @@ int Database::load()
   int rc = 0;
   std::string bdFname = this->getBaseDescFile();
   std::ifstream fin(bdFname.c_str(), std::ios::in);
+  if (!fin.is_open()) 
+    return -1;
   if (bdFname.find(".aqb") != std::string::npos)
     aq::build_base_from_raw(fin, baseDesc);
   else if (bdFname.find(".xml") != std::string::npos)
@@ -94,6 +104,11 @@ int Database::load()
   else
     rc = -1;
   return rc;
+}
+
+std::string Database::getRootPath() const
+{
+  return this->path;
 }
 
 std::string Database::getWorkingPath() const
@@ -109,6 +124,21 @@ std::string Database::getDataPath() const
 std::string Database::getBaseDescFile() const
 {
   return this->path + "base_struct/base.aqb";
+}
+
+std::string Database::getTemporaryWorkingPath() const
+{
+  return this->path + "data_orga/tmp/";
+}
+
+std::string Database::getTemporaryTableLoadPath() const
+{
+  return this->path + "data_orga/tables/";
+}
+
+std::string Database::getTemporaryColumnLoadPath() const
+{
+  return this->path + "data_orga/columns/";
 }
 
 void Database::dump(std::ostream& os) const

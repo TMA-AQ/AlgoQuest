@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cstdarg>
+#include <sstream>
 #include <boost/cstdint.hpp>
 #include <boost/thread/mutex.hpp>
 
@@ -33,6 +34,7 @@ namespace aq
 
     ~Logger();
 
+    void redirectToStream(std::ostream& os) { this->out = &os; }
 		void setLocalFile(const char *);
 
     void setLockMode(bool value)      { this->lockMode = value; }
@@ -62,6 +64,7 @@ namespace aq
     int  openFile(const char *);
     void closeFile(void);
 
+    std::ostream * out;
     int level;
     FILE * localFile;
     char mode;

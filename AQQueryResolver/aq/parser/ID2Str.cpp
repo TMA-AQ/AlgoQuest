@@ -47,6 +47,7 @@ TID2String g_id2str[] = {
 	{ K_GROUP,			"GROUP"			},
 	{ K_HAVING,			"HAVING"		},
 	{ K_IN,				"IN"			},
+	{ K_IN_VALUES,				"IN"			},
 	{ K_INNER,			"K_INNER"		},
 	{ K_INSERT,			"INSERT"		},
 	{ K_INTERVAL,		"INTERVAL"		},
@@ -167,8 +168,7 @@ TID2String g_id2str[] = {
 	{ K_MERGE,			"K_MERGE"		},
 	{ K_MATCHED,		"K_MATCHED"		},
 	{ K_USING,			"K_USING"		},
-	{ K_TARGET,			"K_TARGET"		}//,
-  // { K_IN_VALUES,  "K_IN" }
+	{ K_TARGET,			"K_TARGET"		}
 };
 
 //------------------------------------------------------------------------------
@@ -331,8 +331,7 @@ const char* id_to_string( unsigned int nID ) {
 			return g_id2str[ i ].pszStr;
 		}
 	}
-  //throw aq::generic_error(aq::generic_error::VERB_TYPE_MISMATCH, "cannot find type %u", nID);
-	//return "K_UNKNOW";
+  assert(false);
   return nullptr;
 }
 

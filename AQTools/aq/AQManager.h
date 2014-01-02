@@ -45,3 +45,9 @@ int processQuery(const std::string & query,
                  aq::AQEngine_Intf * aq_engine,
                  const std::string & answer, 
                  bool                keepFiles);
+
+/// TODO
+int test_plugins(const std::string& plugins_path,
+                 const std::string& query, 
+                 const aq::Settings& settings, 
+                 const aq::Base& base);
