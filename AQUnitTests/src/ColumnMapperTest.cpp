@@ -3,7 +3,11 @@
 #include <iostream>
 #include <set>
 #include <aq/GenericFileMapper.h>
+
+#ifdef WIN32
 #include <aq/WIN32FileMapper.h>
+#endif
+
 #include <aq/ColumnMapper.h>
 #include <aq/BaseDesc.h>
 #include <aq/Utilities.h>
@@ -75,6 +79,8 @@ BOOST_AUTO_TEST_CASE(basic_varchar_column_mapper)
   loader_t<char> loader;
   loader.load(cm, 10);
 }
+
+#ifdef WIN32
 
 BOOST_AUTO_TEST_CASE(windows_int_column_mapper)
 {
@@ -172,5 +178,7 @@ BOOST_AUTO_TEST_CASE(column_mapper)
   }
 
 }
+
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()

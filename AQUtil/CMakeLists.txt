@@ -30,7 +30,8 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     # Linux specific code
     SET(OperatingSystem "Linux")
 
-    set(CMAKE_CXX_FLAGS "-O0 -ggdb -std=c++11")
+    set(CMAKE_CXX_COMPILER "g++")
+    set(CMAKE_CXX_FLAGS "-O0 -ggdb -std=c++0x -Wall")
 
     file(GLOB exclude_files "aq/WIN32FileMapper.*")
     list(REMOVE_ITEM source_files ${exclude_files})

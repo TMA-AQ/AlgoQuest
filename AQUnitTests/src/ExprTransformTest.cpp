@@ -5,7 +5,6 @@
 #include <aq/ThesaurusReader.h>
 #include <aq/ColumnMapper.h>
 #include <aq/FileMapper.h>
-#include <aq/WIN32FileMapper.h>
 #include <aq/DateConversion.h>
 #include <aq/ExprTransform.h>
 #include <aq/SQLPrefix.h>
@@ -42,7 +41,7 @@ std::string transform(const char * db_name, const char * query, int tag)
   
   std::cout << *cmpNode << std::endl;
 
-  aq::expression_transform::transform<aq::WIN32FileMapper>(base, settings, cmpNode);
+  aq::expression_transform::transform<aq::FileMapper>(base, settings, cmpNode);
 
   std::string queryTransformed;
   aq::syntax_tree_to_aql_form(tree, queryTransformed);

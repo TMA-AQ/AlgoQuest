@@ -21,7 +21,7 @@ link_directories(
   $ENV{AQQUERY_RESOLVER_LIBRARY_DIR}
 )
 
-set(CMAKE_CXX_FLAGS "-O0 -ggdb -std=c++11")
+set(CMAKE_CXX_FLAGS "-O0 -ggdb -std=c++0x -Wall")
 
 IF(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
 
@@ -29,7 +29,7 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
     SET(OperatingSystem "FreeBSD")
 
     set(CMAKE_CXX_COMPILER "g++46")
-    set(CMAKE_CXX_FLAGS "-O0 -ggdb -std=c++0x")
+    set(CMAKE_CXX_FLAGS "-O0 -ggdb -std=c++0x -Wall")
 
 ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
 

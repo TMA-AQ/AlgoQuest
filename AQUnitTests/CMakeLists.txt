@@ -6,26 +6,31 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib/${CMAKE_BUILD_TYPE})
 set(EXECUTABLE_OUTPUT_PATH bin/${CMAKE_BUILD_TYPE})
 
 find_package(
-  Boost 1.50.0 
-  COMPONENTS test_exec_monitor unit_test_framework program_options thread filesystem system timer 
+  Boost 1.48.0 
+  COMPONENTS test_exec_monitor unit_test_framework program_options thread filesystem system timer regex 
   REQUIRED
 )
 
 include_directories(
   ${PROJECT_SOURCE_DIR}
   ${Boost_INCLUDE_DIRS}
-  ${AQUTIL_SOURCE_DIR}
-  ${AQQUERYRESOLVER_SOURCE_DIR}
+  $ENV{AQUTIL_SOURCE_DIR}
+  $ENV{AQQUERY_RESOLVER_SOURCE_DIR}
 )
 
 link_directories(
   ${LIBRARY_OUTPUT_PATH}
   ${Boost_LIBRARY_DIRS}
-  ${AQUTIL_LIBRARY_DIR}
-  ${AQQUERYRESOLVER_LIBRARY_DIR}
+  $ENV{AQUTIL_LIBRARY_DIR}
+  $ENV{AQQUERY_RESOLVER_LIBRARY_DIR}
 )
 
-set(CMAKE_CXX_FLAGS "-O0 -ggdb -std=c++11")
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    # Linux specific code
+    SET(OperatingSystem "Linux")
+    SET(CMAKE_CXX_COMPILER "g++")
+    SET(CMAKE_CXX_FLAGS "-O0 -ggdb -Wall -std=c++0x")
+ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 file(
   GLOB_RECURSE
