@@ -76,6 +76,7 @@ void AggregateVerb::addResult(aq::Row& row)
     case aq::ColumnType::COL_TYPE_INT:
       boost::get<aq::ColumnItem<int32_t> >(this->item).applyAggregate(row_item.aggFunc, boost::get<aq::ColumnItem<int32_t> >(row_item.item));
       break;
+    case aq::ColumnType::COL_TYPE_DATE:
     case aq::ColumnType::COL_TYPE_BIG_INT:
       boost::get<aq::ColumnItem<int64_t> >(this->item).applyAggregate(row_item.aggFunc, boost::get<aq::ColumnItem<int64_t> >(row_item.item));
       break;

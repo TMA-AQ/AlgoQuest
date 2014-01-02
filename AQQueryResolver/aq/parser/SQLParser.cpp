@@ -407,7 +407,7 @@ tnode* tnode::findOut_IDENT(const std::string& name)
 	return nullptr;
 }
 //------------------------------------------------------------------------------
-tnode* tnode::find_first_node_diffTag(tag_t tag, int diffTag)
+tnode* tnode::find_first_node_diffTag(tag_t tag, tnode::tag_t diffTag)
 {	
   tnode * pNodeFound = nullptr;
   

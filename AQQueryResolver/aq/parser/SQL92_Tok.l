@@ -16,6 +16,7 @@
 %{
 // %option yylineno debug 
 // %option reentrant
+// %option nounput
 %}
 
 %option yylineno
@@ -100,7 +101,7 @@ MIN				[Mm][Ii][Nn]
 MINUS			[Mm][Ii][Nn][Uu][Ss]
 MONTH			[Mm][Oo][Nn][Tt][Hh]
 NATURAL			[Nn][Aa][Tt][Uu][Rr][Aa][Ll]
-nullptr			[Nn][Uu][Ll][Ll]
+NULL			[Nn][Uu][Ll][Ll]
 NVL				[Nn][Vv][Ll]
 ON				[Oo][Nn]
 ORDER			[Oo][Rr][Dd][Ee][Rr]
@@ -338,7 +339,7 @@ UNKNOWN			[Uu][Nn][Kk][Nn][Oo][Ww][Nn]
 {MINUS}			{ yylval = new tnode( K_SEL_MINUS ); return K_SEL_MINUS; }
 {MONTH}			{ yylval = new tnode( K_MONTH ); return K_MONTH; }
 {NATURAL}		{ yylval = new tnode( K_NATURAL ); return K_NATURAL; }
-{nullptr}			{ yylval = new tnode( K_nullptr ); return K_nullptr; }
+{NULL}			{ yylval = new tnode( K_NULL ); return K_NULL; }
 {NVL}			{ yylval = new tnode( K_NVL ); return K_NVL; }
 {ON}			{ yylval = new tnode( K_ON ); return K_ON; }
 {ORDER}			{ yylval = new tnode( K_ORDER ); return K_ORDER; }
@@ -351,7 +352,7 @@ UNKNOWN			[Uu][Nn][Kk][Nn][Oo][Ww][Nn]
 {REPLACE}		{ yylval = new tnode( K_REPLACE ); return K_REPLACE; }
 {RIGHT}			{ yylval = new tnode( K_RIGHT ); return K_RIGHT; }
 {ROLLBACK}		{ yylval = new tnode( K_ROLLBACK ); return K_ROLLBACK; }
-{ROW}			{ yylval = new tnode( K_ROW ); return K_ROW; }
+{ROW}		{ yylval = new tnode( K_ROW ); return K_ROW; }
 {ROW_NUMBER}	{ yylval = new tnode( K_ROW_NUMBER ); return K_ROW_NUMBER; }
 {ROWS}			{ yylval = new tnode( K_ROWS ); return K_ROWS; }
 {SELECT}		{ yylval = new tnode( K_SELECT ); return K_SELECT; }
@@ -399,7 +400,7 @@ UNKNOWN			[Uu][Nn][Kk][Nn][Oo][Ww][Nn]
 
 	/* !!!!!!!! */
 
-{whitespaces}			{ int i; i = 0; } /* Eat White Spaces ! {ws_no_newline} -> { return *yytext; } */
+{whitespaces}			{ } /* Eat White Spaces ! {ws_no_newline} -> { return *yytext; } */
 
 .						{	/* Catch All Rule */
 							char szBuf[ 100 ];

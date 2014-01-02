@@ -4,7 +4,7 @@
 #include <aq/Logger.h>
 #include <aq/Timer.h>
 #include <aq/QueryReader.h>
-#include <aq/AQEngine_intf.h>
+#include <aq/AQEngine_Intf.h>
 #include "VerbBuilder.h"
 #include "AQManager.h"
 #include "CommandHandler.h"
@@ -213,9 +213,7 @@ int main(int argc, char**argv)
 		std::string baseDescr;
     std::string DLLFunction;
 		unsigned int worker;
-		bool multipleAnswerFiles = false;
 		bool keepFiles = false;
-		bool display = false;
     bool displayCount = false;
     bool trace = false;
 		bool loadDatabase = false;
@@ -227,7 +225,6 @@ int main(int argc, char**argv)
 		bool transform = false;
     bool checkDatabase = false;
 		bool simulateAQEngine = false;
-		bool skipNestedQuery = false;
     bool testPlugins = false;
 
     // load option
@@ -260,7 +257,7 @@ int main(int argc, char**argv)
 
     //
     // look for properties file in args
-    for (size_t i = 1; i < argc; i++)
+    for (int i = 1; i < argc; i++)
     {
       //
       // read ini file

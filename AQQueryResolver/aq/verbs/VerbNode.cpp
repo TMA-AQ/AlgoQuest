@@ -178,7 +178,7 @@ VerbNode::Ptr VerbNode::build( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* p
 }
 
 //------------------------------------------------------------------------------
-VerbNode::Ptr VerbNode::BuildVerbsTree( aq::tnode* pStart, const boost::array<unsigned int, 6>& categories_order, Base& baseDesc, Settings * settings )
+VerbNode::Ptr VerbNode::BuildVerbsTree( aq::tnode* pStart, const boost::array<aq::tnode::tag_t, 6>& categories_order, Base& baseDesc, Settings * settings )
 {
   aq::Logger::getInstance().log(AQ_DEBUG, "build verb tree\n");
 	if( pStart->tag != K_SELECT )

@@ -5,7 +5,7 @@ project(AQEngineTests)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib/${CMAKE_BUILD_TYPE})
 set(EXECUTABLE_OUTPUT_PATH bin/${CMAKE_BUILD_TYPE})
 
-find_package(Boost 1.50.0 COMPONENTS program_options thread filesystem system timer python regex REQUIRED)
+find_package(Boost 1.48.0 COMPONENTS program_options thread filesystem system timer python regex REQUIRED)
 
 include_directories(
   ${PROJECT_SOURCE_DIR}
@@ -23,7 +23,8 @@ link_directories(
   /System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7
 )
 
-set(CMAKE_CXX_FLAGS "-O0 -ggdb -std=c++11")
+set(CMAKE_CXX_COMPILER "g++")
+set(CMAKE_CXX_FLAGS "-O0 -ggdb -std=c++0x -Wall -Werror")
 
 file(GLOB_RECURSE source_files aq/*.cpp)
 file(GLOB_RECURSE exclude_files aq/Where*.cpp aq/AQEngineTests.cpp)

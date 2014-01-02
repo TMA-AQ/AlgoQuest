@@ -67,11 +67,11 @@ int get_column_id_from_table(Table& pTD, char * pszColumnName, unsigned int * pn
 		return -1;
 
 	if ( pnColumnId != nullptr )
-		*pnColumnId = static_cast<unsigned int>(pTD.Columns[idx]->ID);
+		*pnColumnId = static_cast<unsigned int>(pTD.Columns[idx]->getID());
 	if ( pnColumnSize != nullptr )
-		*pnColumnSize = static_cast<unsigned int>(pTD.Columns[idx]->Size);
+		*pnColumnSize = static_cast<unsigned int>(pTD.Columns[idx]->getSize());
 	if ( peColumnType != nullptr )
-		*peColumnType = pTD.Columns[idx]->Type;
+		*peColumnType = pTD.Columns[idx]->getType();
 
 	return 0;
 }

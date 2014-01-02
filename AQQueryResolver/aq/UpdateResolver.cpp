@@ -101,14 +101,14 @@ int UpdateResolver::process(std::vector<Row>& rows)
       if (index != 0)
       {
         aq::Logger::getInstance().log(AQ_DEBUG, "update %s[%u]", this->table->getName().c_str(), index);
-        for (auto& cv : columns)
-        {
-          //auto& col = cv.second.column;
-          //auto& item = cv.second.item;
-          //auto& mapper = cv.second.mapper;
-          //aq::Logger::getInstance().log(AQ_DEBUG, "%s = %s", col->getName().c_str(), item.toString(col->Type).c_str());
-          //mapper->setValue(index-1, item);
-        }
+        // for (auto& cv : columns)
+        // {
+        //   auto& col = cv.second.column;
+        //   auto& item = cv.second.item;
+        //   auto& mapper = cv.second.mapper;
+        //   aq::Logger::getInstance().log(AQ_DEBUG, "%s = %s", col->getName().c_str(), item.toString(col->Type).c_str());
+        //   mapper->setValue(index-1, item);
+        // }
       }
     }
   }

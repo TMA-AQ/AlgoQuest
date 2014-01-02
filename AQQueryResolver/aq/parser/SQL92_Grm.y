@@ -52,7 +52,7 @@ using namespace aq;
 %token K_END K_EXISTS K_EXTRACT K_ESCAPE K_IMMEDIATE K_FOR K_FROM K_FULL
 %token K_GROUP K_HAVING K_IN K_INNER K_INSERT K_INTERVAL K_INTO
 %token K_IS K_JOIN K_LEFT K_LIKE K_MAX K_MIN K_MONTH K_NATURAL
-%token K_nullptr K_ON K_ORDER K_OUTER K_RIGHT K_ROLLBACK K_SELECT K_SET 
+%token K_NULL K_ON K_ORDER K_OUTER K_RIGHT K_ROLLBACK K_SELECT K_SET 
 %token K_SUBSTRING K_SUM K_TABLE K_THEN K_TRANSACTION K_UNION K_UPDATE
 %token K_VALUES K_WHEN K_WHERE K_WORK K_YEAR
 
@@ -768,7 +768,7 @@ when_operand	: value_expression
 				;
 
 result	: result_expression 
-		| K_nullptr
+		| K_NULL
 		;
 
 result_expression	: value_expression
@@ -1041,13 +1041,13 @@ escape_character	:  character_value_expression
 	*/
 
 //-----------------
-null_predicate	: row_value_constructor K_IS K_NOT K_nullptr {
+null_predicate	: row_value_constructor K_IS K_NOT K_NULL {
 														$2->left	= $1;
 														$2->right	= $3;
 														$3->left	= $4;
 														$$			= $2;
 													}
-				| row_value_constructor K_IS K_nullptr		{
+				| row_value_constructor K_IS K_NULL		{
 														$2->left	= $1;
 														$2->right	= $3;
 														$$			= $2;
@@ -1079,7 +1079,7 @@ row_value_constructor_list	: row_value_constructor_element
 							;
 
 row_value_constructor_element	: value_expression
-								| K_nullptr
+								| K_NULL
 								| K_DEFAULT
 								;
 
@@ -1173,8 +1173,8 @@ default_expression_optional	: K_COMMA default_expression {
 default_expression	: value_expression
 
 /*
-null_treatment	: K_RESPECT_nullptrS 
-				| K_IGNORE_nullptrS
+null_treatment	: K_RESPECT_NULLS 
+				| K_IGNORE_NULLS
 */
 				
 first_or_last_value_function	: first_or_last_value

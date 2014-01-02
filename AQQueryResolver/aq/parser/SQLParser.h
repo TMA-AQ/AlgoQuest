@@ -23,7 +23,7 @@ class tnode
 {
 public:
   static std::string indentStep;
-  typedef int tag_t; // FIXME
+  typedef unsigned int tag_t; // FIXME
 
   enum tnodeDataType
   {
@@ -66,7 +66,7 @@ public:
   tnode* find_first_node(tag_t tag);
   tnode* findOut_IDENT(const std::string& name);
   tnode* find_deeper_node(tag_t tag);
-  tnode* find_first_node_diffTag(tag_t tag, int diffTag); ///< find out the pNode TAG (COLUMN) with no PERIOD's parent
+  tnode* find_first_node_diffTag(tag_t tag, tag_t diffTag); ///< find out the pNode TAG (COLUMN) with no PERIOD's parent
   void find_nodes(tag_t tag, std::vector<tnode*>& nodes);
 
   void treeListToNodeArray(std::vector<tnode*>& nodes, tag_t tag);

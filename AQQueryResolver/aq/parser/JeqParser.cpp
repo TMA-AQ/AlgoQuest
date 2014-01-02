@@ -1,4 +1,5 @@
 #include "JeqParser.h"
+#include "SQLParser.h"
 #include "ID2Str.h"
 #include <vector>
 #include <map>
@@ -7,10 +8,10 @@
 #include <boost/bind.hpp>
 #include <boost/algorithm/string.hpp>
 
-extern const int nrJoinTypes;
-extern const int joinTypes[];
-extern const int inverseTypes[];
+namespace aq {
+namespace parser {
 
+//------------------------------------------------------------------------------
 struct cmp_table_name
 {
   bool operator()(const std::string& n1, const std::string& n2) const
@@ -19,9 +20,6 @@ struct cmp_table_name
   }
 };
 typedef std::map<std::string, int, struct cmp_table_name> dict_t;
-
-namespace aq
-{
 
 //------------------------------------------------------------------------------
 struct connectionLine
@@ -116,7 +114,7 @@ std::vector<std::string> ParseJeq( std::string& inputString, bool add_active_neu
 void findJoin( const std::string& inputString, std::string& joinType, std::string::size_type& position )
 {
 	position = std::string::npos;
-	for( int idx = 0; idx < nrJoinTypes; ++idx )
+	for( unsigned int idx = 0; idx < nrJoinTypes; ++idx )
 	{
 		std::string::size_type pos = inputString.find( id_to_string( joinTypes[idx] ) );
 		if( pos != std::string::npos && (pos < position || position == std::string::npos) )
@@ -130,7 +128,7 @@ void findJoin( const std::string& inputString, std::string& joinType, std::strin
 //------------------------------------------------------------------------------
 std::string invertJoin( const std::string& join )
 {
-	int idx = 0;
+	unsigned int idx = 0;
 	for( ; idx < nrJoinTypes; ++idx )
 		if( id_to_string(joinTypes[idx]) == join )
 			break;
@@ -588,4 +586,5 @@ void AddActiveNeutralFilter(std::string&)
 {
 }
 
+}
 }

@@ -50,9 +50,9 @@ Settings::Settings()
 Settings::Settings(const Settings& obj)
 	:
 	iniFile(obj.iniFile),
+  queryIdent(obj.queryIdent),
 	outputFile(obj.outputFile),
 	answerFile(obj.answerFile),
-  queryIdent(obj.queryIdent),
 	dbDesc(obj.dbDesc),
 	aqEngine(obj.aqEngine),
   aqLoader(obj.aqLoader),

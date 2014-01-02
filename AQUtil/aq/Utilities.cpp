@@ -414,9 +414,9 @@ std::string getPrmFileName( const char* path, size_t tableIdx, size_t columnIdx,
 {
 	char szFN[ _MAX_PATH ];
 	if( path )
-		sprintf( szFN, "%sB001T%.4uC%.4uV01P%.12u.prm", path, tableIdx, columnIdx, partIdx );
+		sprintf( szFN, "%sB001T%.4luC%.4luV01P%.12lu.prm", path, tableIdx, columnIdx, partIdx );
 	else
-		sprintf( szFN, "B001T%.4uC%.4uV01P%.12u.prm", tableIdx, columnIdx, partIdx );
+		sprintf( szFN, "B001T%.4luC%.4luV01P%.12lu.prm", tableIdx, columnIdx, partIdx );
 	return szFN;
 }
 
@@ -425,9 +425,9 @@ std::string getThesaurusFileName( const char* path, size_t tableIdx, size_t colu
 {
 	char szFN[ _MAX_PATH ];
 	if( path )
-		sprintf( szFN, "%sB001T%.4uC%.4uV01P%.12u.the", path, tableIdx, columnIdx, partIdx );
+		sprintf( szFN, "%sB001T%.4luC%.4luV01P%.12lu.the", path, tableIdx, columnIdx, partIdx );
 	else
-		sprintf( szFN, "B001T%.4uC%.4uV01P%.12u.the", tableIdx, columnIdx, partIdx );
+		sprintf( szFN, "B001T%.4luC%.4luV01P%.12lu.the", tableIdx, columnIdx, partIdx );
 	return szFN;
 }
 
@@ -435,7 +435,7 @@ std::string getThesaurusFileName( const char* path, size_t tableIdx, size_t colu
 std::string getTemporaryFileName( size_t tableIdx, size_t columnIdx, size_t partIdx, const char * type, size_t size )
 {
 	char szFN[ _MAX_PATH ];
-  sprintf( szFN, "B001TMP%.4uC%.4u%s%.4uP%.12u.TMP", tableIdx, columnIdx, type, size, partIdx );
+  sprintf( szFN, "B001TMP%.4luC%.4lu%s%.4luP%.12lu.TMP", tableIdx, columnIdx, type, size, partIdx );
 	return szFN;
 }
 
@@ -566,48 +566,36 @@ void FileWriteEnreg( aq::ColumnType col_type, const int col_size, char *my_field
 
 	if ( (int) strlen ( my_field ) >= col_size ) my_field[ col_size ] = 0 ;
 
+  if (strcmp(my_field, "NULL"))
+  {
+    throw aq::generic_error(aq::generic_error::GENERIC, "NULL are not handle");
+  }
+
 	switch (  col_type )
 	{
 	case COL_TYPE_INT :
-		if ( strcmp ( my_field, "nullptr")  ==   0 )  *my_int = 'NULL'; // FIXME
-		else  *my_int = atoi ( my_field );
+    *my_int = atoi ( my_field );
 		fwrite( my_int , sizeof(int), 1, fcol  );
 		break;
 
 	case COL_TYPE_BIG_INT :
-		if ( strcmp ( my_field, "nullptr")  ==   0 )  *my_long_long  = 'NULL'; // FIXME
 #ifdef WIN32
-		else  *my_long_long  = _atoi64 (my_field );   
+    *my_long_long  = _atoi64 (my_field );   
 #else
-		else  *my_long_long  = atoll (my_field );   
+    *my_long_long  = atoll (my_field );   
 #endif
 		fwrite( my_long_long , sizeof(long long), 1, fcol );
 		break;
 
 	case COL_TYPE_DOUBLE :
-		if (  strcmp ( my_field, "nullptr")  ==   0 )  *my_double = 'NULL'; // FIXME
-		else
-		{
-			// step 1 convert ',' in '.'
-			ChangeCommaToDot (  my_field );
-			// step 2 : use strtod
-			*my_double =     strtod ( my_field, nullptr );  // atof  ( field );
-		}
+    ChangeCommaToDot (  my_field );
+    *my_double =     strtod ( my_field, nullptr );  // atof  ( field );
 		fwrite( my_double, sizeof(double), 1, fcol );
 		break;
 
 	case COL_TYPE_DATE:
-		{
-			if ( (strcmp ( my_field, "nullptr")  ==   0) ||	(strcmp( my_field, "" ) == 0) )
-      {
-        *my_long_long  = 'NULL'; // FIXME
-      }
-      else
-			{
-				dateConverter.dateToBigInt(my_field);
-        fwrite( my_long_long , sizeof(long long), 1, fcol );
-			}
-		}
+    dateConverter.dateToBigInt(my_field);
+    fwrite( my_long_long , sizeof(long long), 1, fcol );
 		break;
 
 	case COL_TYPE_VARCHAR :

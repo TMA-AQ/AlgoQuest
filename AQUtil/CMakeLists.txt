@@ -31,7 +31,7 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     SET(OperatingSystem "Linux")
 
     set(CMAKE_CXX_COMPILER "g++")
-    set(CMAKE_CXX_FLAGS "-O0 -ggdb -std=c++0x -Wall")
+    set(CMAKE_CXX_FLAGS "-O0 -ggdb -fPIC -std=c++0x -Wall -Werror")
 
     file(GLOB exclude_files "aq/WIN32FileMapper.*")
     list(REMOVE_ITEM source_files ${exclude_files})
@@ -43,7 +43,7 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     # Linux specific code
     SET(OperatingSystem "Darwin")
 
-    set(CMAKE_CXX_FLAGS "-O0 -ggdb -std=c++11")
+    set(CMAKE_CXX_FLAGS "-O0 -ggdb -std=c++11 -Wall -Werror")
 
     file(GLOB exclude_files "aq/WIN32FileMapper.*")
     list(REMOVE_ITEM source_files ${exclude_files})
@@ -56,7 +56,7 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
     SET(OperatingSystem "FreeBSD")
 
     set(CMAKE_CXX_COMPILER "g++46")
-    set(CMAKE_CXX_FLAGS "-O0 -ggdb -std=c++0x")
+    set(CMAKE_CXX_FLAGS "-O0 -ggdb -std=c++0x -Wall -Werror")
 
     file(GLOB exclude_files "aq/WIN32FileMapper.*")
     list(REMOVE_ITEM source_files ${exclude_files})

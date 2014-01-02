@@ -19,7 +19,7 @@ struct base_t
     struct col_t
     {
       std::string name;
-      int id;
+      int id; // FIXME
       symbole type;
       int size; ///< number of elements
       int getSize() const;
@@ -27,14 +27,14 @@ struct base_t
     typedef std::vector<col_t> cols_t;
 
     std::string name;
-    int id;
-    int nb_record;
+    int id; // FIXME
+    int nb_record; // FIXME
     cols_t colonne;
   };
   typedef std::vector<table_t> tables_t;
 
 	std::string name;
-	int id;
+	int id; // FIXME
 	tables_t table;
 };
 

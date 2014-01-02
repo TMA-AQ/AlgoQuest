@@ -354,7 +354,7 @@ void AsVerb::addResult(aq::Row& row)
     if (this->index == -1)
     {
       assert(!row.computedRow.empty());
-      assert(row.computedRow.size() <= std::numeric_limits<int>::max());
+      assert(row.computedRow.size() <= static_cast<size_t>(std::numeric_limits<int>::max()));
       this->index = static_cast<int>(row.computedRow.size()) - 1;
       row.computedRow[this->index].tableName = "";
       row.computedRow[this->index].columnName = this->ident;
@@ -365,7 +365,8 @@ void AsVerb::addResult(aq::Row& row)
       return;
     }
 
-    assert(this->index < row.computedRow.size());
+    assert(row.computedRow.size() <= static_cast<size_t>(std::numeric_limits<int>::max()));
+    assert(this->index < static_cast<int>(row.computedRow.size()));
     aq::row_item_t& row_item = row.computedRow[this->index];
     row_item.displayed = true;
   }

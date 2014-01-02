@@ -40,15 +40,11 @@ bool ComparisonVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 		delete pNodeClone ;
 		if( !pNode->left || !pNode->right )
 			throw verb_error(generic_error::GENERIC, this->getVerbType());
-		if( this->Context == K_WHERE &&
-			(pNode->left->tag == K_PERIOD &&
-			pNode->right->tag == K_PERIOD ||
-			pNode->left->tag == K_PERIOD &&
-			resRight && resRight->getType() == VerbResult::SCALAR ||
-			pNode->right->tag == K_PERIOD &&
-			resLeft && resLeft->getType() == VerbResult::SCALAR ||
-			(pNode->left->tag == K_INNER || pNode->left->tag == K_OUTER) &&
-			(pNode->right->tag == K_INNER || pNode->right->tag == K_OUTER)) )
+		if (this->Context == K_WHERE && 
+        (((pNode->left->tag == K_PERIOD) && (pNode->right->tag == K_PERIOD)) ||
+         ((pNode->left->tag == K_PERIOD) && resRight && (resRight->getType() == VerbResult::SCALAR)) ||
+         ((pNode->right->tag == K_PERIOD) && resLeft && (resLeft->getType() == VerbResult::SCALAR)) ||
+         (((pNode->left->tag == K_INNER) || (pNode->left->tag == K_OUTER)) && ((pNode->right->tag == K_INNER) || (pNode->right->tag == K_OUTER)))))
 			return true; //comparison can be handled by the engine
 		else
 		{
@@ -104,12 +100,9 @@ bool IsVerb::preprocessQuery(	aq::tnode* pStart, aq::tnode* pNode,
 								aq::tnode* pStartOriginal )
 {
 
-	if( !pNode->right ||
-		!(pNode->right->tag == K_NOT && pNode->right->left &&
-		pNode->right->left->tag == K_nullptr ||
-		pNode->right->tag == K_nullptr) )
+	if (!pNode->right || !((pNode->right->tag == K_NOT && pNode->right->left && pNode->right->left->tag == K_NULL) || (pNode->right->tag == K_NULL)) ) // FIXME
 		throw generic_error(generic_error::NOT_IMPLEMENTED, "");
-	if( pNode->right->tag == K_NOT && pNode->right->left->tag == K_nullptr )
+	if( pNode->right->tag == K_NOT && (pNode->right->left->tag == K_NULL) )
 		this->IsNot = true;
 	return false;
 }

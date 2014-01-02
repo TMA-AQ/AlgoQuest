@@ -62,7 +62,7 @@ public:
 	/// order is given by \a categories_order (the last one will be executed first)
 	/// engine actually executes GROUP BY before select and after where, but
 	/// I need to delete it after select gets the grouping columns
-  static VerbNode::Ptr BuildVerbsTree( aq::tnode* pStart, const boost::array<unsigned int, 6>& categories_order, Base& baseDesc, Settings * settings );
+  static VerbNode::Ptr BuildVerbsTree( aq::tnode* pStart, const boost::array<aq::tnode::tag_t, 6>& categories_order, Base& baseDesc, Settings * settings );
    
   /// build a VerbNode subtree corresponding to the ppStart subtree
   /// a branch will end when a VerbNode for that aq::tnode cannot be found

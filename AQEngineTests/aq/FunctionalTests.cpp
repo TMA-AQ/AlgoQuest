@@ -282,7 +282,7 @@ uint64_t functional_tests(const struct opt& o)
         }
         else
         {
-          display_cb * cb = new stream_cb(std::cout); 
+          // display_cb * cb = new stream_cb(std::cout); 
           std::string answerPath(o.dbPath);
           answerPath += "/data_orga/tmp/" + std::string(o.queryIdent) + "/dpy/";
           // rc = aq::display(cb, answerPath, o, selectedColumns); // TODO

@@ -16,7 +16,7 @@
 namespace aq
 {
 
-  aq::verb::VerbNode::Ptr VerbBuilder::build(unsigned int type) const
+  aq::verb::VerbNode::Ptr VerbBuilder::build(aq::tnode::tag_t type) const
   {
     aq::verb::VerbNode::Ptr v;
     switch (type)
@@ -107,7 +107,7 @@ namespace aq
     case K_DATE: v = new aq::verb::DateVerb; break;
     }
 
-    assert(!v.get() || (v->getVerbType() == type));
+    assert(!v.get() || (v->getVerbType() == static_cast<int>(type)));
 
     return v;
   }

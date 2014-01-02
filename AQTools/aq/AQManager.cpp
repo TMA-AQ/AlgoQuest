@@ -177,7 +177,7 @@ int process_aq_matrix(const std::string& query, const std::string& aqMatrixFileN
 
 	}
 	
-  boost::array<uint32_t, 6> categories_order = { K_FROM, K_WHERE, K_SELECT, K_GROUP, K_HAVING, K_ORDER };
+  boost::array<aq::tnode::tag_t, 6> categories_order = { { K_FROM, K_WHERE, K_SELECT, K_GROUP, K_HAVING, K_ORDER } };
 	aq::verb::VerbNode::Ptr spTree = aq::verb::VerbNode::BuildVerbsTree(pNode, categories_order, baseDesc, &settings );
 	spTree->changeQuery();
 	aq::util::cleanQuery( pNode );
@@ -230,14 +230,14 @@ int transform_query(const std::string& query, aq::Settings& settings, aq::Base& 
 
 	}
   
-  boost::array<uint32_t, 6> categories_order = { K_FROM, K_WHERE, K_SELECT, K_GROUP, K_HAVING, K_ORDER };
+  boost::array<uint32_t, 6> categories_order = { { K_FROM, K_WHERE, K_SELECT, K_GROUP, K_HAVING, K_ORDER } };
 	aq::verb::VerbNode::Ptr spTree = aq::verb::VerbNode::BuildVerbsTree(pNode, categories_order, baseDesc, &settings );
 	spTree->changeQuery();
 	aq::util::cleanQuery( pNode );
 	
 	std::string str;
 	aq::syntax_tree_to_aql_form(pNode, str);
-  aq::ParseJeq( str );
+  aq::parser::ParseJeq( str );
 
 	return 0;
 }

@@ -32,7 +32,8 @@ public:
 	//functions that need implementation
 
 	//return verb identifier (K_XXX from sql92_grm_tab.h)
-	virtual int getVerbType() const = 0;
+	// virtual aq::tnode::tag_t getVerbType() const = 0; // FIXME
+  virtual int getVerbType() const = 0;
 
 	/// preprocess query to gather information about it before it is changed
 	/// or change the aq::tnode subtree before the verb tree is built based on it

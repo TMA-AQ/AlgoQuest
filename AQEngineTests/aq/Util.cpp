@@ -427,23 +427,23 @@ int check_answer_data(std::ostream& os,
     {
       column_mapper_t cm;
       std::string columnName = table->getName() + "." + (*itCol)->getName();
-      switch((*itCol)->Type)
+      switch((*itCol)->getType())
       {
       case aq::ColumnType::COL_TYPE_INT:
-        register_item<int32_t>(vdgPath, columnName, t.table_id, (*itCol)->ID, 1, o.packetSize, groupedColumns, orderedColumns, isGrouped, isOrdered, cm);
+        register_item<int32_t>(vdgPath, columnName, t.table_id, (*itCol)->getID(), 1, o.packetSize, groupedColumns, orderedColumns, isGrouped, isOrdered, cm);
         break;
       case aq::ColumnType::COL_TYPE_BIG_INT:
       case aq::ColumnType::COL_TYPE_DATE:
-        register_item<int64_t>(vdgPath, columnName, t.table_id, (*itCol)->ID, 1, o.packetSize, groupedColumns, orderedColumns, isGrouped, isOrdered, cm);
+        register_item<int64_t>(vdgPath, columnName, t.table_id, (*itCol)->getID(), 1, o.packetSize, groupedColumns, orderedColumns, isGrouped, isOrdered, cm);
         break;
       case aq::ColumnType::COL_TYPE_DOUBLE:
-        register_item<double>(vdgPath, columnName, t.table_id, (*itCol)->ID, 1, o.packetSize, groupedColumns, orderedColumns, isGrouped, isOrdered, cm);
+        register_item<double>(vdgPath, columnName, t.table_id, (*itCol)->getID(), 1, o.packetSize, groupedColumns, orderedColumns, isGrouped, isOrdered, cm);
         break;
       case aq::ColumnType::COL_TYPE_VARCHAR:
-        register_item<char>(vdgPath, columnName, t.table_id, (*itCol)->ID, 1, o.packetSize, groupedColumns, orderedColumns, isGrouped, isOrdered, cm);
+        register_item<char>(vdgPath, columnName, t.table_id, (*itCol)->getID(), 1, o.packetSize, groupedColumns, orderedColumns, isGrouped, isOrdered, cm);
         break;
       }
-      tableColumnMappers[(*itCol)->ID] = std::make_pair((*itCol)->Type, cm);
+      tableColumnMappers[(*itCol)->getID()] = std::make_pair((*itCol)->getType(), cm);
       bool isSelecting = std::find(selectedColumns.begin(), selectedColumns.end(), std::string(table->getName() + "." + (*itCol)->getName())) != selectedColumns.end();
       isSelected.push_back(isSelecting);
 
@@ -686,35 +686,35 @@ int display(display_cb * cb,
       if (it != selectedColumns.end())
       {
         column_mapper_t cm;
-        switch(col->Type)
+        switch(col->getType())
         {
         case aq::ColumnType::COL_TYPE_INT:
           {
-            aq::ColumnMapper_Intf<int32_t>::Ptr m(new aq::ColumnMapper<int32_t, FileMapper>(settings.dataPath.c_str(), t.table_id, col->ID, 1/*(*itCol)->Size*/, o.packetSize));
+            aq::ColumnMapper_Intf<int32_t>::Ptr m(new aq::ColumnMapper<int32_t, FileMapper>(settings.dataPath.c_str(), t.table_id, col->getID(), 1/*(*itCol)->Size*/, o.packetSize));
             cm = m;
           }
           break;
         case aq::ColumnType::COL_TYPE_BIG_INT:
         case aq::ColumnType::COL_TYPE_DATE:
           {
-            aq::ColumnMapper_Intf<int64_t>::Ptr m(new aq::ColumnMapper<int64_t, FileMapper>(settings.dataPath.c_str(), t.table_id, col->ID, 1/*(*itCol)->Size*/, o.packetSize));
+            aq::ColumnMapper_Intf<int64_t>::Ptr m(new aq::ColumnMapper<int64_t, FileMapper>(settings.dataPath.c_str(), t.table_id, col->getID(), 1/*(*itCol)->Size*/, o.packetSize));
             cm = m;
           }
           break;
         case aq::ColumnType::COL_TYPE_DOUBLE:
           {
-            aq::ColumnMapper_Intf<double>::Ptr m(new aq::ColumnMapper<double, FileMapper>(settings.dataPath.c_str(), t.table_id, col->ID, 1/*(*itCol)->Size*/, o.packetSize));
+            aq::ColumnMapper_Intf<double>::Ptr m(new aq::ColumnMapper<double, FileMapper>(settings.dataPath.c_str(), t.table_id, col->getID(), 1/*(*itCol)->Size*/, o.packetSize));
             cm = m;
           }
           break;
         case aq::ColumnType::COL_TYPE_VARCHAR:
           {
-            aq::ColumnMapper_Intf<char>::Ptr m(new aq::ColumnMapper<char, FileMapper>(settings.dataPath.c_str(), t.table_id, col->ID, col->Size, o.packetSize));
+            aq::ColumnMapper_Intf<char>::Ptr m(new aq::ColumnMapper<char, FileMapper>(settings.dataPath.c_str(), t.table_id, col->getID(), col->getSize(), o.packetSize));
             cm = m;
           }
           break;
         }
-        display_order[std::distance(selectedColumns.begin(), it)] = boost::make_tuple(tindex, col->Type, cm);
+        display_order[std::distance(selectedColumns.begin(), it)] = boost::make_tuple(tindex, col->getType(), cm);
       }
     }
   }

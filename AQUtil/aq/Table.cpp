@@ -188,7 +188,6 @@ void Table::dumpXml( std::ostream& os )
 {
   if( this->Columns.size() == 0 )
     throw generic_error(generic_error::INVALID_TABLE, "");
-  size_t nrColumns = this->Columns.size();
   os << "<Table Name=\"" << this->getOriginalName() << "\" ID=\"" << this->ID << "\" NbRows=\"" << this->TotalCount << "\">" << std::endl;
   os << "<Columns>" << std::endl;
   for (auto& col : Columns)

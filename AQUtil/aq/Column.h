@@ -38,14 +38,23 @@ public:
 	void dumpRaw(std::ostream& os);
 	void dumpXml(std::ostream& os);
 
-	size_t	                     TableID;
+  size_t getTableID() const { return TableID; }
+  size_t getID() const { return ID; }
+  size_t getSize() const { return Size; }
+  aq::ColumnType getType() const { return Type; }
+
+  void setTableID(size_t _tableId) { TableID = _tableId; }
+  void setID(size_t _id) { ID = _id; }
+  void setSize(size_t _size) { Size = _size; }
+  void setType(aq::ColumnType _type) { Type = _type; } 
+
+private:
+	void setBinItemSize();
+
+  size_t	                     TableID;
 	size_t	                     ID;
 	size_t	                     Size;	///< maximum size of the text, not number of items
 	aq::ColumnType		           Type;
-	
-private:
-
-	void setBinItemSize();
 
 	std::string	Name;
 	std::string	OriginalName;

@@ -2,6 +2,7 @@
 #include "ExprTransform.h"
 #include "parser/sql92_grm_tab.hpp"
 #include "parser/ID2Str.h"
+#include "parser/JeqParser.h"
 #include <cassert>
 #include <algorithm>
 #include <aq/DateConversion.h>
@@ -12,11 +13,6 @@
 #include <boost/filesystem.hpp>
 #include <boost/array.hpp>
 #include <aq/FileMapper.h>
-
-//------------------------------------------------------------------------------
-const int nrJoinTypes    = 7;
-const int joinTypes[]    = { K_JEQ, K_JAUTO, K_JNEQ, K_JINF, K_JIEQ, K_JSUP, K_JSEQ };
-const int inverseTypes[] = { K_JEQ, K_JAUTO, K_JNEQ, K_JSUP, K_JSEQ, K_JINF, K_JIEQ };
 
 namespace aq {
 namespace util {
@@ -159,7 +155,7 @@ void addConditionsToWhere( aq::tnode* pCond, aq::tnode* pStart )
 }
 
 //------------------------------------------------------------------------------
-void addInnerOuterNodes( aq::tnode* pNode, int leftTag, int rightTag )
+void addInnerOuterNodes( aq::tnode* pNode, aq::tnode::tag_t leftTag, aq::tnode::tag_t rightTag )
 {
 	if( !pNode || !pNode->left )
 		return;
@@ -170,8 +166,8 @@ void addInnerOuterNodes( aq::tnode* pNode, int leftTag, int rightTag )
 	if( pNode->tag == K_IN_VALUES )
 		return;
 	bool join = false;
-	for( int idx = 0; idx < nrJoinTypes; ++idx )
-		if( pNode->tag == joinTypes[idx] )
+	for( unsigned int idx = 0; idx < aq::parser::nrJoinTypes; ++idx )
+		if( pNode->tag == aq::parser::joinTypes[idx] )
 			join = true;
 	if( join )
 	{
@@ -189,7 +185,7 @@ void addInnerOuterNodes( aq::tnode* pNode, int leftTag, int rightTag )
 }
 
 //------------------------------------------------------------------------------
-void addInnerOuterNodes( aq::tnode* pNode, int tag, const std::vector<std::string>& tables )
+void addInnerOuterNodes( aq::tnode* pNode, aq::tnode::tag_t tag, const std::vector<std::string>& tables )
 {
 	if( !pNode || !pNode->left )
 		return;
@@ -198,8 +194,8 @@ void addInnerOuterNodes( aq::tnode* pNode, int tag, const std::vector<std::strin
 	if( pNode->tag == K_IN_VALUES )
 		return;
 	bool join = false;
-	for( int idx = 0; (idx < nrJoinTypes) && !join; ++idx )
-		if( pNode->tag == joinTypes[idx] )
+	for( unsigned int idx = 0; (idx < aq::parser::nrJoinTypes) && !join; ++idx )
+		if( pNode->tag == aq::parser::joinTypes[idx] )
 			join = true;
 	if( join )
 	{
@@ -496,11 +492,15 @@ std::string checkAndName( std::string colName, std::vector<aq::tnode*> tables, B
           list.push_back( column->getData().val_str );
           std::vector<Column::Ptr>& columns = BaseDesc.getTable( column->getData().val_str )->Columns;
           for( size_t idx2 = 0; idx2 < columns.size(); ++idx2 )
+          {
             if ( columns[idx2]->getName().c_str() == colName )
+            {
               if ( fake == true )
                 throw aq::parsException( "Ambigue", list, colName );
               else
                 fake = assignFake( name, tables[idx], column );
+            }
+          }
         }
         catch ( const std::exception & )
         {
@@ -694,10 +694,12 @@ aq::tnode* findColumn(  std::string columnName, std::vector<aq::tnode*>& interio
 			assert( interiorColumns[idx]->right );
 			assert( interiorColumns[idx]->right->tag == K_IDENT );
 			if( columnName == column2 )
+      {
 				if( keepAlias )
 					return interiorColumns[idx];
 				else
 					return interiorColumns[idx]->left;
+      }
 			break;
 		default:
 			throw generic_error(generic_error::INVALID_QUERY, "");
@@ -931,7 +933,7 @@ void eliminateAliases( aq::tnode* pSelect )
 	std::vector<aq::tnode*> columns;
 	pSelect->left->treeListToNodeArray(columns, K_COMMA);
 	std::vector<aq::tnode*> newColumns;
-	for( int idx = 0; idx < columns.size(); ++idx )
+	for( unsigned int idx = 0; idx < columns.size(); ++idx )
 		if( columns[idx]->tag == K_PERIOD )
 			newColumns.push_back( columns[idx]->clone_subtree() );
 		else if( columns[idx]->tag == K_AS )
@@ -981,7 +983,7 @@ void getTablesList( aq::tnode* pNode, std::list<std::string>& tables )
 }
 
 //------------------------------------------------------------------------------
-aq::tnode* getLastTag( aq::tnode*& pNode, aq::tnode* pLastTag, aq::tnode* pCheckNode, int tag )
+aq::tnode* getLastTag( aq::tnode*& pNode, aq::tnode* pLastTag, aq::tnode* pCheckNode, aq::tnode::tag_t tag )
 {
 	if( !pNode )
 		return nullptr;
@@ -1121,8 +1123,8 @@ void getColumnTypes( aq::tnode* pNode, std::vector<Column::Ptr>& columnTypes, Ba
 //------------------------------------------------------------------------------
 aq::tnode* GetTree( Table& table )
 {
-	aq::tnode	*pNode = nullptr;
-	aq::tnode	*pStart = nullptr;
+	// aq::tnode	*pNode = nullptr;
+  aq::tnode	*pStart = nullptr;
 
 //	if( table.Columns.size() < 1 )
 //		return nullptr;
@@ -1370,7 +1372,7 @@ void transformExpression(const aq::Base& baseDesc, const aq::Settings& settings,
 //------------------------------------------------------------------------------
 void getAllColumns(aq::tnode* pNode, std::vector<aq::tnode*>& columns)
 {
-	if( !pNode || pNode->inf == 1 && pNode->tag != K_COMMA || pNode->tag == K_JNO )
+	if( !pNode || ((pNode->inf == 1) && (pNode->tag != K_COMMA)) || (pNode->tag == K_JNO) )
 		return;
 	if( pNode->tag == K_PERIOD )
 	{
@@ -1557,14 +1559,13 @@ void processNot( aq::tnode*& pNode, bool applyNot )
 	case K_IS:
 		if( !pNode->right )
 			throw generic_error(generic_error::NOT_IMPLEMENTED, "");
-		if( pNode->right->tag == K_NOT && 
-			pNode->right->left && pNode->right->left->tag == K_nullptr )
+		if( (pNode->right->tag == K_NOT) && pNode->right->left && (pNode->right->left->tag == K_NULL) )
 		{
 			aq::tnode* auxNode = pNode->right;
 			pNode->right = pNode->right->left;
 			delete auxNode ;
 		}
-		else if( pNode->right->tag == K_nullptr )
+		else if( pNode->right->tag == K_NULL )
 		{
 			aq::tnode* auxNode = new aq::tnode( K_NOT );
 			auxNode->left = pNode->right;
@@ -1700,7 +1701,6 @@ void tnodeToSelectStatement(aq::tnode& tree, aq::core::SelectStatement& ss)
       }
     }
     
-    ss.joinConditions;
   }
 
   if (whereNode != nullptr)

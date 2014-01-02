@@ -20,7 +20,7 @@ namespace aq
       this->_lib = LoadLibrary(path.c_str());
       if (this->_lib == nullptr)
       {
-        DWORD rc = GetLastError();
+        // DWORD rc = GetLastError();
         wprintf(L"Format message failed with %d\n", GetLastError());
       }
       this->assignFunctor(node);

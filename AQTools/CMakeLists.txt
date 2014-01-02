@@ -23,7 +23,7 @@ link_directories(
   $ENV{AQTESTS_LIBRARY_DIR}
 )
 
-set(CMAKE_CXX_FLAGS "-O0 -ggdb -std=c++0x -Wall")
+set(CMAKE_CXX_FLAGS "-O0 -ggdb -std=c++0x -Wall -Werror")
 
 IF(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
 
@@ -31,7 +31,7 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
     SET(OperatingSystem "FreeBSD")
 
     set(CMAKE_CXX_COMPILER "g++46")
-    set(CMAKE_CXX_FLAGS "-O0 -ggdb -std=c++0x -Wall")
+    set(CMAKE_CXX_FLAGS "-O0 -ggdb -std=c++0x -Wall -Werror")
 
 ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
 

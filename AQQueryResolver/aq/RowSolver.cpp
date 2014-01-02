@@ -64,7 +64,7 @@ RowSolver::RowSolver(boost::shared_ptr<aq::AQMatrix> _aqMatrix, const std::vecto
 void RowSolver::matched_index(column_infos_t& infos)
 {
   auto joinPath = aqMatrix->getJoinPath();
-  Table::Ptr table = BaseDesc.getTable(infos.column->TableID);
+  Table::Ptr table = BaseDesc.getTable(infos.column->getTableID());
   for (size_t j = 0; j < aqMatrix->getNbColumn(); ++j) 
   {
     if (table->getName() == joinPath[j])
@@ -73,7 +73,7 @@ void RowSolver::matched_index(column_infos_t& infos)
       return;
     }
   }
-  throw aq::generic_error(aq::generic_error::AQ_ENGINE, "cannot find table [%u] in join Path", infos.column->TableID);
+  throw aq::generic_error(aq::generic_error::AQ_ENGINE, "cannot find table [%u] in join Path", infos.column->getTableID());
 }
 
 void RowSolver::prepareColumnAndColumnMapper(const std::vector<Column::Ptr>& columnTypes, 
@@ -88,7 +88,7 @@ void RowSolver::prepareColumnAndColumnMapper(const std::vector<Column::Ptr>& col
     
     // COLUMN
     Column::Ptr c(new Column(*columnTypes[i]));
-    c->TableID = BaseDesc.getTable(c->getTableName())->ID;
+    c->setTableID(BaseDesc.getTable(c->getTableName())->ID);
     for (auto it = columnGroup.begin(); it != columnGroup.end(); ++it)
     {
       const aq::tnode * node = *it;
@@ -100,7 +100,7 @@ void RowSolver::prepareColumnAndColumnMapper(const std::vector<Column::Ptr>& col
     }
     infos.column = c;
 
-    columnTypes[i]->TableID = BaseDesc.getTable(columnTypes[i]->getTableName())->ID;
+    columnTypes[i]->setTableID(BaseDesc.getTable(columnTypes[i]->getTableName())->ID);
 
     // MAPPER
     auto& cm = infos.mapper;
@@ -114,13 +114,13 @@ void RowSolver::prepareColumnAndColumnMapper(const std::vector<Column::Ptr>& col
     {
       const aq::Column::Ptr& c = columnTypes[i];
 
-      Table::Ptr table = BaseDesc.getTable(c->TableID);
+      Table::Ptr table = BaseDesc.getTable(c->getTableID());
       while (table->isTemporary()) 
       {
         table = BaseDesc.getTable(table->getReferenceTable());
       }
 
-      cm = new_column_mapper(c->Type, settings.dataPath.c_str(), table->ID, c->ID, c->Size, settings.packSize);
+      cm = new_column_mapper(c->getType(), settings.dataPath.c_str(), table->ID, c->getID(), c->getSize(), settings.packSize);
     }
     infos.mapper = cm;
     
@@ -152,7 +152,6 @@ void RowSolver::addGroupColumn(const std::vector<Column::Ptr>& columnTypes,
       // add to columns
       Table& table = *BaseDesc.getTable( node->left->getData().val_str );
 
-      bool found = false;
       Column auxCol;
       auxCol.setName(node->right->getData().val_str);
       for( size_t idx = 0; idx < table.Columns.size(); ++idx )
@@ -167,7 +166,7 @@ void RowSolver::addGroupColumn(const std::vector<Column::Ptr>& columnTypes,
           infos.column = new Column(*table.Columns[idx]);
           auto& column = infos.column;
           column->setTableName(table.getName());
-          column->TableID = BaseDesc.getTable(column->getTableName())->ID;
+          column->setTableID(BaseDesc.getTable(column->getTableName())->ID);
           column->GroupBy = true;
 
           // MAPPER
@@ -180,7 +179,7 @@ void RowSolver::addGroupColumn(const std::vector<Column::Ptr>& columnTypes,
           }
           else
           {
-            cm = new_column_mapper(column->Type, settings.dataPath.c_str(), column->TableID, column->ID, column->Size, settings.packSize);
+            cm = new_column_mapper(column->getType(), settings.dataPath.c_str(), column->getTableID(), column->getID(), column->getSize(), settings.packSize);
           }
 
           // TABLE_INDEX
@@ -190,7 +189,6 @@ void RowSolver::addGroupColumn(const std::vector<Column::Ptr>& columnTypes,
           set_grouped(columnGroup, infos);
 
 
-          found = true;
           break;
         }
       }
@@ -237,7 +235,7 @@ void RowSolver::solve_thread(boost::shared_ptr<aq::RowProcess_Intf> rowProcess,
 
   for (size_t c = 0; c < columns.size(); ++c)
   {
-    switch (columns[c].column->Type)
+    switch (columns[c].column->getType())
     {
     case aq::ColumnType::COL_TYPE_INT:
       row.initialRow[c].item = aq::ColumnItem<int32_t>();
@@ -280,7 +278,7 @@ void RowSolver::solve_thread(boost::shared_ptr<aq::RowProcess_Intf> rowProcess,
       if (index > 0)
       {
         index -= 1;
-        switch (columns[c].column->Type)
+        switch (columns[c].column->getType())
         {
         case aq::ColumnType::COL_TYPE_INT:
           set_value<int32_t>(columns[c], item_tmp, index);
@@ -308,8 +306,8 @@ void RowSolver::solve_thread(boost::shared_ptr<aq::RowProcess_Intf> rowProcess,
       }
       if (item_tmp.columnName == "")
       {
-        item_tmp.type = columns[c].column->Type;
-        item_tmp.size = static_cast<unsigned int>(columns[c].column->Size);
+        item_tmp.type = columns[c].column->getType();
+        item_tmp.size = static_cast<unsigned int>(columns[c].column->getSize());
         item_tmp.tableName = columns[c].column->getTableName();
         item_tmp.columnName = columns[c].column->getName();
         item_tmp.grouped = columns[c].column->GroupBy;

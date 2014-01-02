@@ -127,15 +127,8 @@ Table::Ptr solveOptimalMinMax(aq::verb::VerbNode::Ptr spTree,
 	size_t colIdx = table->getColumnIdx( columnVerb->getColumnOnlyName() );
 	Column::Ptr column = table->Columns[colIdx];
 
-  switch (column->Type)
-  {
-  case aq::ColumnType::COL_TYPE_INT:
-    
-    break;
-  }
-
 	// ColumnItem::Ptr minMax = nullptr;
-	bool min = verb1->getVerbType() == K_MIN;
+	// bool min = verb1->getVerbType() == K_MIN;
 	for( int partIdx = 0; ; ++partIdx )
 	{
 		//ColumnItem::Ptr item = getMinMaxFromThesaurus( table->ID, colIdx, partIdx, min, BaseDesc, Settings );

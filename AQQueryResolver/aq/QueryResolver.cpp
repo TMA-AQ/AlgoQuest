@@ -56,16 +56,16 @@ namespace aq
 
 //------------------------------------------------------------------------------
 QueryResolver::QueryResolver(aq::tnode * _sqlStatement, Settings * _pSettings, AQEngine_Intf * _aq_engine, Base& _baseDesc, unsigned int& _id, unsigned int _level)
-	:	sqlStatement(_sqlStatement),
+	:	pSettings(_pSettings), 
+		BaseDesc(_baseDesc), 
+    aq_engine(_aq_engine), 
+		sqlStatement(_sqlStatement),
     originalSqlStatement(nullptr),
     outerSelect(nullptr),
-		pSettings(_pSettings), 
-		aq_engine(_aq_engine), 
-		BaseDesc(_baseDesc), 
-    nestedId(0),
-    level(_level),
     id_generator(_id),
     id(_id),
+    nestedId(0),
+    level(_level),
     nested(id > 1),
     inWhereClause(false),
     hasGroupBy(false),
@@ -126,7 +126,6 @@ void QueryResolver::preProcess()
   std::cout << aq::syntax_tree_to_sql_form(this->sqlStatement, sql_query) << std::endl;
 #endif
 
-  bool hasWhere = this->sqlStatement->find_main_node(K_WHERE) != nullptr;
 	this->hasGroupBy = this->sqlStatement->find_main_node( K_GROUP) != nullptr;
 	this->hasOrderBy = this->sqlStatement->find_main_node(K_ORDER) != nullptr;
 
@@ -267,7 +266,7 @@ aq::verb::VerbNode::Ptr QueryResolver::postProcess()
 	//
 	// Query Pre Processing (TODO : optimize tree by detecting identical subtrees)
 	timer.start();
-  boost::array<uint32_t, 6> categories_order =  { K_FROM, K_WHERE, K_SELECT, K_GROUP, K_HAVING, K_ORDER };
+  boost::array<uint32_t, 6> categories_order =  { { K_FROM, K_WHERE, K_SELECT, K_GROUP, K_HAVING, K_ORDER } };
 	spTree = aq::verb::VerbNode::BuildVerbsTree( this->sqlStatement, categories_order, this->BaseDesc, this->pSettings );
   
 #if defined(AQ_TRACE)
@@ -341,7 +340,7 @@ void QueryResolver::resolve(aq::verb::VerbNode::Ptr spTree)
     query = query.substr(0, pos);
   }
 
-  auto joinPath = aq::ParseJeq(query); // TODO : manage active/neutral/filter option
+  auto joinPath = aq::parser::ParseJeq(query); // TODO : manage active/neutral/filter option
 
   if (!this->groupBy.empty())
   {
@@ -467,7 +466,7 @@ void QueryResolver::solveNested()
   }
 
   // then solve where nested  
-  aq::tnode * where = this->sqlStatement->find_main_node(K_WHERE);
+  // aq::tnode * where = this->sqlStatement->find_main_node(K_WHERE);
   // todo
 }
 
@@ -838,8 +837,8 @@ void QueryResolver::changeTemporaryTableName(aq::tnode * pNode)
             if (col->getName() == column->getData().val_str)
             {
               char * buf = static_cast<char*>(malloc(128 * sizeof(char)));
-              std::string type_str = columnTypeToStr(col->Type);
-              sprintf(buf, "C%.4u%s%.4u", col->ID, type_str.c_str(), col->Size);
+              std::string type_str = columnTypeToStr(col->getType());
+              sprintf(buf, "C%.4lu%s%.4lu", col->getID(), type_str.c_str(), col->getSize());
               aq::Logger::getInstance().log(AQ_DEBUG, "change column name '%s' by '%s'\n", column->getData().val_str, buf);
               column->set_string_data(buf);
               free(buf);
@@ -943,7 +942,7 @@ void QueryResolver::changeTemporaryTableName(aq::tnode * pNode)
         else
         {
           char * buf = static_cast<char*>(malloc(128 * sizeof(char)));
-          sprintf(buf, "TMP%.4uSIZE%.10u", nestedTable.second->getResult()->ID, nestedTable.second->getResult()->TotalCount);
+          sprintf(buf, "TMP%.4luSIZE%.10lu", nestedTable.second->getResult()->ID, nestedTable.second->getResult()->TotalCount);
           aq::Logger::getInstance().log(AQ_DEBUG, "change table name '%s' by '%s'\n", pNode->getData().val_str, buf);
           pNode->set_string_data(buf);
           free(buf);
@@ -971,7 +970,7 @@ void QueryResolver::changeTemporaryTableName(aq::tnode * pNode)
       }
 
       char * name = static_cast<char*>(malloc(128 * sizeof(char)));
-      sprintf(name, "TMP%.4uSIZE%.10u", nestedTable.second->result->ID, nestedTable.second->result->TotalCount);
+      sprintf(name, "TMP%.4luSIZE%.10lu", nestedTable.second->result->ID, nestedTable.second->result->TotalCount);
       nestedTable.second->result->setName(name);
       free(name);
 
@@ -979,8 +978,8 @@ void QueryResolver::changeTemporaryTableName(aq::tnode * pNode)
       for (std::vector<Column::Ptr>::iterator itCol = tmp->Columns.begin(); itCol != tmp->Columns.end(); ++itCol)
       {
         char * buf = static_cast<char*>(malloc(128 * sizeof(char)));
-        std::string type_str = columnTypeToStr((*itCol)->Type);
-        sprintf(buf, "C%.4u%s%.4u", (*itCol)->ID, type_str.c_str(), (*itCol)->Size);
+        std::string type_str = columnTypeToStr((*itCol)->getType());
+        sprintf(buf, "C%.4lu%s%.4lu", (*itCol)->getID(), type_str.c_str(), (*itCol)->getSize());
         (*itCol)->setName(buf);
         free(buf);
       }

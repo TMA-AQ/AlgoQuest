@@ -77,15 +77,15 @@ void AlgoQuestDatabase::insertValues(const DatabaseGenerator::handle_t::tables_t
     throw;
   }
 
-  sprintf(column_filename, "%s/B%.3uT%.4uC%.4uP%.12u", db.getTemporaryColumnLoadPath().c_str(), base_id, table_id, column_id, packet);
+  sprintf(column_filename, "%s/B%.3luT%.4luC%.4luP%.12lu", db.getTemporaryColumnLoadPath().c_str(), base_id, table_id, column_id, packet);
   std::ofstream c1file(column_filename, std::ios::binary);
-  for (int32_t v = 1; v <= values.second.size(); v++)
+  for (int32_t v = 1; v <= static_cast<int32_t>(values.second.size()); v++)
   {
     c1file.write(reinterpret_cast<const char*>(&v), sizeof(int32_t));
   }
   c1file.close();
   column_id += 1;
-  sprintf(column_filename, "%s/B%.3uT%.4uC%.4uP%.12u", db.getTemporaryColumnLoadPath().c_str(), base_id, table_id, column_id, packet);
+  sprintf(column_filename, "%s/B%.3luT%.4luC%.4luP%.12lu", db.getTemporaryColumnLoadPath().c_str(), base_id, table_id, column_id, packet);
   std::ofstream c2file(column_filename, std::ios::binary);
   for (const auto& value : values.second)
   {

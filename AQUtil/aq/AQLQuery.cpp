@@ -74,6 +74,7 @@ std::ostream& operator<<(std::ostream& os, const aq::core::JoinCondition::op_t& 
   {
   case aq::core::JoinCondition::op_t::EQ:
   case aq::core::JoinCondition::op_t::AUTO: os << "="; break;
+  case aq::core::JoinCondition::op_t::NEQ: os << "<>"; break;
   case aq::core::JoinCondition::op_t::INF: os << "<"; break;
   case aq::core::JoinCondition::op_t::IEQ: os << "<="; break;
   case aq::core::JoinCondition::op_t::SUP: os << ">"; break;

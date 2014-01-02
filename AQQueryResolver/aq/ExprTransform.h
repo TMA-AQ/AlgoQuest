@@ -53,6 +53,7 @@ namespace
   aq::tnode * itemToNode(const aq::ColumnItem<T>&, const aq::ColumnType)
   {
     BOOST_STATIC_ASSERT_MSG(sizeof(T) == 0, "missing specialisation");
+    return NULL;
   }
   
   template <> inline
@@ -170,9 +171,9 @@ namespace
       {
         // assert(col->TableID == table->ID);
         tId = table->ID;
-        cId = col->ID;
-        cSize = col->Size;
-        cType = col->Type;
+        cId = col->getID();
+        cSize = col->getSize();
+        cType = col->getType();
         column = col;
         break;
       }
@@ -210,8 +211,8 @@ namespace
     } 
      
     return (((n.tag == K_EQ) || (n.tag == K_NEQ) || (n.tag == K_LT) || (n.tag == K_GT) || (n.tag == K_LEQ) || (n.tag == K_GEQ)) && 
-      ((aq::util::is_column_reference(n.left)) && ((n.right) && ((n.right->tag == K_STRING) || (n.right->tag == K_INTEGER) || (n.right->tag == K_REAL))) ||
-       (aq::util::is_column_reference(n.right)) && ((n.left) && ((n.left->tag == K_STRING) || (n.left->tag == K_INTEGER) || (n.left->tag == K_REAL)))));
+            (((aq::util::is_column_reference(n.left)) && (n.right) && ((n.right->tag == K_STRING) || (n.right->tag == K_INTEGER) || (n.right->tag == K_REAL))) ||
+             ((aq::util::is_column_reference(n.right)) && ((n.left) && ((n.left->tag == K_STRING) || (n.left->tag == K_INTEGER) || (n.left->tag == K_REAL))))));
   }
 
 }
@@ -379,7 +380,6 @@ const aq::tnode * check_cmp_op<T>::getColumnRef() const
 template <typename T>
 bool check_cmp_op<T>::check(const aq::ColumnItem<T>& item, const aq::ColumnType& cType) const
 {   
-  bool rc = false;
   switch (op_tag)
   {
   case K_EQ:

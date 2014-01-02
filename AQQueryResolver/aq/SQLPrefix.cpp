@@ -159,7 +159,7 @@ std::string& syntax_tree_to_sql_form(aq::tnode * pNode, std::string& query, unsi
 	{
     if ( pNode->tag == K_SELECT && pNode->parent )
       query += " (";
-    if ( pNode->tag == K_SELECT && pNode->parent || pNode->tag != K_SELECT )
+    if ( ( pNode->tag == K_SELECT && pNode->parent ) || pNode->tag != K_SELECT ) // FIXME
 		  query += " ";
     query += std::string(id_to_string(pNode->tag));
 		aq::syntax_tree_to_sql_form(pNode->left, query, ++level);

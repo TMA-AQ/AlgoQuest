@@ -1,6 +1,7 @@
 #pragma once
 
 #include "parser/SQLParser.h"
+#include "parser/JeqParser.h"
 #include "parser/sql92_grm_tab.hpp"
 #include "Settings.h"
 
@@ -18,17 +19,13 @@
 
 #include <boost/algorithm/string.hpp>
 
-extern const int nrJoinTypes;
-extern const int joinTypes[];
-extern const int inverseTypes[];
-
 namespace aq {
 namespace util {
  
 void addAlias( aq::tnode* pNode );
 void addConditionsToWhere( aq::tnode* pCond, aq::tnode* pStart );
-void addInnerOuterNodes( aq::tnode* pNode, int leftTag, int rightTag );
-void addInnerOuterNodes( aq::tnode* pNode, int tag, const std::vector<std::string>& tables );
+void addInnerOuterNodes( aq::tnode* pNode, aq::tnode::tag_t leftTag, aq::tnode::tag_t rightTag );
+void addInnerOuterNodes( aq::tnode* pNode, aq::tnode::tag_t tag, const std::vector<std::string>& tables );
 void mark_as_deleted( aq::tnode* pNode );
 void solveSelectStar(aq::tnode* pNode, 
                      Base& BaseDesc,
@@ -64,7 +61,7 @@ void getColumnsList( aq::tnode* pNode, std::vector<aq::tnode*>& columns );
 void getTablesList( aq::tnode* pNode, std::list<std::string>& tables );
 
 /// search a subtree for a node and return the last node that had a certain tag
-aq::tnode* getLastTag( aq::tnode*& pNode, aq::tnode* pLastTag, aq::tnode* pCheckNode, int tag );
+aq::tnode* getLastTag( aq::tnode*& pNode, aq::tnode* pLastTag, aq::tnode* pCheckNode, aq::tnode::tag_t tag );
 
 void generate_parent(aq::tnode* pNode, aq::tnode* parent = nullptr);
 

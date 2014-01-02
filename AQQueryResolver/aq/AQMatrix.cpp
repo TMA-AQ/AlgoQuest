@@ -341,7 +341,7 @@ void AQMatrix::writeTemporaryTable()
       auto it = fds[c].find(packet);
       if (it == fds[c].end())
       {
-        sprintf(filename, "%s/B001REG%.4uTMP%.4uP%.12u.TMP", this->settings.tmpPath.c_str(), this->matrix[c].table_id, this->uid, packet);
+        sprintf(filename, "%s/B001REG%.4luTMP%.4luP%.12lu.TMP", this->settings.tmpPath.c_str(), this->matrix[c].table_id, this->uid, packet);
         fd = fopen(filename, "wb");
         if (fd == nullptr)
         {
@@ -379,11 +379,11 @@ void AQMatrix::writeTemporaryTable()
     uint64_t n = table->TotalCount / this->settings.packSize;
     for (uint64_t i = 0; i <= n; ++i)
     {
-      sprintf(filename, "%s/B001REG%.4uTMP%.4uP%.12u.TMP", this->settings.tmpPath.c_str(), (*it).table_id, this->uid, i);
+      sprintf(filename, "%s/B001REG%.4luTMP%.4luP%.12lu.TMP", this->settings.tmpPath.c_str(), (*it).table_id, this->uid, i);
       FILE * fd = fopen(filename, "ab");
       fclose(fd);
     }
-    sprintf(tableName, "B001REG%.4uTMP%.4uP%.12u", (*it).table_id, this->uid, n + 1);
+    sprintf(tableName, "B001REG%.4luTMP%.4luP%.12lu", (*it).table_id, this->uid, n + 1);
     (*it).tableName = tableName;
     (*it).baseTableName = table->getName();
   }

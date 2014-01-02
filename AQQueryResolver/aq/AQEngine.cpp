@@ -145,13 +145,13 @@ namespace aq
         try
         {
           char newFile[_MAX_PATH];
-          sprintf(newFile, "%s/B001REG%.4uTMP%.4uP%.12u.TMP", this->settings.tmpPath.c_str(), reg, id, packet);
+          sprintf(newFile, "%s/B001REG%.4luTMP%.4uP%.12lu.TMP", this->settings.tmpPath.c_str(), reg, id, packet);
           ::remove(newFile);
           ::rename(oldFile.c_str(), newFile);
 
           Table::Ptr table = this->baseDesc.getTable(reg);
           packet = table->TotalCount / this->settings.packSize;
-          sprintf(newFile, "B001REG%.4uTMP%.4uP%.12u", reg, id, packet + 1);
+          sprintf(newFile, "B001REG%.4luTMP%.4uP%.12lu", reg, id, packet + 1);
 
           for (auto it = this->baseDesc.getTables().rbegin(); it != this->baseDesc.getTables().rend(); ++it)
           {

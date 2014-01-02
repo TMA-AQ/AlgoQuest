@@ -195,7 +195,7 @@ void DatabaseLoader::load(const size_t table_id)
 {
 	for (auto& table : my_base.table)
 	{
-    if (table.id != table_id)
+    if (table.id != static_cast<int>(table_id))
       continue;
     
     std::string filename = table.name;
@@ -236,7 +236,7 @@ void DatabaseLoader::loadTable(const aq::base_t::table_t& table, const std::stri
   }
 
   // import records
-  int write_n_enreg = 0;
+  size_t write_n_enreg = 0;
   while (fgets(my_record, this->packet_size, fd_table)) // read record
   {
     if (feof(fd_table))  

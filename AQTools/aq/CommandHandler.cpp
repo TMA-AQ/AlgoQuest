@@ -72,7 +72,7 @@ int CommandHandler::process(const std::string& cmd)
       }
       else if (words.size() >= 3 && boost::iequals(words[1], "VAR"))
       {
-        for (auto i = 2; i < words.size(); i++)
+        for (size_t i = 2; i < words.size(); i++)
         {
         }
       }

@@ -45,7 +45,6 @@ namespace
 
     void operator()()
       {
-        boost::uint64_t value = 0;
         for (typename std::vector<T>::const_iterator it = m_b; it != m_e; ++it)
         {
           m_cb(*it, m_threadId);

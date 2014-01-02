@@ -76,10 +76,6 @@ Column::Column( const Column& source )
 	ID(source.ID),
 	Size(source.Size),
 	Type(source.Type),
-	Invisible(false),
-	GroupBy(false),
-	OrderBy(false),
-  Temporary(source.Temporary),
 	Name(source.Name),
 	OriginalName(source.OriginalName),
 	DisplayName(source.DisplayName),
@@ -88,7 +84,11 @@ Column::Column( const Column& source )
 	prmFileItemSize(source.prmFileItemSize),
 	currentNumPack(source.currentNumPack),
 	packOffset(source.packOffset),
-	nBinItemSize(source.nBinItemSize)
+	nBinItemSize(source.nBinItemSize),
+	Invisible(false),
+	GroupBy(false),
+	OrderBy(false),
+  Temporary(source.Temporary)
 {
 	this->setBinItemSize();
 }

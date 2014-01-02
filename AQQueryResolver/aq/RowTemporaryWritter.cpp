@@ -7,8 +7,8 @@ namespace aq
   
   RowTemporaryWritter::RowTemporaryWritter(unsigned int _tableId, const char * _path, unsigned int _packetSize)
     : 
-    tableId(_tableId),
     path(_path),
+    tableId(_tableId),
     packetSize(_packetSize),
     totalCount(0)
   {
@@ -16,8 +16,8 @@ namespace aq
   
   RowTemporaryWritter::RowTemporaryWritter(const RowTemporaryWritter& o)
     : 
-    tableId(o.tableId),
     path(o.path),
+    tableId(o.tableId),
     packetSize(o.packetSize),
     totalCount(o.totalCount)
   {
@@ -86,13 +86,12 @@ namespace aq
       this->totalCount += 1;
 
       uint16_t c = 0;
-      uint64_t count = row.count;
       for (Row::row_t::const_reverse_iterator it = row.computedRow.rbegin(); it != row.computedRow.rend(); ++it)
       {
         if (!(*it).displayed)
           continue;
 
-        switch (this->columnsWritter[c]->column->Type)
+        switch (this->columnsWritter[c]->column->getType())
         {
         case ColumnType::COL_TYPE_BIG_INT:
         case ColumnType::COL_TYPE_DATE:
@@ -120,7 +119,7 @@ namespace aq
             //memset(value, 0, this->columnsWritter[c]->column->Size + 1);
             //strcpy(value, (*it).item->strval.c_str());
             const char * value = boost::get<aq::ColumnItem<char*> >((*it).item).getValue();
-            fwrite(value, sizeof(char) * this->columnsWritter[c]->column->Size, 1, this->columnsWritter[c]->file);
+            fwrite(value, sizeof(char) * this->columnsWritter[c]->column->getSize(), 1, this->columnsWritter[c]->file);
           }
           break;
         }

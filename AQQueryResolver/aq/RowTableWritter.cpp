@@ -40,7 +40,7 @@ namespace aq
       for (auto it = rows.computedRow.begin(); it != rows.computedRow.end(); ++it)
       {
         Column::Ptr column(new Column);
-        column->Type = (*it).type;
+        column->setType((*it).type);
         // TODO
         this->table->Columns.push_back(column);
       }

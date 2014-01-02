@@ -112,10 +112,8 @@ size_t DatabaseGenerator::getNbDB() const
   {
     nb = 1;
     size_t b = 2;
-    size_t n = 0;
     for (size_t i = 1; i < this->tables_bound.size(); i++)
     {
-      n = gen_mode == gen_mode_t::ALL ? (2 * b) + 1 : b + 1;
       nb *= (b) * (b + 1) / 2;
       b += 2;
     }
