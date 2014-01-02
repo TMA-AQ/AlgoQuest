@@ -6,6 +6,7 @@
 #include <aq/Timer.h>
 #include <aq/Logger.h>
 
+#include <fstream>
 #include <sstream>
 
 #include <boost/shared_ptr.hpp>

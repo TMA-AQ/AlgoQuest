@@ -341,7 +341,7 @@ void QueryResolver::resolve(aq::verb::VerbNode::Ptr spTree)
     query = query.substr(0, pos);
   }
 
-  auto joinPath = aq::ParseJeq(query, true);
+  auto joinPath = aq::ParseJeq(query); // TODO : manage active/neutral/filter option
 
   if (!this->groupBy.empty())
   {

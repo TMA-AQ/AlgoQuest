@@ -9,6 +9,7 @@ namespace verb {
 //--------------------------------------------------------------------------
 struct Builder_Intf
 {
+  virtual ~Builder_Intf() {}
   virtual VerbNode::Ptr build(unsigned int type) const = 0;
 };
 

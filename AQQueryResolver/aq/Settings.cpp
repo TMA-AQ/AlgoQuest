@@ -163,8 +163,6 @@ void Settings::load(std::istream& is)
     boost::property_tree::ptree pt;
     boost::property_tree::ini_parser::read_ini(is, pt);
 
-    std::cout << is << std::endl;
-    
     // all option are optional
     this->aqHome = get_opt_value(pt, "aq-home", this->aqHome);
     boost::algorithm::replace_all(this->aqHome, "\\", "/");

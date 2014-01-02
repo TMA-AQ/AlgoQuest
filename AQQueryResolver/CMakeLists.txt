@@ -31,16 +31,13 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
 
 ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
 
-file(
-  GLOB_RECURSE
-  source_files
-  aq/*.cpp
-  aq/parser/sql92_grm_tab.cpp
-)
+file(GLOB_RECURSE aq_query_resolver_source_files aq/*.cpp)
+file(GLOB aq_engine_source_files aq/AQEngine.cpp aq/AQMatrix.cpp)
+list(REMOVE_ITEM aq_query_resolver_source_files ${aq_engine_source_files})
 
 if(EXISTS "aq/parser/lex.yy.cpp")
   file(GLOB exclude_files "aq/parser/lex.yy.cpp")
-  list(REMOVE_ITEM source_files ${exclude_files})
+  list(REMOVE_ITEM aq_query_resolver_source_files ${exclude_files})
 endif()
 
 # Create target for the parser
@@ -65,12 +62,10 @@ ADD_CUSTOM_COMMAND(
   OUTPUTS aq/parser/sql92_grm_tab.cpp
 )
 
-SET(source_files ${source_files} aq/parser/sql92_grm_tab.cpp)
+SET(aq_query_resolver_source_files ${aq_query_resolver_source_files} aq/parser/sql92_grm_tab.cpp)
 SET_SOURCE_FILES_PROPERTIES(aq/parser/lex.yy.cpp GENERATED)
 SET_SOURCE_FILES_PROPERTIES(aq/parser/sql92_grm_tab.cpp GENERATED)
 
-add_library(
-  aq_query_resolver
-  STATIC
-  ${source_files}
-)
+add_library(aq_query_resolver STATIC ${aq_query_resolver_source_files})
+add_library(aq_engine SHARED ${aq_engine_source_files})
+target_link_libraries(aq_engine aq_util ${Boost_LIBRARIES})

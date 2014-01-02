@@ -7,8 +7,8 @@
 # define HINSTANCE void * // TODO
 # define DWORD int // TODO
 
-HINSTANCE GetProcAddress(int, const char *) { return nullptr; } // TODO
-int GetLastError() { return 0; }
+inline HINSTANCE GetProcAddress(int, const char *) { return nullptr; } // TODO
+inline int GetLastError() { return 0; }
 
 #endif
 

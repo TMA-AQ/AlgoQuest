@@ -246,8 +246,8 @@ int main(int argc, char**argv)
 
     //
     // initialize verb builder
-    aq::VerbBuilder vb;
-    aq::verb::VerbFactory::GetInstance().setBuilder(&vb);
+    aq::VerbBuilder * vb = new aq::VerbBuilder;
+    aq::verb::VerbFactory::GetInstance().setBuilder(vb);
 
     //
     // if aq.ini exists in current directory, use it as default settings
