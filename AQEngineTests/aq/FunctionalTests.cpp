@@ -173,8 +173,8 @@ uint64_t functional_tests(const struct opt& o)
     if (o.aql2sql)
     {
       aq::parser::parse(query, ss);
-      ss.output = aq::core::SelectStatement::SQL;
-      std::cout << ss << std::endl;
+      ss.setOutput(aq::core::SelectStatement::SQL);
+      std::cout << ss.to_string() << std::endl;
     }
 
     // check for select
@@ -222,7 +222,7 @@ uint64_t functional_tests(const struct opt& o)
     // kjeq_parse
     if (o.jeqParserActivated)
     {
-      aq::ParseJeq(query, true);
+      aq::parser::ParseJeq(query, true);
     }
 
     boost::trim(query);

@@ -23,6 +23,8 @@ class VerbVisitor
 {
 public:
 
+  virtual ~VerbVisitor() {}
+  
 	// Default Verbs
   virtual void visit(Verb* v)
   {

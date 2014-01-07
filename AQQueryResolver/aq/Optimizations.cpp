@@ -25,7 +25,7 @@ typename ColumnItem<T>::Ptr getMinMaxFromThesaurus(Column::Ptr column, size_t ta
 
 	size_t binItemSize	= 0;
 	size_t tmpBufSize = 1000;
-	switch( column->Type )
+	switch( column->getType() )
 	{
 	case COL_TYPE_INT: 
 		binItemSize = 4;
@@ -36,8 +36,8 @@ typename ColumnItem<T>::Ptr getMinMaxFromThesaurus(Column::Ptr column, size_t ta
 		binItemSize = 8;
 		break;
 	case COL_TYPE_VARCHAR:
-		binItemSize = column->Size;
-		tmpBufSize = column->Size + 1000;
+		binItemSize = column->getSize();
+		tmpBufSize = column->getSize() + 1000;
 		break;
 	default:
 		throw generic_error(generic_error::NOT_IMPLEMENTED, "type not supported");
@@ -59,7 +59,7 @@ typename ColumnItem<T>::Ptr getMinMaxFromThesaurus(Column::Ptr column, size_t ta
 	if( fread( pTmpBuf, 1, binItemSize, pFIn ) != binItemSize )
 		throw generic_error(generic_error::INVALID_FILE, "invalid thesaurus file [%s]", fileName.c_str());
 
-	switch( column->Type )
+	switch( column->getType() )
 	{
 	case COL_TYPE_INT: 
 		{
@@ -81,7 +81,7 @@ typename ColumnItem<T>::Ptr getMinMaxFromThesaurus(Column::Ptr column, size_t ta
 		}
 		break;
 	case COL_TYPE_VARCHAR:
-		pTmpBuf[column->Size] = '\0';
+		pTmpBuf[column->getSize()] = '\0';
 		minMax = new ColumnItem<char*>( (char*) pTmpBuf );
 		break;
 	}

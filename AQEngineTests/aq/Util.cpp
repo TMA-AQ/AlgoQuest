@@ -202,7 +202,7 @@ int check_answer_validity(const struct opt& o, aq::AQMatrix& matrix, const uint6
         aq::Logger::getInstance().log(AQ_INFO, "groups match [%u]\n", matrix.getGroupBy().size());
       }
     }
-  } 
+  }
   catch (const aq::generic_error& ge)
   {
     aq::Logger::getInstance().log(AQ_ERROR, "ERROR: %s", ge.what());
@@ -252,11 +252,11 @@ int check_item(column_mapper_t mapper, aq::ColumnType type, size_t pos, std::ost
                ordered_t::value_type::first_type& itOrdered,
                bool display, bool isSelected, bool isGrouped, bool isOrdered, bool new_group, size_t i)
 {
-  T value;
+  T item_value;
   typename aq::ColumnItem<T>::Ptr item(new aq::ColumnItem<T>);
   auto m = boost::get<typename aq::ColumnMapper_Intf<T>::Ptr>(mapper);
-  m->loadValue(pos - 1, &value);
-  item->setValue(value);
+  m->loadValue(pos - 1, &item_value);
+  item->setValue(item_value);
 
   if (display && isSelected)
   {

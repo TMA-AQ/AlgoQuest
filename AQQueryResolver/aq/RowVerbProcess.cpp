@@ -24,21 +24,10 @@ namespace aq
 
     int RowVerbProcess::process(std::vector<Row>& rows)
     {
-      if (this->verbs.size() >= 0)
+      this->applyRowVisitor->rows = &rows; // shoulb be done only the first time
+      for (auto& verb : this->verbs)
       {
-        this->applyRowVisitor->rows = &rows; // shoulb be done only the first time
-        for (auto& verb : this->verbs) 
-        {
-          verb->apply(this->applyRowVisitor.get());
-        }
-      }
-      else
-      {
-        // deprecated
-        assert(false);
-        if (rows[0].flush)
-          (*this->applyRowVisitor->rows)[0].flush = rows[0].flush; // FIXME
-        this->spTree->apply(this->applyRowVisitor.get());
+        verb->apply(this->applyRowVisitor.get());
       }
       return 0;
     }

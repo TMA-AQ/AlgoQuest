@@ -22,7 +22,7 @@ void PartitionVerb::changeResult(	Table::Ptr table,
 }
 
 //------------------------------------------------------------------------------
-void PartitionVerb::addResult( aq::Row& row, VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext )
+void PartitionVerb::addResult( aq::Row& row )
 {
 }
 
