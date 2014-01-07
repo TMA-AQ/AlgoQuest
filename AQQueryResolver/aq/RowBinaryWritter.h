@@ -17,9 +17,6 @@ public:
   ~RowBinaryWritter();
 protected:
   int process(Row& row);
-private:
-  uint32_t uint32_value;
-  uint64_t uint64_value;
 };
 
 }

@@ -19,17 +19,14 @@ link_directories(
   $ENV{AQUTIL_LIBRARY_DIR}
 )
 
-set(CMAKE_CXX_FLAGS "-O0 -ggdb -std=c++0x -Wall -Werror")
-
-IF(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
-
-    # Linux specific code
-    SET(OperatingSystem "FreeBSD")
-
-    set(CMAKE_CXX_COMPILER "g++46")
-    set(CMAKE_CXX_FLAGS "-O0 -ggdb -std=c++0x -Wall -Werror")
-
-ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
+# Mac OS X specific code
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    SET(OperatingSystem "Darwin")
+    set(CMAKE_CXX_FLAGS "-O0 -ggdb -std=c++11 -stdlib=libc++ -Wall")
+    set(CMAKE_EXE_LINKER_FLAGS "-lc++")
+    set(CMAKE_SHARED_LINKER_FLAGS "-lc++")
+    set(CMAKE_MODULE_LINKER_FLAGS "-lc++")
+ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 file(GLOB_RECURSE aq_query_resolver_source_files aq/*.cpp)
 file(GLOB aq_engine_source_files aq/AQEngine.cpp aq/AQMatrix.cpp)
@@ -66,6 +63,6 @@ SET(aq_query_resolver_source_files ${aq_query_resolver_source_files} aq/parser/s
 SET_SOURCE_FILES_PROPERTIES(aq/parser/lex.yy.cpp GENERATED)
 SET_SOURCE_FILES_PROPERTIES(aq/parser/sql92_grm_tab.cpp GENERATED)
 
-add_library(aq_query_resolver STATIC ${aq_query_resolver_source_files})
-add_library(aq_engine SHARED ${aq_engine_source_files})
-target_link_libraries(aq_engine aq_util ${Boost_LIBRARIES})
+add_library(aq-query-resolver STATIC ${aq_query_resolver_source_files})
+add_library(aq-engine SHARED ${aq_engine_source_files})
+target_link_libraries(aq-engine aq-util ${Boost_LIBRARIES})

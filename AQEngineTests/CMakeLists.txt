@@ -23,14 +23,20 @@ link_directories(
   /System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7
 )
 
-set(CMAKE_CXX_COMPILER "g++")
-set(CMAKE_CXX_FLAGS "-O0 -ggdb -std=c++0x -Wall -Werror")
+# Mac OS X specific code
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    SET(OperatingSystem "Darwin")
+    set(CMAKE_CXX_FLAGS "-O0 -ggdb -std=c++11 -stdlib=libc++ -Wall")
+    set(CMAKE_EXE_LINKER_FLAGS "-lc++")
+    set(CMAKE_SHARED_LINKER_FLAGS "-lc++")
+    set(CMAKE_MODULE_LINKER_FLAGS "-lc++")
+ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 file(GLOB_RECURSE source_files aq/*.cpp)
 file(GLOB_RECURSE exclude_files aq/Where*.cpp aq/AQEngineTests.cpp)
 list(REMOVE_ITEM source_files ${exclude_files})
 add_library(aq-tests STATIC ${source_files})
-target_link_libraries(aq-tests aq_query_resolver aq_util ${Boost_LIBRARIES})
+target_link_libraries(aq-tests aq-query-resolver aq-util ${Boost_LIBRARIES})
 
 # file(GLOB_RECURSE py_bind_src python_binding/*.cpp)
 # file(GLOB exclude_files "python_binding/dllmain.cpp")

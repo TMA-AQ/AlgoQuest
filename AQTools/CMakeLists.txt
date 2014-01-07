@@ -23,17 +23,14 @@ link_directories(
   $ENV{AQTESTS_LIBRARY_DIR}
 )
 
-set(CMAKE_CXX_FLAGS "-O0 -ggdb -std=c++0x -Wall -Werror")
-
-IF(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
-
-    # Linux specific code
-    SET(OperatingSystem "FreeBSD")
-
-    set(CMAKE_CXX_COMPILER "g++46")
-    set(CMAKE_CXX_FLAGS "-O0 -ggdb -std=c++0x -Wall -Werror")
-
-ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
+# Mac OS X specific code
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    SET(OperatingSystem "Darwin")
+    set(CMAKE_CXX_FLAGS "-O0 -ggdb -std=c++11 -stdlib=libc++ -Wall")
+    set(CMAKE_EXE_LINKER_FLAGS "-lc++")
+    set(CMAKE_SHARED_LINKER_FLAGS "-lc++")
+    set(CMAKE_MODULE_LINKER_FLAGS "-lc++")
+ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 file(GLOB_RECURSE source_files aq/*.cpp)
 file(GLOB exclude_files aq/aq_tests_batch.cpp)
@@ -46,9 +43,9 @@ add_executable(
 
 target_link_libraries( 
   aq-tools
-  aq_query_resolver
-  aq_engine
-  aq_util
+  aq-query-resolver
+  aq-engine
+  aq-util
   ${Boost_LIBRARIES}
 )
 
@@ -60,9 +57,10 @@ add_executable(
 target_link_libraries(
   aq-tests-batch
   aq-tests
-  aq_query_resolver
-  aq_engine
-  aq_util
+  aq-query-resolver
+  aq-engine
+  aq-util
   ${Boost_LIBRARIES}
-  mysqlcppconn
+  mysqlcppconn-static.a
+  /usr/local/mysql/lib/libmysqlclient.a
 )

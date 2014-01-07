@@ -4,7 +4,7 @@ namespace aq
 {
   
 RowBinaryWritter::RowBinaryWritter(const std::string& filePath)
-  : RowWritter(filePath), uint32_value(0), uint64_value(0)
+  : RowWritter(filePath)
 {
   pFOut = fopen(filePath.c_str(), "wb");
 }

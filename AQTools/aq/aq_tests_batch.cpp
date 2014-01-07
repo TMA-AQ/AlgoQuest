@@ -229,7 +229,7 @@ struct Runner : public aq::DatabaseGenerator::handle_t
 
   int run()
   {
-    size_t nExpected = gen->getNbDB();
+    gen->getNbDB();
     gen->generate(this);
     return EXIT_SUCCESS;
   }
