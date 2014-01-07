@@ -140,7 +140,7 @@ void QueryResolver::preProcess()
   {
     tnode * grpNode = this->sqlStatement->find_main_node(K_GROUP);
     std::vector<tnode*> cl;
-    aq::util::getColumnsList(grpNode->left->left, cl);
+    aq::util::getColumnsList(grpNode->left, cl);
     for (auto& n : cl) 
     {
       this->groupBy.push_back(n->clone_subtree());
@@ -162,7 +162,7 @@ void QueryResolver::preProcess()
   {
     tnode * grpNode = this->sqlStatement->find_main_node(K_ORDER);
     std::vector<tnode*> cl;
-    aq::util::getColumnsList(grpNode->left->left, cl);
+    aq::util::getColumnsList(grpNode->left, cl);
     for (auto& n : cl) 
     {
       this->orderBy.push_back(n->clone_subtree());
@@ -240,22 +240,24 @@ aq::verb::VerbNode::Ptr QueryResolver::postProcess()
     return spTree;
   }
 
-  this->changeTemporaryTableName(this->sqlStatement);
-  for (auto& n : this->groupBy) 
-  {
-    this->changeTemporaryTableName(n);
-  }
-  for (auto& n : this->orderBy) 
-  {
-    this->changeTemporaryTableName(n);
-  }
-  for (auto& v : this->partitions) 
-  {
-    for (auto& n : v)
-    {
-      this->changeTemporaryTableName(n);
-    }
-  }
+  //this->changeTemporaryTableName(this->sqlStatement);
+  //for (auto& n : this->groupBy) 
+  //{
+  //  this->changeTemporaryTableName(n);
+  //}
+  //for (auto& n : this->orderBy) 
+  //{
+  //  this->changeTemporaryTableName(n);
+  //}
+  //for (auto& v : this->partitions) 
+  //{
+  //  for (auto& n : v)
+  //  {
+  //    this->changeTemporaryTableName(n);
+  //  }
+  //}
+
+  this->updateBaseDesc();
   
 #if defined(AQ_TRACE)
   sql_query = "";
@@ -953,36 +955,36 @@ void QueryResolver::changeTemporaryTableName(aq::tnode * pNode)
   changeTemporaryTableName(pNode->left);
   changeTemporaryTableName(pNode->right);
   changeTemporaryTableName(pNode->next);
-  
+}
+
+void QueryResolver::updateBaseDesc()
+{
   // change table and column name in BaseDesc
-  if (pNode == this->sqlStatement)
+  for (auto& nestedTable : this->nestedTables)
   {
-    for (auto& nestedTable : this->nestedTables)
+    if (!nestedTable.second->result)
     {
-      if (!nestedTable.second->result)
+      assert(nestedTable.second->isCompressable());
+      if (!nestedTable.second->isCompressable())
       {
-        assert(nestedTable.second->isCompressable());
-        if (!nestedTable.second->isCompressable())
-        {
-          throw aq::generic_error(aq::generic_error::INVALID_TABLE, "");
-        }
-        continue;
+        throw aq::generic_error(aq::generic_error::INVALID_TABLE, "");
       }
+      continue;
+    }
 
-      char * name = static_cast<char*>(malloc(128 * sizeof(char)));
-      sprintf(name, "TMP%.4luSIZE%.10lu", nestedTable.second->result->ID, nestedTable.second->result->TotalCount);
-      nestedTable.second->result->setName(name);
-      free(name);
+    char * name = static_cast<char*>(malloc(128 * sizeof(char)));
+    sprintf(name, "TMP%.4luSIZE%.10lu", nestedTable.second->result->ID, nestedTable.second->result->TotalCount);
+    nestedTable.second->result->setName(name);
+    free(name);
 
-      Table::Ptr tmp = nestedTable.second->getResult();
-      for (std::vector<Column::Ptr>::iterator itCol = tmp->Columns.begin(); itCol != tmp->Columns.end(); ++itCol)
-      {
-        char * buf = static_cast<char*>(malloc(128 * sizeof(char)));
-        std::string type_str = columnTypeToStr((*itCol)->getType());
-        sprintf(buf, "C%.4lu%s%.4lu", (*itCol)->getID(), type_str.c_str(), (*itCol)->getSize());
-        (*itCol)->setName(buf);
-        free(buf);
-      }
+    Table::Ptr tmp = nestedTable.second->getResult();
+    for (std::vector<Column::Ptr>::iterator itCol = tmp->Columns.begin(); itCol != tmp->Columns.end(); ++itCol)
+    {
+      char * buf = static_cast<char*>(malloc(128 * sizeof(char)));
+      std::string type_str = columnTypeToStr((*itCol)->getType());
+      sprintf(buf, "C%.4lu%s%.4lu", (*itCol)->getID(), type_str.c_str(), (*itCol)->getSize());
+      (*itCol)->setName(buf);
+      free(buf);
     }
   }
 }

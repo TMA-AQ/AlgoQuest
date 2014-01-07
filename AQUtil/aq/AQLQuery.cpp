@@ -32,13 +32,14 @@ bool operator==(const aq::core::JoinCondition& jc1, const aq::core::JoinConditio
 
 aq::core::JoinCondition::join_t join_str_2_join_t(std::string jt_left_str, std::string jt_right_str)
 {
-  aq::core::JoinCondition::join_t jt;
+  aq::core::JoinCondition::join_t jt = aq::core::JoinCondition::join_t::INNER;
   boost::to_lower(jt_left_str);
   boost::to_lower(jt_right_str);
   if ((jt_left_str == "k_inner") && (jt_right_str == "k_inner")) jt = aq::core::JoinCondition::join_t::INNER;
   else if ((jt_left_str == "k_inner") && (jt_right_str == "k_outer")) jt = aq::core::JoinCondition::join_t::LEFT_OUTER;
   else if ((jt_left_str == "k_outer") && (jt_right_str == "k_inner")) jt = aq::core::JoinCondition::join_t::RIGHT_OUTER;
   else if ((jt_left_str == "k_outer") && (jt_right_str == "k_outer")) jt = aq::core::JoinCondition::join_t::FULL_OUTER;
+  else assert(false);
   return jt;
 }
 
@@ -57,7 +58,7 @@ std::ostream& operator<<(std::ostream& os, const aq::core::JoinCondition::join_t
 aq::core::JoinCondition::op_t op_str_2_op_t(std::string op_str)
 {
   boost::to_lower(op_str);
-  aq::core::JoinCondition::op_t op;
+  aq::core::JoinCondition::op_t op = aq::core::JoinCondition::op_t::AUTO;
   if (op_str == "k_jeq") op = aq::core::JoinCondition::op_t::EQ;
   else if (op_str == "k_auto") op = aq::core::JoinCondition::op_t::AUTO;
   else if (op_str == "k_jneq") op = aq::core::JoinCondition::op_t::NEQ;
@@ -65,6 +66,7 @@ aq::core::JoinCondition::op_t op_str_2_op_t(std::string op_str)
   else if (op_str == "k_jieq") op = aq::core::JoinCondition::op_t::IEQ;
   else if (op_str == "k_jsup") op = aq::core::JoinCondition::op_t::SUP;
   else if (op_str == "k_jseq") op = aq::core::JoinCondition::op_t::SEQ;
+  else assert(false);
   return op;
 }
 
@@ -128,7 +130,11 @@ void print_aql(std::ostream& os, const aq::core::SelectStatement& query)
     for (auto& w : query.joinConditions) 
     {
       os << "  " << w.op << " ";
+      if (w.type_left != "")
+        os << w.type_left << " ";
       os << w.jt_left << " . " << w.left.table.name << " " << w.left.name << " ";
+      if (w.type_right != "")
+        os << w.type_right << " ";
       os << w.jt_right << " . " << w.right.table.name << " " << w.right.name << " ";
       os << std::endl;
     }

@@ -89,6 +89,7 @@ private:
   void solveNested();
 	void solveNested(aq::tnode*& pNode, unsigned int nSelectLevel, aq::tnode* pLastSelect, bool inFrom, bool inIn);
   void changeTemporaryTableName(aq::tnode * pNode);
+  void updateBaseDesc();
   bool isCompressable();
   boost::tribool isCompressable() const { return this->compressable; }
   std::string getOriginalColumn(const std::string& alias) const;

@@ -158,7 +158,7 @@ TID2String g_id2str[] = {
 	{ K_ROW_NUMBER,		"ROW_NUMBER"	},
 	{ K_TRUNCATE,		"TRUNCATE"		},
 	{ K_DECODE,			"DECODE"		},
-	{ K_JNO,			"K_ACTIVE K_INNER K_JNO"			},
+	{ K_JNO,			"K_JNO K_ACTIVE K_INNER"			},
 	{ K_JINF,			"K_JINF"		},
 	{ K_JIEQ,			"K_JIEQ"		},
 	{ K_JSUP,			"K_JSUP"		},

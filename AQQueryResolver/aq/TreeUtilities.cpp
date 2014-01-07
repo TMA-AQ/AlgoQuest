@@ -1079,43 +1079,31 @@ void cleanQuery( aq::tnode*& pNode )
 //------------------------------------------------------------------------------
 void getColumnTypes( aq::tnode* pNode, std::vector<Column::Ptr>& columnTypes, Base& BaseDesc )
 {
-	if( !pNode || !pNode->left )
+	if (!pNode || !pNode->left)
 		return;
-//	assert( pNode->left ); //debug13 not necessarily true, I should really start to handle this case
-	while( pNode->left->tag == K_PERIOD || pNode->left->tag == K_COMMA )
+
+	while ((pNode->left->tag == K_PERIOD) || (pNode->left->tag == K_COMMA))
 	{
 		pNode = pNode->left;
 		aq::tnode* colNode;
-		if( pNode->tag == K_PERIOD )
-			colNode = pNode;
-		else
+		if (pNode->tag == K_PERIOD)
+    {
+      colNode = pNode;
+    }
+    else
 		{
 			colNode = pNode->right;
-			assert( colNode->tag == K_PERIOD );
+			assert (colNode->tag == K_PERIOD);
 		}
-		assert( colNode );
-		assert( colNode->left && colNode->left->tag == K_IDENT );
-		assert( colNode->right && colNode->right->tag == K_COLUMN );
-		Table& table = *BaseDesc.getTable( colNode->left->getData().val_str );
+		assert(colNode);
+		assert(colNode->left && (colNode->left->tag == K_IDENT));
+		assert(colNode->right && (colNode->right->tag == K_COLUMN));
 		bool found = false;
-		Column auxCol;
-		auxCol.setName(colNode->right->getData().val_str);
-		for(auto& c : table.Columns)
-    {
-			if (c->getName() == auxCol.getName())
-			{
-				Column::Ptr column = new Column(*c);
-        column->setTableName(table.getName());
-				columnTypes.push_back( column );
-				found = true;
-				break;
-			}
-    }
-    assert(found);
-    if (!found)
-    {
-      throw aq::generic_error(aq::generic_error::INVALID_QUERY, "");
-    }
+		const auto& table = BaseDesc.getTable(colNode->left->getData().val_str);
+    const auto& column = table->getColumn(colNode->right->getData().val_str);
+    Column::Ptr c = new Column(*column);
+    c->setTableName(table->getName());
+    columnTypes.push_back(c);
 	}
 	reverse(columnTypes.begin(), columnTypes.end());
 }

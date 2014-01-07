@@ -46,7 +46,7 @@ namespace aq
   
   int RowTemporaryWritter::process(Row& row)
   {
-    if (this->columns.size() == 0)
+    if (this->columnsWritter.size() == 0)
     {
       uint16_t columnId = 1;
       for (Row::row_t::const_reverse_iterator it = row.computedRow.rbegin(); it != row.computedRow.rend(); ++it)

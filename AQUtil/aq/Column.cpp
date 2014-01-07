@@ -146,8 +146,13 @@ void Column::setBinItemSize()
 //------------------------------------------------------------------------------
 void Column::setName( const std::string& name )
 {
-	this->OriginalName = name;
-	this->Name = name;
+  if (this->OriginalName == "")
+  {
+    this->OriginalName = name;
+    boost::to_upper(this->OriginalName);
+    boost::trim(this->OriginalName);
+  }
+  this->Name = name;
 	boost::to_upper(this->Name);
 	boost::trim(this->Name);
 }

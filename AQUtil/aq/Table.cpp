@@ -102,12 +102,12 @@ Column::Ptr Table::getColumn(const std::string& columnName) const
   boost::to_upper(aux);
   for (auto& c : this->Columns)
   {
-    if (c->getName() == aux)
+    if ((c->getName() == aux) || (c->getOriginalName() == aux))
     {
       return c;
     }
   }
-  throw aq::generic_error(aq::generic_error::INVALID_QUERY, "cannot find table [%s]", columnName.c_str());
+  throw aq::generic_error(aq::generic_error::INVALID_QUERY, "cannot find column [%s]", columnName.c_str());
 }
 
 //------------------------------------------------------------------------------
@@ -149,7 +149,12 @@ std::vector<Column::Ptr> Table::getColumnsByName( std::vector<Column::Ptr>& colu
 //------------------------------------------------------------------------------
 void Table::setName( const std::string& name )
 {
-	this->OriginalName = name;
+  if (this->OriginalName == "")
+  {
+    this->OriginalName = name;
+    boost::to_upper(this->OriginalName);
+    boost::trim(this->OriginalName);
+  }
 	this->Name = name;
 	boost::to_upper(this->Name);
 	boost::trim(this->Name);

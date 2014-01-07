@@ -27,8 +27,10 @@ BOOST_FUSION_ADAPT_STRUCT(aq::core::InCondition,
 
 BOOST_FUSION_ADAPT_STRUCT(aq::core::JoinCondition,
                           (std::string, op)
+                          (std::string, type_left)
                           (std::string, jt_left)
                           (aq::core::ColumnReference, left)
+                          (std::string, type_right)
                           (std::string, jt_right)
                           (aq::core::ColumnReference, right)
                           );
@@ -59,6 +61,7 @@ namespace aq {
         value = no_case [ "k_value" ] >> lexeme [ *qi::char_("a-zA-Z_0-9") ];
         list_value = value | ',' >> value >> list_value ;
         in_condition = no_case [ "in" ] >> column_ref >> list_value;
+        join_type = no_case [ string("k_active") ] | no_case [ string("k_filter") ] | no_case [ string("k_neutral") ];
         join = no_case [ string("k_inner") ] | no_case [ string("k_outer") ];
         op = 
           no_case [ string("k_jeq") ] | 
@@ -67,8 +70,8 @@ namespace aq {
           no_case [ string("k_jieq") ] | 
           no_case [ string("k_jsup") ] | 
           no_case [ string("k_jseq") ];  
-        join_condition = op >> join >> column_ref >> join >> column_ref;
-        unary_join = no_case [ string("k_jno") ] >> column_ref;
+        join_condition = op >> -(join_type) >> join >> column_ref >> -(join_type) >> join >> column_ref;
+        unary_join = no_case [ string("k_jno") ] >> -(join_type) >> -(join) >> column_ref;
         condition = 
           ( 
           unary_join
@@ -119,7 +122,7 @@ namespace aq {
       }
 
     private:
-      qi::rule<It, std::string()                            , Skipper> sql_ident, op, join, value;
+      qi::rule<It, std::string()                            , Skipper> sql_ident, op, join_type, join, value;
       qi::rule<It, aq::core::TableReference()               , Skipper> table_ref;
       qi::rule<It, aq::core::ColumnReference()              , Skipper> column_ref;
       qi::rule<It, aq::core::JoinCondition()                , Skipper> join_condition;

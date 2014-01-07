@@ -68,6 +68,8 @@ public:
 	FileCloser(FILE *& pFile): pFile(pFile){};
 	~FileCloser() { if( pFile ) fclose(pFile); };
 private:
+  FileCloser(const FileCloser& o);
+  FileCloser& operator=(const FileCloser& o);
 	FILE *& pFile;
 };
 

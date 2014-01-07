@@ -1,4 +1,5 @@
 #include "AQEngineSimulate.h"
+#include <aq/AQLParser.h>
 
 #include <aq/Exceptions.h>
 #include <aq/TreeUtilities.h>
@@ -23,6 +24,12 @@ namespace aq
     {
       std::cout << "[" << tid << "]" << std::endl;
     }
+
+    aq::core::SelectStatement ss;
+    aq::parser::parse(query + ";", ss);
+
+    std::cout << "Execute:" << std::endl;
+    std::cout << ss.to_string(aq::core::SelectStatement::output_t::AQL) << std::endl;
 
     // this->aqMatrix->simulate( rand() % 1000, this->tableIDs );
   }
