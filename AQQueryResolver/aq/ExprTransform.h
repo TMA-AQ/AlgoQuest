@@ -170,7 +170,7 @@ namespace
       if (col->getName() == columnName)
       {
         // assert(col->TableID == table->ID);
-        tId = table->ID;
+        tId = table->getID();
         cId = col->getID();
         cSize = col->getSize();
         cType = col->getType();
@@ -187,7 +187,7 @@ namespace
   bool check_between_for_transform(const aq::tnode& n) 
   {
     return (((n.tag == K_BETWEEN) || (n.tag == K_NOT_BETWEEN)) && 
-      aq::util::is_column_reference(n.left) && 
+      aq::util::isColumnReference(n.left) && 
       n.right && (n.right->tag == K_AND) && 
       n.right->left && ((n.right->left->tag == K_STRING) || (n.right->left->tag == K_INTEGER)) && 
       n.right->right && ((n.right->right->tag == K_STRING) || (n.right->right->tag == K_INTEGER))); 
@@ -196,7 +196,7 @@ namespace
   bool check_like_for_transform(const aq::tnode& n) 
   {
     return (((n.tag == K_LIKE) || (n.tag == K_NOT_LIKE)) &&
-      (aq::util::is_column_reference(n.left)) && 
+      (aq::util::isColumnReference(n.left)) && 
       n.right && 
       ((n.right->tag == K_STRING) || 
        ((n.right->tag == K_ESCAPE) && ((n.right->left) && (n.right->left->tag == K_STRING) && 
@@ -211,8 +211,8 @@ namespace
     } 
      
     return (((n.tag == K_EQ) || (n.tag == K_NEQ) || (n.tag == K_LT) || (n.tag == K_GT) || (n.tag == K_LEQ) || (n.tag == K_GEQ)) && 
-            (((aq::util::is_column_reference(n.left)) && (n.right) && ((n.right->tag == K_STRING) || (n.right->tag == K_INTEGER) || (n.right->tag == K_REAL))) ||
-             ((aq::util::is_column_reference(n.right)) && ((n.left) && ((n.left->tag == K_STRING) || (n.left->tag == K_INTEGER) || (n.left->tag == K_REAL))))));
+            (((aq::util::isColumnReference(n.left)) && (n.right) && ((n.right->tag == K_STRING) || (n.right->tag == K_INTEGER) || (n.right->tag == K_REAL))) ||
+             ((aq::util::isColumnReference(n.right)) && ((n.left) && ((n.left->tag == K_STRING) || (n.left->tag == K_INTEGER) || (n.left->tag == K_REAL))))));
   }
 
 }
@@ -222,7 +222,8 @@ namespace aq {
 class ExpressionTransform
 {
 public:
-  ExpressionTransform(const Base& _baseDesc, const Settings& _settings) : baseDesc(_baseDesc), settings(_settings) {}
+  ExpressionTransform(const Base& _baseDesc, const std::string _dataPath, size_t _packSize) 
+    : baseDesc(_baseDesc), dataPath(_dataPath), packSize(_packSize) {}
   template <typename M> aq::tnode * transform(aq::tnode * pNode);
 private:
   enum transformation_type
@@ -235,11 +236,12 @@ private:
   template <typename T, class M> aq::tnode * transform(aq::tnode * pNode, transformation_type tt);
   template <typename T, typename M, class CMP> aq::tnode * transform(CMP& cmp);
   const Base& baseDesc;
-  const Settings& settings;
+  std::string dataPath;
   size_t tId;
   size_t cId;
   size_t cSize;
   aq::ColumnType cType;
+  size_t packSize;
 };
 
 template <typename T> 
@@ -328,7 +330,7 @@ void check_cmp_op<T>::init()
     reverseOp = !reverseOp;
   }
 
-  if (aq::util::is_column_reference( pNode->left ) != 0) 
+  if (aq::util::isColumnReference( pNode->left ) != 0) 
   {
     // Left is column reference -> check for strings at right 
     pNodeColumnRef = pNode->left;
@@ -336,7 +338,7 @@ void check_cmp_op<T>::init()
     bLeftColumnRef = true;
     op_tag = pNode->tag;
   } 
-  else if (aq::util::is_column_reference(pNode->right) != 0) 
+  else if (aq::util::isColumnReference(pNode->right) != 0) 
   {
     // Right is column reference -> check for strings at left
     pNodeColumnRef = pNode->right;
@@ -351,7 +353,7 @@ void check_cmp_op<T>::init()
     throw aq::generic_error(aq::generic_error::INVALID_QUERY, "");
   }
 
-  if (aq::util::is_column_reference(pNodeColumnRef) == 0) 
+  if (aq::util::isColumnReference(pNodeColumnRef) == 0) 
   {
     throw aq::generic_error(aq::generic_error::INVALID_QUERY, "");
   }
@@ -624,7 +626,8 @@ aq::tnode * ExpressionTransform::transform(CMP& cmp)
   aq::ColumnItem<T> item;
   std::vector<aq::ColumnItem<T> > result, resultTmp1, resultTmp2, resultTmp3;
   column_item_cmp_t<T> column_cmp;
-  boost::shared_ptr<aq::ColumnMapper_Intf<T> > cm(new aq::ThesaurusReader<T, M>(settings.dataPath.c_str(), tId, cId, cSize, settings.packSize));
+  // todo : thesaurus reader should be a callback
+  boost::shared_ptr<aq::ColumnMapper_Intf<T> > cm(new aq::ThesaurusReader<T, M>(dataPath.c_str(), tId, cId, cSize, packSize));
   while (cm->loadValue(index++, &value) == 0)
   {
     item.setValue(value);
@@ -677,25 +680,30 @@ aq::tnode * ExpressionTransform::transform(CMP& cmp)
 	return pNodeRes;
 }
 
+/// \brief tree node transformation expression
 namespace expression_transform {
   
+  /// \brief transformation of expression in a tree into a list of value
+  /// \param base database description
+  /// \param settings
+  /// \param tree the tree to transform
   template <class M>
-  aq::tnode * transform(const aq::Base& base, const aq::Settings& settings, aq::tnode * node)
+  aq::tnode * transform(const aq::Base& base, const std::string& dataPath, size_t packSize, aq::tnode * tree)
   {
-    aq::tnode * newNode = node->clone_subtree();
-    aq::ExpressionTransform expTr(base, settings);
-    newNode = expTr.transform<M>(newNode);
+    aq::tnode * newTree = tree->clone_subtree();
+    aq::ExpressionTransform expTr(base, dataPath, packSize);
+    newTree = expTr.transform<M>(newTree);
 
-    *node = *newNode;
-    aq::tnode::delete_subtree(node->left);
-    aq::tnode::delete_subtree(node->right);
-    aq::tnode::delete_subtree(node->left);
-    node->left = newNode->left;
-    node->right = newNode->right;
-    node->next = newNode->next;
-    node->parent = nullptr;
+    *newTree = *newTree;
+    aq::tnode::delete_subtree(newTree->left);
+    aq::tnode::delete_subtree(newTree->right);
+    aq::tnode::delete_subtree(newTree->left);
+    newTree->left = newTree->left;
+    newTree->right = newTree->right;
+    newTree->next = newTree->next;
+    newTree->parent = nullptr;
     
-    return node;
+    return newTree;
   }
 
 }

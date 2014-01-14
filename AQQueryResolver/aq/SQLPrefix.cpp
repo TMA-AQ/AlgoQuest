@@ -16,43 +16,7 @@ namespace aq
 {
 
 //------------------------------------------------------------------------------
-bool IsColumnReference( aq::tnode *pNode ) {
-	if ( pNode != nullptr ) {
-		if ( pNode->tag == K_COLUMN )
-			return true;
-		if ( pNode->tag == K_PERIOD ) {
-			if ( pNode->left != nullptr && pNode->right != nullptr ) {
-				if ( pNode->left->tag == K_IDENT ) {
-					if ( pNode->right->tag == K_IDENT || pNode->right->tag == K_COLUMN )
-						return true;
-				}
-			}
-		}
-	}
-	return false;
-}
-
-//------------------------------------------------------------------------------
-void getTableAndColumnName(aq::tnode * n, std::string& table, std::string& column) 
-{
-	if (n == nullptr) return;
-	
-	if (n->tag == K_COLUMN)
-	{
-		column = n->getData().val_str;
-	}
-	else if (( n->tag == K_PERIOD ) &&
-					 ( (n->left != nullptr) && (n->right != nullptr) ) &&
-					 ( n->left->tag == K_IDENT ) &&
-					 ( (n->right->tag == K_IDENT) || (n->right->tag == K_COLUMN) ) )
-	{
-		table = n->left->getData().val_str;
-		column = n->right->getData().val_str;
-	}
-}
-
-//------------------------------------------------------------------------------
-std::string syntax_tree_to_aql_form(aq::tnode * pNode)
+std::string syntax_tree_to_aql_form(const aq::tnode * const pNode)
 {
   std::string query;
   syntax_tree_to_aql_form(pNode, query);
@@ -60,13 +24,11 @@ std::string syntax_tree_to_aql_form(aq::tnode * pNode)
 }
 
 //------------------------------------------------------------------------------
-std::string& syntax_tree_to_aql_form( aq::tnode *pNode, std::string& query )
+std::string& syntax_tree_to_aql_form(const aq::tnode * const pNode, std::string& query)
 {
   if ( pNode == nullptr ) return query;
 
-	if (	pNode->tag == K_SELECT || pNode->tag == K_FROM 
-		 || pNode->tag == K_WHERE  || pNode->tag == K_GROUP
-		 || pNode->tag == K_HAVING || pNode->tag == K_ORDER )
+	if (tnode::isMainTag(pNode->tag))
 	{
     if (pNode->tag != K_SELECT)
       query += "\n";
@@ -78,11 +40,6 @@ std::string& syntax_tree_to_aql_form( aq::tnode *pNode, std::string& query )
 	else
 	{
 		std::ostringstream stmp;
-
-    if ((pNode->tag == K_EQ) && IsColumnReference(pNode->left) && IsColumnReference(pNode->right))
-    {
-      pNode->tag = K_JEQ;
-    }
 
     if (pNode->tag == K_JNO) 
     {
@@ -133,7 +90,7 @@ std::string& syntax_tree_to_aql_form( aq::tnode *pNode, std::string& query )
 }
 
 //------------------------------------------------------------------------------
-std::string syntax_tree_to_sql_form(aq::tnode * pNode, unsigned int level)
+std::string syntax_tree_to_sql_form(const aq::tnode * const pNode, unsigned int level)
 {
   std::string query;
   syntax_tree_to_sql_form(pNode, query, level);
@@ -141,7 +98,7 @@ std::string syntax_tree_to_sql_form(aq::tnode * pNode, unsigned int level)
 }
 
 //------------------------------------------------------------------------------
-std::string& syntax_tree_to_sql_form(aq::tnode * pNode, std::string& query, unsigned int level)
+std::string& syntax_tree_to_sql_form(const aq::tnode * const pNode, std::string& query, unsigned int level)
 {
 	if ( pNode == nullptr ) return query;
 
@@ -153,9 +110,7 @@ std::string& syntax_tree_to_sql_form(aq::tnode * pNode, std::string& query, unsi
 	
   bool bill = false;
 
-	if (	pNode->tag == K_SELECT || pNode->tag == K_FROM 
-		 || pNode->tag == K_WHERE  || pNode->tag == K_GROUP
-		 || pNode->tag == K_HAVING || pNode->tag == K_ORDER )
+	if (tnode::isMainTag(pNode->tag))
 	{
     if ( pNode->tag == K_SELECT && pNode->parent )
       query += " (";
@@ -217,7 +172,7 @@ std::string& syntax_tree_to_sql_form(aq::tnode * pNode, std::string& query, unsi
 }
 
 //------------------------------------------------------------------------------
-std::string& syntax_tree_to_sql_form_nonext(aq::tnode * pNode, std::string& query, unsigned int level)
+std::string& syntax_tree_to_sql_form_nonext(const aq::tnode * const pNode, std::string& query, unsigned int level)
 {
 	if (pNode == nullptr) return query;
 
@@ -227,9 +182,7 @@ std::string& syntax_tree_to_sql_form_nonext(aq::tnode * pNode, std::string& quer
 		return query;
 	}
 	
-	if (	pNode->tag == K_SELECT || pNode->tag == K_FROM 
-		 || pNode->tag == K_WHERE  || pNode->tag == K_GROUP
-		 || pNode->tag == K_HAVING || pNode->tag == K_ORDER )
+	if (tnode::isMainTag(pNode->tag))
 	{
 		query += " " + std::string(id_to_string(pNode->tag)) + " ";
 		aq::syntax_tree_to_sql_form_nonext(pNode->left, query, ++level);

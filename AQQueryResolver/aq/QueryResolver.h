@@ -88,8 +88,10 @@ private:
   /// solve all selects found in the main select
   void solveNested();
 	void solveNested(aq::tnode*& pNode, unsigned int nSelectLevel, aq::tnode* pLastSelect, bool inFrom, bool inIn);
+  void updateTableName();
   void changeTemporaryTableName(aq::tnode * pNode);
   void updateBaseDesc();
+  void generateAQEngineQuery(std::string& query, std::vector<std::string>& joinPath) const;
   bool isCompressable();
   boost::tribool isCompressable() const { return this->compressable; }
   std::string getOriginalColumn(const std::string& alias) const;

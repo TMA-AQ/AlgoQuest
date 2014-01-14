@@ -37,7 +37,7 @@ namespace aq
     //
     //
     std::string new_request_file = settings.workingPath + "New_Request.txt";
-    aq::SaveFile(new_request_file.c_str(), query.c_str());
+    aq::util::SaveFile(new_request_file.c_str(), query.c_str());
 
     aq::Timer timer;
     if ((mode == 0) || (!settings.skipNestedQuery))
@@ -72,11 +72,11 @@ namespace aq
       aq::Logger::getInstance().log(AQ_NOTICE, "Load From Binary AQ Matrix: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
       if (mode == REGULAR)
       {
-        aq::DeleteFolder( settings.dpyPath.c_str() );
+        aq::util::DeleteFolder( settings.dpyPath.c_str() );
       }
       else
       {
-        aq::CleanFolder( settings.tmpPath.c_str() );
+        aq::util::CleanFolder( settings.tmpPath.c_str() );
       }
 #else
       aqMatrix->loadHeader(settings.szTempPath2, this->tableIDs);
@@ -105,7 +105,7 @@ namespace aq
   void AQEngine::renameResult(unsigned int id, std::vector<std::pair<std::string, std::string> >& resultTables)
   {
     std::vector<std::string> files;
-    if(aq::GetFiles(this->settings.tmpPath.c_str(), files) != 0)
+    if (aq::util::getFileNames(this->settings.tmpPath.c_str(), files) != 0)
       throw aq::generic_error(aq::generic_error::COULD_NOT_OPEN_FILE, "");
 
     size_t reg = 0;
@@ -150,7 +150,7 @@ namespace aq
           ::rename(oldFile.c_str(), newFile);
 
           Table::Ptr table = this->baseDesc.getTable(reg);
-          packet = table->TotalCount / this->settings.packSize;
+          packet = table->getTotalCount() / this->settings.packSize;
           sprintf(newFile, "B001REG%.4luTMP%.4uP%.12lu", reg, id, packet + 1);
 
           for (auto it = this->baseDesc.getTables().rbegin(); it != this->baseDesc.getTables().rend(); ++it)
@@ -201,8 +201,8 @@ namespace aq
 
   void AQEngine::clean() const
   {
-    aq::DeleteFolder(settings.workingPath.c_str());
-    aq::DeleteFolder(settings.tmpPath.c_str());
+    aq::util::DeleteFolder(settings.workingPath.c_str());
+    aq::util::DeleteFolder(settings.tmpPath.c_str());
   }
 
 #ifdef WIN32
@@ -227,8 +227,8 @@ namespace aq
 
     std::string prg_s("E:/AQ_Bin/bin/aq-engine.exe");
 
-    std::wstring wprg = aq::string2Wstring(prg_s);
-    std::wstring warg = aq::string2Wstring(args);
+    std::wstring wprg = aq::util::string2Wstring(prg_s);
+    std::wstring warg = aq::util::string2Wstring(args);
     LPCWSTR prg_wstr = wprg.c_str();
     LPCWSTR arg_wstr = warg.c_str();
     if (CreateProcessW(prg_wstr, (LPWSTR)arg_wstr, nullptr, nullptr, FALSE, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi))

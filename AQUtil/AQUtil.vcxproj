@@ -138,7 +138,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>Level4</WarningLevel>
+      <WarningLevel>Level3</WarningLevel>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -159,9 +159,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="aq\Algo.h" />
     <ClInclude Include="aq\Base.h" />
     <ClInclude Include="aq\Column.h" />
@@ -170,6 +167,7 @@
     <ClInclude Include="aq\BaseDesc.h" />
     <ClInclude Include="aq\DateConversion.h" />
     <ClInclude Include="aq\Exceptions.h" />
+    <ClInclude Include="aq\FileCloser.h" />
     <ClInclude Include="aq\FileMapper.h" />
     <ClInclude Include="aq\GenericFileMapper.h" />
     <ClInclude Include="aq\Logger.h" />
@@ -184,8 +182,6 @@
     <ClInclude Include="aq\Timer.h" />
     <ClInclude Include="aq\Utilities.h" />
     <ClInclude Include="aq\WIN32FileMapper.h" />
-    <ClInclude Include="stdafx.h" />
-    <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="aq\Base.cpp" />
@@ -223,6 +219,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="aq\LocklessQueue.h" />
+    <None Include="doc\doxyfile" />
+    <None Include="mainpage.dox" />
     <None Include="Tests\Makefile.win" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

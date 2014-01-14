@@ -21,30 +21,32 @@ namespace aq
 {
 
 //------------------------------------------------------------------------------
-Table::Table()
+Table::Table(const std::string& _name, unsigned int _id, uint64_t _totalCount)
   : 
-	ID(0), 
-	HasCount(false), 
-	TotalCount(0), 
-	GroupByApplied(false),
-	OrderByApplied(false),
-	NoAnswer(false)
+  ID(_id), 
+  HasCount(false), 
+  TotalCount(_totalCount), 
+  GroupByApplied(false), 
+  OrderByApplied(false),
+  NoAnswer(false),
+  temporary(false)
 {
+	this->setName(_name);
 	memset(szBuffer, 0, STR_BUF_SIZE);
 }
 
 //------------------------------------------------------------------------------
-Table::Table(const std::string& name, unsigned int ID, bool _temporary)
+Table::Table(const std::string& _name, unsigned int _id, uint64_t _totalCount, bool _temporary)
   : 
 	ID(ID), 
-	HasCount(false), 
+	HasCount(_totalCount), 
 	TotalCount(0), 
 	GroupByApplied(false), 
 	OrderByApplied(false),
 	NoAnswer(false),
   temporary(_temporary)
 {
-	this->setName( name );
+	this->setName(_name);
 	memset(szBuffer, 0, STR_BUF_SIZE);
 }
 
@@ -63,7 +65,8 @@ Table::Table(const Table& source)
 	memset(szBuffer, 0, STR_BUF_SIZE);
   for (auto& c : source.Columns)
   {
-    this->Columns.push_back(new Column(*c));
+    Column::Ptr column(new Column(*c));
+    this->Columns.push_back(column);
   }
 }
 
@@ -88,7 +91,8 @@ Table& Table::operator=(const Table& source)
     memset(szBuffer, 0, STR_BUF_SIZE);
     for (auto& c : source.Columns)
     {
-      this->Columns.push_back(new Column(*c));
+      Column::Ptr column(new Column(*c));
+      this->Columns.push_back(column);
     }
   }
   return *this;

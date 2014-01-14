@@ -294,7 +294,7 @@ int generate_tmp_table(const aq::Settings& settings, aq::base_t& baseDesc, unsig
     {
       if (fd != NULL)
         fclose(fd);
-      std::string tmpFilename = settings.rootPath + aq::getTemporaryFileName(tableIndex,  columnIndex,  partIndex, type.c_str(),  size);
+      std::string tmpFilename = settings.rootPath + aq::Database::getTemporaryFileName(tableIndex,  columnIndex,  partIndex, type.c_str(),  size);
       fd = fopen(tmpFilename.c_str(), "w");
       if (fd == NULL)
         return -1;
@@ -463,9 +463,9 @@ int processQuery(const std::string& query, aq::Settings& settings, aq::Base& bas
   if (!keepFiles)
   {
     aq::Logger::getInstance().log(AQ_NOTICE, "remove temporary directory '%s'\n", settings.tmpPath.c_str());
-    aq::DeleteFolder(settings.tmpPath.c_str());
+    aq::util::DeleteFolder(settings.tmpPath.c_str());
     aq::Logger::getInstance().log(AQ_NOTICE, "remove working directory '%s'\n", settings.workingPath.c_str());
-    aq::DeleteFolder(settings.workingPath.c_str());
+    aq::util::DeleteFolder(settings.workingPath.c_str());
   }
 
 	return rc;

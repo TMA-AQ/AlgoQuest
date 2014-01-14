@@ -24,15 +24,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="stdafx.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="targetver.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
     <ClInclude Include="aq\Logger.h">
       <Filter>Fichiers d%27en-tête\aq</Filter>
     </ClInclude>
@@ -97,6 +88,9 @@
       <Filter>Fichiers d%27en-tête\aq</Filter>
     </ClInclude>
     <ClInclude Include="aq\Table.h">
+      <Filter>Fichiers d%27en-tête\aq</Filter>
+    </ClInclude>
+    <ClInclude Include="aq\FileCloser.h">
       <Filter>Fichiers d%27en-tête\aq</Filter>
     </ClInclude>
   </ItemGroup>
@@ -165,6 +159,12 @@
     </None>
     <None Include="aq\LocklessQueue.h">
       <Filter>Fichiers d%27en-tête\aq</Filter>
+    </None>
+    <None Include="doc\doxyfile">
+      <Filter>Fichiers de ressources</Filter>
+    </None>
+    <None Include="mainpage.dox">
+      <Filter>Fichiers de ressources</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -322,6 +322,8 @@ void AQMatrix::compress()
 
 void AQMatrix::writeTemporaryTable()
 {
+  if (this->matrix.empty())
+    return;
   uint64_t packet = 0;
   char filename[1024];
   FILE * fd;
@@ -376,7 +378,7 @@ void AQMatrix::writeTemporaryTable()
   for (auto it = this->matrix.begin(); it != this->matrix.end(); ++it)
   {
     Table::Ptr table = this->baseDesc.getTable((*it).table_id);
-    uint64_t n = table->TotalCount / this->settings.packSize;
+    uint64_t n = table->getTotalCount() / this->settings.packSize;
     for (uint64_t i = 0; i <= n; ++i)
     {
       sprintf(filename, "%s/B001REG%.4luTMP%.4luP%.12lu.TMP", this->settings.tmpPath.c_str(), (*it).table_id, this->uid, i);

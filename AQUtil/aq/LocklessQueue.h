@@ -8,9 +8,7 @@
 namespace aq 
 {
 
-	/*!
-	* \brief Lockless queue for one thread pushing and one thread poping
-	*/
+	/// \brief Lockless queue for one thread pushing and one thread poping
 	template <class T> class LocklessQueue
 	{
 	private:

@@ -19,7 +19,7 @@ bool AggregateVerb::changeQuery(aq::tnode* pStart,
                                 VerbResult::Ptr resRight, 
                                 VerbResult::Ptr resNext )
 {
-	if ((this->Context != K_SELECT) && (this->Context != K_HAVING))
+	if ((this->getContext() != K_SELECT) && (this->getContext() != K_HAVING))
   {
 		throw generic_error( generic_error::AGGREGATE_NOT_IN_SELECT_OR_HAVING, "" );
   }

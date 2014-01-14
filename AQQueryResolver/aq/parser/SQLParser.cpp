@@ -1,7 +1,6 @@
 #include "SQLParser.h"
 #include <aq/DBTypes.h>
 #include <aq/Exceptions.h>
-#include "sql92_grm_tab.hpp"
 #include "ID2Str.h"
 
 #include <cstdio>
@@ -245,7 +244,7 @@ std::string tnode::to_string() const
 		return szBuffer;
 		break;
 	case NODE_DATA_NUMBER: 
-		doubleToString( szBuffer, this->data.val_number );
+		util::doubleToString( szBuffer, this->data.val_number );
 		return szBuffer;
 		break;
 	case NODE_DATA_STRING:
@@ -287,16 +286,16 @@ bool tnode::cmp(const tnode * n2) const
 }
 
 //------------------------------------------------------------------------------
-tnode* tnode::clone_subtree()
+tnode* tnode::clone_subtree() const
 {
-	stack<tnode*> nodes;
+	stack<const tnode*> nodes;
 	nodes.push(this);
 	tnode* pClone = new tnode(*this);
 	stack<tnode*> clones;
 	clones.push( pClone );
 	while( !nodes.empty() )
 	{
-		tnode* nodeIdx = nodes.top();
+		const tnode* nodeIdx = nodes.top();
 		tnode* cloneIdx = clones.top();
 		nodes.pop();
 		clones.pop();
@@ -323,7 +322,7 @@ tnode* tnode::clone_subtree()
 }
 
 //------------------------------------------------------------------------------
-void tnode::treeListToNodeArray(std::vector<tnode*>& nodes, tag_t tag)
+void tnode::treeListToNodeArray(std::vector<tnode*>& nodes, tag_t tag) const
 {
 	if (this->getTag() == tag)
 	{
@@ -337,14 +336,14 @@ void tnode::treeListToNodeArray(std::vector<tnode*>& nodes, tag_t tag)
 }
 
 //------------------------------------------------------------------------------
-void tnode::joinlistToNodeArray(std::vector<tnode*>& nodes)
+void tnode::joinlistToNodeArray(std::vector<tnode*>& nodes) const
 {
-  aq::tnode * join = this->find_first_node(K_JOIN);
-  aq::tnode * join2 = nullptr;
+  const aq::tnode * join = this->find_first(K_JOIN);
+  const aq::tnode * join2 = nullptr;
   while (join != nullptr)
   {
     nodes.push_back(join->right->clone_subtree());
-    if ((join2 = join->left->find_deeper_node(K_JOIN)) == nullptr)
+    if ((join2 = join->left->find_deeper(K_JOIN)) == nullptr)
     {
       nodes.push_back(join->left->clone_subtree());
     }
@@ -353,90 +352,118 @@ void tnode::joinlistToNodeArray(std::vector<tnode*>& nodes)
 }
 
 //------------------------------------------------------------------------------
-void tnode::find_nodes(tag_t tag, std::vector<tnode*>& l)
+namespace helper
 {
-  if (this->getTag() == tag)
-    l.push_back(this);
-  if (this->left != nullptr) 
-    this->left->find_nodes(tag, l);
-  if (this->right != nullptr)
-    this->right->find_nodes(tag, l);
-  if (this->next != nullptr)
-    this->next->find_nodes(tag, l);
+  template <typename T>
+  void find_nodes(T n, tnode::tag_t tag, std::vector<T>& l)
+  {
+    if (n == nullptr) 
+      return;
+    if (n->getTag() == tag)
+      l.push_back(n);
+    find_nodes<T>(n->left, tag, l);
+    find_nodes<T>(n->right, tag, l);
+    find_nodes<T>(n->next, tag, l);
+  }
 }
 
 //------------------------------------------------------------------------------
-tnode* tnode::find_main_node(tag_t tag)
+void tnode::find_nodes(tag_t tag, std::vector<tnode*>& l)
+{
+  helper::find_nodes<tnode*>(this, tag, l);
+}
+
+//------------------------------------------------------------------------------
+void tnode::find_nodes(tag_t tag, std::vector<const tnode*>& l) const
+{
+  helper::find_nodes<const tnode*>(this, tag, l);
+}
+
+//------------------------------------------------------------------------------
+tnode * tnode::find_main(tag_t tag)
 {
 	if (this->getTag() == tag)
 		return this;
 	if (this->next != nullptr) 
-    return this->next->find_main_node(tag);
+    return this->next->find_main(tag);
 	return nullptr;
 }
 
 //------------------------------------------------------------------------------
-tnode* tnode::find_first_node(tag_t tag)
+tnode * tnode::find_first(tag_t tag)
 {	
   tnode * pNodeFound = nullptr;
 	if (this->getTag() == tag)
 		return this;
 
- 	if ((this->left != nullptr) && ((pNodeFound = this->left->find_first_node(tag)) != nullptr))
+ 	if ((this->left != nullptr) && ((pNodeFound = this->left->find_first(tag)) != nullptr))
  		return pNodeFound;
 
- 	if ((this->right != nullptr) && ((pNodeFound = this->right->find_first_node(tag)) != nullptr))
+ 	if ((this->right != nullptr) && ((pNodeFound = this->right->find_first(tag)) != nullptr))
 		return pNodeFound;
 
 	return nullptr;
 }
 //------------------------------------------------------------------------------
-tnode* tnode::findOut_IDENT(const std::string& name)
+tnode * tnode::find_first(const std::string& name)
 {	
   tnode * pNodeFound = nullptr;
 
 	if ((this->getTag() == K_COLUMN || this->getTag() == K_IDENT) && this->getData().val_str == name)
 		return this;
 
- 	if ((this->left != nullptr) && ((pNodeFound = this->left->findOut_IDENT(name)) != nullptr))
+ 	if ((this->left != nullptr) && ((pNodeFound = this->left->find_first(name)) != nullptr))
  		return pNodeFound;
 
- 	if ((this->right != nullptr) && ((pNodeFound = this->right->findOut_IDENT(name)) != nullptr))
+ 	if ((this->right != nullptr) && ((pNodeFound = this->right->find_first(name)) != nullptr))
 		return pNodeFound;
 
 	return nullptr;
 }
 //------------------------------------------------------------------------------
-tnode* tnode::find_first_node_diffTag(tag_t tag, tnode::tag_t diffTag)
+tnode * tnode::find_first(tag_t tag, tnode::tag_t diffTag)
 {	
   tnode * pNodeFound = nullptr;
   
-  if (this->getTag() == tag && this->parent && this->parent->getTag() != diffTag)
+  if (this->getTag() == tag && this->parent && (this->parent->getTag() != diffTag))
 		return this;
 
- 	if ((this->left != nullptr) && ((pNodeFound = this->left->find_first_node_diffTag(tag, diffTag)) != nullptr))
+ 	if ((this->left != nullptr) && ((pNodeFound = this->left->find_first(tag, diffTag)) != nullptr))
  		return pNodeFound;
 
- 	if ((this->right != nullptr) && ((pNodeFound = this->right->find_first_node_diffTag(tag, diffTag)) != nullptr))
+ 	if ((this->right != nullptr) && ((pNodeFound = this->right->find_first(tag, diffTag)) != nullptr))
 		return pNodeFound;
 
 	return nullptr;
 }
 //------------------------------------------------------------------------------
-tnode* tnode::find_deeper_node(tag_t tag) 
+tnode * tnode::find_deeper(tag_t tag)
 {
 	tnode * pNodeFound = nullptr;
 
- 	if ((this->left != nullptr) && ((pNodeFound = this->left->find_deeper_node(tag)) != nullptr))
+ 	if ((this->left != nullptr) && ((pNodeFound = this->left->find_deeper(tag)) != nullptr))
  		return pNodeFound;
 
- 	if ((this->right != nullptr) && ((pNodeFound = this->right->find_deeper_node(tag)) != nullptr))
+ 	if ((this->right != nullptr) && ((pNodeFound = this->right->find_deeper(tag)) != nullptr))
 		return pNodeFound;
 
 	if (this->getTag() == tag)
 		return this;
 
 	return nullptr;
+}
+
+//------------------------------------------------------------------------------
+bool tnode::isColumnReference() const
+{
+  if ((this->tag == K_COLUMN) ||
+      ((this->tag == K_PERIOD) &&
+       ((this->left != nullptr) && (this->right != nullptr)) && 
+       (this->left->tag == K_IDENT) && (this->right->tag == K_COLUMN)))
+  {
+    return true;
+	}
+	return false;
 }
 
 //------------------------------------------------------------------------------
@@ -476,66 +503,54 @@ void tnode::dump(std::ostream& os, std::string indent) const
 // STATIC METHODS
 
 //------------------------------------------------------------------------------
-tnode* tnode::get_leftmost_child(tnode * pNode) {
-	if ( pNode == nullptr )
+tnode* tnode::get_leftmost_child(tnode * pNode) 
+{
+	if (pNode == nullptr)
 		return nullptr;
-	if ( pNode->left != nullptr )
-		return get_leftmost_child( pNode->left );
-	else if ( pNode->right != nullptr )
-		return get_leftmost_child( pNode->right );
+	if (pNode->left != nullptr)
+		return get_leftmost_child(pNode->left);
+	else if (pNode->right != nullptr)
+		return get_leftmost_child(pNode->right);
 	return pNode;
 }
 
 //------------------------------------------------------------------------------
-void tnode::checkTree(tnode * tree, std::set<tnode*>& nodes)
+namespace helper 
 {
-
-  if (tree == nullptr) return;
-
-  std::set<tnode*>::iterator it = nodes.find(tree);
-  assert(it == nodes.end());
-  if (it != nodes.end())
+  void checkTree(const tnode * tree, std::set<const tnode*>& nodes)
   {
-    throw aq::generic_error(aq::generic_error::INVALID_QUERY, "recurse in tnode structure is not allowed");
+
+    if (tree == nullptr) return;
+
+    auto it = nodes.find(tree);
+    assert(it == nodes.end());
+    if (it != nodes.end())
+    {
+      throw aq::generic_error(aq::generic_error::INVALID_QUERY, "recurse in tnode structure is not allowed");
+    }
+    nodes.insert(tree);
+
+    switch (tree->getDataType())
+    {
+    case aq::tnode::tnodeDataType::NODE_DATA_INT: break;
+    case aq::tnode::tnodeDataType::NODE_DATA_NUMBER: break;
+    case aq::tnode::tnodeDataType::NODE_DATA_STRING: 
+      //assert(tree->data.val_str != nullptr); 
+      //assert((tree->nStrBufCb % STR_BUF_SIZE_ROUND_UP) == 0);
+      //assert(tree->nStrBufCb >= strlen(tree->data.val_str));
+      break;
+    }
+
+    checkTree(tree->left, nodes);
+    checkTree(tree->right, nodes);
+    checkTree(tree->next, nodes);
   }
-  nodes.insert(tree);
-
-  switch (tree->getDataType())
-  {
-  case aq::tnode::tnodeDataType::NODE_DATA_INT: break;
-  case aq::tnode::tnodeDataType::NODE_DATA_NUMBER: break;
-  case aq::tnode::tnodeDataType::NODE_DATA_STRING: 
-    //assert(tree->data.val_str != nullptr); 
-    //assert((tree->nStrBufCb % STR_BUF_SIZE_ROUND_UP) == 0);
-    //assert(tree->nStrBufCb >= strlen(tree->data.val_str));
-    break;
-  }
-
-  checkTree(tree->left, nodes);
-  checkTree(tree->right, nodes);
-  checkTree(tree->next, nodes);
-
 }
 
-//------------------------------------------------------------------------------
-tnode* tnode::nodeArrayToTreeList( const std::vector<tnode*>& nodes, tag_t tag )
+void tnode::checkTree(const tnode * tree)
 {
-	if( nodes.size() < 1 )
-		return nullptr;
-	if( nodes.size() == 1 )
-		return nodes[0];
-
-	tnode* pNode = new tnode( tag );
-	tnode* pStart = pNode;
-	for( size_t idx = nodes.size() - 1; idx > 1; --idx )
-	{
-		pNode->left = new tnode( tag );
-		pNode->right = nodes[idx];
-		pNode = pNode->left;
-	}
-	pNode->left = nodes[0];
-	pNode->right = nodes[1];
-	return pStart;
+  std::set<const tnode*> nodes;
+  helper::checkTree(tree, nodes);
 }
 
 //------------------------------------------------------------------------------
@@ -563,6 +578,12 @@ void tnode::delete_subtree(tnode *& pNode)
 		delete nodes[idx];
 	}
   pNode = nullptr;
+}
+
+//------------------------------------------------------------------------------
+bool tnode::isMainTag(tag_t tag)
+{
+  return tag == K_SELECT || tag == K_FROM || tag == K_WHERE || tag == K_GROUP || tag == K_HAVING || tag == K_ORDER;
 }
 
 //------------------------------------------------------------------------------

@@ -80,6 +80,7 @@ public:
   AQENGINE_API void writeTemporaryTable();
 
   AQENGINE_API const std::vector<std::string>& getJoinPath() { return this->joinPath; }
+  AQENGINE_API matrix_t& getMatrix() { return this->matrix; }
   AQENGINE_API const matrix_t& getMatrix() const { return this->matrix; }
   AQENGINE_API const size_t getTableId(size_t c) const { return this->matrix[c].table_id; }
 	AQENGINE_API const v_size_t& getColumn(size_t c) const { return this->matrix[c].indexes; }

@@ -7,6 +7,7 @@
 namespace aq
 {
 
+/// \brief A generic file mapper used the standard C file library
 class GenericFileMapper
 {
 public:
@@ -22,7 +23,7 @@ public:
 
 	int read(void * buffer, size_t offset, size_t len);
   int write(void * buffer, size_t offset, size_t len);
-  int move(size_t new_offset, size_t old_offset, size_t len);
+  int move(size_t new_offset, size_t old_offset, size_t len); ///< \todo not implemented
   int erase(size_t offset, size_t len);
   size_t size() { return this->m_size; }
 

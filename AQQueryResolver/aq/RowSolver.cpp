@@ -88,7 +88,7 @@ void RowSolver::prepareColumnAndColumnMapper(const std::vector<Column::Ptr>& col
     
     // COLUMN
     Column::Ptr c(new Column(*columnTypes[i]));
-    c->setTableID(BaseDesc.getTable(c->getTableName())->ID);
+    c->setTableID(BaseDesc.getTable(c->getTableName())->getID());
     for (auto it = columnGroup.begin(); it != columnGroup.end(); ++it)
     {
       const aq::tnode * node = *it;
@@ -100,7 +100,7 @@ void RowSolver::prepareColumnAndColumnMapper(const std::vector<Column::Ptr>& col
     }
     infos.column = c;
 
-    columnTypes[i]->setTableID(BaseDesc.getTable(columnTypes[i]->getTableName())->ID);
+    columnTypes[i]->setTableID(BaseDesc.getTable(columnTypes[i]->getTableName())->getID());
 
     // MAPPER
     auto& cm = infos.mapper;
@@ -120,7 +120,7 @@ void RowSolver::prepareColumnAndColumnMapper(const std::vector<Column::Ptr>& col
         table = BaseDesc.getTable(table->getReferenceTable());
       }
 
-      cm = new_column_mapper(c->getType(), settings.dataPath.c_str(), table->ID, c->getID(), c->getSize(), settings.packSize);
+      cm = new_column_mapper(c->getType(), settings.dataPath.c_str(), table->getID(), c->getID(), c->getSize(), settings.packSize);
     }
     infos.mapper = cm;
     
@@ -163,10 +163,10 @@ void RowSolver::addGroupColumn(const std::vector<Column::Ptr>& columnTypes,
           auto& infos = *columns_infos.rbegin();
 
           // COLUMN
-          infos.column = new Column(*table.Columns[idx]);
+          infos.column.reset(new Column(*table.Columns[idx]));
           auto& column = infos.column;
           column->setTableName(table.getName());
-          column->setTableID(BaseDesc.getTable(column->getTableName())->ID);
+          column->setTableID(BaseDesc.getTable(column->getTableName())->getID());
           column->GroupBy = true;
 
           // MAPPER

@@ -15,23 +15,47 @@ namespace aq
 
   void AQEngineSimulate::call(const std::string& query, aq::AQEngine_Intf::mode_t mode)
   {
-    this->aqMatrix.reset(new aq::AQMatrix(this->settings, this->baseDesc));
-
-    this->createTableIDs(query);
-
-    std::cout << "TableIDs value =" << std::endl;
-    for (auto& tid : this->tableIDs) 
-    {
-      std::cout << "[" << tid << "]" << std::endl;
-    }
-
     aq::core::SelectStatement ss;
     aq::parser::parse(query + ";", ss);
 
     std::cout << "Execute:" << std::endl;
     std::cout << ss.to_string(aq::core::SelectStatement::output_t::AQL) << std::endl;
 
+    //std::cout << "TableIDs value =" << std::endl;
+    //for (auto& tid : this->tableIDs) 
+    //{
+    //  std::cout << "[" << tid << "]" << std::endl;
+    //}
     // this->aqMatrix->simulate( rand() % 1000, this->tableIDs );
+    
+    if (mode != aq::AQEngine_Intf::mode_t::NESTED_2)
+    {
+      this->aqMatrix.reset(new aq::AQMatrix(this->settings, this->baseDesc));
+      this->createTableIDs(query);
+      auto& matrix = aqMatrix->getMatrix();
+      for (const auto& col : ss.selectedTables)
+      {
+        const auto& tname = col.table.name;
+        bool find = false;
+        for (const auto& table : matrix)
+        {
+          if (table.tableName == tname)
+          {
+            find = true;
+            break;
+          }
+        }
+        if (!find)
+        {
+          const auto& table = baseDesc.getTable(tname);
+          matrix.push_back(aq::AQMatrix::matrix_t::value_type());
+          auto& t = *matrix.rbegin();
+          t.baseTableName = t.tableName = table->getName();
+          t.table_id = table->getID();
+        }
+      }
+    }
+
   }
 
   void AQEngineSimulate::call(const aq::core::SelectStatement& query, aq::AQEngine_Intf::mode_t mode)
@@ -77,8 +101,8 @@ namespace aq
       return;
 
     if ( (pNode->tag == K_IDENT) 
-      && (std::find( this->tableIDs.begin(), this->tableIDs.end(), this->baseDesc.getTable( pNode->getData().val_str )->ID ) == this->tableIDs.end()) )
-      this->tableIDs.push_back( this->baseDesc.getTable( pNode->getData().val_str )->ID );
+      && (std::find( this->tableIDs.begin(), this->tableIDs.end(), this->baseDesc.getTable( pNode->getData().val_str )->getID() ) == this->tableIDs.end()) )
+      this->tableIDs.push_back( this->baseDesc.getTable( pNode->getData().val_str )->getID() );
 
     this->createTableIDs( pNode->left );
     this->createTableIDs( pNode->right );
@@ -106,9 +130,10 @@ namespace aq
       querySS >> s;
     } while ((s != "") && (s != ";") && (s != "WHERE") && (s != "GROUP") && (s != "ORDER"));
 
-    std::for_each(tableNames.begin(), tableNames.end(), [&] (const std::string& tname) {
-      this->tableIDs.push_back(this->baseDesc.getTable(tname.c_str())->ID);
-    });
+    for (const auto& tname : tableNames) 
+    {
+      this->tableIDs.push_back(this->baseDesc.getTable(tname)->getID());
+    }
     
   }
 }

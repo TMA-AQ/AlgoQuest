@@ -21,132 +21,278 @@
 
 namespace aq {
 namespace util {
- 
-void addAlias( aq::tnode* pNode );
-void addConditionsToWhere( aq::tnode* pCond, aq::tnode* pStart );
-void addInnerOuterNodes( aq::tnode* pNode, aq::tnode::tag_t leftTag, aq::tnode::tag_t rightTag );
-void addInnerOuterNodes( aq::tnode* pNode, aq::tnode::tag_t tag, const std::vector<std::string>& tables );
-void mark_as_deleted( aq::tnode* pNode );
-void solveSelectStar(aq::tnode* pNode, 
-                     Base& BaseDesc,
-                     std::vector<std::string>& columnNames,
-                     std::vector<std::string>& columnDisplayNames);
 
-void  solveIdentRequest( aq::tnode* pNode, Base& BaseDesc ); ///< create trees of select
-void  assignIdentRequest( aq::tnode* pNode, std::vector<aq::tnode*> tables, Base& BaseDesc ); //  used in solveBaseName
-std::string checkAndName( std::string colName, std::vector<aq::tnode*> tables, Base& BaseDesc ); // check if the COLUMN exist in the IDENT COLUMN and chose the IDENT
-aq::tnode*  assignSafe( aq::tnode* colRef, aq::tnode* clean ); // cut code
-aq::tnode*  createPeriodColumn( std::string column, std::string period ); //  create a little tree of a period/column/ident
-bool  assignFake( std::string& name, aq::tnode* table, aq::tnode* column );
+  namespace {
 
-void solveSelectStarExterior( aq::tnode* pInterior, aq::tnode* pExterior );
-void solveOneTableInFrom( aq::tnode* pStart, Base& BaseDesc );
-void moveFromJoinToWhere( aq::tnode* pStart, Base& BaseDesc );
-void changeTableNames(	aq::tnode* pIntSelectAs, aq::tnode* pInteriorSelect, aq::tnode* pExteriorSelect );
-void changeColumnNames(	aq::tnode* pIntSelectAs, aq::tnode* pInteriorSelect, aq::tnode* pExteriorSelect, bool keepAlias );
-aq::tnode * getJoin(aq::tnode* pNode);
-bool isMonoTable(aq::tnode* query, std::string& tableName);
+  }
 
-void readTmpFile( const char* filePath, std::vector<llong>& vals );
-void writeTmpFile(	const char* filePath, const std::vector<llong>& vals, size_t startIdx, size_t endIdx );
 
-void getColumnsIds(	const Table& table, std::vector<aq::tnode*>& columns, std::vector<int>& valuePos );
 
-void eliminateAliases( aq::tnode* pSelect );
+  /// \defgroup conditions_process Pre-process joins conditions
+  /// \{
 
-void getAllColumnNodes( aq::tnode*& pNode, std::vector<aq::tnode*>& columnNodes );
+  /// \brief Add a condition in Where clause
+  /// \param pCond
+  /// \param pStart
+  void addConditionsToWhere(aq::tnode* pCond, aq::tnode* pStart);
 
-void getColumnsList( aq::tnode* pNode, std::vector<aq::tnode*>& columns );
+  /// \brief Add K_INNER/K_OUTER node a condition.
+  /// \param pNode the input and output result tree
+  /// \param leftTag K_INNER/K_OUTER on left
+  /// \param rightTag K_INNER/K_OUTER on right
+  ///
+  /// K_INNER and K_OUTER node are needed by AQ_Engine. There AQ equivalent to sql [inner/left outer/right outer/full outer] join in from clause
+  void addInnerOuterNodes(aq::tnode* pNode, aq::tnode::tag_t leftTag, aq::tnode::tag_t rightTag);
 
-void getTablesList( aq::tnode* pNode, std::list<std::string>& tables );
+  /// \brief
+  /// \param pNode
+  /// \param tag
+  /// \param tables
+  void addInnerOuterNodes(aq::tnode* pNode, aq::tnode::tag_t tag, const std::vector<std::string>& tables);
+  
+  /// \brief
+  /// \param pStart
+  /// \param BaseDesc
+  void moveFromJoinToWhere(aq::tnode* pStart, Base& BaseDesc);
 
-/// search a subtree for a node and return the last node that had a certain tag
-aq::tnode* getLastTag( aq::tnode*& pNode, aq::tnode* pLastTag, aq::tnode* pCheckNode, aq::tnode::tag_t tag );
+  /// \}
 
-void generate_parent(aq::tnode* pNode, aq::tnode* parent = nullptr);
 
-void getColumnTypes( aq::tnode* pNode, std::vector<Column::Ptr>& columnTypes, Base& baseDesc );
 
-void cleanQuery( aq::tnode*& pNode );
+  /// \defgroup select_process Pre-process of select clause
+  /// \{
 
-//------------------------------------------------------------------------------
-template <typename T> aq::ColumnItem<T> GetItem(const aq::tnode& n)
-{
-  aq::ColumnItem<T> item;
-  item.setValue(static_cast<T>(n.getData().val_int));
-  return item;
-}
+  /// \brief Add an alias on each select item
+  /// \param pNode the list of item to process
+  void addAlias(aq::tnode* pNode);
 
-//template <> aq::ColumnItem<char*> GetItem(const aq::tnode& n)
-//{
-//  aq::ColumnItem<char*> item;
-//  char * value = new char[strlen(n.getData().val_str) + 1];
-//  strcpy(value, n.getData().val_str);
-//  item.setValue(value);
-//  return item;
-//}
+  /// \brief Replace * in select clause by all columns resulting of the from clause
+  /// \param pNode the input and output resulting tree
+  /// \param BaseDesc Database Description with current temporary table of the query beeing processed
+  /// \param columnNames the resulting columnNames
+  /// \param columnDisplayNames the name of the columns
+  void solveSelectStar(aq::tnode* pNode, Base& BaseDesc, std::vector<std::string>& columnNames, std::vector<std::string>& columnDisplayNames);
+  
+  /// \brief Create trees of select
+  /// \param pNode
+  /// \param BaseDesc
+  void solveIdentRequest(aq::tnode* pNode, Base& BaseDesc);
 
-//------------------------------------------------------------------------------
-template <typename T> aq::tnode * GetNode(const aq::ColumnItem<T>& item)
-{
-	aq::tnode	* n = new aq::tnode(K_INTEGER);
-  n->set_int_data(item.getValue());
-	return n;
-}
+  /// \brief
+  /// \param pNode
+  /// \param tables
+  /// \param BaseDesc
+  void assignIdentRequest(aq::tnode* pNode, std::vector<aq::tnode*> tables, Base& BaseDesc);
 
-template <>
-inline aq::tnode * GetNode<double>(const aq::ColumnItem<double>& item)
-{
-  aq::tnode * n = new aq::tnode(K_REAL);
-  n->set_double_data(item.getValue());
-  return n;
-}
+  /// \brief Check if the COLUMN exist in the IDENT COLUMN and chose the IDENT
+  /// \param colName
+  /// \param tables
+  /// \param BaseDesc
+  std::string checkAndName(std::string colName, std::vector<aq::tnode*> tables, Base& BaseDesc);
 
-template <>
-inline aq::tnode * GetNode<char*>(const aq::ColumnItem<char*>& item)
-{
-  aq::tnode * n = new aq::tnode(K_STRING);
-  n->set_string_data(item.getValue());
-  return n;
-}
+  /// \brief
+  /// \param colRef
+  /// \param clean
+  aq::tnode * assignSafe(aq::tnode* colRef, aq::tnode* clean);
 
-aq::tnode* GetTree( Table& table );
+  /// \brief Create a little tree of a period/column/ident
+  /// \param column
+  /// \param period
+  aq::tnode * createPeriodColumn(std::string column, std::string period);
 
-void toNodeListToStdList(tnode* pNode, std::list<tnode*>& columns);
+  /// \brief
+  /// \param name
+  /// \param table
+  /// \param column
+  bool assignFake(std::string& name, aq::tnode* table, aq::tnode* column);
+  
+  /// \brief
+  /// \param pInterior
+  /// \param pExterior
+  void solveSelectStarExterior(aq::tnode* pInterior, aq::tnode* pExterior);
 
-void findAggregateFunction(const std::list<tnode *>& columns, std::list<tnode *>& aggregateColumns);
+  /// \brief
+  /// \param pIntSelectAs
+  /// \param pInteriorSelect
+  /// \param pExteriorSelect
+  void changeTableNames(aq::tnode* pIntSelectAs, aq::tnode* pInteriorSelect, aq::tnode* pExteriorSelect);
 
-void addEmptyGroupBy(tnode * pNode);
+  /// \brief
+  /// \param pIntSelectAs
+  /// \param pInteriorSelect
+  /// \param pExteriorSelect
+  /// \param keepAlias
+  void changeColumnNames(aq::tnode* pIntSelectAs, aq::tnode* pInteriorSelect, aq::tnode* pExteriorSelect, bool keepAlias);
 
-void addColumnsToGroupBy(tnode * pNode, const std::list<tnode *>& aggregateColumns);
+  /// \}
 
-void setOneColumnByTableOnSelect(tnode * pNode);
 
-void removePartitionBy(tnode *& pNode);
+  
+  /// \brief
+  /// \param pNode
+  aq::tnode * getJoin(aq::tnode* pNode);
+  
+  /// \brief
+  /// \param pNode
+  /// \param BaseDesc
+  void solveOneTableInFrom(aq::tnode* pNode, Base& BaseDesc);
 
-/// Return 1 for true, 0 for false
-int is_column_reference(const aq::tnode * pNode);
+  /// \brief
+  /// \param pNode
+  /// \param columnNodes
+  void getAllColumnNodes(aq::tnode*& pNode, std::vector<aq::tnode*>& columnNodes);
+  
+  /// \brief
+  /// \param pNode
+  /// \param columns
+  void getColumnsList(aq::tnode* pNode, std::vector<aq::tnode*>& columns);
 
-void dateNodeToBigInt(tnode * pNode);
+  /// \brief
+  /// \param pNode
+  /// \param tables
+  void getTablesList(aq::tnode* pNode, std::list<std::string>& tables);
 
-void transformExpression(const aq::Base& baseDesc, const aq::Settings& settings, aq::tnode * tree);
+  /// \brief Search in a tree for the last node matching tag
+  /// \param pNode
+  /// \param pLastTag
+  /// \param pCheckNode
+  /// \param tag 
+  aq::tnode* getLastTag(aq::tnode*& pNode, aq::tnode* pLastTag, aq::tnode* pCheckNode, aq::tnode::tag_t tag);
 
-void getAllColumns(aq::tnode* pNode, std::vector<aq::tnode*>& columns);
+  /// \brief
+  /// \param pNode
+  /// \param parent
+  void generateParent(aq::tnode* pNode, aq::tnode* parent = nullptr);
 
-void extractName(aq::tnode* pNode, std::string& name);
+  /// \brief
+  /// \param pNode
+  /// \param columnTypes
+  /// \param baseDesc
+  void getColumnTypes(aq::tnode* pNode, std::vector<Column::Ptr>& columnTypes, Base& baseDesc);
 
-/// \brief traverse subtree recursively and negate operators when needed
-///
-/// if there is a NOT to be applied and the current node is
-/// NOT: delete this node and make the child node this node
-///      if no NOT applies, apply NOT to child node
-///      if a NOT already applies, do not apply NOT to child node
-/// <, <=, >, >=, =, <>, BETWEEN, LIKE : change into the inverse version
-/// OR : change to AND, apply NOT on children
-/// AND: change to OR, apply NOT on children
-void processNot(aq::tnode*& pNode, bool applyNot);
+  /// \brief
+  /// \param pNode
+  void cleanQuery(aq::tnode*& pNode);
 
-void tnodeToSelectStatement(aq::tnode& tree, aq::core::SelectStatement& ss);
+  /// \brief
+  /// \param pNode
+  template <typename T> aq::ColumnItem<T> GetItem(const aq::tnode& pNode)
+  {
+    aq::ColumnItem<T> item;
+    item.setValue(static_cast<T>(pNode.getData().val_int));
+    return item;
+  }
+
+  //template <> aq::ColumnItem<char*> GetItem(const aq::tnode& n)
+  //{
+  //  aq::ColumnItem<char*> item;
+  //  char * value = new char[strlen(n.getData().val_str) + 1];
+  //  strcpy(value, n.getData().val_str);
+  //  item.setValue(value);
+  //  return item;
+  //}
+
+  /// \brief
+  /// \param item
+  template <typename T> aq::tnode * GetNode(const aq::ColumnItem<T>& item)
+  {
+    aq::tnode	* n = new aq::tnode(K_INTEGER);
+    n->set_int_data(item.getValue());
+    return n;
+  }
+
+  template <>
+  inline aq::tnode * GetNode<double>(const aq::ColumnItem<double>& item)
+  {
+    aq::tnode * n = new aq::tnode(K_REAL);
+    n->set_double_data(item.getValue());
+    return n;
+  }
+
+  template <>
+  inline aq::tnode * GetNode<char*>(const aq::ColumnItem<char*>& item)
+  {
+    aq::tnode * n = new aq::tnode(K_STRING);
+    n->set_string_data(item.getValue());
+    return n;
+  }
+
+  /// \brief
+  /// \param table
+  /// \todo to implement
+  aq::tnode* GetTree(Table& table);
+
+  /// \brief
+  /// \param pNode
+  /// \param columns
+  void toNodeListToStdList(tnode* pNode, std::list<tnode*>& columns);
+
+  /// \brief
+  /// \param columns
+  /// \param aggregateColumns
+  void findAggregateFunction(const std::list<tnode *>& columns, std::list<tnode *>& aggregateColumns);
+
+  /// \brief
+  /// \param pNode
+  void addEmptyGroupBy(tnode * pNode);
+
+  /// \brief
+  /// \param pNode
+  /// \param aggregateColumns
+  void addColumnsToGroupBy(tnode * pNode, const std::list<tnode *>& aggregateColumns);
+
+  /// \brief
+  /// \param pNode
+  void removePartitionBy(tnode *& pNode);
+
+  /// \brief
+  /// \param pNode
+  bool isColumnReference(const aq::tnode * pNode);
+  
+  /// \brief
+  /// \param pNode
+  void dateNodeToBigInt(tnode * pNode);
+  
+  /// \brief
+  /// \param baseDesc
+  /// \param settings
+  /// \param pNode
+  void transformExpression(const aq::Base& baseDesc, const aq::Settings& settings, aq::tnode * pNode);
+
+  /// \brief
+  /// \param pNode
+  /// \param columns
+  void getAllColumns(aq::tnode* pNode, std::vector<aq::tnode*>& columns);
+  
+  /// \brief
+  /// \param pNode
+  /// \param name
+  void extractName(aq::tnode* pNode, std::string& name);
+  
+  /// \brief get table and column name if n is a column reference
+  /// \param[int] n the input column node
+  /// \param[out] table output table name
+  /// \param[out[ column output column name
+  void getTableAndColumnName(const aq::tnode& n, std::string& table, std::string& column);
+
+  /// \brief traverse subtree recursively and negate operators when needed
+  ///
+  /// \param pNode
+  /// \param applyNot
+  ///
+  /// if there is a NOT to be applied and the current node is
+  /// NOT: delete this node and make the child node this node
+  ///      if no NOT applies, apply NOT to child node
+  ///      if a NOT already applies, do not apply NOT to child node
+  /// <, <=, >, >=, =, <>, BETWEEN, LIKE : change into the inverse version
+  /// OR : change to AND, apply NOT on children
+  /// AND: change to OR, apply NOT on children
+  void processNot(aq::tnode*& pNode, bool applyNot);
+
+  /// \brief 
+  /// \param pNode
+  /// \param stmt
+  void tnodeToSelectStatement(const aq::tnode& pNode, aq::core::SelectStatement& stmt);
 
 }
 }

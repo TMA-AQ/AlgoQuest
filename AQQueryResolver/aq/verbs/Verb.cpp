@@ -15,14 +15,19 @@ verb_error::verb_error( EType type, int verbTag ):
 }
 
 //------------------------------------------------------------------------------
-Verb::Verb(): Result(nullptr), Context(0), Disabled(false)
+Verb::Verb(): Result(nullptr), context(0), disabled(false)
 {
 }
 
 //------------------------------------------------------------------------------
-void Verb::setContext( int context )
+Verb::~Verb()
 {
-	this->Context = context;
+}
+
+//------------------------------------------------------------------------------
+void Verb::setContext(tnode::tag_t _context)
+{
+	this->context = context;
 }
 
 //------------------------------------------------------------------------------
@@ -36,33 +41,6 @@ void Verb::accept(VerbVisitor* visitor)
 {
 	visitor->visit(this);
 }
-
-/*
-//------------------------------------------------------------------------------
-void addColumn( aq::tnode* pNode, aq::tnode* pColumnNode )
-{
-	if( !pNode || !pColumnNode )
-		return;
-	if( pNode->tag != K_SELECT )
-		return;
-	assert( pNode->right == nullptr );
-	
-	if( !pNode->left )
-	{
-		pNode->left = pColumnNode;
-		return;
-	}
-	while( pNode->right && pNode->right->tag == K_COMMA )
-		pNode = pNode->right;
-	
-	aq::tnode* pAuxNode = pNode->right;
-	pNode->right = new_node( K_COMMA );
-	pNode->right->left = pAuxNode;
-	pNode->right->right = pColumnNode;
-}
-
-
-*/
 
 }
 }

@@ -96,29 +96,29 @@ Table::Ptr solveOptimalMinMax(aq::verb::VerbNode::Ptr spTree,
 {
 	if( !spTree->getLeftChild() )
   {
-    return nullptr;
+    return Table::Ptr();
 		// throw generic_error(generic_error::INVALID_QUERY, "");
   }
 	aq::verb::VerbNode::Ptr verb1 = spTree->getLeftChild();
   aq::verb::VerbNode::Ptr verb2 = nullptr;
 	if( !verb1 ) 
-    return nullptr;
+    return Table::Ptr();;
   if ((verb1->getVerbType() == K_MIN) || (verb1->getVerbType() == K_MAX))
     verb2 = verb1->getLeftChild();
   else if ((verb1->getVerbType() == K_AS) && ((verb1->getLeftChild()->getVerbType() == K_MIN) || (verb1->getLeftChild()->getVerbType() == K_MAX)))
     verb2 = verb1->getLeftChild()->getLeftChild();
   else
-    return nullptr;
+    return Table::Ptr();;
 
 	if( verb2->getVerbType() != K_PERIOD )
-		return nullptr;
+		return Table::Ptr();;
 	if( spTree->getBrother() == nullptr )
-		return nullptr;
+		return Table::Ptr();;
 	aq::verb::VerbNode::Ptr spNode = spTree;
 	do
 	{
 		if( spNode->getVerbType() == K_WHERE )
-			return nullptr;
+			return Table::Ptr();;
 		spNode = spNode->getBrother();
 	} while( spNode->getBrother() );
 
@@ -141,11 +141,10 @@ Table::Ptr solveOptimalMinMax(aq::verb::VerbNode::Ptr spTree,
 		//		minMax = item;
 	}
 	
-	table.reset(new Table());
+  assert(false);
+	table.reset(new Table("", 0, 1));
 	Column::Ptr newColumn(new Column(*column));
-	// newColumn->Items.push_back( minMax );
-	table->Columns.push_back( newColumn );
-	table->TotalCount = 1;
+	table->Columns.push_back(newColumn);
 	return table;
 }
 

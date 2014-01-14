@@ -20,7 +20,8 @@ Base::Base(const Base& source)
 {
   for (auto& t : source.Tables)
   {
-    this->Tables.push_back(new Table(*t));
+    Table::Ptr table(new Table(*t));
+    this->Tables.push_back(table);
   }
   this->Name = source.Name;
 }
@@ -28,7 +29,22 @@ Base::Base(const Base& source)
 // -------------------------------------------------------------------------------------------------
 Base::Base(const std::string& filename)
 {
-  Base::load(filename, *this);
+  if (filename == "")
+  {
+    aq::Logger::getInstance().log(AQ_WARNING, "no database specify");
+  }
+  aq::Logger::getInstance().log(AQ_INFO, "load base %s\n", filename.c_str());
+  std::fstream bdFile(filename.c_str());
+  aq::base_t baseDescHolder;
+  if (filename.substr(filename.size() - 4) == ".xml")
+  {
+    aq::base_t::build_base_from_xml(bdFile, baseDescHolder);
+  }
+  else
+  {
+    aq::base_t::build_base_from_raw(bdFile, baseDescHolder);
+  }
+  this->loadFromBaseDesc(baseDescHolder);
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -44,40 +60,18 @@ Base& Base::operator=(const Base& source)
     this->Name = source.Name;
     for (auto& t : source.Tables)
     {
-      this->Tables.push_back(new Table(*t));
+      Table::Ptr table(new Table(*t));
+      this->Tables.push_back(table);
     }
   }
   return *this;
-}
-
-// -------------------------------------------------------------------------------------------------
-int Base::load(const std::string& filename, aq::Base& bd)
-{
-  if (filename == "")
-  {
-    aq::Logger::getInstance().log(AQ_WARNING, "no database specify");
-    return -1;
-  }
-  aq::Logger::getInstance().log(AQ_INFO, "load base %s\n", filename.c_str());
-  std::fstream bdFile(filename.c_str());
-  aq::base_t baseDescHolder;
-  if (filename.substr(filename.size() - 4) == ".xml")
-  {
-    aq::build_base_from_xml(bdFile, baseDescHolder);
-  }
-  else
-  {
-    aq::build_base_from_raw(bdFile, baseDescHolder);
-  }
-  bd.loadFromBaseDesc(baseDescHolder);
-  return 0;
 }
 
 //------------------------------------------------------------------------------
 Table::Ptr Base::getTable(size_t id)
 {
 	for( size_t i = 0; i < this->Tables.size(); ++i )
-		if( id == this->Tables[i]->ID )
+		if( id == this->Tables[i]->getID() )
 			return this->Tables[i];
 	throw generic_error(generic_error::INVALID_TABLE, "cannot find table %u", id);
 }
@@ -122,11 +116,12 @@ void Base::clear()
 void Base::loadFromBaseDesc(const aq::base_t& base) 
 {
   this->Name = base.name;
-  std::for_each(base.table.begin(), base.table.end(), [&] (const base_t::table_t& table) {
-		Table::Ptr pTD(new Table(table.name, table.id));
-		pTD->TotalCount = table.nb_record;
-    std::for_each(table.colonne.begin(), table.colonne.end(), [&] (const base_t::table_t::col_t& column) {
-      aq::ColumnType type = aq::symbole_to_column_type(column.type);
+  for (const auto& table : base.table) 
+  {
+		Table::Ptr pTD(new Table(table.name, table.id, table.nb_record));
+    for (const auto& column : table.colonne) 
+    {
+      aq::ColumnType type = aq::util::symbole_to_column_type(column.type);
       unsigned int size = 0;
       switch (type)
       {
@@ -140,10 +135,11 @@ void Base::loadFromBaseDesc(const aq::base_t& base)
         size = 1; 
         break;
       }
-      pTD->Columns.push_back(new Column(column.name, column.id, size, type));
-		});
+      Column::Ptr column(new Column(column.name, column.id, size, type));
+      pTD->Columns.push_back(column);
+    }
 		this->Tables.push_back(pTD);
-  });
+  }
 }
 
 //------------------------------------------------------------------------------

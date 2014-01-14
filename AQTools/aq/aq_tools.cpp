@@ -188,6 +188,7 @@ int parse_queries(const std::string & aqHome,
 // -------------------------------------------------------------------------------------------------
 int main(int argc, char**argv)
 {
+
 	try
 	{
 
@@ -243,7 +244,7 @@ int main(int argc, char**argv)
 
     //
     // initialize verb builder
-    aq::VerbBuilder * vb = new aq::VerbBuilder;
+    boost::shared_ptr<const aq::VerbBuilder> vb(new aq::VerbBuilder);
     aq::verb::VerbFactory::GetInstance().setBuilder(vb);
 
     //
@@ -402,7 +403,7 @@ int main(int argc, char**argv)
 		if (loadDatabase)
 		{
       aq::base_t bd;
-      if (aq::build_base_from_raw(settings.dbDesc.c_str(), bd) != -1)
+      if (aq::base_t::build_base_from_raw(settings.dbDesc.c_str(), bd) != -1)
       {
         return load_database(settings, bd, tableNameToLoad);
       }
@@ -426,7 +427,7 @@ int main(int argc, char**argv)
     if (generateTmpTable)
     {
       aq::base_t bd;
-      if (aq::build_base_from_raw(settings.dbDesc.c_str(), bd) != -1)
+      if (aq::base_t::build_base_from_raw(settings.dbDesc.c_str(), bd) != -1)
       {
         int rc = 0;
         while ((nbTables-- > 0) && ((rc = generate_tmp_table(settings, bd, nbValues, minValue, maxValue)) == 0));

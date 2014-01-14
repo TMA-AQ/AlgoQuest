@@ -85,7 +85,7 @@ bool ScalarVerb::changeQuery(aq::tnode* pStart,
   // assert( scalar );
 	
   pNode->inf = 1;
-	this->Disabled = true;
+	this->disable();
   aq::tnode::delete_subtree(pNode->left);
 	aq::tnode::delete_subtree(pNode->right);
 	// pNode->set_data(scalar->getValue(), scalar->Type);

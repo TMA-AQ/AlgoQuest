@@ -12,89 +12,65 @@ VerbNode::VerbNode(): pStart(nullptr), pNode(nullptr)
 }
 
 //------------------------------------------------------------------------------
-void VerbNode::setLeftChild( VerbNode::Ptr child )
-{
-	this->Left = child;
-}
-
-//------------------------------------------------------------------------------
-void VerbNode::setRightChild( VerbNode::Ptr child )
-{
-	this->Right = child;
-}
-
-//------------------------------------------------------------------------------
-void VerbNode::setBrother( VerbNode::Ptr brother )
-{
-	this->Brother = brother;
-}
-
-//------------------------------------------------------------------------------
 void VerbNode::cloneSubtree(VerbNode::Ptr v)
 {
   if (v->getLeftChild())
   {
-    this->Left = aq::verb::VerbFactory::GetInstance().getVerb(v->getLeftChild()->getVerbType());
-    this->Left->cloneSubtree(v->getLeftChild());
+    this->left = aq::verb::VerbFactory::GetInstance().getVerb(v->getLeftChild()->getVerbType());
+    this->left->cloneSubtree(v->getLeftChild());
   }
   if (v->getRightChild())
   {
-    this->Right = aq::verb::VerbFactory::GetInstance().getVerb(v->getRightChild()->getVerbType());
-    this->Right->cloneSubtree(v->getRightChild());
+    this->right = aq::verb::VerbFactory::GetInstance().getVerb(v->getRightChild()->getVerbType());
+    this->right->cloneSubtree(v->getRightChild());
   }
   if (v->getBrother())
   {
-    this->Brother = aq::verb::VerbFactory::GetInstance().getVerb(v->getBrother()->getVerbType());
-    this->Brother->cloneSubtree(v->getBrother());
+    this->brother = aq::verb::VerbFactory::GetInstance().getVerb(v->getBrother()->getVerbType());
+    this->brother->cloneSubtree(v->getBrother());
   }
 }
 
 //------------------------------------------------------------------------------
 void VerbNode::changeQuery()
 {
-	if( this->Brother )
-		this->Brother->changeQuery();
-	if( this->Left )
-		this->Left->changeQuery();
-	if( this->Right)
-		this->Right->changeQuery();
+	if( this->brother )
+		this->brother->changeQuery();
+	if( this->left )
+		this->left->changeQuery();
+	if( this->right)
+		this->right->changeQuery();
 	
 	if( pNode->inf == 1 )
 		return;
 	
-	VerbResult::Ptr param1 = this->Left ? this->Left->getResult() : nullptr;
-	VerbResult::Ptr param2 = this->Right ? this->Right->getResult() : nullptr;
-	VerbResult::Ptr param3 = this->Brother ? this->Brother->getResult() : nullptr;
+	VerbResult::Ptr param1 = this->left ? this->left->getResult() : nullptr;
+	VerbResult::Ptr param2 = this->right ? this->right->getResult() : nullptr;
+	VerbResult::Ptr param3 = this->brother ? this->brother->getResult() : nullptr;
 	if( this->changeQuery( this->pStart, this->pNode, param1, param2, param3 ) )
 	{
 		assert( this->pNode );
 		this->pNode->inf = 1;
-		this->Disabled = true;
+		this->disable();
 	}
 	
 }
 
 //------------------------------------------------------------------------------
-void VerbNode::changeResult( Table::Ptr table )
-{
-  assert(false);
-}
-
-//------------------------------------------------------------------------------
 void VerbNode::addResultOnChild(aq::Row& row)
 {
-	if( this->Brother )
-		this->Brother->addResultOnChild( row );
+	if( this->brother )
+		this->brother->addResultOnChild( row );
 
-	if( this->Disabled )
+	if( this->isDisabled() )
 		return;
 
-	//right first because partition by modifies the column pointers in table
-	//and it should be executed before order by collects his list of column pointers
-	if( this->Right )
-		this->Right->addResultOnChild( row );
-	if( this->Left )
-		this->Left->addResultOnChild( row );
+	// right first because partition by modifies the column pointers in table
+	// and it should be executed before order by collects his list of column pointers
+	if( this->right )
+		this->right->addResultOnChild( row );
+	if( this->left )
+		this->left->addResultOnChild( row );
 
 	this->addResult( row );
   
@@ -107,19 +83,14 @@ void VerbNode::accept(VerbVisitor* visitor)
 
 void VerbNode::apply(VerbVisitor* visitor)
 {
-  if (this->Brother) this->Brother->apply(visitor);
-  if (this->Left) this->Left->apply(visitor);
-  if (this->Right) this->Right->apply(visitor);
+  if (this->brother) this->brother->apply(visitor);
+  if (this->left) this->left->apply(visitor);
+  if (this->right) this->right->apply(visitor);
   this->accept(visitor);
 }
 
 //------------------------------------------------------------------------------
-VerbNode::Ptr VerbNode::getLeftChild(){ return this->Left; }
-VerbNode::Ptr VerbNode::getRightChild(){ return this->Right; }
-VerbNode::Ptr VerbNode::getBrother(){ return this->Brother; }
-
-//------------------------------------------------------------------------------
-//helper struct for BuildVerbsTree
+// helper struct for BuildVerbsTree
 struct tnodeVerbNode
 {
 	tnodeVerbNode( aq::tnode* pNode, VerbNode::Ptr spNode ): 
@@ -129,7 +100,7 @@ struct tnodeVerbNode
 };
 
 //------------------------------------------------------------------------------
-VerbNode::Ptr VerbNode::build( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal, int context, Base& BaseDesc, Settings& settings )
+VerbNode::Ptr VerbNode::build(aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal, tnode::tag_t context, Base& BaseDesc, Settings& settings)
 {
   aq::Logger::getInstance().log(AQ_DEBUG, "build verb '%s'\n", id_to_kstring(pNode->tag));
 	VerbNode::Ptr verb = VerbFactory::GetInstance().getVerb( pNode->tag );
@@ -178,7 +149,7 @@ VerbNode::Ptr VerbNode::build( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* p
 }
 
 //------------------------------------------------------------------------------
-VerbNode::Ptr VerbNode::BuildVerbsTree( aq::tnode* pStart, const boost::array<aq::tnode::tag_t, 6>& categories_order, Base& baseDesc, Settings * settings )
+VerbNode::Ptr VerbNode::BuildVerbsTree(aq::tnode* pStart, const boost::array<aq::tnode::tag_t, 6>& categories_order, Base& baseDesc, Settings * settings)
 {
   aq::Logger::getInstance().log(AQ_DEBUG, "build verb tree\n");
 	if( pStart->tag != K_SELECT )
@@ -204,10 +175,10 @@ VerbNode::Ptr VerbNode::BuildVerbsTree( aq::tnode* pStart, const boost::array<aq
 }
 
 //------------------------------------------------------------------------------
-VerbNode::Ptr VerbNode::BuildVerbsSubtree(	aq::tnode* pSelect, aq::tnode* pStart, aq::tnode* pStartOriginal, int context, Base& BaseDesc, Settings *pSettings  )
+VerbNode::Ptr VerbNode::BuildVerbsSubtree(aq::tnode* pSelect, aq::tnode* pStart, aq::tnode* pStartOriginal, tnode::tag_t context, Base& BaseDesc, Settings *pSettings)
 {
 	VerbNode::Ptr spStart = VerbNode::build(pSelect, pStart, pStartOriginal, context, BaseDesc, *pSettings);
-	if( !spStart || !spStart->isToSolved() )
+	if( !spStart || !spStart->toSolve )
 		return spStart;
 	std::deque<tnodeVerbNode> deq;
 	deq.push_back( tnodeVerbNode(pStart, spStart) );
@@ -224,7 +195,7 @@ VerbNode::Ptr VerbNode::BuildVerbsSubtree(	aq::tnode* pSelect, aq::tnode* pStart
 			if( pNext )
 			{
 				VerbNode::Ptr spNewVerbNode = VerbNode::build(pSelect, pNext, pStartOriginal, context, BaseDesc, *pSettings);
-				if( spNewVerbNode && spNewVerbNode->isToSolved() )
+				if( spNewVerbNode && spNewVerbNode->toSolve )
 				{
 					currentnode.spNode->setBrother( spNewVerbNode );
 					deq.push_back( tnodeVerbNode( pNext, spNewVerbNode ) );
@@ -236,7 +207,7 @@ VerbNode::Ptr VerbNode::BuildVerbsSubtree(	aq::tnode* pSelect, aq::tnode* pStart
 		if( pLeft )
 		{
 			VerbNode::Ptr spNewVerbNode = VerbNode::build(pSelect, pLeft, pStartOriginal, context, BaseDesc, *pSettings);
-			if( spNewVerbNode && spNewVerbNode->isToSolved() )
+			if( spNewVerbNode && spNewVerbNode->toSolve )
 			{
 				currentnode.spNode->setLeftChild( spNewVerbNode );
 				deq.push_back( tnodeVerbNode( pLeft, spNewVerbNode ) );
@@ -247,7 +218,7 @@ VerbNode::Ptr VerbNode::BuildVerbsSubtree(	aq::tnode* pSelect, aq::tnode* pStart
 		if( pRight )
 		{
 			VerbNode::Ptr spNewVerbNode = VerbNode::build(pSelect, pRight, pStartOriginal, context, BaseDesc, *pSettings);
-			if( spNewVerbNode && spNewVerbNode->isToSolved() )
+			if( spNewVerbNode && spNewVerbNode->toSolve )
 			{
 				currentnode.spNode->setRightChild( spNewVerbNode );
 				deq.push_back( tnodeVerbNode( pRight, spNewVerbNode ) );

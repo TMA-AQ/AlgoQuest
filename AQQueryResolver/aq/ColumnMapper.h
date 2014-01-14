@@ -6,6 +6,7 @@
 #include <aq/Logger.h>
 #include <aq/DBTypes.h>
 #include <aq/Exceptions.h>
+#include <aq/Database.h>
 #include <map>
 #include <vector>
 #include <boost/shared_ptr.hpp>
@@ -59,8 +60,8 @@ ColumnMapper<T, M>::ColumnMapper(const char * _path, size_t _tableId, size_t _co
     mode(_mode),
     cache(_cache)
 {
-	std::string prmFilename = getPrmFileName(path.c_str(), tableId, columnId, currentPart);
-	std::string thesaurusFilename = getThesaurusFileName(path.c_str(), tableId, columnId, currentPart);
+	std::string prmFilename = aq::Database::getPrmFileName(path.c_str(), tableId, columnId, currentPart);
+	std::string thesaurusFilename = aq::Database::getThesaurusFileName(path.c_str(), tableId, columnId, currentPart);
 	this->prmMapper.reset(new M(prmFilename.c_str(), mode));
 	this->thesaurusMapper.reset(new M(thesaurusFilename.c_str(), mode));
   this->val = new T[size];
@@ -161,8 +162,8 @@ size_t ColumnMapper<T, M>::setPrmThe(size_t index)
 
 		if (this->prmMappers.find(currentPart) == this->prmMappers.end())
 		{
-			std::string prmFilename = getPrmFileName(path.c_str(), tableId, columnId, currentPart);
-			std::string thesaurusFilename = getThesaurusFileName(path.c_str(), tableId, columnId, currentPart);
+			std::string prmFilename = aq::Database::getPrmFileName(path.c_str(), tableId, columnId, currentPart);
+			std::string thesaurusFilename = aq::Database::getThesaurusFileName(path.c_str(), tableId, columnId, currentPart);
 
 			aq::Logger::getInstance().log(AQ_DEBUG, "open %s\n", prmFilename.c_str());
 			aq::Logger::getInstance().log(AQ_DEBUG, "open %s\n", thesaurusFilename.c_str());

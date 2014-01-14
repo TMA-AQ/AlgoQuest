@@ -164,6 +164,12 @@ void Column::setDisplayName( const std::string& name )
 }
 
 //------------------------------------------------------------------------------
+void Column::setOriginalName( const std::string& name )
+{
+	this->OriginalName = name;
+}
+
+//------------------------------------------------------------------------------
 std::string& Column::getName()
 {
 	return this->Name;

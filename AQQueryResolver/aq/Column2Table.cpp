@@ -292,7 +292,7 @@ int add_tnode_tables(aq::tnode * pNode, aq::Base * baseDesc, aq::TColumn2TablesA
   {
 		/* K_SELECT -> find K_FROM */
 		aq::tnode *pNodeFound;
-		pNodeFound = pNode->find_main_node(K_FROM );
+		pNodeFound = pNode->find_main(K_FROM );
 		if ( pNodeFound == nullptr ) 
     {
       aq::Logger::getInstance().log(AQ_ERROR, "add_aq::tnode_tables() : Function find_main_node() returned nullptr !\n");
@@ -316,7 +316,7 @@ TColumn2TablesArray * create_column_map_for_tables_used_in_select(aq::tnode * pN
 	aq::tnode * pNodeFound = nullptr;
 	TColumn2TablesArray * parrC2T = nullptr;
 
-	pNodeFound = pNode->find_main_node(K_FROM);
+	pNodeFound = pNode->find_main(K_FROM);
 	if ( pNodeFound == nullptr ) 
   {
 		aq::Logger::getInstance().log(AQ_ERROR, "create_column_map_for_tables_used_in_select() : Function find_main_node() returned nullptr !\n");
