@@ -7,13 +7,13 @@
 namespace aq
 {
 
-  AQEngineSimulate::AQEngineSimulate(aq::Base& _baseDesc, aq::Settings& _settings)
+  AQEngineSimulate::AQEngineSimulate(const aq::Base::Ptr _baseDesc, const aq::Settings::Ptr _settings)
     : baseDesc(_baseDesc), settings(_settings)
   {
     srand( static_cast<unsigned int>( time( NULL ) ) ); //temporaire
   }
 
-  void AQEngineSimulate::call(const std::string& query, aq::AQEngine_Intf::mode_t mode)
+  void AQEngineSimulate::call(const std::string& query, aq::engine::AQEngine_Intf::mode_t mode)
   {
     aq::core::SelectStatement ss;
     aq::parser::parse(query + ";", ss);
@@ -28,9 +28,9 @@ namespace aq
     //}
     // this->aqMatrix->simulate( rand() % 1000, this->tableIDs );
     
-    if (mode != aq::AQEngine_Intf::mode_t::NESTED_2)
+    if (mode != aq::engine::AQEngine_Intf::mode_t::NESTED_2)
     {
-      this->aqMatrix.reset(new aq::AQMatrix(this->settings, this->baseDesc));
+      this->aqMatrix.reset(new aq::engine::AQMatrix(this->settings, this->baseDesc));
       this->createTableIDs(query);
       auto& matrix = aqMatrix->getMatrix();
       for (const auto& col : ss.selectedTables)
@@ -47,8 +47,8 @@ namespace aq
         }
         if (!find)
         {
-          const auto& table = baseDesc.getTable(tname);
-          matrix.push_back(aq::AQMatrix::matrix_t::value_type());
+          const auto& table = baseDesc->getTable(tname);
+          matrix.push_back(aq::engine::AQMatrix::matrix_t::value_type());
           auto& t = *matrix.rbegin();
           t.baseTableName = t.tableName = table->getName();
           t.table_id = table->getID();
@@ -58,7 +58,7 @@ namespace aq
 
   }
 
-  void AQEngineSimulate::call(const aq::core::SelectStatement& query, aq::AQEngine_Intf::mode_t mode)
+  void AQEngineSimulate::call(const aq::core::SelectStatement& query, aq::engine::AQEngine_Intf::mode_t mode)
   {
   }
 
@@ -70,11 +70,11 @@ namespace aq
     std::for_each(this->tableIDs.begin(), this->tableIDs.end(), [&] (uint64_t tid) { 
       std::ostringstream oss;
       oss << "REG" << tid << "TMP" << id;
-      resultTables.push_back(std::make_pair(oss.str(), this->baseDesc.getTable(id)->getName()));
+      resultTables.push_back(std::make_pair(oss.str(), this->baseDesc->getTable(id)->getName()));
     });
   }
 
-  void AQEngineSimulate::setAQMatrix(boost::shared_ptr<aq::AQMatrix> _aqMatrix)
+  void AQEngineSimulate::setAQMatrix(aq::engine::AQMatrix::Ptr _aqMatrix)
   {
     this->aqMatrix = _aqMatrix;
   }
@@ -85,7 +85,7 @@ namespace aq
     std::copy(_tableIDs.begin(), _tableIDs.end(), this->tableIDs.begin());
   }
 
-  boost::shared_ptr<aq::AQMatrix> AQEngineSimulate::getAQMatrix()
+  aq::engine::AQMatrix::Ptr AQEngineSimulate::getAQMatrix()
   {
     return this->aqMatrix;
   }
@@ -101,8 +101,8 @@ namespace aq
       return;
 
     if ( (pNode->tag == K_IDENT) 
-      && (std::find( this->tableIDs.begin(), this->tableIDs.end(), this->baseDesc.getTable( pNode->getData().val_str )->getID() ) == this->tableIDs.end()) )
-      this->tableIDs.push_back( this->baseDesc.getTable( pNode->getData().val_str )->getID() );
+      && (std::find( this->tableIDs.begin(), this->tableIDs.end(), this->baseDesc->getTable( pNode->getData().val_str )->getID() ) == this->tableIDs.end()) )
+      this->tableIDs.push_back( this->baseDesc->getTable( pNode->getData().val_str )->getID() );
 
     this->createTableIDs( pNode->left );
     this->createTableIDs( pNode->right );
@@ -132,7 +132,7 @@ namespace aq
 
     for (const auto& tname : tableNames) 
     {
-      this->tableIDs.push_back(this->baseDesc.getTable(tname)->getID());
+      this->tableIDs.push_back(this->baseDesc->getTable(tname)->getID());
     }
     
   }

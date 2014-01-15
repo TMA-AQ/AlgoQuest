@@ -11,33 +11,33 @@
 namespace aq
 {
 
-  class AQEngineSimulate : public aq::AQEngine_Intf
+  class AQEngineSimulate : public aq::engine::AQEngine_Intf
   {
   public:
-    AQEngineSimulate(Base& _baseDesc, Settings& settings);
+    AQEngineSimulate(const Base::Ptr _baseDesc, const Settings::Ptr _settings);
 
     void prepare() const {}
     void clean() const {}
 
-    void call(const std::string& query, aq::AQEngine_Intf::mode_t mode); 
-    void call(const aq::core::SelectStatement& query, aq::AQEngine_Intf::mode_t mode); 
+    void call(const std::string& query, aq::engine::AQEngine_Intf::mode_t mode); 
+    void call(const aq::core::SelectStatement& query, aq::engine::AQEngine_Intf::mode_t mode); 
     
     void renameResult(unsigned int id, std::vector<std::pair<std::string, std::string> >& resultTables);
 
-    void setAQMatrix(boost::shared_ptr<aq::AQMatrix> _aqMatrix);
+    void setAQMatrix(aq::engine::AQMatrix::Ptr _aqMatrix);
     void setTablesIDs(std::vector<llong>& _tableIDs);
     
-    boost::shared_ptr<aq::AQMatrix>   getAQMatrix();
+    aq::engine::AQMatrix::Ptr   getAQMatrix();
     const std::vector<llong>&         getTablesIDs() const;
     
   private:
     void createTableIDs(const std::string& query);
     void createTableIDs(aq::tnode* pNode);
 
-    boost::shared_ptr<aq::AQMatrix> aqMatrix;
+    boost::shared_ptr<aq::engine::AQMatrix> aqMatrix;
     std::vector<llong> tableIDs;
-    const Base& baseDesc;
-    const Settings& settings;
+    const Base::Ptr baseDesc;
+    const Settings::Ptr settings;
   };
 
 }

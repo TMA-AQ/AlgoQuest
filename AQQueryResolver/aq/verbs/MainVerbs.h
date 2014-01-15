@@ -18,7 +18,7 @@ public:
 	virtual void changeResult( Table::Ptr table, 
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
 
-	virtual void setBaseDesc(Base * baseDesc) 
+	virtual void setBaseDesc(Base::Ptr baseDesc) 
 	{ 
 		m_baseDesc = baseDesc;
 	}
@@ -28,7 +28,7 @@ public:
 private:
 	std::vector<std::string> Columns;
 	std::vector<std::string> ColumnsDisplay;
-	Base * m_baseDesc;
+	Base::Ptr m_baseDesc;
 };
 
 //------------------------------------------------------------------------------
@@ -77,14 +77,14 @@ public:
 	virtual bool preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal );
 	virtual bool changeQuery( aq::tnode* pStart, aq::tnode* pNode,
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
-  virtual void setBaseDesc(Base * baseDesc) 
+  virtual void setBaseDesc(Base::Ptr baseDesc) 
   { 
     m_baseDesc = baseDesc;
   }
 	virtual void accept(VerbVisitor* visitor);
   const std::list<std::string>& getTables() const { return this->tables; };
 private:
-  Base * m_baseDesc;
+  Base::Ptr m_baseDesc;
   std::list<std::string> tables;
 };
 
@@ -100,7 +100,7 @@ public:
 		VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext );
 	virtual void addResult(aq::Row& row);
   void accept(VerbVisitor* visitor);
-  virtual void setSettings(Settings* settings)
+  virtual void setSettings(Settings::Ptr settings)
   {
     this->useRowResolver = true;
   }

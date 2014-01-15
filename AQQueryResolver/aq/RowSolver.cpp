@@ -55,8 +55,8 @@ aq::RowSolver::column_infos_t::mapper_type_t new_column_mapper(const aq::ColumnT
 namespace aq 
 {
   
-RowSolver::RowSolver(boost::shared_ptr<aq::AQMatrix> _aqMatrix, const std::vector<Column::Ptr>& _columnTypes, 
-                     const std::vector<aq::tnode*> _columnGroup, const Settings& _settings, const Base& _BaseDesc)
+RowSolver::RowSolver(boost::shared_ptr<aq::engine::AQMatrix> _aqMatrix, const std::vector<Column::Ptr>& _columnTypes, 
+                     const std::vector<aq::tnode*> _columnGroup, const boost::shared_ptr<Settings> _settings, const boost::shared_ptr<Base> _BaseDesc)
                      : aqMatrix(_aqMatrix), columnTypes(_columnTypes), columnGroup(_columnGroup), settings(_settings), BaseDesc(_BaseDesc)
 {
 }
@@ -64,7 +64,7 @@ RowSolver::RowSolver(boost::shared_ptr<aq::AQMatrix> _aqMatrix, const std::vecto
 void RowSolver::matched_index(column_infos_t& infos)
 {
   auto joinPath = aqMatrix->getJoinPath();
-  Table::Ptr table = BaseDesc.getTable(infos.column->getTableID());
+  Table::Ptr table = BaseDesc->getTable(infos.column->getTableID());
   for (size_t j = 0; j < aqMatrix->getNbColumn(); ++j) 
   {
     if (table->getName() == joinPath[j])
@@ -88,7 +88,7 @@ void RowSolver::prepareColumnAndColumnMapper(const std::vector<Column::Ptr>& col
     
     // COLUMN
     Column::Ptr c(new Column(*columnTypes[i]));
-    c->setTableID(BaseDesc.getTable(c->getTableName())->getID());
+    c->setTableID(BaseDesc->getTable(c->getTableName())->getID());
     for (auto it = columnGroup.begin(); it != columnGroup.end(); ++it)
     {
       const aq::tnode * node = *it;
@@ -100,7 +100,7 @@ void RowSolver::prepareColumnAndColumnMapper(const std::vector<Column::Ptr>& col
     }
     infos.column = c;
 
-    columnTypes[i]->setTableID(BaseDesc.getTable(columnTypes[i]->getTableName())->getID());
+    columnTypes[i]->setTableID(BaseDesc->getTable(columnTypes[i]->getTableName())->getID());
 
     // MAPPER
     auto& cm = infos.mapper;
@@ -114,13 +114,13 @@ void RowSolver::prepareColumnAndColumnMapper(const std::vector<Column::Ptr>& col
     {
       const aq::Column::Ptr& c = columnTypes[i];
 
-      Table::Ptr table = BaseDesc.getTable(c->getTableID());
+      Table::Ptr table = BaseDesc->getTable(c->getTableID());
       while (table->isTemporary()) 
       {
-        table = BaseDesc.getTable(table->getReferenceTable());
+        table = BaseDesc->getTable(table->getReferenceTable());
       }
 
-      cm = new_column_mapper(c->getType(), settings.dataPath.c_str(), table->getID(), c->getID(), c->getSize(), settings.packSize);
+      cm = new_column_mapper(c->getType(), settings->dataPath.c_str(), table->getID(), c->getID(), c->getSize(), settings->packSize);
     }
     infos.mapper = cm;
     
@@ -150,7 +150,7 @@ void RowSolver::addGroupColumn(const std::vector<Column::Ptr>& columnTypes,
     if (!inSelect)
     {
       // add to columns
-      Table& table = *BaseDesc.getTable( node->left->getData().val_str );
+      Table& table = *BaseDesc->getTable( node->left->getData().val_str );
 
       Column auxCol;
       auxCol.setName(node->right->getData().val_str);
@@ -166,7 +166,7 @@ void RowSolver::addGroupColumn(const std::vector<Column::Ptr>& columnTypes,
           infos.column.reset(new Column(*table.Columns[idx]));
           auto& column = infos.column;
           column->setTableName(table.getName());
-          column->setTableID(BaseDesc.getTable(column->getTableName())->getID());
+          column->setTableID(BaseDesc->getTable(column->getTableName())->getID());
           column->GroupBy = true;
 
           // MAPPER
@@ -179,7 +179,7 @@ void RowSolver::addGroupColumn(const std::vector<Column::Ptr>& columnTypes,
           }
           else
           {
-            cm = new_column_mapper(column->getType(), settings.dataPath.c_str(), column->getTableID(), column->getID(), column->getSize(), settings.packSize);
+            cm = new_column_mapper(column->getType(), settings->dataPath.c_str(), column->getTableID(), column->getID(), column->getSize(), settings->packSize);
           }
 
           // TABLE_INDEX

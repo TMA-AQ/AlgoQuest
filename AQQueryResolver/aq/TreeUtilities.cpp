@@ -204,7 +204,7 @@ void addInnerOuterNodes( aq::tnode* pNode, aq::tnode::tag_t tag, const std::vect
 }
 
 //------------------------------------------------------------------------------
-void moveFromJoinToWhere( aq::tnode* pStart, Base& BaseDesc )
+void moveFromJoinToWhere( aq::tnode* pStart, Base::Ptr BaseDesc )
 {	
 	assert( pStart && pStart->tag == K_SELECT );
 
@@ -305,7 +305,7 @@ void addAlias( aq::tnode* pNode )
 }
 
 //------------------------------------------------------------------------------
-void solveSelectStar(aq::tnode* pNode, Base& BaseDesc, std::vector<std::string>& columnNames, std::vector<std::string>& columnDisplayNames )
+void solveSelectStar(aq::tnode* pNode, Base::Ptr BaseDesc, std::vector<std::string>& columnNames, std::vector<std::string>& columnDisplayNames )
 {
   if ( !pNode || ( pNode->tag == K_SELECT && !pNode->left ) )
     throw aq::parsException( "pNode->left is empty in { void solveSelectStar }, this exception should be throw in { int SQLParse }" );
@@ -369,7 +369,7 @@ void solveSelectStar(aq::tnode* pNode, Base& BaseDesc, std::vector<std::string>&
     }
     else
     {
-      std::vector<Column::Ptr>& columns = BaseDesc.getTable( column->getData().val_str )->Columns;
+      std::vector<Column::Ptr>& columns = BaseDesc->getTable( column->getData().val_str )->Columns;
       for( size_t idx2 = 0; idx2 < columns.size(); ++idx2 )
       {
         if ( ( alias = tables[idx]->find_first(K_AS)) != nullptr &&
@@ -387,7 +387,7 @@ void solveSelectStar(aq::tnode* pNode, Base& BaseDesc, std::vector<std::string>&
 }
 
 //------------------------------------------------------------------------------
-void solveIdentRequest(aq::tnode* pNode, Base& BaseDesc)
+void solveIdentRequest(aq::tnode* pNode, Base::Ptr BaseDesc)
 {
   if ( !pNode || ( pNode->tag == K_SELECT && !pNode->left ) )
     throw aq::parsException( "SELECT EMPTY", pNode, true );
@@ -439,7 +439,7 @@ void solveIdentRequest(aq::tnode* pNode, Base& BaseDesc)
 }
 
 //------------------------------------------------------------------------------
-void assignIdentRequest( aq::tnode* pNode, std::vector<aq::tnode*> tables, Base& BaseDesc )
+void assignIdentRequest( aq::tnode* pNode, std::vector<aq::tnode*> tables, Base::Ptr BaseDesc )
 {
   if ( !pNode )
     throw aq::parsException( "pNode is empty in { void assignIdentRequest }, this exception shouldn't be normal" );
@@ -513,7 +513,7 @@ aq::tnode * assignSafe( aq::tnode* colRef, aq::tnode* clean )
 }
 
 //------------------------------------------------------------------------------
-std::string checkAndName( std::string colName, std::vector<aq::tnode*> tables, Base& BaseDesc )
+std::string checkAndName( std::string colName, std::vector<aq::tnode*> tables, Base::Ptr BaseDesc )
 {
   aq::tnode* column;
   bool fake = false;
@@ -537,7 +537,7 @@ std::string checkAndName( std::string colName, std::vector<aq::tnode*> tables, B
         try
         {
           list.push_back( column->getData().val_str );
-          std::vector<Column::Ptr>& columns = BaseDesc.getTable( column->getData().val_str )->Columns;
+          std::vector<Column::Ptr>& columns = BaseDesc->getTable( column->getData().val_str )->Columns;
           for( size_t idx2 = 0; idx2 < columns.size(); ++idx2 )
           {
             if ( columns[idx2]->getName().c_str() == colName )
@@ -772,7 +772,7 @@ aq::tnode * getJoin(aq::tnode* pNode)
 }
 
 //------------------------------------------------------------------------------
-void solveOneTableInFrom( aq::tnode* pStart, Base& BaseDesc )
+void solveOneTableInFrom( aq::tnode* pStart, Base::Ptr BaseDesc )
 {
 	assert( pStart && pStart->tag == K_SELECT );
 	aq::tnode* pNode = pStart->find_main(K_FROM);
@@ -783,9 +783,9 @@ void solveOneTableInFrom( aq::tnode* pStart, Base& BaseDesc )
 	if( tables.size() != 1 || !tables[0] || tables[0]->tag != K_IDENT )
 		return;
 	char* tName = tables[0]->getData().val_str;
-	if( BaseDesc.getTable( tName )->Columns.size() == 0 )
+	if( BaseDesc->getTable( tName )->Columns.size() == 0 )
 		return;
-	Column::Ptr col = BaseDesc.getTable( tName )->Columns[0];
+	Column::Ptr col = BaseDesc->getTable( tName )->Columns[0];
 	if( !col )
 		return;
 	
@@ -947,7 +947,7 @@ void cleanQuery( aq::tnode*& pNode )
 }
 
 //------------------------------------------------------------------------------
-void getColumnTypes( aq::tnode* pNode, std::vector<Column::Ptr>& columnTypes, Base& BaseDesc )
+void getColumnTypes( aq::tnode* pNode, std::vector<Column::Ptr>& columnTypes, Base::Ptr BaseDesc )
 {
 	if (!pNode || !pNode->left)
 		return;
@@ -969,7 +969,7 @@ void getColumnTypes( aq::tnode* pNode, std::vector<Column::Ptr>& columnTypes, Ba
 		assert(colNode->left && (colNode->left->tag == K_IDENT));
 		assert(colNode->right && (colNode->right->tag == K_COLUMN));
 		bool found = false;
-		const auto& table = BaseDesc.getTable(colNode->left->getData().val_str);
+		const auto& table = BaseDesc->getTable(colNode->left->getData().val_str);
     const auto& column = table->getColumn(colNode->right->getData().val_str);
     Column::Ptr c(new Column(*column));
     c->setTableName(table->getName());
@@ -1166,7 +1166,7 @@ void dateNodeToBigInt(tnode * pNode)
 }
 
 //------------------------------------------------------------------------------
-void transformExpression(const aq::Base& baseDesc, const aq::Settings& settings, aq::tnode * tree)
+void transformExpression(const aq::Base::Ptr baseDesc, const aq::Settings::Ptr settings, aq::tnode * tree)
 {
   aq::tnode * whereNode = tree->find_main(K_WHERE);
   if (whereNode)
@@ -1177,7 +1177,7 @@ void transformExpression(const aq::Base& baseDesc, const aq::Settings& settings,
       aq::tnode * cmpNode = nullptr;
       while ((cmpNode = whereNode->find_first(tag)) != nullptr)
       {
-        aq::expression_transform::transform<FileMapper>(baseDesc, settings.dataPath, settings.packSize, cmpNode);
+        aq::expression_transform::transform<FileMapper>(baseDesc, settings->dataPath, settings->packSize, cmpNode);
       }
     }
   }

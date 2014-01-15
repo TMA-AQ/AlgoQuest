@@ -70,7 +70,7 @@ public:
   /// \param context
   /// \param BaseDesc
   /// \param settings
-	static VerbNode::Ptr build(aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal, tnode::tag_t context, Base& BaseDesc, Settings& settings);
+	static VerbNode::Ptr build(aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal, tnode::tag_t context, Base::Ptr BaseDesc, Settings::Ptr settings);
 
 	/// \brief build a subtree for each major category
   /// \param pStart top node of query tree
@@ -78,7 +78,7 @@ public:
   /// \param baseDesc base description
   /// \param settings settings
   /// \return the subtree builded
-  static VerbNode::Ptr BuildVerbsTree( aq::tnode* pStart, const boost::array<aq::tnode::tag_t, 6>& categories_order, Base& baseDesc, Settings * settings );
+  static VerbNode::Ptr BuildVerbsTree( aq::tnode* pStart, const boost::array<aq::tnode::tag_t, 6>& categories_order, Base::Ptr baseDesc, Settings::Ptr settings );
    
   /// \brief build a VerbNode subtree corresponding to the pStart subtree
   /// \param pSelect
@@ -89,7 +89,7 @@ public:
   /// \param settings
   /// a branch will end when a VerbNode for that aq::tnode cannot be found
   /// top level node in the subtree will not have a brother
-  static VerbNode::Ptr BuildVerbsSubtree( aq::tnode* pSelect, aq::tnode* pStart, aq::tnode* pStartOriginal, tnode::tag_t context, Base& BaseDesc, Settings * settings );
+  static VerbNode::Ptr BuildVerbsSubtree( aq::tnode* pSelect, aq::tnode* pStart, aq::tnode* pStartOriginal, tnode::tag_t context, Base::Ptr BaseDesc, Settings::Ptr settings );
 
   /// \brief Debug purpose
   static void dump(std::ostream& os, VerbNode::Ptr tree, std::string ident = "");

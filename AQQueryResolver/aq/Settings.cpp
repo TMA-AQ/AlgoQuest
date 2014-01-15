@@ -36,7 +36,6 @@ Settings::Settings()
 	group_by_process_size(100000),
   process_thread(1),
   packSize(aq::packet_size), 
-  maxRecordSize(40960),
   computeAnswer(true),
 	csvFormat(true),
 	skipNestedQuery(false),
@@ -69,7 +68,6 @@ Settings::Settings(const Settings& obj)
 	group_by_process_size(obj.group_by_process_size),
   process_thread(obj.process_thread),
 	packSize(obj.packSize),
-	maxRecordSize(obj.maxRecordSize),
 	computeAnswer(obj.computeAnswer),
 	skipNestedQuery(obj.skipNestedQuery),
   useBinAQMatrix(obj.useBinAQMatrix),
@@ -107,9 +105,7 @@ Settings& Settings::operator=(const Settings& obj)
 		group_by_process_size = obj.group_by_process_size;
     process_thread = obj.process_thread;
 		packSize = obj.packSize;
-		maxRecordSize = obj.maxRecordSize;
 		computeAnswer = obj.computeAnswer;
-		maxRecordSize = obj.maxRecordSize;
 		computeAnswer = obj.computeAnswer;
 		skipNestedQuery = obj.skipNestedQuery;
     useBinAQMatrix = obj.useBinAQMatrix;
@@ -258,7 +254,6 @@ void Settings::dump(std::ostream& os) const
 	os << "fieldSeparator:       ['" << fieldSeparator       << "']" << std::endl;
 	os << "MAX_COLUMN_NAME_SIZE: ["  << MAX_COLUMN_NAME_SIZE <<  "]" << std::endl;
 	os << "packSize:             ["  << packSize             <<  "]" << std::endl;
-	os << "maxRecordSize:        ["  << maxRecordSize        <<  "]" << std::endl;
   os << "computeAnswer:        ["  << computeAnswer        <<  "]" << std::endl;
   os << "displayCount:         ["  << displayCount         <<  "]" << std::endl;
   os << "cmdLine:              ["  << cmdLine              <<  "]" << std::endl;

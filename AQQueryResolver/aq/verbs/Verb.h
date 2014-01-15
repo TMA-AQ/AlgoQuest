@@ -78,8 +78,7 @@ public:
 
   /// \brief Set the Base Description
   /// \param BaseDesc the base description
-  /// \todo BaseDesc should be a const shared_ptr
-  virtual void setBaseDesc(Base * BaseDesc) 
+  virtual void setBaseDesc(Base::Ptr BaseDesc) 
   { 
     // empty by default
   }
@@ -87,7 +86,7 @@ public:
   /// \brief Set the settings
   /// \param settings the query settings
   /// \todo settings should be a const shared_ptr
-  virtual void setSettings(Settings * settings) 
+  virtual void setSettings(Settings::Ptr settings) 
   {
     // empty by default
   }

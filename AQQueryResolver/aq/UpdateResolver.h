@@ -15,7 +15,7 @@ namespace aq
   class UpdateResolver : public aq::RowWritter_Intf
   {
   public:
-    UpdateResolver(aq::tnode * _statement, aq::Settings & _settings, aq::AQEngine_Intf * _aqEngine, aq::Base & _base);
+    UpdateResolver(aq::tnode * _statement, aq::Settings::Ptr _settings, aq::engine::AQEngine_Intf::Ptr _aqEngine, aq::Base::Ptr _base);
     void solve();
 
     int process(std::vector<Row>& rows);
@@ -39,9 +39,9 @@ namespace aq
     typedef std::map<std::string, col_handler_type_t> columns_values_t;
 
     aq::tnode         * statement;
-    aq::AQEngine_Intf * aqEngine;
-    aq::Settings      & settings;
-    aq::Base          & base;
+    aq::engine::AQEngine_Intf::Ptr aqEngine;
+    aq::Settings::Ptr      settings;
+    aq::Base::Ptr          base;
     aq::Table::Ptr      table;
     columns_values_t    columns;
     unsigned int        totalCount;

@@ -27,7 +27,7 @@ bool ComparisonVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 	if( this->getContext() == K_WHERE )
 	{
 		boost::posix_time::ptime begin(boost::posix_time::microsec_clock::local_time());
-    aq::ExpressionTransform expTrans(*this->m_baseDesc, this->m_settings->dataPath, this->m_settings->packSize);
+    aq::ExpressionTransform expTrans(this->m_baseDesc, this->m_settings->dataPath, this->m_settings->packSize);
     newNode = expTrans.transform<FileMapper>(pNodeClone);
 		boost::posix_time::ptime end(boost::posix_time::microsec_clock::local_time());
 		std::ostringstream oss;

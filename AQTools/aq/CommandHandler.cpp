@@ -40,7 +40,7 @@ int CommandHandler::process(const std::string& cmd)
     {
       if (words[1] == "TABLES")
       {
-        for (auto& table : baseDesc.getTables())
+        for (auto& table : baseDesc->getTables())
         {
           std::cout << table->getName() << std::endl;
         }
@@ -64,9 +64,9 @@ int CommandHandler::process(const std::string& cmd)
       }
       else if (boost::iequals(words[1], "VARS"))
       {
-        settings.dump(std::cout);
+        settings->dump(std::cout);
         std::cout << std::endl;
-        std::cout << "AQ_ENGINE: " << settings.aqEngine << std::endl;
+        std::cout << "AQ_ENGINE: " << settings->aqEngine << std::endl;
         std::cout << "ROOT_PATH: " << databasesPath << std::endl;
         std::cout << "DATABASE : " << databaseName << std::endl;
       }
@@ -83,23 +83,23 @@ int CommandHandler::process(const std::string& cmd)
       {
         std::string tname = words[1];
         boost::trim(tname);
-        auto table = baseDesc.getTable(tname);
+        auto table = baseDesc->getTable(tname);
         table->dumpRaw(std::cout);
       }
       else
       {
-        baseDesc.dumpRaw(std::cout);
+        baseDesc->dumpRaw(std::cout);
       }
     }
     else if (words.size() >= 3 && boost::iequals(words[0], "SET"))
     {
       if (boost::iequals(words[1], "AQ-ENGINE"))
       {
-        settings.aqEngine = words[2];
+        settings->aqEngine = words[2];
       }
       else if (boost::iequals(words[1], "TRACE"))
       {
-        settings.trace = !((words[2] == "0") || boost::iequals(words[2], "FALSE"));
+        settings->trace = !((words[2] == "0") || boost::iequals(words[2], "FALSE"));
       }
     }
     else if (words.size() >= 2 && boost::iequals(words[0], "CONNECT"))
@@ -110,9 +110,9 @@ int CommandHandler::process(const std::string& cmd)
       if (d.isValid())
       {
         aq::base_t b = d.getBaseDesc();
-        baseDesc.clear();
-        baseDesc.loadFromBaseDesc(b);
-        settings.initPath(s);
+        baseDesc->clear();
+        baseDesc->loadFromBaseDesc(b);
+        settings->initPath(s);
         std::cout << "connected to " << words[1] << std::endl;
       }
       else

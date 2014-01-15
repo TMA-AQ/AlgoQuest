@@ -252,9 +252,9 @@ uint64_t functional_tests(const struct opt& o)
 
       aq::Logger::getInstance().log(AQ_INFO, "checking '%s'\n", reader->getFullIdent().c_str());
       aq::Logger::getInstance().log(AQ_INFO, "expecting: %s\n", reader->getExpected());
-      aq::Settings settings;
-      aq::Base baseDesc;
-      aq::AQMatrix matrix(settings, baseDesc);
+      aq::Settings::Ptr settings(new aq::Settings);
+      aq::Base::Ptr baseDesc(new aq::Base);
+      aq::engine::AQMatrix matrix(settings, baseDesc);
 
       // run aq engine
       timer.start();

@@ -55,10 +55,16 @@ namespace aq
 {
 
 //------------------------------------------------------------------------------
-QueryResolver::QueryResolver(aq::tnode * _sqlStatement, Settings * _pSettings, AQEngine_Intf * _aq_engine, Base& _baseDesc, unsigned int& _id, unsigned int _level)
-	:	pSettings(_pSettings), 
-		BaseDesc(_baseDesc), 
-    aq_engine(_aq_engine), 
+QueryResolver::QueryResolver(
+  aq::tnode * _sqlStatement, 
+  Settings::Ptr _settings, 
+  aq::engine::AQEngine_Intf::Ptr  _aqEngine, 
+  Base::Ptr  _baseDesc, 
+  unsigned int& _id, 
+  unsigned int _level)
+	:	settings(_settings), 
+		baseDesc(_baseDesc), 
+    aqEngine(_aqEngine), 
 		sqlStatement(_sqlStatement),
     originalSqlStatement(nullptr),
     outerSelect(nullptr),
@@ -212,7 +218,7 @@ aq::verb::VerbNode::Ptr QueryResolver::postProcess()
 {
   aq::verb::VerbNode::Ptr spTree;
 
-	aq::util::solveIdentRequest(this->sqlStatement, BaseDesc);
+	aq::util::solveIdentRequest(this->sqlStatement, this->baseDesc);
 
 #if defined(AQ_TRACE)
 	sql_query = "";
@@ -221,7 +227,7 @@ aq::verb::VerbNode::Ptr QueryResolver::postProcess()
 #endif
 
   aq::util::dateNodeToBigInt(this->sqlStatement);
-  aq::util::transformExpression(this->BaseDesc, *this->pSettings, this->sqlStatement);
+  aq::util::transformExpression(this->baseDesc, this->settings, this->sqlStatement);
 
 #if defined(AQ_TRACE)
 	sql_query = "";
@@ -240,7 +246,7 @@ aq::verb::VerbNode::Ptr QueryResolver::postProcess()
 	// Query Pre Processing (TODO : optimize tree by detecting identical subtrees)
 	timer.start();
   boost::array<uint32_t, 6> categories_order =  { { K_FROM, K_WHERE, K_SELECT, K_GROUP, K_HAVING, K_ORDER } };
-	spTree = aq::verb::VerbNode::BuildVerbsTree( this->sqlStatement, categories_order, this->BaseDesc, this->pSettings );
+	spTree = aq::verb::VerbNode::BuildVerbsTree(this->sqlStatement, categories_order, this->baseDesc, this->settings);
   
 #if defined(AQ_TRACE)
   sql_query = "";
@@ -262,7 +268,7 @@ aq::verb::VerbNode::Ptr QueryResolver::postProcess()
 	//
 	// Solve Optimal Min/Max : FIXME
 	timer.start();
-	this->result = solveOptimalMinMax( spTree, BaseDesc, *pSettings );
+	this->result = solveOptimalMinMax(spTree, this->baseDesc, this->settings);
   if (this->result)
   {
     aq::Logger::getInstance().log(AQ_INFO, "Solve Optimal Min/Max: Time elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
@@ -275,23 +281,23 @@ aq::verb::VerbNode::Ptr QueryResolver::postProcess()
 //-------------------------------------------------------------------------------
 void QueryResolver::resolve(aq::verb::VerbNode::Ptr spTree)
 {   
-  AQEngine_Intf::mode_t mode;
+  aq::engine::AQEngine_Intf::mode_t mode;
   analyze::type_t type;
   if (!this->nested || this->inWhereClause)
   {
-    mode = AQEngine_Intf::mode_t::REGULAR;
+    mode = aq::engine::AQEngine_Intf::mode_t::REGULAR;
     type = analyze::type_t::REGULAR;
   }
   else
   {
     if (this->hasGroupBy || this->hasPartitionBy)
     {
-      mode = AQEngine_Intf::mode_t::NESTED_1;
+      mode = aq::engine::AQEngine_Intf::mode_t::NESTED_1;
       type = this->isCompressable() ? analyze::type_t::TEMPORARY_TABLE : analyze::type_t::TEMPORARY_COLUMN;
     }
     else
     {
-      mode = AQEngine_Intf::mode_t::NESTED_2;
+      mode = aq::engine::AQEngine_Intf::mode_t::NESTED_2;
       type = analyze::type_t::FOLD_UP_QUERY;
     }
   }
@@ -305,8 +311,8 @@ void QueryResolver::resolve(aq::verb::VerbNode::Ptr spTree)
   this->generateAQEngineQuery(query, joinPath);
 
   // Call AQEngine
-  aq_engine->call(query, mode);
-  auto aqMatrix = aq_engine->getAQMatrix();
+  this->aqEngine->call(query, mode);
+  auto aqMatrix = this->aqEngine->getAQMatrix();
   if (aqMatrix != 0)
   {  
     assert(joinPath.size() >= aqMatrix->getNbColumn());
@@ -315,7 +321,7 @@ void QueryResolver::resolve(aq::verb::VerbNode::Ptr spTree)
     {
       for (auto& tname : joinPath)
       {
-        aq::Table::Ptr table = BaseDesc.getTable(tname);
+        aq::Table::Ptr table = this->baseDesc->getTable(tname);
         for (auto& tm : aqMatrix->getMatrix())
         {
           if (tm.table_id == table->getID())
@@ -335,7 +341,7 @@ void QueryResolver::resolve(aq::verb::VerbNode::Ptr spTree)
   // aq::MakeBackupFile(pSettings->szOutputFN, aq::backup_type_t::Empty, this->level, this->id);
 
   // parse result
-  if (pSettings->computeAnswer)
+  if (this->settings->computeAnswer)
   {
     timer.start();
     switch (type)
@@ -422,7 +428,7 @@ void QueryResolver::solveNested(aq::tnode*& pNode, unsigned int nSelectLevel, aq
     else // inIn
     {
       assert(inIn);
-      QueryResolver queryResolver(pNode, this->pSettings, this->aq_engine, this->BaseDesc, nSelectLevel, ++this->nestedId);
+      QueryResolver queryResolver(pNode, this->settings, this->aqEngine, this->baseDesc, nSelectLevel, ++this->nestedId);
       queryResolver.setInWereClause();
       aq::tnode * result = new aq::tnode(K_IN_VALUES);
       boost::shared_ptr<aq::NodeWritter> writter(new aq::NodeWritter(*result));
@@ -476,7 +482,7 @@ void QueryResolver::executeNested(aq::tnode * pNode)
 
   // build table
   this->id_generator += 1;
-  boost::shared_ptr<QueryResolver> interiorQuery(new QueryResolver(pNode->clone_subtree(), pSettings, aq_engine, BaseDesc, this->id_generator, this->level + 1));
+  boost::shared_ptr<QueryResolver> interiorQuery(new QueryResolver(pNode->clone_subtree(), this->settings, this->aqEngine, this->baseDesc, this->id_generator, this->level + 1));
   interiorQuery->setOuterSelect(this->sqlStatement);
   interiorQuery->setResultName(alias.c_str(), ""); // FIXME
   interiorQuery->solve();
@@ -486,7 +492,7 @@ void QueryResolver::executeNested(aq::tnode * pNode)
   if (interiorQuery->result)
   {
     interiorQuery->result->setOriginalName(alias);
-    this->BaseDesc.getTables().push_back(interiorQuery->result);
+    this->baseDesc->getTables().push_back(interiorQuery->result);
   }
 
   // update node tree
@@ -597,7 +603,7 @@ void QueryResolver::solveAQMatrix(aq::verb::VerbNode::Ptr spTree)
 
 	// Prepare Columns
 	std::vector<Column::Ptr> columnTypes;
-	aq::util::getColumnTypes( this->sqlStatement, columnTypes, this->BaseDesc );
+	aq::util::getColumnTypes(this->sqlStatement, columnTypes, this->baseDesc);
 	
   // build process to apply on each row
   boost::shared_ptr<aq::RowProcesses> processes(new aq::RowProcesses);
@@ -637,19 +643,19 @@ void QueryResolver::solveAQMatrix(aq::verb::VerbNode::Ptr spTree)
     {
       if (this->inWhereClause)
       {
-        this->result.reset(new Table("tmp", static_cast<unsigned>(this->BaseDesc.getTables().size() + 1), true));
+        this->result.reset(new Table("tmp", static_cast<unsigned>(this->baseDesc->getTables().size() + 1), true));
         this->resultHandler.reset(new aq::RowTableWritter(this->result));
         processes->addProcess(this->resultHandler);
       }
       else
       {
-        this->resultHandler.reset(new aq::RowTemporaryWritter(static_cast<unsigned>(BaseDesc.getTables().size() + 1), this->pSettings->tmpPath.c_str(), pSettings->packSize));
+        this->resultHandler.reset(new aq::RowTemporaryWritter(static_cast<unsigned>(this->baseDesc->getTables().size() + 1), this->settings->tmpPath.c_str(), this->settings->packSize));
         processes->addProcess(this->resultHandler);
       }
     }
     else
     {
-      resultHandler.reset(new aq::RowWritter(pSettings->outputFile == "stdout" ? pSettings->outputFile : pSettings->answerFile));
+      resultHandler.reset(new aq::RowWritter(this->settings->outputFile == "stdout" ? this->settings->outputFile : this->settings->answerFile));
     }
   }
   this->resultHandler->setColumn(columnTypes);
@@ -661,8 +667,8 @@ void QueryResolver::solveAQMatrix(aq::verb::VerbNode::Ptr spTree)
   //
   // build result from aq matrix
   timer.start();
-  aq::RowSolver solver(aq_engine->getAQMatrix(), columnTypes, columnNodes, *pSettings, BaseDesc);
-  solver.solve(processes, pSettings->process_thread, this->hasGroupBy || this->hasPartitionBy);
+  aq::RowSolver solver(this->aqEngine->getAQMatrix(), columnTypes, columnNodes, this->settings, this->baseDesc);
+  solver.solve(processes, this->settings->process_thread, this->hasGroupBy || this->hasPartitionBy);
   aq::Logger::getInstance().log(AQ_INFO, "build result from aq matrix: Time Elapsed = %s\n", aq::Timer::getString(timer.getTimeElapsed()).c_str());
 
   //
@@ -670,7 +676,7 @@ void QueryResolver::solveAQMatrix(aq::verb::VerbNode::Ptr spTree)
   if (this->nested && !this->inWhereClause)
   {
     std::string name = (this->resultTables.size() == 1) ? this->resultTables[0].first : "tmp";
-    this->result.reset(new Table(name, static_cast<unsigned>(this->BaseDesc.getTables().size() + 1), this->resultHandler->getTotalCount(), true));
+    this->result.reset(new Table(name, static_cast<unsigned>(this->baseDesc->getTables().size() + 1), this->resultHandler->getTotalCount(), true));
 
     // const std::vector<Column::Ptr>& columnsWritter = this->resultHandler->getColumns();
     // std::copy(columnsWritter.begin(), columnsWritter.end(), std::back_inserter(this->columns));
@@ -704,33 +710,33 @@ void QueryResolver::solveAQMatrix(aq::verb::VerbNode::Ptr spTree)
 //------------------------------------------------------------------------------
 size_t QueryResolver::getNbRows()
 {
-  if (this->aq_engine && this->aq_engine->getAQMatrix())
-    return this->aq_engine->getAQMatrix()->getCount().size();
+  if (this->aqEngine && this->aqEngine->getAQMatrix())
+    return this->aqEngine->getAQMatrix()->getCount().size();
   return 0;
 }
 
 //------------------------------------------------------------------------------
 void QueryResolver::generateTemporaryTable()
 {
-  boost::shared_ptr<AQMatrix> matrix = aq_engine->getAQMatrix();
+  boost::shared_ptr<aq::engine::AQMatrix> matrix = this->aqEngine->getAQMatrix();
   matrix->compress();
   matrix->writeTemporaryTable();
 
   // the table is compress and refer to a physical table so the alias table must be rename by real table name
   assert(this->resultTables.empty());
 
-  const AQMatrix::matrix_t& m = matrix->getMatrix();
+  const auto& m = matrix->getMatrix();
   assert(m.size() == 1);
   for (auto& c : m) 
   {
     this->resultTables.push_back(std::make_pair(c.tableName, c.baseTableName));
   }
 
-  aq::Table::Ptr table(new Table(this->resultTables[0].first, static_cast<unsigned>(this->BaseDesc.getTables().size() + 1), true));
+  aq::Table::Ptr table(new Table(this->resultTables[0].first, static_cast<unsigned>(this->baseDesc->getTables().size() + 1), true));
   table->setReferenceTable(this->resultTables[0].second);
 
   // TODO : add column according to query
-  aq::Table::Ptr refTable = this->BaseDesc.getTable(this->resultTables[0].second);
+  aq::Table::Ptr refTable = this->baseDesc->getTable(this->resultTables[0].second);
   
   for (const auto& alias : this->aliases)
   {
@@ -770,21 +776,21 @@ void QueryResolver::generateTemporaryTable()
 void QueryResolver::renameResultTable()
 {
 
-  aq_engine->renameResult(this->id, this->resultTables);
+  this->aqEngine->renameResult(this->id, this->resultTables);
 
   for (auto& e : this->resultTables) 
   {
     aq::Table::Ptr table(new Table(e.first, 1, true));
     table->setReferenceTable(e.second);
     
-    aq::Table::Ptr refTable = this->BaseDesc.getTable(e.second);
+    aq::Table::Ptr refTable = this->baseDesc->getTable(e.second);
     for (auto& column : refTable->Columns) 
     {
       Column::Ptr c(new aq::Column(*column));
       table->Columns.push_back(c);
     }
 
-    this->BaseDesc.getTables().push_back(table);
+    this->baseDesc->getTables().push_back(table);
   }
 
   
@@ -804,7 +810,7 @@ void QueryResolver::renameResultTable()
       joinNode->find_nodes(K_IDENT, ltables);
       for (auto& n : ltables) 
       {
-        aq::Table::Ptr table = this->BaseDesc.getTable(n->getData().val_str);
+        aq::Table::Ptr table = this->baseDesc->getTable(n->getData().val_str);
         for (auto& rt : this->resultTables)
         {
           if (rt.second == table->getName())
@@ -892,8 +898,8 @@ void QueryResolver::changeTemporaryTableName(aq::tnode * pNode)
             throw aq::generic_error(aq::generic_error::INVALID_TABLE, "empty result on a non compressable nested result");
           for (auto& baseTable : nestedTable.second->getResultTables())
           {
-            aq::Table::Ptr tableBase = this->BaseDesc.getTable(baseTable.first);
-            aq::Table::Ptr tableDesc = this->BaseDesc.getTable(baseTable.first);
+            aq::Table::Ptr tableBase = this->baseDesc->getTable(baseTable.first);
+            aq::Table::Ptr tableDesc = this->baseDesc->getTable(baseTable.first);
 
             //while (tableBase->isTemporary())
             //{
@@ -1090,7 +1096,7 @@ std::string QueryResolver::getOriginalColumn(const std::string& alias) const
 }
 
 // -------------------------------------------------------------------------------------------------
-int QueryResolver::prepareQuery(const std::string& query, const std::string & ident, aq::Settings& settings, bool force)
+int QueryResolver::prepareQuery(const std::string& query, const std::string & ident, aq::Settings::Ptr settings, bool force)
 {		
 	//
 	// generate ident and ini file
@@ -1102,14 +1108,14 @@ int QueryResolver::prepareQuery(const std::string& query, const std::string & id
     oss << qi;
     queryIdent = oss.str();
   }
-  settings.changeIdent(queryIdent);
+  settings->changeIdent(queryIdent);
 
 	//
 	// create directories
 	std::list<fs::path> lpaths;
-	lpaths.push_back(fs::path(settings.rootPath + "calculus/" + queryIdent));
-	lpaths.push_back(fs::path(settings.tmpPath));
-	lpaths.push_back(fs::path(settings.dpyPath));
+	lpaths.push_back(fs::path(settings->rootPath + "calculus/" + queryIdent));
+	lpaths.push_back(fs::path(settings->tmpPath));
+	lpaths.push_back(fs::path(settings->dpyPath));
 	for (std::list<fs::path>::const_iterator dir = lpaths.begin(); dir != lpaths.end(); ++dir)
 	{
 		if (fs::exists(*dir))
@@ -1132,23 +1138,27 @@ int QueryResolver::prepareQuery(const std::string& query, const std::string & id
 
   //
   // write request file
-  std::string queryFilename(settings.rootPath + "calculus/" + queryIdent + "/Request.sql");
+  std::string queryFilename(settings->rootPath + "calculus/" + queryIdent + "/Request.sql");
   std::ofstream queryFile(queryFilename.c_str());
   queryFile << query;
   queryFile.close();
 
 	//
 	// write ini file (it is needed for now by AQEngine)
-	std::ofstream iniFile(settings.iniFile.c_str());
-	settings.writeAQEngineIni(iniFile);
+	std::ofstream iniFile(settings->iniFile.c_str());
+	settings->writeAQEngineIni(iniFile);
 	iniFile.close();
 
 	return EXIT_SUCCESS;
 }
 
 // -------------------------------------------------------------------------------------------------
-int QueryResolver::processQuery(const std::string& query, aq::Settings& settings, aq::Base& baseDesc, aq::AQEngine_Intf * aq_engine,
-                                boost::shared_ptr<aq::RowWritter_Intf> resultHandler, bool keepFiles)
+int QueryResolver::processQuery(const std::string& query, 
+                                boost::shared_ptr<aq::Settings> settings, 
+                                boost::shared_ptr<aq::Base> baseDesc, 
+                                boost::shared_ptr<aq::engine::AQEngine_Intf> aqEngine,
+                                boost::shared_ptr<aq::RowWritter_Intf> resultHandler, 
+                                bool keepFiles)
 {
   int rc = EXIT_SUCCESS;
 
@@ -1184,10 +1194,10 @@ int QueryResolver::processQuery(const std::string& query, aq::Settings& settings
     {
       unsigned int id_generator = 1;
       aq::Timer timer;
-      aq::QueryResolver queryResolver(pNode, &settings, aq_engine, baseDesc, id_generator);
+      aq::QueryResolver queryResolver(pNode, settings, aqEngine, baseDesc, id_generator);
       aq::Table::Ptr result = queryResolver.solve(resultHandler);
       timer.stop();
-      if (settings.cmdLine)
+      if (settings->cmdLine)
       {
         std::cout << queryResolver.getNbRows() << " rows processed in " << aq::Timer::getString(timer.getTimeElapsed()) << std::endl;
         std::cout << std::endl;
@@ -1195,7 +1205,7 @@ int QueryResolver::processQuery(const std::string& query, aq::Settings& settings
     }
     else if (pNode->tag == K_UPDATE)
     {
-      aq::UpdateResolver updateResolver(pNode, settings, aq_engine, baseDesc);
+      aq::UpdateResolver updateResolver(pNode, settings, aqEngine, baseDesc);
       updateResolver.solve();
     }
     else 
@@ -1223,10 +1233,10 @@ int QueryResolver::processQuery(const std::string& query, aq::Settings& settings
 
   if (!keepFiles)
   {
-    aq::Logger::getInstance().log(AQ_NOTICE, "remove temporary directory '%s'\n", settings.tmpPath.c_str());
-    aq::util::DeleteFolder(settings.tmpPath.c_str());
-    aq::Logger::getInstance().log(AQ_NOTICE, "remove working directory '%s'\n", settings.workingPath.c_str());
-    aq::util::DeleteFolder(settings.workingPath.c_str());
+    aq::Logger::getInstance().log(AQ_NOTICE, "remove temporary directory '%s'\n", settings->tmpPath.c_str());
+    aq::util::DeleteFolder(settings->tmpPath.c_str());
+    aq::Logger::getInstance().log(AQ_NOTICE, "remove working directory '%s'\n", settings->workingPath.c_str());
+    aq::util::DeleteFolder(settings->workingPath.c_str());
   }
 
 	return rc;

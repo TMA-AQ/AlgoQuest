@@ -100,7 +100,7 @@ struct tnodeVerbNode
 };
 
 //------------------------------------------------------------------------------
-VerbNode::Ptr VerbNode::build(aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal, tnode::tag_t context, Base& BaseDesc, Settings& settings)
+VerbNode::Ptr VerbNode::build(aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal, tnode::tag_t context, Base::Ptr BaseDesc, Settings::Ptr settings)
 {
   aq::Logger::getInstance().log(AQ_DEBUG, "build verb '%s'\n", id_to_kstring(pNode->tag));
 	VerbNode::Ptr verb = VerbFactory::GetInstance().getVerb( pNode->tag );
@@ -130,8 +130,8 @@ VerbNode::Ptr VerbNode::build(aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pS
   else 
   {
     verb->setContext( context );
-    verb->setBaseDesc(&BaseDesc);
-    verb->setSettings(&settings);
+    verb->setBaseDesc(BaseDesc);
+    verb->setSettings(settings);
 
     if( verb->preprocessQuery( pStart, pNode, pStartOriginal ) )
     {
@@ -149,7 +149,7 @@ VerbNode::Ptr VerbNode::build(aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pS
 }
 
 //------------------------------------------------------------------------------
-VerbNode::Ptr VerbNode::BuildVerbsTree(aq::tnode* pStart, const boost::array<aq::tnode::tag_t, 6>& categories_order, Base& baseDesc, Settings * settings)
+VerbNode::Ptr VerbNode::BuildVerbsTree(aq::tnode* pStart, const boost::array<aq::tnode::tag_t, 6>& categories_order, Base::Ptr baseDesc, Settings::Ptr settings)
 {
   aq::Logger::getInstance().log(AQ_DEBUG, "build verb tree\n");
 	if( pStart->tag != K_SELECT )
@@ -175,9 +175,9 @@ VerbNode::Ptr VerbNode::BuildVerbsTree(aq::tnode* pStart, const boost::array<aq:
 }
 
 //------------------------------------------------------------------------------
-VerbNode::Ptr VerbNode::BuildVerbsSubtree(aq::tnode* pSelect, aq::tnode* pStart, aq::tnode* pStartOriginal, tnode::tag_t context, Base& BaseDesc, Settings *pSettings)
+VerbNode::Ptr VerbNode::BuildVerbsSubtree(aq::tnode* pSelect, aq::tnode* pStart, aq::tnode* pStartOriginal, tnode::tag_t context, Base::Ptr BaseDesc, Settings::Ptr pSettings)
 {
-	VerbNode::Ptr spStart = VerbNode::build(pSelect, pStart, pStartOriginal, context, BaseDesc, *pSettings);
+	VerbNode::Ptr spStart = VerbNode::build(pSelect, pStart, pStartOriginal, context, BaseDesc, pSettings);
 	if( !spStart || !spStart->toSolve )
 		return spStart;
 	std::deque<tnodeVerbNode> deq;
@@ -194,7 +194,7 @@ VerbNode::Ptr VerbNode::BuildVerbsSubtree(aq::tnode* pSelect, aq::tnode* pStart,
 			aq::tnode* pNext = currentnode.pNode->next;
 			if( pNext )
 			{
-				VerbNode::Ptr spNewVerbNode = VerbNode::build(pSelect, pNext, pStartOriginal, context, BaseDesc, *pSettings);
+				VerbNode::Ptr spNewVerbNode = VerbNode::build(pSelect, pNext, pStartOriginal, context, BaseDesc, pSettings);
 				if( spNewVerbNode && spNewVerbNode->toSolve )
 				{
 					currentnode.spNode->setBrother( spNewVerbNode );
@@ -206,7 +206,7 @@ VerbNode::Ptr VerbNode::BuildVerbsSubtree(aq::tnode* pSelect, aq::tnode* pStart,
 		aq::tnode* pLeft = currentnode.pNode->left;
 		if( pLeft )
 		{
-			VerbNode::Ptr spNewVerbNode = VerbNode::build(pSelect, pLeft, pStartOriginal, context, BaseDesc, *pSettings);
+			VerbNode::Ptr spNewVerbNode = VerbNode::build(pSelect, pLeft, pStartOriginal, context, BaseDesc, pSettings);
 			if( spNewVerbNode && spNewVerbNode->toSolve )
 			{
 				currentnode.spNode->setLeftChild( spNewVerbNode );
@@ -217,7 +217,7 @@ VerbNode::Ptr VerbNode::BuildVerbsSubtree(aq::tnode* pSelect, aq::tnode* pStart,
 		aq::tnode* pRight = currentnode.pNode->right;
 		if( pRight )
 		{
-			VerbNode::Ptr spNewVerbNode = VerbNode::build(pSelect, pRight, pStartOriginal, context, BaseDesc, *pSettings);
+			VerbNode::Ptr spNewVerbNode = VerbNode::build(pSelect, pRight, pStartOriginal, context, BaseDesc, pSettings);
 			if( spNewVerbNode && spNewVerbNode->toSolve )
 			{
 				currentnode.spNode->setRightChild( spNewVerbNode );

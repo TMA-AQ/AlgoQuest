@@ -8,7 +8,9 @@
 
 namespace aq
 {
-
+  
+/// \ingroup row_writter
+/// \deprecated
 class ColumnTemporaryWritter
 {
 

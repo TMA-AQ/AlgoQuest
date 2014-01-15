@@ -153,7 +153,7 @@ struct Runner : public aq::DatabaseGenerator::handle_t
       }
 
       aq::Logger::getInstance().setLevel(log_level);
-      aq::verb::VerbFactory::GetInstance().setBuilder(new aq::VerbBuilder);
+      aq::verb::VerbFactory::GetInstance().setBuilder(boost::shared_ptr<aq::VerbBuilder>(new aq::VerbBuilder));
 
       opt->point_mode = (point_mode == "FULL") ? aq::DatabaseGenerator::point_mode_t::FULL : aq::DatabaseGenerator::point_mode_t::MIN_MAX;
       opt->gen_mode = (gen_mode == "ALL") ? aq::DatabaseGenerator::gen_mode_t::ALL : aq::DatabaseGenerator::gen_mode_t::INTERSECT;
@@ -193,11 +193,11 @@ struct Runner : public aq::DatabaseGenerator::handle_t
       gen.reset(new aq::DatabaseGenerator(tables, opt->nb_rows, opt->min_value, opt->max_value, opt->point_mode, opt->gen_mode, opt->value_mode));
 
       tc.reset(new aq::TestCase);
-      aq::Settings settings;
-      settings.initPath(opt->aq_path + "/" + opt->aq_name);
-      settings.changeIdent("test");
-      settings.aqEngine = opt->aq_engine;
-      settings.aqLoader = opt->aq_loader;
+      aq::Settings::Ptr settings(new aq::Settings);
+      settings->initPath(opt->aq_path + "/" + opt->aq_name);
+      settings->changeIdent("test");
+      settings->aqEngine = opt->aq_engine;
+      settings->aqLoader = opt->aq_loader;
       boost::shared_ptr<aq::DatabaseIntf> db1(new aq::AlgoQuestDatabase(settings, true));
       boost::shared_ptr<aq::DatabaseIntf> db2(new aq::MySQLDatabase(opt->mysql_host, opt->mysql_user, opt->mysql_pass, opt->mysql_name));
       tc->add(db1);

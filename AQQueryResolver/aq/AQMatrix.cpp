@@ -10,7 +10,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/bind.hpp>
 
-using namespace aq;
+using namespace aq::engine;
  
 #define STR_BIG_BUF_SIZE 128
 
@@ -36,7 +36,7 @@ namespace
 
 uint64_t AQMatrix::uid_generator = 0;
 
-AQMatrix::AQMatrix(const Settings& _settings, const Base& _baseDesc)
+AQMatrix::AQMatrix(const aq::Settings::Ptr _settings, const aq::Base::Ptr _baseDesc)
 	: settings(_settings),
     baseDesc(_baseDesc),
 		totalCount(0),
@@ -264,39 +264,6 @@ void AQMatrix::loadNextPacket()
   }
 }
 
-void AQMatrix::computeUniqueRow(std::vector<std::vector<size_t> >& mapToUniqueIndex, std::vector<std::vector<size_t> >& uniqueIndex) const
-{
-	size_t nrColumns = this->matrix.size();
-	for( size_t idx = 0; idx < nrColumns; ++idx )
-	{
-    mapToUniqueIndex.push_back( std::vector<size_t>() );
-		uniqueIndex.push_back( std::vector<size_t>() );
-		if( this->matrix[idx].indexes.size() < 1 )
-			continue;
-
-		::inner_column_cmp_t cmp(this->matrix[idx].indexes);
-
-		std::vector<size_t> index;
-		index.reserve(this->matrix[idx].indexes.size());
-		for (size_t idx2 = 0; idx2 < this->matrix[idx].indexes.size(); ++idx2)
-			index.push_back(idx2);
-
-		sort(index.begin(), index.end(), cmp);
-
-		mapToUniqueIndex[idx].resize(index.size(), std::string::npos);
-		uniqueIndex[idx].push_back( (size_t) this->matrix[idx].indexes[index[0]] );
-		mapToUniqueIndex[idx][index[0]] = uniqueIndex[idx].size() - 1;
-		for( size_t idx2 = 1; idx2 < index.size(); ++idx2 )
-		{
-			size_t row1 = (size_t) this->matrix[idx].indexes[index[idx2 - 1]];
-			size_t row2 = (size_t) this->matrix[idx].indexes[index[idx2]];
-			if( row1 != row2 )
-				uniqueIndex[idx].push_back( row2 );
-			mapToUniqueIndex[idx][index[idx2]] = uniqueIndex[idx].size() - 1;
-		}
-	}
-}
-
 void AQMatrix::compress()
 {
   size_t p = 0;
@@ -338,12 +305,12 @@ void AQMatrix::writeTemporaryTable()
     for (size_t c = 0; c < this->matrix.size(); ++c)
     {
       pos = static_cast<uint32_t>(this->matrix[c].indexes[i]);
-      packet = pos / settings.packSize;
-      pos = (pos - 1) % settings.packSize;
+      packet = pos / settings->packSize;
+      pos = (pos - 1) % settings->packSize;
       auto it = fds[c].find(packet);
       if (it == fds[c].end())
       {
-        sprintf(filename, "%s/B001REG%.4luTMP%.4luP%.12lu.TMP", this->settings.tmpPath.c_str(), this->matrix[c].table_id, this->uid, packet);
+        sprintf(filename, "%s/B001REG%.4luTMP%.4luP%.12lu.TMP", this->settings->tmpPath.c_str(), this->matrix[c].table_id, this->uid, packet);
         fd = fopen(filename, "wb");
         if (fd == nullptr)
         {
@@ -377,11 +344,11 @@ void AQMatrix::writeTemporaryTable()
   char tableName[128];
   for (auto it = this->matrix.begin(); it != this->matrix.end(); ++it)
   {
-    Table::Ptr table = this->baseDesc.getTable((*it).table_id);
-    uint64_t n = table->getTotalCount() / this->settings.packSize;
+    Table::Ptr table = this->baseDesc->getTable((*it).table_id);
+    uint64_t n = table->getTotalCount() / this->settings->packSize;
     for (uint64_t i = 0; i <= n; ++i)
     {
-      sprintf(filename, "%s/B001REG%.4luTMP%.4luP%.12lu.TMP", this->settings.tmpPath.c_str(), (*it).table_id, this->uid, i);
+      sprintf(filename, "%s/B001REG%.4luTMP%.4luP%.12lu.TMP", this->settings->tmpPath.c_str(), (*it).table_id, this->uid, i);
       FILE * fd = fopen(filename, "ab");
       fclose(fd);
     }

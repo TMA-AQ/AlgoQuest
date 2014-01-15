@@ -53,7 +53,7 @@ namespace util {
   /// \brief
   /// \param pStart
   /// \param BaseDesc
-  void moveFromJoinToWhere(aq::tnode* pStart, Base& BaseDesc);
+  void moveFromJoinToWhere(aq::tnode* pStart, Base::Ptr BaseDesc);
 
   /// \}
 
@@ -71,24 +71,24 @@ namespace util {
   /// \param BaseDesc Database Description with current temporary table of the query beeing processed
   /// \param columnNames the resulting columnNames
   /// \param columnDisplayNames the name of the columns
-  void solveSelectStar(aq::tnode* pNode, Base& BaseDesc, std::vector<std::string>& columnNames, std::vector<std::string>& columnDisplayNames);
+  void solveSelectStar(aq::tnode* pNode, Base::Ptr BaseDesc, std::vector<std::string>& columnNames, std::vector<std::string>& columnDisplayNames);
   
   /// \brief Create trees of select
   /// \param pNode
   /// \param BaseDesc
-  void solveIdentRequest(aq::tnode* pNode, Base& BaseDesc);
+  void solveIdentRequest(aq::tnode* pNode, Base::Ptr BaseDesc);
 
   /// \brief
   /// \param pNode
   /// \param tables
   /// \param BaseDesc
-  void assignIdentRequest(aq::tnode* pNode, std::vector<aq::tnode*> tables, Base& BaseDesc);
+  void assignIdentRequest(aq::tnode* pNode, std::vector<aq::tnode*> tables, Base::Ptr BaseDesc);
 
   /// \brief Check if the COLUMN exist in the IDENT COLUMN and chose the IDENT
   /// \param colName
   /// \param tables
   /// \param BaseDesc
-  std::string checkAndName(std::string colName, std::vector<aq::tnode*> tables, Base& BaseDesc);
+  std::string checkAndName(std::string colName, std::vector<aq::tnode*> tables, Base::Ptr BaseDesc);
 
   /// \brief
   /// \param colRef
@@ -135,7 +135,7 @@ namespace util {
   /// \brief
   /// \param pNode
   /// \param BaseDesc
-  void solveOneTableInFrom(aq::tnode* pNode, Base& BaseDesc);
+  void solveOneTableInFrom(aq::tnode* pNode, Base::Ptr BaseDesc);
 
   /// \brief
   /// \param pNode
@@ -168,7 +168,7 @@ namespace util {
   /// \param pNode
   /// \param columnTypes
   /// \param baseDesc
-  void getColumnTypes(aq::tnode* pNode, std::vector<Column::Ptr>& columnTypes, Base& baseDesc);
+  void getColumnTypes(aq::tnode* pNode, std::vector<Column::Ptr>& columnTypes, Base::Ptr baseDesc);
 
   /// \brief
   /// \param pNode
@@ -257,7 +257,8 @@ namespace util {
   /// \param baseDesc
   /// \param settings
   /// \param pNode
-  void transformExpression(const aq::Base& baseDesc, const aq::Settings& settings, aq::tnode * pNode);
+  /// \deprecated
+  void transformExpression(const aq::Base::Ptr baseDesc, const aq::Settings::Ptr settings, aq::tnode * pNode);
 
   /// \brief
   /// \param pNode

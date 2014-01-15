@@ -155,7 +155,7 @@ namespace
     }
   }
 
-  void getColumnInfos(const aq::Base& baseDesc, const aq::tnode& node, size_t& tId, size_t& cId, size_t& cSize, aq::ColumnType& cType)
+  void getColumnInfos(const aq::Base::Ptr baseDesc, const aq::tnode& node, size_t& tId, size_t& cId, size_t& cSize, aq::ColumnType& cType)
   {
     std::string tableName = node.left->getData().val_str;
     std::string columnName = node.right->getData().val_str;
@@ -163,7 +163,7 @@ namespace
     boost::trim(columnName);
     boost::to_upper(tableName);
     boost::to_upper(columnName);
-    aq::Table::Ptr table = baseDesc.getTable(tableName);
+    aq::Table::Ptr table = baseDesc->getTable(tableName);
     aq::Column::Ptr column;
     for (auto& col : table->Columns)
     {
@@ -222,7 +222,7 @@ namespace aq {
 class ExpressionTransform
 {
 public:
-  ExpressionTransform(const Base& _baseDesc, const std::string _dataPath, size_t _packSize) 
+  ExpressionTransform(const Base::Ptr _baseDesc, const std::string _dataPath, size_t _packSize) 
     : baseDesc(_baseDesc), dataPath(_dataPath), packSize(_packSize) {}
   template <typename M> aq::tnode * transform(aq::tnode * pNode);
 private:
@@ -235,7 +235,7 @@ private:
   };
   template <typename T, class M> aq::tnode * transform(aq::tnode * pNode, transformation_type tt);
   template <typename T, typename M, class CMP> aq::tnode * transform(CMP& cmp);
-  const Base& baseDesc;
+  const Base::Ptr baseDesc;
   std::string dataPath;
   size_t tId;
   size_t cId;
@@ -248,13 +248,13 @@ template <typename T>
 class check_cmp_op
 {
 public:
-  check_cmp_op(const aq::Base& _baseDesc, aq::tnode * node);
+  check_cmp_op(const aq::Base::Ptr _baseDesc, aq::tnode * node);
   void init();
   const aq::tnode * getColumnRef() const;
   bool check(const aq::ColumnItem<T>& item, const aq::ColumnType& cType) const;
   void success(aq::tnode * node);
 private:
-  const aq::Base& baseDesc;
+  const aq::Base::Ptr baseDesc;
   aq::ColumnItem<T> reference;
   aq::tnode * pNode;
   aq::tnode * pNodeColumnRef;
@@ -269,13 +269,13 @@ template <typename T>
 class check_between
 {
 public:
-  check_between(const aq::Base& _baseDesc, aq::tnode * node);
+  check_between(const aq::Base::Ptr _baseDesc, aq::tnode * node);
   void init();
   const aq::tnode * getColumnRef() const;
   bool check(const aq::ColumnItem<T>& item, const aq::ColumnType& cType) const;
   void success(aq::tnode * node);
 private:
-  const aq::Base& baseDesc;
+  const aq::Base::Ptr baseDesc;
 	aq::tnode * pNodeTmp;
 	aq::tnode * pNodeColumnRef;
 	aq::tnode * pNodeLeftBound;
@@ -290,13 +290,13 @@ template <typename T>
 class check_like
 {
 public:
-  check_like(const aq::Base& _baseDesc, aq::tnode * pNode);
+  check_like(const aq::Base::Ptr _baseDesc, aq::tnode * pNode);
   void init();
   const aq::tnode * getColumnRef() const;
   bool check(const aq::ColumnItem<T>& item, const aq::ColumnType& cType) const;
   void success(aq::tnode * node);
 private:
-  const aq::Base& baseDesc;
+  const aq::Base::Ptr baseDesc;
 	aq::tnode * pNodeTmp;
 	aq::tnode * pNodeColumnRef;
 	aq::tnode * pNodeStr;
@@ -314,7 +314,7 @@ private:
 // ----------------------------------------------------------------------
 
 template <typename T>
-check_cmp_op<T>::check_cmp_op(const aq::Base& _baseDesc, aq::tnode * node) 
+check_cmp_op<T>::check_cmp_op(const aq::Base::Ptr _baseDesc, aq::tnode * node) 
   : baseDesc(_baseDesc), pNode(node)
 {
   this->init();
@@ -425,7 +425,7 @@ void check_cmp_op<T>::success(aq::tnode * node)
 // ----------------------------------------------------------------------
 
 template <typename T>
-check_between<T>::check_between(const aq::Base& _baseDesc, aq::tnode * node)
+check_between<T>::check_between(const aq::Base::Ptr _baseDesc, aq::tnode * node)
   : baseDesc(_baseDesc), pNodeTmp(node)
 {
   this->init();
@@ -478,7 +478,7 @@ void check_between<T>::success(aq::tnode * node)
 // ----------------------------------------------------------------------
 
 template <typename T>
-check_like<T>::check_like(const aq::Base& _baseDesc, aq::tnode * pNode)
+check_like<T>::check_like(const aq::Base::Ptr _baseDesc, aq::tnode * pNode)
   : baseDesc(_baseDesc), pNodeTmp(pNode)
 {
   this->init();
@@ -688,7 +688,7 @@ namespace expression_transform {
   /// \param settings
   /// \param tree the tree to transform
   template <class M>
-  aq::tnode * transform(const aq::Base& base, const std::string& dataPath, size_t packSize, aq::tnode * tree)
+  aq::tnode * transform(const aq::Base::Ptr base, const std::string& dataPath, size_t packSize, aq::tnode * tree)
   {
     aq::tnode * newTree = tree->clone_subtree();
     aq::ExpressionTransform expTr(base, dataPath, packSize);

@@ -8,7 +8,7 @@
 namespace aq
 {
   
-UpdateResolver::UpdateResolver(aq::tnode * _statement, aq::Settings & _settings, aq::AQEngine_Intf * _aqEngine, aq::Base & _base)
+UpdateResolver::UpdateResolver(aq::tnode * _statement, aq::Settings::Ptr _settings, aq::engine::AQEngine_Intf::Ptr _aqEngine, aq::Base::Ptr _base)
   : statement(_statement), aqEngine(_aqEngine), settings(_settings), base(_base)
 {
 
@@ -23,7 +23,7 @@ void UpdateResolver::solve()
     throw aq::generic_error(aq::generic_error::INVALID_QUERY, "invalid table name");
   }
   std::string tableName = this->statement->left->getData().val_str;
-  this->table = this->base.getTable(tableName);
+  this->table = this->base->getTable(tableName);
 
   //
   // get columns to update and there values
@@ -86,7 +86,7 @@ void UpdateResolver::solve()
     boost::shared_ptr<RowWritter_Intf> rowHandler(handler);
 
     unsigned int id_generator = 1;
-    aq::QueryResolver solver(select, &settings, aqEngine, base, id_generator);
+    aq::QueryResolver solver(select, settings, aqEngine, base, id_generator);
     solver.solve(rowHandler);
   }
 

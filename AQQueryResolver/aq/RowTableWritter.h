@@ -6,7 +6,10 @@
 
 namespace aq
 {
-
+  
+  /// \ingroup row_writter
+  /// \brief write into a Table
+  /// used by nested queries
   class RowTableWritter : public aq::RowWritter_Intf
   {
   public:
