@@ -152,6 +152,9 @@
     <ClCompile Include="aq\Table.cpp">
       <Filter>Fichiers sources\aq</Filter>
     </ClCompile>
+    <ClCompile Include="aq\AQLInfixSpiritParser.cpp">
+      <Filter>Fichiers sources\aq</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Tests\Makefile.win">

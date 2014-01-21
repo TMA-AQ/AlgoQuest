@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <boost/optional.hpp>
 
 namespace aq {
 namespace core {
@@ -66,7 +67,7 @@ struct JoinCondition
   };
   
   std::string op;
-  std::string type_left, type_right;
+  boost::optional<std::string> type_left, type_right;
   std::string jt_left, jt_right;
   ColumnReference left, right;
 
@@ -95,7 +96,8 @@ struct SelectStatement
 {
   enum output_t
   {
-    AQL, 
+    AQL,
+    AQL_INFIX,
     SQL,
   };
   mutable output_t output;

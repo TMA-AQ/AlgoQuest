@@ -130,11 +130,11 @@ void print_aql(std::ostream& os, const aq::core::SelectStatement& query)
     for (auto& w : query.joinConditions) 
     {
       os << "  " << w.op << " ";
-      if (w.type_left != "")
-        os << w.type_left << " ";
+      if (w.type_left.is_initialized())
+        os << w.type_left.get() << " ";
       os << w.jt_left << " . " << w.left.table.name << " " << w.left.name << " ";
-      if (w.type_right != "")
-        os << w.type_right << " ";
+      if (w.type_right.is_initialized())
+        os << w.type_right.get() << " ";
       os << w.jt_right << " . " << w.right.table.name << " " << w.right.name << " ";
       os << std::endl;
     }
@@ -168,6 +168,75 @@ void print_aql(std::ostream& os, const aq::core::SelectStatement& query)
     os << "ORDER ";
     for (size_t i = 1; i < query.orderedColumns.size(); ++i) os << ", ";
     for (auto& c : query.orderedColumns) os << ". " << c.table.name << " " << c.name << " ";
+    os << std::endl;
+  }
+}
+
+void print_aql_infix(std::ostream& os, const aq::core::SelectStatement& query)
+{
+  os << "SELECT ";
+  print_list(os, query.selectedTables);
+  os << std::endl;
+
+  os << "FROM ";
+  print_list(os, query.fromTables);
+  os << std::endl;
+
+  if (!query.joinConditions.empty())
+  {
+    os << "WHERE ";
+    size_t i = 0;
+    size_t n = query.joinConditions.size() + query.inConditions.size();
+    os << std::endl;
+    for (auto& w : query.joinConditions) 
+    {
+      os << " ";
+
+      if (w.type_left.is_initialized())
+        os << w.type_left.get() << " ";
+      os << w.jt_left << " " << w.left.table.name << "." << w.left.name;
+      
+      os << " " << w.op << " ";
+
+      if (w.type_right.is_initialized())
+        os << w.type_right.get() << " ";
+      os << w.jt_right << " " << w.right.table.name << "." << w.right.name;
+      
+      if (++i < n)
+        os << " AND";
+      
+      os << std::endl;
+    }
+    for (auto& w : query.inConditions)
+    {
+      os << " " << w.column.table.name << "." << w.column.name << " IN (";
+      for (auto it = w.values.begin(); it != w.values.end();)
+      {
+        os << *it;
+        ++it;
+        if (it != w.values.end())
+        {
+          os << ", ";
+        }
+      }
+      os << ")";
+      if (++i < n)
+        os << " AND";
+      os << std::endl;
+    }
+  }
+
+  if (!query.groupedColumns.empty())
+  {
+    os << "GROUP ";
+    print_list(os, query.groupedColumns);
+    os << std::endl;
+  }
+
+  if (!query.orderedColumns.empty())
+  {
+    os << "ORDER ";
+    print_list(os, query.orderedColumns);
     os << std::endl;
   }
 }
@@ -342,6 +411,9 @@ std::ostream& operator<<(std::ostream& os, const aq::core::SelectStatement& ss)
     break;
   case aq::core::SelectStatement::AQL:
     print_aql(os, ss);
+    break;
+  case aq::core::SelectStatement::AQL_INFIX:
+    print_aql_infix(os, ss);
     break;
   }
   return os;

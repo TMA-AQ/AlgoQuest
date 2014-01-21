@@ -8,7 +8,7 @@ namespace aq {
 /// parser aql
 namespace parser {
 
-/// \brief parse aql query
+/// \brief parse aql prefixed query
 /// \param queryStr the aql string represention
 /// \query the query struct parsed
 /// \return true if succeed, false otherwise
@@ -21,6 +21,9 @@ namespace parser {
 /// GROUP ...
 /// ORDER ...
 bool parse(const std::string& queryStr, aq::core::SelectStatement& query);
+
+/// \brief parse aql infixed quer
+bool parse_infix(const std::string& queryStr, aq::core::SelectStatement& query);
 
 }
 }

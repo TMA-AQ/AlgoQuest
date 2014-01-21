@@ -26,10 +26,10 @@ BOOST_FUSION_ADAPT_STRUCT(aq::core::InCondition,
                           );
 
 BOOST_FUSION_ADAPT_STRUCT(aq::core::JoinCondition,
-                          (std::string, op)
                           (boost::optional<std::string>, type_left)
                           (std::string, jt_left)
                           (aq::core::ColumnReference, left)
+                          (std::string, op)
                           (boost::optional<std::string>, type_right)
                           (std::string, jt_right)
                           (aq::core::ColumnReference, right)
@@ -47,20 +47,18 @@ namespace aq {
 
     // --------------------------------------------------------
     template <typename It, typename Skipper = qi::space_type>
-    struct aq_parser : qi::grammar<It, aq::core::SelectStatement(), Skipper>
+    struct aq_infix_parser : qi::grammar<It, aq::core::SelectStatement(), Skipper>
     {
-      aq_parser(aq::core::SelectStatement& _ss) : aq_parser::base_type(start), ss(_ss)
+      aq_infix_parser(aq::core::SelectStatement& _ss) : aq_infix_parser::base_type(start), ss(_ss)
       {
         using namespace qi;
 
         sql_ident = lexeme [ qi::char_("a-zA-Z_") >> *qi::char_("a-zA-Z_0-9") ];
         table_ref = sql_ident;
-        column_ref = '.' >> table_ref >> sql_ident;
-        // value = no_case [ "k_value" ] >> '\'' >> lexeme [ *(char_ - '\'') ] >> '\'';
-        // value = no_case [ "k_value" ] >> lexeme [ *(char_ - ' ') ];
-        value = no_case [ "k_value" ] >> lexeme [ *qi::char_("a-zA-Z_0-9") ];
-        list_value = value | ',' >> value >> list_value ;
-        in_condition = no_case [ "in" ] >> column_ref >> list_value;
+        column_ref = table_ref >> '.' >> sql_ident;
+        value = lexeme [ *qi::char_("a-zA-Z_0-9") ];
+        list_value = '(' >> value % ',' >> ')';
+        in_condition = column_ref >> no_case [ "in" ] >> list_value;
         join_type = no_case [ string("k_active") ] | no_case [ string("k_filter") ] | no_case [ string("k_neutral") ];
         join = no_case [ string("k_inner") ] | no_case [ string("k_outer") ];
         op = 
@@ -70,21 +68,21 @@ namespace aq {
           no_case [ string("k_jieq") ] | 
           no_case [ string("k_jsup") ] | 
           no_case [ string("k_jseq") ];  
-        join_condition = op >> -(join_type) >> join >> column_ref >> -(join_type) >> join >> column_ref;
-        unary_join = no_case [ string("k_jno") ] >> -(join_type) >> -(join) >> column_ref;
+        join_condition = (-join_type) >> join >> column_ref >> op >> (-join_type) >> join >> column_ref;
+        unary_join = no_case [ string("k_jno") ] >> (-join_type) >> (-join) >> column_ref;
         condition = 
           ( 
           unary_join
           |
-          join_condition [ phx::bind(&aq_parser::add_join_condition, this, qi::_1) ] 
+          join_condition [ phx::bind(&aq_infix_parser::add_join_condition, this, qi::_1) ] 
           | 
-          in_condition [ phx::bind(&aq_parser::add_in_condition, this, qi::_1) ]      
+          in_condition [ phx::bind(&aq_infix_parser::add_in_condition, this, qi::_1) ]      
         ) 
           ;
 
-        column_list = column_ref | ',' >> column_list >> column_ref;
-        table_list = table_ref | ',' >> table_list >> table_ref;
-        where_list = condition | no_case [ "and" ] >> where_list >> condition;
+        column_list = column_ref % ',';
+        table_list = table_ref % ',' ;
+        where_list = condition % no_case [ "and" ];
 
         select   = no_case [ "select" ] >> column_list;
         from     = no_case [ "from" ]   >> table_list;
@@ -154,11 +152,11 @@ namespace aq {
 
     // --------------------------------------------------------
     template <typename C, typename Skipper>
-    bool aq_parse(aq::core::SelectStatement& query, const C& input, const Skipper& skipper)
+    bool aq_infix_parse(aq::core::SelectStatement& query, const C& input, const Skipper& skipper)
     {
       auto f(std::begin(input)), l(std::end(input));
 
-      aq_parser<decltype(f), Skipper> p(query);
+      aq_infix_parser<decltype(f), Skipper> p(query);
 
       try
       {
@@ -176,9 +174,9 @@ namespace aq {
     }
     
     // --------------------------------------------------------
-    bool parse(const std::string& queryStr, aq::core::SelectStatement& query)
+    bool parse_infix(const std::string& queryStr, aq::core::SelectStatement& query)
     {
-      return aq::parser::aq_parse(query, queryStr, qi::space);
+      return aq::parser::aq_infix_parse(query, queryStr, qi::space);
     }
 
   }
@@ -190,7 +188,7 @@ namespace aq {
   namespace parser {
 
     // --------------------------------------------------------
-    bool parse(const std::string& queryStr, aq::core::SelectStatement& query)
+    bool parse_infix(const std::string& queryStr, aq::core::SelectStatement& query)
     {
       return true;
     }

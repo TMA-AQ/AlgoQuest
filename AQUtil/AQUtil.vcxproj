@@ -184,6 +184,7 @@
     <ClInclude Include="aq\WIN32FileMapper.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="aq\AQLInfixSpiritParser.cpp" />
     <ClCompile Include="aq\Base.cpp" />
     <ClCompile Include="aq\BaseDesc.cpp" />
     <ClCompile Include="aq\Column.cpp" />
