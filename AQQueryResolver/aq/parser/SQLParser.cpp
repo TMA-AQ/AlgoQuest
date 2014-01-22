@@ -1,6 +1,8 @@
 #include "SQLParser.h"
 #include <aq/DBTypes.h>
 #include <aq/Exceptions.h>
+#include <aq/Logger.h>
+#include "sql92_grm_tab.hpp"
 #include "ID2Str.h"
 
 #include <cstdio>
@@ -14,7 +16,11 @@
 #define STR_BUF_SIZE_ROUND_UP	4096
 #define EXIT_ON_MEM_ERROR		1
 
-extern int yyerror ( const char *pszMsg );
+int yyerror(const char *pszMsg)
+{
+  aq::Logger::getInstance().log(AQ_ERROR, pszMsg);
+  return -1;
+}
 
 using namespace std;
 

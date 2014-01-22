@@ -5,7 +5,8 @@ project(AQQueryResolver)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib/${CMAKE_BUILD_TYPE})
 set(EXECUTABLE_OUTPUT_PATH bin/${CMAKE_BUILD_TYPE})
 
-find_package(Boost 1.48.0 COMPONENTS program_options thread filesystem system timer REQUIRED)
+set(Boost_USE_STATIC_LIBS ON)
+find_package(Boost 1.48.0 COMPONENTS program_options thread filesystem system timer regex REQUIRED)
 
 include_directories(
   ${PROJECT_SOURCE_DIR}
@@ -63,6 +64,18 @@ SET(aq_query_resolver_source_files ${aq_query_resolver_source_files} aq/parser/s
 SET_SOURCE_FILES_PROPERTIES(aq/parser/lex.yy.cpp GENERATED)
 SET_SOURCE_FILES_PROPERTIES(aq/parser/sql92_grm_tab.cpp GENERATED)
 
+# aq-engine static library
+add_library(aq-engine STATIC ${aq_engine_source_files})
+
+# aq-engine shared library
+add_library(aq-engine-shared SHARED ${aq_engine_source_files})
+target_link_libraries(aq-engine-shared aq-util ${Boost_LIBRARIES})
+set_target_properties(aq-engine-shared PROPERTIES OUTPUT_NAME "aq-engine")
+
+# aq-query-resolver static library
 add_library(aq-query-resolver STATIC ${aq_query_resolver_source_files})
-add_library(aq-engine SHARED ${aq_engine_source_files})
-target_link_libraries(aq-engine aq-util ${Boost_LIBRARIES})
+
+# aq-query-resolver shared library
+add_library(aq-query-resolver-shared SHARED ${aq_query_resolver_source_files})
+target_link_libraries(aq-query-resolver-shared aq-engine aq-util ${Boost_LIBRARIES})
+set_target_properties(aq-query-resolver-shared PROPERTIES OUTPUT_NAME "aq-query-resolver")
