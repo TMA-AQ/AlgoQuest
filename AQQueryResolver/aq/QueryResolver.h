@@ -23,25 +23,42 @@ public:
   
   static boost::mutex parserMutex;
 
-  /// TODO
+  /// /brief prepare execution of a sql query
+  /// \param query
+  /// \param ident
+  /// \param settings
+  /// \param force
+  /// \return
   static int prepareQuery(
-    const std::string  & query, 
-    const std::string  & ident,
-    aq::Settings       & settings,  
-    bool                 force);
+    const std::string & query, 
+    const std::string & ident,
+    aq::Settings::Ptr   settings,  
+    bool force);
 
-  /// TODO
+  /// \brief run query
+  /// \param query
+  /// \param settings
+  /// \param baseDesc
+  /// \param aqEngine
+  /// \param resultHandler
+  /// \param keepFiles
+  /// \return
   static int processQuery(
     const std::string & query, 
-    aq::Settings      & settings, 
-    aq::Base          & baseDesc, 
-    aq::AQEngine_Intf * aq_engine,
-    // const std::string & answer, 
+    aq::Settings::Ptr settings, 
+    aq::Base::Ptr baseDesc, 
+    aq::engine::AQEngine_Intf::Ptr aqEngine,
     boost::shared_ptr<aq::RowWritter_Intf> resultHandler,
-    bool                keepFiles);
+    bool keepFiles);
 
 public:
-	QueryResolver(aq::tnode * _sqlStatement, Settings * _pSettings, AQEngine_Intf * _aq_engine, Base& _baseDesc, unsigned int& _id, unsigned int _level = 1);
+	QueryResolver(
+    aq::tnode * _sqlStatement, 
+    Settings::Ptr _settings, 
+    aq::engine::AQEngine_Intf::Ptr _aqEngine, 
+    Base::Ptr _baseDesc, 
+    unsigned int& _id, 
+    unsigned int _level = 1);
 	~QueryResolver();
 
   /// main entry
@@ -88,7 +105,10 @@ private:
   /// solve all selects found in the main select
   void solveNested();
 	void solveNested(aq::tnode*& pNode, unsigned int nSelectLevel, aq::tnode* pLastSelect, bool inFrom, bool inIn);
+  void updateTableName();
   void changeTemporaryTableName(aq::tnode * pNode);
+  void updateBaseDesc();
+  void generateAQEngineQuery(std::string& query, std::vector<std::string>& joinPath) const;
   bool isCompressable();
   boost::tribool isCompressable() const { return this->compressable; }
   std::string getOriginalColumn(const std::string& alias) const;
@@ -96,12 +116,10 @@ private:
   void buildJoinPath(const std::string& query);
 
   ////////////////////////////////////////////////////////////////////////////
-	// Variables Members
 
-  // Settings
-	Settings * pSettings;
-	Base& BaseDesc;
-	AQEngine_Intf * aq_engine;
+	Settings::Ptr settings;
+	Base::Ptr baseDesc;
+	boost::shared_ptr<aq::engine::AQEngine_Intf> aqEngine;
 
   // helper
 	aq::Timer timer;

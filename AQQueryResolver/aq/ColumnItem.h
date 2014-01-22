@@ -111,7 +111,7 @@ namespace aq
   template <> inline
   void ColumnItem<double>::toString(char * buffer) const
   {
-    doubleToString(buffer, this->value);
+    util::doubleToString(buffer, this->value);
   }
   
   //template <>

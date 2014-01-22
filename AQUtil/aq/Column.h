@@ -12,12 +12,12 @@
 namespace aq
 {
 
-//------------------------------------------------------------------------------
-class Column : public Object<Column>
+/// \brief column of query
+class Column
 {
 public:
   
-  typedef boost::intrusive_ptr<Column> Ptr;
+  typedef boost::shared_ptr<Column> Ptr;
 
 	Column();
 	Column(aq::ColumnType type);
@@ -28,6 +28,7 @@ public:
 
 	void setName( const std::string& name );
 	void setDisplayName(const std::string& name);
+  void setOriginalName(const std::string& name);
 	std::string& getName();
 	std::string& getDisplayName();
 	std::string& getOriginalName();

@@ -10,7 +10,10 @@
 
 namespace aq
 {
-
+  
+/// \ingroup row_writter
+/// \brief write row in a temporary column
+/// this row writter is used to handle nested queries with temporary values
 class RowTemporaryWritter : public RowWritter_Intf
 {
 public:

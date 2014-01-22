@@ -3,6 +3,8 @@
 #include <aq/Utilities.h>
 #include <aq/Logger.h>
 #include <aq/Exceptions.h>
+#include <aq/FileCloser.h>
+#include <aq/Database.h>
 
 #include <cstring>
 #include <cstdlib>
@@ -33,7 +35,7 @@ namespace aq
 
   namespace helper
   {
-    
+
     template <typename T>
     struct pointer_type_handler
     {
@@ -63,7 +65,7 @@ namespace aq
     };
 
     template <typename T>
-    void write_record(const char * field, size_t size, aq::column_info_t& ci)
+    void write_record(const char * field, size_t size, DatabaseLoader::column_info_t& ci)
     {
       typedef typename helper::pointer_type_handler<T> ptr_handler;
       typedef typename helper::raw_type_handler<T> raw_handler;
@@ -222,16 +224,16 @@ void DatabaseLoader::loadTable(const aq::base_t::table_t& table, const std::stri
 	int n_paquet = 0;
 
   // open source file and check if opened
-  if( (fd_table = aq::fopenUTF8(filename.c_str(), "r")) == nullptr )
+  if( (fd_table = aq::util::fopenUTF8(filename.c_str(), "r")) == nullptr )
   {
     throw aq::generic_error(aq::generic_error::COULD_NOT_OPEN_FILE, "error opening file %s\n", filename.c_str());
   }
 
   // prepare columns infos
-  std::vector<struct aq::column_info_t> columns_infos;
+  std::vector<struct column_info_t> columns_infos;
   for (auto& col : table.colonne)
   {
-    struct aq::column_info_t infos = { col, "", nullptr, nullptr, nullptr };
+    struct column_info_t infos = { col, "", nullptr, nullptr, nullptr };
     columns_infos.push_back(infos);
   }
 
@@ -306,7 +308,7 @@ void DatabaseLoader::loadAllColumns() const
     for (const auto& column : table.colonne)
     {
       sprintf(filename, format_file_name.c_str(), rep_cible.c_str(), 1, table.id, column.id, 0);
-      aq::column_info_t ci = { column, filename, nullptr, nullptr, nullptr };
+      column_info_t ci = { column, filename, nullptr, nullptr, nullptr };
       this->runLoader(table.id, ci, 0); // FIXME : manage multi packet
     }
   }
@@ -321,7 +323,7 @@ void DatabaseLoader::loadColumn(const size_t table_id, const size_t column_id) c
 }
 
 // --------------------------------------------------------------------------------------------
-void DatabaseLoader::writeRecord(std::vector<struct aq::column_info_t>& columns_infos, const char * record) const
+void DatabaseLoader::writeRecord(std::vector<struct column_info_t>& columns_infos, const char * record) const
 {
   
 	size_t len_rec = strlen(record);
@@ -382,10 +384,10 @@ void DatabaseLoader::writeRecord(std::vector<struct aq::column_info_t>& columns_
 }
 
 // --------------------------------------------------------------------------------------------
-void DatabaseLoader::buildPrmThesaurus(const aq::column_info_t& ci, size_t table_id, size_t packet) const
+void DatabaseLoader::buildPrmThesaurus(const column_info_t& ci, size_t table_id, size_t packet) const
 {
   // prm
-  std::string prmFilename = aq::getPrmFileName(this->rep_cible.c_str(), table_id, ci.col.id, packet);
+  std::string prmFilename = aq::Database::getPrmFileName(this->rep_cible.c_str(), table_id, ci.col.id, packet);
   FILE * prm = fopen(prmFilename.c_str(), "w");
   if (prm == nullptr)
   {
@@ -398,7 +400,7 @@ void DatabaseLoader::buildPrmThesaurus(const aq::column_info_t& ci, size_t table
   fclose(prm);
   
   // thesaurus
-  std::string theFilename = aq::getThesaurusFileName(this->rep_cible.c_str(), table_id, ci.col.id, packet);
+  std::string theFilename = aq::Database::getThesaurusFileName(this->rep_cible.c_str(), table_id, ci.col.id, packet);
   FILE * the = fopen(theFilename.c_str(), "w");
   if (the == nullptr)
   {
@@ -467,7 +469,7 @@ void DatabaseLoader::runLoader(size_t table, column_info_t& ci, size_t packet) c
 }
 
 //-------------------------------------------------------------------------------
-void DatabaseLoader::FileWriteEnreg(aq::column_info_t& ci, char * field) const
+void DatabaseLoader::FileWriteEnreg(column_info_t& ci, char * field) const
 {
 	switch (ci.col.type)
 	{
@@ -480,7 +482,7 @@ void DatabaseLoader::FileWriteEnreg(aq::column_info_t& ci, char * field) const
 		break;
 
 	case aq::t_double:
-    ChangeCommaToDot(field);
+    util::ChangeChar(field, ',', '.');
     helper::write_record<double>(field, ci.col.size, ci);
 		break;
 
@@ -500,12 +502,12 @@ void DatabaseLoader::FileWriteEnreg(aq::column_info_t& ci, char * field) const
       aq::Logger::getInstance().log(AQ_WARNING, "column size is too small\n");
       field[ci.col.size] = 0 ;
     }
-    aq::cleanSpaceAtEnd(field);
+    aq::util::removeCharAtEnd(field, ' ');
     helper::write_record<char*>(field, strlen(field) + 1, ci);
 		break;
 
 	default:
-    throw aq::generic_error(aq::generic_error::TYPE_MISMATCH, "type de colonne non traite [%s]\n", aq::symbole_to_char(ci.col.type));
+    throw aq::generic_error(aq::generic_error::TYPE_MISMATCH, "type de colonne non traite [%s]\n", aq::util::symbole_to_char(ci.col.type));
 		break;
 	}
 }

@@ -54,11 +54,12 @@
     <None Include="aq\parser\SQL92_Tok.l">
       <Filter>Source Files\aq\parser</Filter>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="AQQueryResolver.rc">
+    <None Include="doc\doxyfile">
       <Filter>Resource Files</Filter>
-    </ResourceCompile>
+    </None>
+    <None Include="mainpage.dox">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aq\ColumnItem.h">

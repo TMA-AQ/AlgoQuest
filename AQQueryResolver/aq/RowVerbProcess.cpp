@@ -1,4 +1,5 @@
 #include "RowVerbProcess.h"
+#include "verbs\VerbFactory.h"
 
 namespace aq
 {

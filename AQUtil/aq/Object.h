@@ -5,6 +5,8 @@
 
 #include <boost/intrusive_ptr.hpp>
 
+/// \brief AlgoQuest Object to hold intrusive pointer
+/// \deprecated don't need this class. use of shared_ptr are more than enough for our need.
 template <class T>
 class Object
 {

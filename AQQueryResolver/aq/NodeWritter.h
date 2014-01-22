@@ -6,7 +6,10 @@
 
 namespace aq
 {
-
+  
+  /// \ingroup row_writter
+  /// \brief write into tnode structure
+  /// used by nested queries
   class NodeWritter : public RowWritter_Intf
   {
   public:

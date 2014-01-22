@@ -9,31 +9,31 @@
 #include <string>
 #include <deque>
 
-#include <boost/variant.hpp>
-
-// Forward declaration (need because of a conflict #define in header)
 namespace aq 
 {
 
-//------------------------------------------------------------------------------
-class Table: public Object<Table>
+/// \brief Table of query
+class Table
 {
 public:
+  typedef boost::shared_ptr<Table> Ptr;
 	typedef std::vector<Column::Ptr> columns_t;
 
-	size_t  	ID;
-	bool			HasCount; ///< last column is "Count"
-	columns_t Columns;
-	uint64_t  TotalCount;
-	bool			GroupByApplied; ///< used by aggregate functions to know when there is a GROUP BY in the query
-	bool			OrderByApplied;
-	bool			NoAnswer;
-
-	Table();
-	Table(const std::string& name, unsigned int ID, bool temporary = false);
+	Table(const std::string& name, unsigned int ID, uint64_t _totalCount);
+	Table(const std::string& name, unsigned int ID, uint64_t _totalCount, bool temporary);
   Table(const Table& source);
   ~Table();
   Table& operator=(const Table& source);
+
+  size_t getID() const { return ID; }
+  uint64_t getTotalCount() const { return TotalCount; }
+  bool hasCount() const { return HasCount; }
+  bool isGroupByApplied() const { return GroupByApplied; }
+  bool isOrderByApplied() const { return OrderByApplied; }
+  bool hasNoAnswer() const { return NoAnswer; }
+
+  //void setID(size_t _id) { this->ID = _id; }
+  //void setTotalCount(uint64_t _totalCount) { this->TotalCount = _totalCount; }
 
 	int getColumnIdx(const std::string& name)  const;
   Column::Ptr getColumn(const std::string& columnName) const;
@@ -41,6 +41,8 @@ public:
 
 	void setName(const std::string& name);
 	const std::string& getName() const;
+
+  void setOriginalName(const std::string& _originalName) { this->OriginalName = _originalName; }
 	const std::string& getOriginalName() const;
   
   bool isTemporary() const { return temporary; }
@@ -51,8 +53,17 @@ public:
 
 	void dumpRaw(std::ostream& os);
 	void dumpXml(std::ostream& os);
+  
+	columns_t Columns;
 
 private:
+	size_t  	ID;
+	uint64_t  TotalCount;
+	bool			HasCount; ///< last column is "Count"
+	bool			GroupByApplied; ///< used by aggregate functions to know when there is a GROUP BY in the query
+	bool			OrderByApplied;
+	bool			NoAnswer;
+
 	std::string		Name;
 	std::string		OriginalName;
   std::string   temporaryName;

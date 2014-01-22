@@ -4,7 +4,8 @@
 namespace aq
 {
 
-// ----- symbole -----------------
+/// \brief symbole use by aq engine and aq loader
+/// \deprecated should be split into several enum
 typedef enum 
 {
 	faux, vrai, vide, unaire, binaire, 
@@ -38,8 +39,6 @@ typedef enum
 	copy/*, type le 17/10/04 */ , vdg, troncat/*trunc*/, name,
 	file, t_row_id, precision, t_star, last_symbole
 } symbole;
-
-const char * symbole_to_char(aq::symbole sid);
 
 }
 

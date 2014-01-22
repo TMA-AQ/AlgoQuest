@@ -41,13 +41,13 @@ int yyerror( const char *pszMsg )
 }
 
 // -------------------------------------------------------------------------------------------------
-int processSQLQueries(const std::string  & query, 
-                      const aq::Settings & settingsBase, 
-                      const std::string    queryIdent, 
-                      aq::Base           & baseDesc, 
-                      bool                 simulateAQEngine,
-                      bool                 keepFiles, 
-                      bool                 force)
+int processSQLQueries(const std::string       & query, 
+                      const aq::Settings::Ptr   settingsBase, 
+                      const std::string         queryIdent, 
+                      aq::Base::Ptr             baseDesc, 
+                      bool                      simulateAQEngine,
+                      bool                      keepFiles, 
+                      bool                      force)
 {
 
   aq::Logger::getInstance().log(AQ_INFO, "%s\n", query.c_str());
@@ -55,20 +55,20 @@ int processSQLQueries(const std::string  & query,
 
   //
   // Settings
-  aq::Settings settings(settingsBase);
+  aq::Settings::Ptr settings(new aq::Settings(*settingsBase));
 
   //
   // Load AQ engine
-  aq::AQEngine_Intf * aq_engine;
+  aq::engine::AQEngine_Intf::Ptr aq_engine;
   if (simulateAQEngine)
   {
     aq::Logger::getInstance().log(AQ_INFO, "Do not use aq engine\n");
-    aq_engine = new aq::AQEngineSimulate(baseDesc, settings);
+    aq_engine.reset(new aq::AQEngineSimulate(baseDesc, settings));
   }
   else
   {
-    aq::Logger::getInstance().log(AQ_INFO, "Use aq engine: '%s'\n", settings.aqEngine.c_str());
-    aq_engine = aq::getAQEngineSystem(baseDesc, settings);
+    aq::Logger::getInstance().log(AQ_INFO, "Use aq engine: '%s'\n", settings->aqEngine.c_str());
+    aq_engine.reset(aq::engine::getAQEngineSystem(baseDesc, settings));
   }
 
   //
@@ -94,8 +94,8 @@ int parse_queries(const std::string & aqHome,
                   const std::string & queryIdent, 
                   const std::string & sqlQueriesFile, 
                   const std::string & aqMatrixFileName,
-                  aq::Settings      & settings, 
-                  aq::Base          & baseDesc, 
+                  aq::Settings::Ptr   settings, 
+                  aq::Base::Ptr       baseDesc, 
                   bool                transform, 
                   bool                simulateAQEngine, 
                   bool                keepFiles, 
@@ -103,14 +103,14 @@ int parse_queries(const std::string & aqHome,
 {
   //
   // print info if use as command line tool
-  if (settings.cmdLine)
+  if (settings->cmdLine)
   {
     std::cout << "Welcome to AlgoQuest Monitor version " << AQ_TOOLS_VERSION << std::endl;
     std::cout << "Copyright (c) 2013, AlgoQuest System. All rights reserved." << std::endl;
     std::cout << std::endl;
-    if (settings.rootPath != "")
+    if (settings->rootPath != "")
     {
-      std::cout << "Connected to database " << settings.rootPath << std::endl;
+      std::cout << "Connected to database " << settings->rootPath << std::endl;
       std::cout << std::endl;
     }
   }
@@ -134,14 +134,14 @@ int parse_queries(const std::string & aqHome,
   }
   else
   {
-    reader = new aq::QueryReader(std::cin, settings.cmdLine ? "aq" : "");
+    reader = new aq::QueryReader(std::cin, settings->cmdLine ? "aq" : "");
   }
 
   // 
   // Get current database name from settings if set
   if (aqName == "")
   {
-    std::string databaseName = settings.rootPath;
+    std::string databaseName = settings->rootPath;
     boost::replace_all(databaseName, "\\", "/");
     while ((databaseName.size() > 0) && (*databaseName.rbegin() == '/'))
     {
@@ -159,7 +159,7 @@ int parse_queries(const std::string & aqHome,
   }
   else
   {
-    settings.initPath(aqHome + aqName);
+    settings->initPath(aqHome + aqName);
   }
 
   std::string query;
@@ -172,7 +172,7 @@ int parse_queries(const std::string & aqHome,
     }
     else if (aqMatrixFileName != "")
     {
-      process_aq_matrix(query, aqMatrixFileName, settings.outputFile, settings, baseDesc);
+      process_aq_matrix(query, aqMatrixFileName, settings->outputFile, settings, baseDesc);
     }
     else 
     {
@@ -188,12 +188,13 @@ int parse_queries(const std::string & aqHome,
 // -------------------------------------------------------------------------------------------------
 int main(int argc, char**argv)
 {
+
 	try
 	{
 
 		// Settings
-		aq::Settings settings;      
-    settings.outputFile = "stdout";
+		aq::Settings::Ptr settings(new aq::Settings);      
+    settings->outputFile = "stdout";
 
 		// log options
 		std::string mode;
@@ -243,16 +244,16 @@ int main(int argc, char**argv)
 
     //
     // initialize verb builder
-    aq::VerbBuilder * vb = new aq::VerbBuilder;
+    boost::shared_ptr<const aq::VerbBuilder> vb(new aq::VerbBuilder);
     aq::verb::VerbFactory::GetInstance().setBuilder(vb);
 
     //
     // if aq.ini exists in current directory, use it as default settings
-    settings.iniFile = "aq.ini";
-    boost::filesystem::path iniFile(settings.iniFile);
+    settings->iniFile = "aq.ini";
+    boost::filesystem::path iniFile(settings->iniFile);
     if (boost::filesystem::exists(iniFile))
     {
-      settings.load(settings.iniFile);
+      settings->load(settings->iniFile);
     }
 
     //
@@ -266,7 +267,7 @@ int main(int argc, char**argv)
         if ((i + 1) < argc)
         {
           propertiesFile = argv[i+1];
-          settings.load(propertiesFile);
+          settings->load(propertiesFile);
         }
       }
 
@@ -292,14 +293,14 @@ int main(int argc, char**argv)
     po::options_description engine("Engine");
     engine.add_options()
       ("settings,s", po::value<std::string>(&propertiesFile), "")
-      ("aq-engine,e", po::value<std::string>(&settings.aqEngine))
+      ("aq-engine,e", po::value<std::string>(&settings->aqEngine))
       ("aq-home,r", po::value<std::string>(&aqHome)->default_value(aqHome), "set AQ Home (AQ_HOME environment variable)")
       ("aq-name,n", po::value<std::string>(&aqName), "")
 			("query-ident,i", po::value<std::string>(&queryIdent), "")
       ("queries-file,f", po::value<std::string>(&sqlQueriesFile), "")
-			("output,o", po::value<std::string>(&settings.outputFile), "")
+			("output,o", po::value<std::string>(&settings->outputFile), "")
 			("worker,w", po::value<unsigned int>(&worker), "number of thread assigned to resolve the bunch of sql queries")
-			("parralellize,p", po::value<size_t>(&settings.process_thread)->default_value(settings.process_thread), "number of thread assigned resolve one sql queries")
+			("parralellize,p", po::value<size_t>(&settings->process_thread)->default_value(settings->process_thread), "number of thread assigned resolve one sql queries")
 			("display-count", po::bool_switch(&displayCount), "")
       ("force", po::bool_switch(&force), "force use of directory if it already exists")
 			("keep-file,k", po::bool_switch(&keepFiles), "")
@@ -313,7 +314,7 @@ int main(int argc, char**argv)
     testing.add_options()
       ("simulate-aq-engine,z", po::bool_switch(&simulateAQEngine), "")
 			("transform", po::bool_switch(&transform), "")
-			("skip-nested-query", po::value<bool>(&settings.skipNestedQuery), "")
+			("skip-nested-query", po::value<bool>(&settings->skipNestedQuery), "")
 			("aq-matrix", po::value<std::string>(&aqMatrixFileName), "")
       ("check-database", po::bool_switch(&checkDatabase), "")
       ("test-plugins", po::bool_switch(&testPlugins), "")
@@ -327,7 +328,7 @@ int main(int argc, char**argv)
 
     po::options_description loader("Loader");
     loader.add_options()
-      ("aq-loader,l", po::value<std::string>(&settings.aqLoader))
+      ("aq-loader,l", po::value<std::string>(&settings->aqLoader))
 			("load-db", po::bool_switch(&loadDatabase), "")
       ("load-table", po::value<std::string>(&tableNameToLoad), "")
 			;
@@ -361,9 +362,9 @@ int main(int argc, char**argv)
 		
     //
     // settings flags bool
-    settings.trace = trace || settings.trace;
-    settings.displayCount = displayCount || settings.displayCount;
-    settings.cmdLine = _isatty(_fileno(stdin)) != 0;
+    settings->trace = trace || settings->trace;
+    settings->displayCount = displayCount || settings->displayCount;
+    settings->cmdLine = _isatty(_fileno(stdin)) != 0;
     
     //
     //
@@ -378,11 +379,11 @@ int main(int argc, char**argv)
     //
     if (aqName == "")
     {
-      aqName = settings.aqName;
+      aqName = settings->aqName;
     }
     if ((aqHome != "") && (aqName != ""))
     {
-      settings.initPath(aqHome + aqName);
+      settings->initPath(aqHome + aqName);
     }
 
 		//
@@ -395,20 +396,20 @@ int main(int argc, char**argv)
     
 		//
 		// print Project Settings
-    aq::Logger::getInstance().log(AQ_DEBUG, "Settings:\n%s\n", settings.to_string().c_str());
+    aq::Logger::getInstance().log(AQ_DEBUG, "Settings:\n%s\n", settings->to_string().c_str());
 
 		//
 		// If Load database is invoked
 		if (loadDatabase)
 		{
       aq::base_t bd;
-      if (aq::build_base_from_raw(settings.dbDesc.c_str(), bd) != -1)
+      if (aq::base_t::build_base_from_raw(settings->dbDesc.c_str(), bd) != -1)
       {
         return load_database(settings, bd, tableNameToLoad);
       }
       else
       {
-        aq::Logger::getInstance().log(AQ_CRITICAL, "cannot find database desc file '%s'\n", settings.dbDesc.c_str());
+        aq::Logger::getInstance().log(AQ_CRITICAL, "cannot find database desc file '%s'\n", settings->dbDesc.c_str());
         return EXIT_FAILURE;
       }
       assert(false);
@@ -426,7 +427,7 @@ int main(int argc, char**argv)
     if (generateTmpTable)
     {
       aq::base_t bd;
-      if (aq::build_base_from_raw(settings.dbDesc.c_str(), bd) != -1)
+      if (aq::base_t::build_base_from_raw(settings->dbDesc.c_str(), bd) != -1)
       {
         int rc = 0;
         while ((nbTables-- > 0) && ((rc = generate_tmp_table(settings, bd, nbValues, minValue, maxValue)) == 0));
@@ -434,7 +435,7 @@ int main(int argc, char**argv)
       }
       else
       {
-        aq::Logger::getInstance().log(AQ_CRITICAL, "cannot find database desc file '%s'\n", settings.dbDesc.c_str());
+        aq::Logger::getInstance().log(AQ_CRITICAL, "cannot find database desc file '%s'\n", settings->dbDesc.c_str());
         return EXIT_FAILURE;
       }
     }
@@ -443,7 +444,7 @@ int main(int argc, char**argv)
     // Test plugins
     if (testPlugins)
     {
-      aq::Base bd(settings.dbDesc);
+      aq::Base::Ptr bd(new aq::Base(settings->dbDesc));
       std::string plugins_path = "C:/Users/AlgoQuest/Documents/Visual Studio 2012/Projects/AQPlugin/x64/Debug/AQPlugin.dll";
       std::string query = "select aq_func1(t1.id), aq_func2(t1.v1) from t1;";
       return test_plugins(plugins_path, query, settings, bd);
@@ -451,7 +452,7 @@ int main(int argc, char**argv)
 
     //
     // Solve Queries
-    aq::Base bd(settings.dbDesc);
+    aq::Base::Ptr bd(new aq::Base(settings->dbDesc));
     return parse_queries(
       aqHome, aqName, queryIdent, sqlQueriesFile, aqMatrixFileName, 
       settings, bd,

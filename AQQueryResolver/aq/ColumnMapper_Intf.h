@@ -15,15 +15,37 @@ template <> struct type_conversion<int64_t> { static const aq::ColumnType type =
 template <> struct type_conversion<double> { static const aq::ColumnType type = aq::ColumnType::COL_TYPE_DOUBLE; };
 template <> struct type_conversion<char> { static const aq::ColumnType type = aq::ColumnType::COL_TYPE_VARCHAR; };
 
+/// \brief Column interface reader to read values stored in database
+/// The link to the column is manage by the implemented class.
+/// \param T the type of the value
 template <typename T>
 class ColumnMapper_Intf
 {
 public:
 	typedef boost::shared_ptr<ColumnMapper_Intf> Ptr;
   virtual ~ColumnMapper_Intf() {}
+
+  /// \brief load an item
+  /// \param index the position in the column
+  /// \param value a pointer holding the value to load
+  /// \return 0 if succeed, -1 otherwise
 	virtual int loadValue(size_t index, T * value) = 0;
+  
+  /// \brief set an item
+  /// \param index the position in the column
+  /// \param value a pointer holdind the value to set 
+  /// \todo value should be a const reference
+  /// \return 0 if succeed, -1 otherwise
   virtual int setValue(size_t index, T * value) = 0;
+  
+  /// \brief append an item
+  /// \param value a pointer holding the value to append
+  /// \todo value should be a const reference
+  /// \return 0 if succeed, -1 otherwise
   virtual int append(T * value) = 0;
+  
+  /// \brief load an item value
+  /// \return the column type
   const aq::ColumnType getType() const { return aq::type_conversion<T>::type; } ;
 };
 

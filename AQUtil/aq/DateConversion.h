@@ -25,10 +25,14 @@ public:
   void setInputFormat(const char * format) { this->input_facet->format(format); }
   void setOutputFormat(const char * format) { this->output_facet->format(format); }
 
-  /// 1 - success, 0 - failure
+  /// \brief convert a string representation of date into a long long millisecond
+  /// \return 1 - success, 0 - failure
   long long dateToBigInt(const char * strval);
+
   long long dateToBigInt(const char * strval, const char * format);
+  
   std::string bigIntToDate(long long intval);
+  
   std::string bigIntToDate(long long intval, const char * format);
   
   static long long currentDate();

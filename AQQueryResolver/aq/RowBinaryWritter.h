@@ -9,7 +9,9 @@
 
 namespace aq
 {
-
+  
+/// \ingroup row_writter
+/// \deprecated
 class RowBinaryWritter : public aq::RowWritter
 {
 public:

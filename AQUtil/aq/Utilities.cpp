@@ -16,75 +16,226 @@
 #define _MAX_PATH 1024
 #endif
 
-namespace aq
+namespace aq {
+namespace util {
+  
+//------------------------------------------------------------------------------
+#if defined(_MSC_VER)
+# define strtoll _strtoi64
+#endif
+#if defined(__FreeBSD__)
+# define strtoll strtol
+# define atoll atol
+#endif
+int StrToInt( const char* psz, llong* pnVal )
 {
+	char* pszIdx;
+	if( pnVal == nullptr || psz == nullptr )
+		return -1;
+	if( psz[0] <= ' ' )
+		return -1;
+	errno = 0;
+	*pnVal = strtoll(psz, &pszIdx, 10);
+	if( errno != 0 )
+		return -1;
+	if( *pszIdx != '\0' )
+		return -1;
+	return 0;
+}
 
 //------------------------------------------------------------------------------
+int StrToDouble( const char* psz, double* pdVal  )
+{
+	char* pszIdx;
+	if( pdVal == nullptr || psz == nullptr )
+		return -1;
+	if( psz[0] <= ' ' )
+		return -1;
+	errno = 0;
+	*pdVal = strtod(psz, &pszIdx);
+	if( errno != 0 )
+		return -1;
+	if( *pszIdx != '\0' )
+		return -1;
+	return 0;
+}
 
-extern const double EPSILON = 0.0000001;
+//------------------------------------------------------------------------------
+char* strtoupr( char* pszStr ) 
+{
+	char *psz;
+
+	if ( pszStr == nullptr )
+		return nullptr;
+
+	psz = pszStr;
+	while ( *psz != '\0' )
+	{
+		*psz = toupper( *psz );
+		psz += 1;
+	}
+	return pszStr;
+}
+
+//------------------------------------------------------------------------------
+std::wstring string2Wstring(const std::string& s)
+{
+#ifdef WIN32
+  int len;
+  int slength = (int)s.length() + 1;
+  len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0); 
+  wchar_t* buf = new wchar_t[len];
+  MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, buf, len);
+  std::wstring r(buf);
+  delete[] buf;
+  return r;
+#else
+  assert(false);
+  (void)s;
+#endif
+}
+
+//------------------------------------------------------------------------------
+void doubleToString( char* strVal, double dVal )
+{
+	llong iVal = (llong)(dVal * 100 + ((dVal > 0.0) ? 0.5 : -0.5));
+	dVal = (double) iVal / 100;
+	sprintf( strVal, "%.2lf", dVal );
+}
+
+//------------------------------------------------------------------------------
+aq::ColumnType symbole_to_column_type(symbole s)
+{
+  switch (s)
+  {
+  case t_int: return aq::COL_TYPE_INT; break;
+  case t_long_long: return aq::COL_TYPE_BIG_INT; break;
+  case t_date1: return aq::COL_TYPE_DATE; break;
+  case t_date2: return aq::COL_TYPE_DATE; break;
+  case t_date3: return aq::COL_TYPE_DATE; break;
+  case t_char: return aq::COL_TYPE_VARCHAR; break;
+  case t_double: return aq::COL_TYPE_DOUBLE; break;
+  case t_raw: return aq::COL_TYPE_VARCHAR; break;
+  default: return aq::COL_TYPE_VARCHAR;
+  }
+}
+
+//------------------------------------------------------------------------------
+const char * symbole_to_char(aq::symbole sid)
+{
+  switch (sid)
+  {
+  case faux: return "faux"; break; 
+  case vrai: return "vrai"; break; 
+  case vide: return "vide"; break; 
+  case unaire: return "unaire"; break; 
+  case binaire: return "binaire"; break; 
+  case scalaire: return "scalaire"; break; 
+  case vecteur: return "vecteur"; break; 
+  case liste: return "liste"; break; 
+  case r_et: return "r_et"; break; 
+  case r_ou: return "r_ou"; break; 
+  case r_feuille: return "r_feuille"; break; 
+  case r_frere: return "r_frere"; break; 
+  case mini_mot: return "mini_mot"; break; 
+  case maxi_mot: return "maxi_mot"; break; 
+  case liste_mot: return "liste_mot"; break;
+  case r_liste: return "r_liste"; break; 
+  case inf_egal: return "inf_egal"; break; 
+  case egal: return "egal"; break; 
+  case sup_egal: return "sup_egal"; break;
+  case hp: return "hp"; break;
+  case tuples: return "tuples"; break; 
+  case r_tag: return "r_tag"; break; 
+  case fils_gauche: return "fils_gauche"; break; 
+  case fils_droit: return "fils_droit"; break;
+  case t_int: return "t_int"; break; 
+  case t_double: return "t_double"; break; 
+  case t_date1: return "t_date1"; break; 
+  case t_date2: return "t_date2"; break; 
+  case t_date3: return "t_date3"; break;
+  case t_char : return "t_char "; break; 
+  case t_long_long: return "t_long_long"; break; 
+  case t_raw : return "t_raw "; break;
+  case m_up: return "m_up"; break; 
+  case m_down: return "m_down"; break;
+  case n_contenu: return "n_contenu"; break; 
+  case n_table: return "n_table"; break;
+  case t_continue : return "t_continue "; break;  
+  case t_done : return "t_done "; break; 
+  case t_eof: return "t_eof"; break; 
+  case t_file_read_error: return "t_file_read_error"; break; 
+  case r_jeq: return "r_jeq"; break;
+  case r_between: return "r_between"; break; 
+  case r_sup: return "r_sup"; break; 
+  case r_inf: return "r_inf"; break; 
+  case r_leq: return "r_leq"; break; 
+  case r_seq: return "r_seq"; break; 
+  case r_in: return "r_in"; break; 
+  case r_equal : return "r_equal "; break;
+  case l_source: return "l_source"; break;  
+  case l_pivot: return "l_pivot"; break; 
+  case l_cible: return "l_cible"; break;
+  case ec_requete: return "ec_requete"; break; 
+  case ec_jointure: return "ec_jointure"; break; 
+  case ec_etape_1: return "ec_etape_1"; break; 
+  case ec_etape_2: return "ec_etape_2"; break; 
+  case ec_etape_3 : return "ec_etape_3 "; break;
+  case ec_etape_4: return "ec_etape_4"; break; 
+  case ec_hp: return "ec_hp"; break; 
+  case ec_tuple: return "ec_tuple"; break;
+  case c_neutre: return "c_neutre"; break; 
+  case c_calcul: return "c_calcul"; break;
+  case string: return "string"; break; 
+  case integer: return "integer"; break; 
+  case d_nulle: return "d_nulle"; break; 
+  case comma: return "comma"; break;
+  case my_eof: return "my_eof"; break; 
+  case une_table: return "une_table"; break; 
+  case column: return "column"; break; 
+  case copy: return "copy"; break; 
+  case vdg: return "vdg"; break; 
+  case troncat: return "troncat"; break; 
+  case name: return "name"; break;
+  case file: return "file"; break; 
+  case t_row_id: return "t_row_id"; break; 
+  case precision: return "precision"; break; 
+  case t_star: return "t_star"; break; 
+  case last_symbole: return "last_symbole"; break;
+  default: return "unknown"; break;
+  }
+}
 
 //-------------------------------------------------------------------------------
-void * safecalloc(size_t nb, size_t size)
+void removeCharAtEnd(char *my_field, char c)
 {
-	void *p = (void *) calloc(nb, size);
-	if (!p)
+	size_t max_size = strlen(my_field);
+  if (max_size == 0) 
+    return;
+	for (size_t i = max_size - 1; i > 0 ; i--)
 	{
-		throw aq::generic_error(aq::generic_error::GENERIC, "not enough memory");
+		if (my_field[i] == c) 
+      my_field[i] = '\0';
+		else 
+      return;
 	}
-	return p;
+}
+
+//-------------------------------------------------------------------------------
+void ChangeChar(char * string, char old_c, char new_c)
+{
+  char * p = nullptr;
+  do
+  {
+    p = strchr(string, old_c);
+    if (p != nullptr) 
+      *p = new_c ;
+  } while (p != nullptr);
 }
 
 //------------------------------------------------------------------------------
-char* LoadFile( const char *pszFN ) {
-	char* pszBuf = nullptr;
-	FILE* pFIn = nullptr;
-	long  nFileSize = 0;
-	int   nPos = 0;
-
-	pFIn = fopenUTF8( pszFN, "rb" );
-	if ( pFIn == nullptr )
-		return nullptr;
-
-	/* Get start position */
-	nPos = ftell( pFIn );
-	/* Seek to end */
-	if ( fseek( pFIn, 0, SEEK_END ) != 0 ) {
-		fclose( pFIn );
-		return nullptr;
-	}
-	/* Get File Size */
-	nFileSize = ftell( pFIn ) - nPos;
-	if ( nFileSize <= 0 ) {
-		fclose( pFIn );
-		return nullptr;
-	}
-	/* Seek to beginning */
-	if ( fseek( pFIn, nPos, SEEK_SET ) != 0 ) {
-		fclose( pFIn );
-		return nullptr;
-	}
-	/* Allocate Memory for the file content + '\0' character */	
-	pszBuf = new char[nFileSize + 1];
-	if ( pszBuf == nullptr ) {
-		fclose( pFIn );
-		return nullptr;
-	}
-	/* Read in the file content */
-	if ( fread( pszBuf, nFileSize, 1, pFIn ) != 1 ) {
-		fclose( pFIn );
-		delete[] pszBuf;
-		return nullptr;
-	}
-	/* '\0' terminate the string */
-	pszBuf[ nFileSize ] = '\0';
-
-	fclose( pFIn );
-
-	return pszBuf;
-}
-
-//------------------------------------------------------------------------------
-void SaveFile( const char *pszFN, const char* pszToSave ) {
+void SaveFile( const char *pszFN, const char* pszToSave )
+{
 	FILE *pFOut;
 
 	pFOut = fopen( pszFN, "wt" );
@@ -142,70 +293,6 @@ int FileRename(const char* pszSrcPath, const char* pszDstPath)
 	}
 	aq::Logger::getInstance().log(AQ_DEBUG, "rename file %s to %s\n", pszSrcPath, pszDstPath);
 	return 0;
-}
-
-//------------------------------------------------------------------------------
-int GetFiles( const char* pszSrcPath, std::vector<std::string>& files )
-{
-#ifdef WIN32
-	WIN32_FIND_DATA ffd;
-	HANDLE hFind = INVALID_HANDLE_VALUE;
-	std::string path( pszSrcPath );
-	path += "\\*";
-	hFind = FindFirstFile( path.c_str(), &ffd);
-
-	if (INVALID_HANDLE_VALUE == hFind)
-		return -1;
-
-	do
-	{
-		if( !(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) )
-			files.push_back( ffd.cFileName );
-	}
-	while (FindNextFile(hFind, &ffd) != 0);
-
-	DWORD dwError = GetLastError();
-	if (dwError != ERROR_NO_MORE_FILES) 
-		return -1;
-
-	FindClose(hFind);
-#else
-	//not implemented yet
-#endif
-	return 0;
-}
-
-//------------------------------------------------------------------------------
-char* ReadValidLine( FILE* pFIn, char* pszTmpBuf, int nSize, int nTrimEnd ) {
-	char *psz = nullptr;
-	size_t  nLen;
-
-	/* Read a valid line */
-	pszTmpBuf[ 0 ] = '\0';
-	while ( pszTmpBuf[ 0 ] == '\0' ) {
-		if ( fgets( pszTmpBuf, nSize, pFIn ) == nullptr )
-			return nullptr;
-
-		/* Skip whitespace from the begin of the line ! */
-		psz = pszTmpBuf;
-		while ( *psz != '\0' && ( *psz == ' ' || *psz == '\t' ) )
-			psz++;
-
-		/* Check if valid line ! */
-		if ( *psz == '\0' || *psz == '\n' || *psz == '\r' )
-			pszTmpBuf[ 0 ] = '\0';
-	}
-
-	nLen = strlen( psz );
-	while ( nLen > 0 ) {
-		if ( psz[ nLen - 1 ] != '\n' && psz[ nLen - 1 ] != '\r'
-			&& (!nTrimEnd || psz[ nLen - 1 ] != ' ') )
-			break;
-		nLen--;
-		psz[ nLen ] = '\0';
-	}
-
-	return psz;
 }
 
 //------------------------------------------------------------------------------
@@ -284,168 +371,45 @@ FILE* fopenUTF8( const char* pszFlename, const char* pszMode )
 }
 
 //------------------------------------------------------------------------------
-#if defined(_MSC_VER)
-# define strtoll _strtoi64
-#endif
-#if defined(__FreeBSD__)
-# define strtoll strtol
-# define atoll atol
-#endif
-int StrToInt( const char* psz, llong* pnVal )
-{
-	char* pszIdx;
-	if( pnVal == nullptr || psz == nullptr )
-		return -1;
-	if( psz[0] <= ' ' )
-		return -1;
-	errno = 0;
-	*pnVal = strtoll(psz, &pszIdx, 10);
-	if( errno != 0 )
-		return -1;
-	if( *pszIdx != '\0' )
-		return -1;
-	return 0;
-}
-
-int StrToDouble( const char* psz, double* pdVal  )
-{
-	char* pszIdx;
-	if( pdVal == nullptr || psz == nullptr )
-		return -1;
-	if( psz[0] <= ' ' )
-		return -1;
-	errno = 0;
-	*pdVal = strtod(psz, &pszIdx);
-	if( errno != 0 )
-		return -1;
-	if( *pszIdx != '\0' )
-		return -1;
-	return 0;
-}
-
-//------------------------------------------------------------------------------
-char* strtoupr( char* pszStr ) {
-	char *psz;
-
-	if ( pszStr == nullptr )
-		return nullptr;
-
-	psz = pszStr;
-	while ( *psz != '\0' )
-	{
-		*psz = toupper( *psz );
-		psz += 1;
-	}
-	return pszStr;
-}
-
-//------------------------------------------------------------------------------
-std::wstring string2Wstring(const std::string& s)
+int GetFiles(const char* pszSrcPath, std::vector<std::string>& files)
 {
 #ifdef WIN32
-  int len;
-  int slength = (int)s.length() + 1;
-  len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0); 
-  wchar_t* buf = new wchar_t[len];
-  MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, buf, len);
-  std::wstring r(buf);
-  delete[] buf;
-  return r;
-#else
-  assert(false);
-  (void)s;
-#endif
-}
+	WIN32_FIND_DATA ffd;
+	HANDLE hFind = INVALID_HANDLE_VALUE;
+	std::string path( pszSrcPath );
+	path += "\\*";
+	hFind = FindFirstFile( path.c_str(), &ffd);
 
-//------------------------------------------------------------------------------
-void ShowError( char *message ) {
-	if ( message && *message )
-		fprintf( stderr, "%s", message );
-	if ( errno != 0 ) {
-		fprintf( stderr, " ( " );
-		perror( nullptr );
-		fprintf( stderr, " )\n" );
-	} else
-		fprintf( stderr, "\n" );
-}
+	if (INVALID_HANDLE_VALUE == hFind)
+		return -1;
 
-//------------------------------------------------------------------------------
-//helper function for loadFromAnswer
-void splitLine( char *psz, char fieldSeparator, std::vector<char*>& fields, 
-				bool answerFormat )
-{
-	char *pszIdx = psz;
-	if( answerFormat )
-		++psz;
-	while( true )
+	do
 	{
-		++pszIdx;
-		if( *pszIdx != fieldSeparator && *pszIdx != '\0' )
-			continue;
-		//skip space character that engine adds to the beginning of fields
-		if( answerFormat )
-		{
-			while( *psz == ' ' ) ++psz;
-			if( *pszIdx == fieldSeparator )
-			{
-				char *pszEnd = pszIdx - 1;
-				while( *pszEnd == ' ' && pszEnd > pszIdx ) --pszEnd;
-			}
-		}
-		fields.push_back( psz );
-		if( *pszIdx == '\0' )
-			break; //we have reached the end
-		//replace separator with null character to get substring
-		*pszIdx = '\0';
-		psz = pszIdx + 1;
+		if( !(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) )
+			files.push_back( ffd.cFileName );
 	}
+	while (FindNextFile(hFind, &ffd) != 0);
+
+	DWORD dwError = GetLastError();
+	if (dwError != ERROR_NO_MORE_FILES) 
+		return -1;
+
+	FindClose(hFind);
+#else
+  throw aq::generic_error(aq::generic_error::NOT_IMPLEMENTED, "");
+	//not implemented yet
+#endif
+	return 0;
 }
 
 //------------------------------------------------------------------------------
-void doubleToString( char* strVal, double dVal )
-{
-	llong iVal = (llong)(dVal * 100 + ((dVal > 0.0) ? 0.5 : -0.5));
-	dVal = (double) iVal / 100;
-	sprintf( strVal, "%.2lf", dVal );
-}
-
-//------------------------------------------------------------------------------
-std::string getPrmFileName( const char* path, size_t tableIdx, size_t columnIdx, size_t partIdx )
-{
-	char szFN[ _MAX_PATH ];
-	if( path )
-		sprintf( szFN, "%sB001T%.4luC%.4luV01P%.12lu.prm", path, tableIdx, columnIdx, partIdx );
-	else
-		sprintf( szFN, "B001T%.4luC%.4luV01P%.12lu.prm", tableIdx, columnIdx, partIdx );
-	return szFN;
-}
-
-//------------------------------------------------------------------------------
-std::string getThesaurusFileName( const char* path, size_t tableIdx, size_t columnIdx, size_t partIdx )
-{
-	char szFN[ _MAX_PATH ];
-	if( path )
-		sprintf( szFN, "%sB001T%.4luC%.4luV01P%.12lu.the", path, tableIdx, columnIdx, partIdx );
-	else
-		sprintf( szFN, "B001T%.4luC%.4luV01P%.12lu.the", tableIdx, columnIdx, partIdx );
-	return szFN;
-}
-
-//------------------------------------------------------------------------------
-std::string getTemporaryFileName( size_t tableIdx, size_t columnIdx, size_t partIdx, const char * type, size_t size )
-{
-	char szFN[ _MAX_PATH ];
-  sprintf( szFN, "B001TMP%.4luC%.4lu%s%.4luP%.12lu.TMP", tableIdx, columnIdx, type, size, partIdx );
-	return szFN;
-}
-
-//------------------------------------------------------------------------------
-void getFileNames( const char* path, std::vector<std::string>& filenames, const char * prefix )
+int getFileNames(const char * path, std::vector<std::string>& filenames, const char * prefix)
 {
   boost::filesystem::path p(path);
 	if (!boost::filesystem::exists(p))
 	{
 		aq::Logger::getInstance().log(AQ_INFO, "path %s doesn't exists\n", p.string().c_str());
+    return -1;
 	}
 	else
 	{
@@ -458,160 +422,8 @@ void getFileNames( const char* path, std::vector<std::string>& filenames, const 
       }
     }
 	}
+  return 0;
 }
 
-//------------------------------------------------------------------------------
-aq::ColumnType symbole_to_column_type(symbole s)
-{
-  switch (s)
-  {
-  case t_int: return aq::COL_TYPE_INT; break;
-  case t_long_long: return aq::COL_TYPE_BIG_INT; break;
-  case t_date1: return aq::COL_TYPE_DATE; break;
-  case t_date2: return aq::COL_TYPE_DATE; break;
-  case t_date3: return aq::COL_TYPE_DATE; break;
-  case t_char: return aq::COL_TYPE_VARCHAR; break;
-  case t_double: return aq::COL_TYPE_DOUBLE; break;
-  case t_raw: return aq::COL_TYPE_VARCHAR; break;
-  default: return aq::COL_TYPE_VARCHAR;
-  }
 }
-
-//-------------------------------------------------------------------------------
-void cleanSpaceAtEnd ( char *my_field )
-{
-	size_t max_size = strlen( my_field);
-  if (max_size == 0) 
-    return;
-	for (size_t i = max_size - 1; i > 0 ; i--)
-	{
-		if (my_field[i] == ' ') 
-      my_field[i] = '\0';
-		else 
-      return;
-	}
-}
-
-//-------------------------------------------------------------------------------
-char * cleanNameFast(char * strval)
-{
-	if (!strval)
-		return strval;
-	size_t len = strlen(strval);
-	if (len < 2)
-		return strval;
-	if ((strval[0] != '"') || (strval[len - 1] != '"'))
-		return strval;
-	strval[len - 1] = '\0';
-	return strval + 1;
-}
-
-//-------------------------------------------------------------------------------
-void ChangeCommaToDot (  char *string )
-{
-	char *p;
-	// seach first  ',' in string
-	p = strchr(string, ',' );
-	// modify string ',' become '.'  
-	if (p != nullptr )  *p = '.' ;
-}
-
-//------------------------------------------------------------------------------
-int MakeBackupFile( const std::string& pszPath, backup_type_t type, int level, int id )
-{
-	char szBuffer[STR_BUF_SIZE];
-	memset(szBuffer, 0, STR_BUF_SIZE);
-	char szDstPath[_MAX_PATH];
-	size_t	len = 0;
-	strcpy( szBuffer, pszPath.c_str() );
-	len = strlen(szBuffer);
-	if( len < 3 )
-	{
-		aq::Logger::getInstance().log(AQ_DEBUG, "MakeBackupFile : Invalid filename %s !", szBuffer );
-		return -1;
-	}
-	szBuffer[len - 4] = '\0';
-	std::string typeChar = "";
-	switch( type )
-	{
-  case backup_type_t::Empty: break;
-  case backup_type_t::Before: typeChar = "_Before"; break;
-	case backup_type_t::After: typeChar = "_After"; break;
-	case backup_type_t::Exterior_Before: typeChar = "_Exterior_Before"; break;
-	case backup_type_t::Exterior: typeChar = "_Exterior"; break;
-	default: ;
-	}
-	sprintf( szDstPath, "%s_%.2d_%.2d%s.%s", szBuffer, level, id, typeChar.c_str(), &pszPath[len - 3] );
-	if( FileRename( pszPath.c_str(), szDstPath ) != 0 )
-	{
-	  aq::Logger::getInstance().log(AQ_DEBUG, "MakeBackupFile : Error renaming file %s to %s !\n", pszPath.c_str(), szDstPath );
-		return -1;
-	}
-	return 0;
-}
-
-//-------------------------------------------------------------------------------
-void FileWriteEnreg( aq::ColumnType col_type, const int col_size, char *my_field, FILE *fcol )
-{
-	int dum_int;
-	int * my_int = & dum_int;
-
-	double dum_double; // 2009/09/01 
-	double * my_double = &dum_double; // 2009/09/01 
-
-	long long int dum_long_long;
-	long long int *my_long_long = &dum_long_long;
-
-  DateConversion dateConverter;
-
-	if ( (int) strlen ( my_field ) >= col_size ) my_field[ col_size ] = 0 ;
-
-  if (strcmp(my_field, "NULL"))
-  {
-    throw aq::generic_error(aq::generic_error::GENERIC, "NULL are not handle");
-  }
-
-	switch (  col_type )
-	{
-	case COL_TYPE_INT :
-    *my_int = atoi ( my_field );
-		fwrite( my_int , sizeof(int), 1, fcol  );
-		break;
-
-	case COL_TYPE_BIG_INT :
-#ifdef WIN32
-    *my_long_long  = _atoi64 (my_field );   
-#else
-    *my_long_long  = atoll (my_field );   
-#endif
-		fwrite( my_long_long , sizeof(long long), 1, fcol );
-		break;
-
-	case COL_TYPE_DOUBLE :
-    ChangeCommaToDot (  my_field );
-    *my_double =     strtod ( my_field, nullptr );  // atof  ( field );
-		fwrite( my_double, sizeof(double), 1, fcol );
-		break;
-
-	case COL_TYPE_DATE:
-    dateConverter.dateToBigInt(my_field);
-    fwrite( my_long_long , sizeof(long long), 1, fcol );
-		break;
-
-	case COL_TYPE_VARCHAR :
-		// check my_field size
-		if ( (int) strlen ( my_field ) >= col_size ) my_field[ col_size ] = 0 ;
-		// clean all space at the end
-		cleanSpaceAtEnd (my_field );
-		// write string record and go to next
-		fwrite(my_field, sizeof(char), strlen( my_field ) , fcol );
-		fwrite("\0",sizeof(char),1, fcol );
-		break;
-
-	default:
-		throw generic_error(generic_error::TYPE_MISMATCH, "");
-		break;
-	}
-}
-
 }

@@ -130,7 +130,11 @@ void print_aql(std::ostream& os, const aq::core::SelectStatement& query)
     for (auto& w : query.joinConditions) 
     {
       os << "  " << w.op << " ";
+      if (w.type_left != "")
+        os << w.type_left << " ";
       os << w.jt_left << " . " << w.left.table.name << " " << w.left.name << " ";
+      if (w.type_right != "")
+        os << w.type_right << " ";
       os << w.jt_right << " . " << w.right.table.name << " " << w.right.name << " ";
       os << std::endl;
     }

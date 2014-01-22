@@ -29,9 +29,14 @@ namespace aq
 
 class Base;
 
+namespace engine 
+{
+
+/// \brief representation of aq engine result. See aq engine specification for more explanations.
 class AQMatrix
 {
 public:
+  typedef boost::shared_ptr<AQMatrix> Ptr;
   typedef std::vector<size_t> v_size_t;
 
 	struct column_t
@@ -47,38 +52,59 @@ public:
 	typedef std::vector<column_t> matrix_t;
   typedef std::vector<std::pair<uint64_t, uint64_t> > group_by_t;
 
-	AQENGINE_API AQMatrix(const Settings& settings, const Base& baseDesc);
+	AQENGINE_API AQMatrix(const Settings::Ptr settings, const Base::Ptr baseDesc);
 	AQENGINE_API AQMatrix(const AQMatrix& source);
 	AQENGINE_API ~AQMatrix();
 	AQENGINE_API AQMatrix& operator=(const AQMatrix& source);
 
-	// 
-	// testing purpose (to remove)
-	// void simulate(size_t rows, const std::vector<long long>& tableIDs);
-  
+  /// \brief clean directories
   AQENGINE_API void clear();
+
+  /// \brief set join path
+  /// \param jp
   AQENGINE_API void setJoinPath(const std::vector<std::string>& jp) { this->joinPath = jp; }
+  
+  /// \brief write
+  /// \param filePath
   AQENGINE_API void write(const char * filePath);
+
+  /// \brief load full aq matrix
+  /// \param filePath
+  /// \param tableIds
 	AQENGINE_API void load(const char * filePath, std::vector<long long>& tableIDs);
+
+  /// \brief load only head aq matrix
+  /// \param filePath
+  /// \param tableIDs
   AQENGINE_API void loadHeader(const char * filePath, std::vector<long long>& tableIDs);
+
+  /// \brief load only full data aq matrix
+  /// \param filePath
   AQENGINE_API void loadData(const char * filePath);
+
+  /// \brief prepare data file to be read by row
+  /// \param filePath
   AQENGINE_API void prepareData(const char * filePath);
+
+  /// \brief load next packet
   AQENGINE_API void loadNextPacket();
+
+  /// \brief read data by row and call a callback for each row
+  /// \param CB the type of callback to call
+  /// \param cb the callback
   template <class CB> void readData(CB& cb);
 
-	/// Each column in the table holds a list of row indexes.
-	/// Compute a column containing unique and sorted row indexes.
-	/// Also compute a mapping between the original row indexes and the sorted and unique indexes
-	AQENGINE_API void computeUniqueRow(std::vector<std::vector<size_t> >& mapToUniqueIndex, std::vector<std::vector<size_t> >& uniqueIndex) const;
-
-	AQENGINE_API const group_by_t& getGroupBy() const { return this->groupByIndex; }
-
-  ///
+  /// \brief use for compress matrix when a group by with an aggregate function appears
   AQENGINE_API void compress();
 
-  ///
+  /// \brief write tempoaray table
+  /// \todo
   AQENGINE_API void writeTemporaryTable();
 
+  /// \name aq_matrix_getter_setter AQ Matrix getter
+  /// \{
+  AQENGINE_API matrix_t& getMatrix() { return this->matrix; }
+	AQENGINE_API const group_by_t& getGroupBy() const { return this->groupByIndex; }
   AQENGINE_API const std::vector<std::string>& getJoinPath() { return this->joinPath; }
   AQENGINE_API const matrix_t& getMatrix() const { return this->matrix; }
   AQENGINE_API const size_t getTableId(size_t c) const { return this->matrix[c].table_id; }
@@ -88,16 +114,17 @@ public:
 	AQENGINE_API uint64_t getTotalCount() const { return this->totalCount; }
 	AQENGINE_API uint64_t getNbRows() const { return this->nbRows; }
 	AQENGINE_API bool hasCountColumn() const { return this->hasCount; }
+  /// \}
 
-  /// Debug purpose
+  /// \brief Debug purpose
   AQENGINE_API void dump(std::ostream& os) const;
 
 private:
 
   static uint64_t uid_generator;
   uint64_t uid;
-	const Settings& settings;
-  const Base& baseDesc;
+	const Settings::Ptr settings;
+  const Base::Ptr baseDesc;
 	matrix_t matrix;
 	v_size_t count;
   group_by_t groupByIndex;
@@ -139,6 +166,7 @@ void AQMatrix::readData(CB& cb)
   this->packet += 1;
 }
 
+}
 }
 
 #endif

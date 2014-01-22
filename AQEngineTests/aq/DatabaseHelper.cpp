@@ -14,11 +14,11 @@
 
 using namespace aq;
 
-AlgoQuestDatabase::AlgoQuestDatabase(aq::Settings& _settings, bool _onlyEngine)
-  : db(_settings.rootPath), settings(_settings), onlyEngine(_onlyEngine)
+AlgoQuestDatabase::AlgoQuestDatabase(aq::Settings::Ptr _settings, bool _onlyEngine)
+  : db(_settings->rootPath), settings(_settings), onlyEngine(_onlyEngine)
 {
   base.id = 1; // fixme
-  base.name = settings.rootPath;
+  base.name = settings->rootPath;
   boost::replace_all(base.name, "\\", "/");
   while (!base.name.empty() && (*base.name.rbegin() == '/'))
     base.name.erase(base.name.size() - 1);
@@ -189,13 +189,12 @@ bool AlgoQuestDatabase::execute(const aq::core::SelectStatement& ss, DatabaseInt
   {
     try
     {
-      aq::Base base(settings.dbDesc);
-      aq::AQEngine_Intf * engine = getAQEngineSystem(base, settings);
+      aq::Base::Ptr base(new aq::Base(settings->dbDesc));
+      aq::engine::AQEngine_Intf::Ptr engine(aq::engine::getAQEngineSystem(base, settings));
       engine->prepare();
       engine->call(ss);
       engine->clean();
       auto matrix = engine->getAQMatrix();
-      delete engine;
       if (matrix != nullptr)
       {
         boost::shared_ptr<aq::display_cb> cb(new result_handler_t(result)); 
@@ -204,7 +203,7 @@ bool AlgoQuestDatabase::execute(const aq::core::SelectStatement& ss, DatabaseInt
         o.withCount = o.withIndex = false;
         for (const auto& c : ss.selectedTables)
           columns.push_back(c.table.name + "." + c.name);
-        aq::display(cb.get(), *matrix, base, settings, o, columns);
+        aq::display(cb.get(), matrix, base, settings, o, columns);
       }
     }
     catch (const aq::generic_error& ge)
@@ -215,15 +214,12 @@ bool AlgoQuestDatabase::execute(const aq::core::SelectStatement& ss, DatabaseInt
   }
   else
   {
-    std::string         query;
-    aq::Base            bd;
-    aq::AQEngine_Intf * aqEngine = nullptr;
-    const std::string   ident; 
-    bool                keepFiles = false;
-    bool                force = false;
-
-    aq::Base::load(settings.dbDesc, bd);
-    aqEngine = aq::getAQEngineSystem(bd, settings);
+    std::string query;
+    aq::Base::Ptr bd(new aq::Base(settings->dbDesc));
+    aq::engine::AQEngine_Intf::Ptr aqEngine(aq::engine::getAQEngineSystem(bd, settings));
+    const std::string ident; 
+    bool keepFiles = false;
+    bool force = false;
 
     ss.setOutput(aq::core::SelectStatement::output_t::SQL);
     ss.to_string(query);
@@ -237,8 +233,6 @@ bool AlgoQuestDatabase::execute(const aq::core::SelectStatement& ss, DatabaseInt
     boost::shared_ptr<aq::RowWritter_Intf> resultHandler(new ResultHandler(result));
     aq::QueryResolver::prepareQuery(query, ident, settings, force);
     aq::QueryResolver::processQuery(query, settings, bd, aqEngine, resultHandler, keepFiles);
-
-    delete aqEngine;
   }
   return true;
 }

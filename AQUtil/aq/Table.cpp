@@ -21,30 +21,32 @@ namespace aq
 {
 
 //------------------------------------------------------------------------------
-Table::Table()
+Table::Table(const std::string& _name, unsigned int _id, uint64_t _totalCount)
   : 
-	ID(0), 
-	HasCount(false), 
-	TotalCount(0), 
-	GroupByApplied(false),
-	OrderByApplied(false),
-	NoAnswer(false)
+  ID(_id), 
+  HasCount(false), 
+  TotalCount(_totalCount), 
+  GroupByApplied(false), 
+  OrderByApplied(false),
+  NoAnswer(false),
+  temporary(false)
 {
+	this->setName(_name);
 	memset(szBuffer, 0, STR_BUF_SIZE);
 }
 
 //------------------------------------------------------------------------------
-Table::Table(const std::string& name, unsigned int ID, bool _temporary)
+Table::Table(const std::string& _name, unsigned int _id, uint64_t _totalCount, bool _temporary)
   : 
 	ID(ID), 
-	HasCount(false), 
+	HasCount(_totalCount), 
 	TotalCount(0), 
 	GroupByApplied(false), 
 	OrderByApplied(false),
 	NoAnswer(false),
   temporary(_temporary)
 {
-	this->setName( name );
+	this->setName(_name);
 	memset(szBuffer, 0, STR_BUF_SIZE);
 }
 
@@ -63,7 +65,8 @@ Table::Table(const Table& source)
 	memset(szBuffer, 0, STR_BUF_SIZE);
   for (auto& c : source.Columns)
   {
-    this->Columns.push_back(new Column(*c));
+    Column::Ptr column(new Column(*c));
+    this->Columns.push_back(column);
   }
 }
 
@@ -88,7 +91,8 @@ Table& Table::operator=(const Table& source)
     memset(szBuffer, 0, STR_BUF_SIZE);
     for (auto& c : source.Columns)
     {
-      this->Columns.push_back(new Column(*c));
+      Column::Ptr column(new Column(*c));
+      this->Columns.push_back(column);
     }
   }
   return *this;
@@ -102,12 +106,12 @@ Column::Ptr Table::getColumn(const std::string& columnName) const
   boost::to_upper(aux);
   for (auto& c : this->Columns)
   {
-    if (c->getName() == aux)
+    if ((c->getName() == aux) || (c->getOriginalName() == aux))
     {
       return c;
     }
   }
-  throw aq::generic_error(aq::generic_error::INVALID_QUERY, "cannot find table [%s]", columnName.c_str());
+  throw aq::generic_error(aq::generic_error::INVALID_QUERY, "cannot find column [%s]", columnName.c_str());
 }
 
 //------------------------------------------------------------------------------
@@ -149,7 +153,12 @@ std::vector<Column::Ptr> Table::getColumnsByName( std::vector<Column::Ptr>& colu
 //------------------------------------------------------------------------------
 void Table::setName( const std::string& name )
 {
-	this->OriginalName = name;
+  if (this->OriginalName == "")
+  {
+    this->OriginalName = name;
+    boost::to_upper(this->OriginalName);
+    boost::trim(this->OriginalName);
+  }
 	this->Name = name;
 	boost::to_upper(this->Name);
 	boost::trim(this->Name);

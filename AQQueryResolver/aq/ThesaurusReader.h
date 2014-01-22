@@ -2,6 +2,7 @@
 #define __THESAURUS_READER_H__
 
 #include "ColumnMapper_Intf.h"
+#include <aq/Database.h>
 #include <aq/Exceptions.h>
 #include <boost/filesystem.hpp>
 
@@ -34,7 +35,7 @@ namespace aq
   ThesaurusReader<T, M>::ThesaurusReader(const char * _path, size_t _tableId, size_t _columnId, size_t _size, size_t _packetSize, size_t _currentPacket, bool _readNextPacket)
     : path(_path), tableId(_tableId), columnId(_columnId), size(_size), currentPacket(_currentPacket), readNextPacket(_readNextPacket)
   {
-    std::string thesaurusFilename = getThesaurusFileName(path.c_str(), tableId, columnId, currentPacket);
+    std::string thesaurusFilename = aq::Database::getThesaurusFileName(path.c_str(), tableId, columnId, currentPacket);
     this->thesaurusMapper.reset(new M(thesaurusFilename.c_str()));
     sizes.push_back(this->thesaurusMapper->size() / (size * sizeof(T)));
     mappedZone = std::make_pair(0, sizes[0]);
@@ -63,7 +64,7 @@ namespace aq
     else if ((index >= mappedZone.second) && (readNextPacket))
     {
       ++currentPacket;
-      std::string thesaurusFilename = getThesaurusFileName(path.c_str(), tableId, columnId, currentPacket);
+      std::string thesaurusFilename = aq::Database::getThesaurusFileName(path.c_str(), tableId, columnId, currentPacket);
       boost::filesystem::path f(thesaurusFilename);
       if (boost::filesystem::exists(f))
       {

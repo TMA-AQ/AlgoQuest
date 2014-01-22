@@ -23,12 +23,12 @@ public:
 	std::string getColumnName() const;
 	std::string getColumnOnlyName() const;
   
-  virtual void setBaseDesc(Base * baseDesc) 
+  virtual void setBaseDesc(Base::Ptr baseDesc) 
   { 
     m_baseDesc = baseDesc;
   }
   
-  virtual void setSettings(Settings * settings) 
+  virtual void setSettings(Settings::Ptr settings) 
   {
     m_settings = settings;
   }
@@ -37,8 +37,8 @@ public:
 
 private:
 	std::string TableName, ColumnName, ColumnOnlyName;
-  Base * m_baseDesc;
-  Settings * m_settings;
+  Base::Ptr m_baseDesc;
+  Settings::Ptr m_settings;
   int index;
   int computed_index;
 };

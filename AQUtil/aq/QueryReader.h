@@ -8,6 +8,9 @@
 namespace aq
 {
 
+/// \brief an helper class to read some query from a stream
+///
+/// the stream can contain several query classed by suite and ident and contains metadata for each query (as expected result)
 class QueryReader
 {
 public:

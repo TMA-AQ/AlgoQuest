@@ -7,16 +7,24 @@
 namespace aq
 {
 
+/// \brief helper class to report prerformance
 class Timer
 {
 public:
-	Timer();
-	~Timer();
+  Timer(); ///< \brief Start the timer
+  ~Timer();
 
-	void start();
-	void stop();
+	void start(); ///< \brief Start the timer
+	void stop(); ///< \brief Stop the timer
+
+  /// \brief get time elapsed
+  /// \return time elapsed
 	boost::posix_time::time_duration getTimeElapsed() const;
-	static const std::string getString(boost::posix_time::time_duration);
+
+  /// \brief get string representation of a duration
+  /// \param d the duration
+  /// \return the string representation
+	static const std::string getString(boost::posix_time::time_duration d);
 
 private:
 	boost::posix_time::ptime begin;

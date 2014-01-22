@@ -43,7 +43,7 @@ namespace aq
     {
       if (!node || (node->tag == K_SELECT && !node->left))
         throw;
-      aq::util::generate_parent(node, NULL);
+      aq::util::generateParent(node, NULL);
       vectorNode listSave;
       node->find_nodes(K_FUNC, listSave);
       for (auto& it : listSave)

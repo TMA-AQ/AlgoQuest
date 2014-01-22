@@ -4,12 +4,17 @@
 #include "parser/SQLParser.h"
 #include <aq/Base.h>
 
+/// algoquest namespace
 namespace aq
 {
 
-///
-int enforce_qualified_column_reference(aq::tnode * pNode, 
-                                       aq::Base  & baseDesc);
+/// \brief add table for each column reference and check ambiguity
+/// \deprectated
+/// If * occur, replace it by all column
+/// \param pNode
+/// \param baseDesc
+/// \return
+int enforce_qualified_column_reference(aq::tnode * pNode, aq::Base & baseDesc);
 
 }
 

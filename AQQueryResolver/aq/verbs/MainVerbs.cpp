@@ -38,7 +38,7 @@ bool SelectVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
 	if( resLeft && resLeft->getType() == VerbResult::ASTERISK )
 	{
 		this->Columns.clear();
-		aq::util::solveSelectStar( pNode, *this->m_baseDesc, this->Columns, this->ColumnsDisplay );
+		aq::util::solveSelectStar( pNode, this->m_baseDesc, this->Columns, this->ColumnsDisplay );
 		return false;
 	}
 	vector<aq::tnode*> columns;
@@ -230,8 +230,8 @@ bool FromVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* 
 bool FromVerb::changeQuery( aq::tnode* pStart, aq::tnode* pNode,
 	VerbResult::Ptr resLeft, VerbResult::Ptr resRight, VerbResult::Ptr resNext )
 {
-	aq::util::solveOneTableInFrom( pStart, *this->m_baseDesc );
-	aq::util::moveFromJoinToWhere( pStart, *this->m_baseDesc );
+	aq::util::solveOneTableInFrom( pStart, this->m_baseDesc );
+	aq::util::moveFromJoinToWhere( pStart, this->m_baseDesc );
 	return false;
 }
 

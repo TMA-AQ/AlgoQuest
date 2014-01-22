@@ -10,7 +10,7 @@ namespace aq
     oss << "Problem detected: Parsing: " << Msg;
     if ( pNode != nullptr )
     {
-      aq::util::generate_parent( pNode, nullptr );
+      aq::util::generateParent( pNode, nullptr );
       std::string str;
       if ( next == false )
         syntax_tree_to_sql_form_nonext( pNode, str );

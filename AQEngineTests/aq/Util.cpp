@@ -159,7 +159,7 @@ int run_aq_engine(const std::string& aq_engine, const std::string& iniFilename, 
 }
 
 // ------------------------------------------------------------------------------
-int check_answer_validity(const struct opt& o, aq::AQMatrix& matrix, const uint64_t count, const uint64_t nbRows, const uint64_t nbGroups)
+int check_answer_validity(const struct opt& o, aq::engine::AQMatrix& matrix, const uint64_t count, const uint64_t nbRows, const uint64_t nbGroups)
 {
   int rc = 0;
   try
@@ -389,18 +389,18 @@ int check_answer_data(std::ostream& os,
   std::string vdgPath(o.dbPath);
   vdgPath += "/data_orga/vdg/data/";
 
-  aq::Settings settings;
-  aq::Base baseDesc(baseFilename);
+  aq::Settings::Ptr settings(new aq::Settings);
+  aq::Base::Ptr baseDesc(new aq::Base(baseFilename));
 
   // Set the baseDesc for the Where Conditions
   // whereValidator.setBaseDesc(baseDesc);
 
-  aq::AQMatrix matrix(settings, baseDesc);
+  aq::engine::AQMatrix matrix(settings, baseDesc);
   
   std::vector<long long> tableIDs;
   matrix.load(answerPath.c_str(), tableIDs);
 
-  const aq::AQMatrix::matrix_t& m = matrix.getMatrix();
+  const auto& m = matrix.getMatrix();
 
   // check size, print column name and prepare column mapping
   size_t size = 0;
@@ -421,8 +421,8 @@ int check_answer_data(std::ostream& os,
     }
     
     std::map<size_t, std::pair<aq::ColumnType, column_mapper_t> > tableColumnMappers;
-    const aq::AQMatrix::matrix_t::value_type t = *it;
-    aq::Table::Ptr table = baseDesc.getTable(t.table_id);
+    const aq::engine::AQMatrix::matrix_t::value_type t = *it;
+    aq::Table::Ptr table = baseDesc->getTable(t.table_id);
     for (auto itCol = table->Columns.begin(); itCol != table->Columns.end(); ++itCol)
     {
       column_mapper_t cm;
@@ -654,14 +654,14 @@ private:
 // ------------------------------------------------------------------------------
 int display(display_cb * cb,
             // const std::string& answerPath,
-            aq::AQMatrix& aqMatrix,
-            const aq::Base& baseDesc,
-            const aq::Settings& settings,
+            const aq::engine::AQMatrix::Ptr aqMatrix,
+            const aq::Base::Ptr baseDesc,
+            const aq::Settings::Ptr settings,
             const struct opt& o,
             const std::vector<std::string>& selectedColumns)
 {
   std::stringstream ss;
-  const auto& matrix = aqMatrix.getMatrix();
+  const auto& matrix = aqMatrix->getMatrix();
 
   // check size, print column name and prepare column mapping
   size_t size = 0;
@@ -679,7 +679,7 @@ int display(display_cb * cb,
       exit(-1);
     }
     
-    aq::Table::Ptr table = baseDesc.getTable(t.table_id);
+    aq::Table::Ptr table = baseDesc->getTable(t.table_id);
     for (auto& col : table->Columns)
     {
       auto it = std::find(selectedColumns.begin(), selectedColumns.end(), std::string(table->getName() + "." + col->getName()));
@@ -690,26 +690,26 @@ int display(display_cb * cb,
         {
         case aq::ColumnType::COL_TYPE_INT:
           {
-            aq::ColumnMapper_Intf<int32_t>::Ptr m(new aq::ColumnMapper<int32_t, FileMapper>(settings.dataPath.c_str(), t.table_id, col->getID(), 1/*(*itCol)->Size*/, o.packetSize));
+            aq::ColumnMapper_Intf<int32_t>::Ptr m(new aq::ColumnMapper<int32_t, FileMapper>(settings->dataPath.c_str(), t.table_id, col->getID(), 1/*(*itCol)->Size*/, o.packetSize));
             cm = m;
           }
           break;
         case aq::ColumnType::COL_TYPE_BIG_INT:
         case aq::ColumnType::COL_TYPE_DATE:
           {
-            aq::ColumnMapper_Intf<int64_t>::Ptr m(new aq::ColumnMapper<int64_t, FileMapper>(settings.dataPath.c_str(), t.table_id, col->getID(), 1/*(*itCol)->Size*/, o.packetSize));
+            aq::ColumnMapper_Intf<int64_t>::Ptr m(new aq::ColumnMapper<int64_t, FileMapper>(settings->dataPath.c_str(), t.table_id, col->getID(), 1/*(*itCol)->Size*/, o.packetSize));
             cm = m;
           }
           break;
         case aq::ColumnType::COL_TYPE_DOUBLE:
           {
-            aq::ColumnMapper_Intf<double>::Ptr m(new aq::ColumnMapper<double, FileMapper>(settings.dataPath.c_str(), t.table_id, col->getID(), 1/*(*itCol)->Size*/, o.packetSize));
+            aq::ColumnMapper_Intf<double>::Ptr m(new aq::ColumnMapper<double, FileMapper>(settings->dataPath.c_str(), t.table_id, col->getID(), 1/*(*itCol)->Size*/, o.packetSize));
             cm = m;
           }
           break;
         case aq::ColumnType::COL_TYPE_VARCHAR:
           {
-            aq::ColumnMapper_Intf<char>::Ptr m(new aq::ColumnMapper<char, FileMapper>(settings.dataPath.c_str(), t.table_id, col->getID(), col->getSize(), o.packetSize));
+            aq::ColumnMapper_Intf<char>::Ptr m(new aq::ColumnMapper<char, FileMapper>(settings->dataPath.c_str(), t.table_id, col->getID(), col->getSize(), o.packetSize));
             cm = m;
           }
           break;
@@ -738,7 +738,7 @@ int display(display_cb * cb,
   if (size == 0) // FIXME : size can be 0 if there is no result
   {
     print_data pd_cb(o, cb, display_order);
-    aqMatrix.readData<print_data>(pd_cb);
+    aqMatrix->readData<print_data>(pd_cb);
     cb->next();
   }
   else
@@ -793,7 +793,7 @@ int display(display_cb * cb,
       if (o.withCount)
       {
         ss.str("");
-        ss << aqMatrix.getCount()[i];
+        ss << aqMatrix->getCount()[i];
         cb->push(ss.str());
       }
     }

@@ -6,20 +6,20 @@
 #include <aq/Base.h>
 #include <aq/Utilities.h>
 
-namespace aq
-{
+namespace aq {
+namespace engine {
 
 class AQEngine : public AQEngine_Intf
 {
 public:
-	AQEngine(Base& _baseDesc, Settings& _settings);
+	AQEngine(const Base::Ptr _baseDesc, const Settings::Ptr _settings);
 	~AQEngine();
   
-  void call(const std::string& query, mode_t mode = aq::AQEngine_Intf::mode_t::REGULAR);
+  void call(const std::string& query, mode_t mode = AQEngine_Intf::mode_t::REGULAR);
   void call(const aq::core::SelectStatement& query, mode_t mode = mode_t::REGULAR);
   
   void renameResult(unsigned int id, std::vector<std::pair<std::string, std::string> >& resultTables);
-	boost::shared_ptr<aq::AQMatrix> getAQMatrix() { return aqMatrix; }
+	AQMatrix::Ptr getAQMatrix() { return aqMatrix; }
 	const std::vector<llong>& getTablesIDs() const { return tableIDs; }
 
   void prepare() const;
@@ -29,9 +29,9 @@ protected:
   virtual int run(const char * prg, const char * args) const = 0;
 
 private:
-	const Base& baseDesc;
-	const Settings& settings;
-  boost::shared_ptr<aq::AQMatrix> aqMatrix;
+	const Base::Ptr baseDesc;
+	const Settings::Ptr settings;
+  AQMatrix::Ptr aqMatrix;
 	std::vector<llong> tableIDs;
 };
 
@@ -40,7 +40,7 @@ private:
 class AQEngineWindows : public AQEngine
 {
 public:
-  AQEngineWindows(Base& _baseDesc, Settings& settings);
+  AQEngineWindows(const Base::Ptr _baseDesc, const Settings::Ptr settings);
 protected:
   int run(const char * prg, const char * args) const;
 };
@@ -50,11 +50,12 @@ protected:
 class AQEngineSystem : public AQEngine
 {
 public:
-  AQEngineSystem(Base& _baseDesc, Settings& settings);
+  AQEngineSystem(const Base::Ptr _baseDesc, const Settings::Ptr settings);
 protected:
   int run(const char * prg, const char * args) const;
 };
 
+}
 }
 
 #endif

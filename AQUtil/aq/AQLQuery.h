@@ -39,7 +39,14 @@ struct InCondition
 
 struct JoinCondition
 {
-  enum join_t
+  enum class type_t
+  {
+    K_ACTIVE,
+    K_FILTER,
+    K_NEUTRAL,
+  };
+
+  enum class join_t
   {
     INNER,
     LEFT_OUTER,
@@ -47,7 +54,7 @@ struct JoinCondition
     FULL_OUTER,
   };
 
-  enum op_t
+  enum class op_t
   {
     AUTO,
     EQ,
@@ -59,11 +66,12 @@ struct JoinCondition
   };
   
   std::string op;
+  std::string type_left, type_right;
   std::string jt_left, jt_right;
   ColumnReference left, right;
 
   JoinCondition() {}
-  JoinCondition(const JoinCondition& o) : op(o.op), jt_left(o.jt_left), jt_right(o.jt_right), left(o.left), right(o.right) 
+  JoinCondition(const JoinCondition& o) : op(o.op), type_left(o.type_left), type_right(o.type_right), jt_left(o.jt_left), jt_right(o.jt_right), left(o.left), right(o.right) 
   {
   }
   JoinCondition& operator=(const JoinCondition& o)
@@ -71,6 +79,8 @@ struct JoinCondition
     if (this != &o)
     {
       this->op = o.op;
+      this->type_left = o.type_left;
+      this->type_right = o.type_right;
       this->jt_left = o.jt_left;
       this->jt_right = o.jt_right;
       this->left = o.left;

@@ -6,7 +6,9 @@
 namespace aq
 {
 
-//------------------------------------------------------------------------------
+/// \brief AlgoQuest Exception
+/// \todo rename this class
+/// \todo make a hierarchy of exceptions
 class generic_error: public std::exception
 {
 public:

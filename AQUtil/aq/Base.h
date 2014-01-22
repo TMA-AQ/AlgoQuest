@@ -10,10 +10,12 @@
 namespace aq
 {
 
-//------------------------------------------------------------------------------
-class Base: public Object<Base>
+/// \brief base description for query
+/// This contains also the temporaries tables representation of nested queries
+class Base
 {
 public:
+  typedef boost::shared_ptr<Base> Ptr;
 	typedef std::vector<Table::Ptr> tables_t;
   
   Base();
@@ -22,27 +24,6 @@ public:
   ~Base();
   Base& operator=(const Base& source);
   
-	/// The standard content of this file is defined below :
-	/// 
-	/// <Name_Base>
-	/// <Tbl_count>
-	/// 
-	/// "<Tbl_Name>" <tbl_id> <tbl_records_nb> <tbl_col_nb>
-	/// "<Col_Name>" <col_id> <col_size> <col_type>
-	/// 
-	/// Example : 
-	/// my_base_name
-	/// 4
-	/// 
-	/// "BONUS" 1 1 4
-	/// "ENAME" 1 10 VARCHAR2
-	/// "JOB" 2 9 VARCHAR2
-	/// "SAL" 3 22 NUMBER
-	/// "COMM" 4 22 NUMBER
-	///
-	/// ...
-	///
-  static int load(const std::string& filename, Base& base);
 
 	void loadFromBaseDesc( const aq::base_t& base );
   void dumpRaw(std::ostream& os) const;

@@ -1,4 +1,5 @@
 #include "AQEngineSimulate.h"
+#include <aq/AQLParser.h>
 
 #include <aq/Exceptions.h>
 #include <aq/TreeUtilities.h>
@@ -6,28 +7,58 @@
 namespace aq
 {
 
-  AQEngineSimulate::AQEngineSimulate(aq::Base& _baseDesc, aq::Settings& _settings)
+  AQEngineSimulate::AQEngineSimulate(const aq::Base::Ptr _baseDesc, const aq::Settings::Ptr _settings)
     : baseDesc(_baseDesc), settings(_settings)
   {
     srand( static_cast<unsigned int>( time( NULL ) ) ); //temporaire
   }
 
-  void AQEngineSimulate::call(const std::string& query, aq::AQEngine_Intf::mode_t mode)
+  void AQEngineSimulate::call(const std::string& query, aq::engine::AQEngine_Intf::mode_t mode)
   {
-    this->aqMatrix.reset(new aq::AQMatrix(this->settings, this->baseDesc));
+    aq::core::SelectStatement ss;
+    aq::parser::parse(query + ";", ss);
 
-    this->createTableIDs(query);
+    std::cout << "Execute:" << std::endl;
+    std::cout << ss.to_string(aq::core::SelectStatement::output_t::AQL) << std::endl;
 
-    std::cout << "TableIDs value =" << std::endl;
-    for (auto& tid : this->tableIDs) 
+    //std::cout << "TableIDs value =" << std::endl;
+    //for (auto& tid : this->tableIDs) 
+    //{
+    //  std::cout << "[" << tid << "]" << std::endl;
+    //}
+    // this->aqMatrix->simulate( rand() % 1000, this->tableIDs );
+    
+    if (mode != aq::engine::AQEngine_Intf::mode_t::NESTED_2)
     {
-      std::cout << "[" << tid << "]" << std::endl;
+      this->aqMatrix.reset(new aq::engine::AQMatrix(this->settings, this->baseDesc));
+      this->createTableIDs(query);
+      auto& matrix = aqMatrix->getMatrix();
+      for (const auto& col : ss.selectedTables)
+      {
+        const auto& tname = col.table.name;
+        bool find = false;
+        for (const auto& table : matrix)
+        {
+          if (table.tableName == tname)
+          {
+            find = true;
+            break;
+          }
+        }
+        if (!find)
+        {
+          const auto& table = baseDesc->getTable(tname);
+          matrix.push_back(aq::engine::AQMatrix::matrix_t::value_type());
+          auto& t = *matrix.rbegin();
+          t.baseTableName = t.tableName = table->getName();
+          t.table_id = table->getID();
+        }
+      }
     }
 
-    // this->aqMatrix->simulate( rand() % 1000, this->tableIDs );
   }
 
-  void AQEngineSimulate::call(const aq::core::SelectStatement& query, aq::AQEngine_Intf::mode_t mode)
+  void AQEngineSimulate::call(const aq::core::SelectStatement& query, aq::engine::AQEngine_Intf::mode_t mode)
   {
   }
 
@@ -39,11 +70,11 @@ namespace aq
     std::for_each(this->tableIDs.begin(), this->tableIDs.end(), [&] (uint64_t tid) { 
       std::ostringstream oss;
       oss << "REG" << tid << "TMP" << id;
-      resultTables.push_back(std::make_pair(oss.str(), this->baseDesc.getTable(id)->getName()));
+      resultTables.push_back(std::make_pair(oss.str(), this->baseDesc->getTable(id)->getName()));
     });
   }
 
-  void AQEngineSimulate::setAQMatrix(boost::shared_ptr<aq::AQMatrix> _aqMatrix)
+  void AQEngineSimulate::setAQMatrix(aq::engine::AQMatrix::Ptr _aqMatrix)
   {
     this->aqMatrix = _aqMatrix;
   }
@@ -54,7 +85,7 @@ namespace aq
     std::copy(_tableIDs.begin(), _tableIDs.end(), this->tableIDs.begin());
   }
 
-  boost::shared_ptr<aq::AQMatrix> AQEngineSimulate::getAQMatrix()
+  aq::engine::AQMatrix::Ptr AQEngineSimulate::getAQMatrix()
   {
     return this->aqMatrix;
   }
@@ -70,8 +101,8 @@ namespace aq
       return;
 
     if ( (pNode->tag == K_IDENT) 
-      && (std::find( this->tableIDs.begin(), this->tableIDs.end(), this->baseDesc.getTable( pNode->getData().val_str )->ID ) == this->tableIDs.end()) )
-      this->tableIDs.push_back( this->baseDesc.getTable( pNode->getData().val_str )->ID );
+      && (std::find( this->tableIDs.begin(), this->tableIDs.end(), this->baseDesc->getTable( pNode->getData().val_str )->getID() ) == this->tableIDs.end()) )
+      this->tableIDs.push_back( this->baseDesc->getTable( pNode->getData().val_str )->getID() );
 
     this->createTableIDs( pNode->left );
     this->createTableIDs( pNode->right );
@@ -99,9 +130,10 @@ namespace aq
       querySS >> s;
     } while ((s != "") && (s != ";") && (s != "WHERE") && (s != "GROUP") && (s != "ORDER"));
 
-    std::for_each(tableNames.begin(), tableNames.end(), [&] (const std::string& tname) {
-      this->tableIDs.push_back(this->baseDesc.getTable(tname.c_str())->ID);
-    });
+    for (const auto& tname : tableNames) 
+    {
+      this->tableIDs.push_back(this->baseDesc->getTable(tname)->getID());
+    }
     
   }
 }

@@ -39,7 +39,7 @@ bool ColumnVerb::changeQuery(	aq::tnode* pStart, aq::tnode* pNode,
   boost::to_upper(this->ColumnOnlyName);
   boost::to_upper(this->ColumnName);
 
-	if( this->Context != K_WHERE )
+	if( this->getContext() != K_WHERE )
 		return false;
 
 	return false;
@@ -56,7 +56,7 @@ void ColumnVerb::changeResult(	Table::Ptr table,
 //------------------------------------------------------------------------------
 void ColumnVerb::addResult(aq::Row& row)
 {
-  if (this->Context != K_SELECT)
+  if (this->getContext() != K_SELECT)
   {
     // TODO
     return;
@@ -193,7 +193,7 @@ void AndVerb::changeResult(	Table::Ptr table,
 							VerbResult::Ptr resRight, 
 							VerbResult::Ptr resNext )
 {
-	if( this->Context != K_WHERE && this->Context != K_HAVING )
+	if( this->getContext() != K_WHERE && this->getContext() != K_HAVING )
 		return;
 	if( !resLeft && !resRight )
 		return;
@@ -318,7 +318,7 @@ AsVerb::AsVerb()
 //------------------------------------------------------------------------------
 bool AsVerb::preprocessQuery( aq::tnode* pStart, aq::tnode* pNode, aq::tnode* pStartOriginal )
 {
-	switch( this->Context )
+	switch( this->getContext() )
 	{
 	case K_FROM:
 		assert( pNode && pNode->left );
@@ -349,7 +349,7 @@ void AsVerb::changeResult(	Table::Ptr table,
 //------------------------------------------------------------------------------
 void AsVerb::addResult(aq::Row& row)
 {
-  if (this->Context == K_SELECT)
+  if (this->getContext() == K_SELECT)
   {
     if (this->index == -1)
     {

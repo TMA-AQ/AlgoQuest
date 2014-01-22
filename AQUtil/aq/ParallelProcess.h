@@ -60,6 +60,15 @@ namespace
 
 }
 
+namespace aq
+{
+
+/// \brief Parallelize process on a C array
+/// \param v the C array
+/// \param size the size of the array
+/// \param cb the function callback to call
+/// \param nbProc the number of process
+/// \return 0 if succeed, -1 if failed
 template <typename T>
 int ParallelProcess(T v[], boost::uint64_t size, boost::function<void (T, unsigned)> cb, unsigned int nbProc)
 {
@@ -78,6 +87,12 @@ int ParallelProcess(T v[], boost::uint64_t size, boost::function<void (T, unsign
   return 0;
 }
 
+/// \brief Parallelize process on a C++ vector
+/// \todo generallize for any C++ container
+/// \param v the C++ array
+/// \param cb the function callback to call
+/// \param nbProc the number of process
+/// \return 0 if succeed, -1 if failed
 template <typename T>
 int ParallelProcess(std::vector<T>& v, boost::function<void (T, unsigned)> cb, unsigned int nbProc)
 {
@@ -94,6 +109,8 @@ int ParallelProcess(std::vector<T>& v, boost::function<void (T, unsigned)> cb, u
   }
   grp.join_all();
   return 0;
+}
+
 }
 
 #endif

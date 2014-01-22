@@ -1,5 +1,6 @@
 #include "RowTemporaryWritter.h"
 #include <aq/Utilities.h>
+#include <aq/Database.h>
 #include <cstring>
 
 namespace aq
@@ -46,7 +47,7 @@ namespace aq
   
   int RowTemporaryWritter::process(Row& row)
   {
-    if (this->columns.size() == 0)
+    if (this->columnsWritter.size() == 0)
     {
       uint16_t columnId = 1;
       for (Row::row_t::const_reverse_iterator it = row.computedRow.rbegin(); it != row.computedRow.rend(); ++it)
@@ -72,7 +73,7 @@ namespace aq
 
         boost::shared_ptr<ColumnTemporaryWritter> ctw(new ColumnTemporaryWritter);
         ctw->column = column;
-        ctw->filename = getTemporaryFileName( tableId, columnId, 0, type_str.c_str(), size);
+        ctw->filename = aq::Database::getTemporaryFileName(tableId, columnId, 0, type_str.c_str(), size);
         ctw->filename = path + "/" + ctw->filename;
         ctw->file = fopen(ctw->filename.c_str(), "wb");
         this->columnsWritter.push_back(ctw);
@@ -132,7 +133,7 @@ namespace aq
           aq::ColumnType type = (*it).type;
           std::string type_str = columnTypeToStr(type);
           boost::shared_ptr<ColumnTemporaryWritter> ctw = this->columnsWritter[c];
-          ctw->filename = getTemporaryFileName( tableId, ID, packet, type_str.c_str(), size);
+          ctw->filename = aq::Database::getTemporaryFileName( tableId, ID, packet, type_str.c_str(), size);
           ctw->filename = path + "/" + ctw->filename;
           fclose(ctw->file);
           ctw->file = fopen(ctw->filename.c_str(), "wb");

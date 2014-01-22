@@ -8,7 +8,9 @@
 
 namespace aq
 {
-
+  
+/// \ingroup row_writter
+/// \brief write row into a file
 class RowWritter : public RowWritter_Intf
 {
 public:

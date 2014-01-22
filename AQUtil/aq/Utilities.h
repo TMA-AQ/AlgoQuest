@@ -1,8 +1,11 @@
+/// \file Utilities.h
+
 #ifndef __AQ_UTILITIES_H__
 #define __AQ_UTILITIES_H__
 
 #include "Symbole.h"
 #include "DBTypes.h"
+#include "Exceptions.h"
 #include <cstdio>
 #include <string>
 #include <vector>
@@ -13,111 +16,86 @@ typedef long long llong;
 //------------------------------------------------------------------------------
 #define STR_BUF_SIZE 4096
 
-//------------------------------------------------------------------------------
-extern const double EPSILON;
+namespace aq {
 
-namespace aq
-{
-  
-//------------------------------------------------------------------------------
-void * safecalloc(size_t nb, size_t size);
+/// utils functions
+namespace util {
 
-//------------------------------------------------------------------------------
-char* LoadFile( const char *pszFN );
+/// \defgroup conversion_function miscellaenous conversions functions
+/// \{
 
-//------------------------------------------------------------------------------
-/* Ret : 0 on success, -1 on error */
-void SaveFile( const char *pszFN, const char* pszToSave );
-
-//------------------------------------------------------------------------------
-/* Ret : 0 on success, -1 on error */
-int FileCopy( char* pszSrcPath, char* pszDstPath );
-
-//------------------------------------------------------------------------------
-/* Ret : 0 on success, -1 on error */
-int FileRename(const char* pszSrcPath, const char* pszDstPath);
-
-//------------------------------------------------------------------------------
-int GetFiles( const char* pszSrcPath, std::vector<std::string>& files );
-
-//------------------------------------------------------------------------------
-char* ReadValidLine( FILE* pFIn, char* pszTmpBuf, int nSize, int nTrimEnd );
-
-//------------------------------------------------------------------------------
-void CleanFolder( const char * pszPath );
-
-//------------------------------------------------------------------------------
-void DeleteFolder( const char* pszPath );
-
-//------------------------------------------------------------------------------
-/* Should be used when reading UTF8 files */
-FILE* fopenUTF8( const char* pszFlename, const char* pszMode );
-
-//------------------------------------------------------------------------------
-/* Set errno if the string contains anything else but the number */
-int StrToInt( const char* psz, llong* pnVal );
-int StrToDouble( const char* psz, double* pdVal  );
-
-//------------------------------------------------------------------------------
+int StrToInt(const char* psz, llong* pnVal);
+int StrToDouble(const char* psz, double* pdVal);
 std::wstring string2Wstring(const std::string& s);
-
-//------------------------------------------------------------------------------
-class FileCloser
-{
-public:
-	FileCloser(FILE *& pFile): pFile(pFile){};
-	~FileCloser() { if( pFile ) fclose(pFile); };
-private:
-	FILE *& pFile;
-};
-
-//------------------------------------------------------------------------------
-char* strtoupr( char* pszStr );
-
-//------------------------------------------------------------------------------
-void ShowError( char *message );
-
-//------------------------------------------------------------------------------
-void splitLine( char *psz, char fieldSeparator, std::vector<char*>& fields, 
-				bool answerFormat );
-
-//------------------------------------------------------------------------------
-void doubleToString( char* strVal, double dVal );
-
-//------------------------------------------------------------------------------
-std::string getPrmFileName( const char* path, size_t tableIdx, size_t columnIdx, size_t partIdx );
-std::string getThesaurusFileName( const char* path, size_t tableIdx, size_t columnIdx, size_t partIdx );
-std::string getTemporaryFileName( size_t tableIdx, size_t columnIdx, size_t partIdx, const char * type, size_t size );
-void getFileNames( const char* path, std::vector<std::string>& filenames, const char * prefix = nullptr );
-
-//------------------------------------------------------------------------------
+char* strtoupr(char* pszStr);
+void doubleToString(char* strVal, double dVal);
 aq::ColumnType symbole_to_column_type(aq::symbole s);
+const char * symbole_to_char(aq::symbole sid);
 
-//-------------------------------------------------------------------------------
-void cleanSpaceAtEnd(char * my_field);
+/// \}
 
-//-------------------------------------------------------------------------------
-char * cleanNameFast(char * strval); ///< return nullptr when failure
+/// \brief remove all char at end of an input string
+/// \param input the string to modify
+/// \param c the char(s) to remove at end of the input string (space by default if not specify)
+void removeCharAtEnd(char * input, char c = ' ');
 
-//-------------------------------------------------------------------------------
-/// assume input is a double
-/// change  ',' in '.'
-void ChangeCommaToDot(char * string);
+/// \brief Change all char that match an input char in a string
+/// \param input string to modify
+/// \param old_c the char to change
+/// \param new_c the new char 
+void ChangeChar(char * input, char old_c, char new_c);
 
-/// backup
-enum backup_type_t
-{
-  Empty = 0,
-  Before,
-  After,
-  Exterior_Before,
-  Exterior
-};
-int MakeBackupFile( const std::string&, backup_type_t type, int level, int id );
+/// \defgroup file_function miscellaenous files functions
+/// \{
 
-/// write a record
-void FileWriteEnreg( aq::ColumnType col_type, const int col_size, char *my_field, FILE *fcol );
+/// \brief save a file with data to write in
+/// \throw generic_error
+void SaveFile(const char * pszFN, const char * pszToSave);
 
+/// \brief copy a file
+/// \param srcPath the file to copy
+/// \param dstPath the new file
+/// \return 0 on success, -1 on error
+int FileCopy(char * srcPath, char * dstPath);
+
+/// \brief rename a file
+/// \param srcPath the file to rename
+/// \param dstPath the new file name
+/// \return 0 on success, -1 on error
+int FileRename(const char * srcPath, const char * dstPath);
+
+/// \brief clean a directory
+/// \param path the directory to clean
+void CleanFolder(const char * path);
+
+/// \brief clean a directory
+/// \param path the directory to remove
+void DeleteFolder(const char * path);
+
+/// \brief open an UTF-8 file
+/// Should be used when reading UTF8 files
+/// \param filename the name of file to open
+/// \param mode refer to mode used by c fopen function
+/// \return a FILE stream if succeed, nullptr if failed
+FILE* fopenUTF8(const char * filename, const char * mode);
+
+/// \brief get list of files in directory
+/// \deprecated
+/// \param path the directory
+/// \param files the list of files
+/// \return 0 on success, -1 on error
+int GetFiles(const char * path, std::vector<std::string>& files);
+
+/// \brief get filename in directory
+/// \param path the directory
+/// \param filenames the list of files
+/// \param prefix a prefix to add for each file
+/// \return 0 on success, -1 on error
+int getFileNames(const char * path, std::vector<std::string>& filenames, const char * prefix = nullptr);
+
+/// \}
+
+}
 }
 
 #endif /* __AQ_UTILITIES_H__ */

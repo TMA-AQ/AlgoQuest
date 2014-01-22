@@ -25,6 +25,7 @@
 namespace aq
 {
 
+  /// \brief Logging singleton class
   class Logger
   {
   public:

@@ -304,15 +304,14 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
+    <None Include="doc\doxyfile" />
     <None Include="Generate_Parser.bat" />
+    <None Include="mainpage.dox" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AQUtil\AQUtil.vcxproj">
       <Project>{49633ed8-bd24-4937-a454-7f73c1f9afd0}</Project>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="AQQueryResolver.rc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aq\ApplyRowVisitor.h" />

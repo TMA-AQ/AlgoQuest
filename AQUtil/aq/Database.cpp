@@ -63,7 +63,7 @@ void Database::create(aq::base_t& base)
   boost::filesystem::path bdFile(this->getBaseDescFile());
   std::string fname = this->getBaseDescFile();
   std::ofstream f(fname.c_str(), std::ios::trunc);
-  aq::dump_raw_base(f, base);
+  aq::base_t::dump_raw_base(f, base);
   f.close();
 
 }
@@ -98,9 +98,9 @@ int Database::load()
   if (!fin.is_open()) 
     return -1;
   if (bdFname.find(".aqb") != std::string::npos)
-    aq::build_base_from_raw(fin, baseDesc);
+    aq::base_t::build_base_from_raw(fin, baseDesc);
   else if (bdFname.find(".xml") != std::string::npos)
-    aq::build_base_from_xml(fin, baseDesc);
+    aq::base_t::build_base_from_xml(fin, baseDesc);
   else
     rc = -1;
   return rc;
@@ -148,7 +148,48 @@ void Database::dump(std::ostream& os) const
   os << this->getBaseDescFile() << std::endl;
   os << this->getWorkingPath() << std::endl;
   os << this->getDataPath() << std::endl;
-  aq::dump_raw_base(os, this->baseDesc);
+  aq::base_t::dump_raw_base(os, this->baseDesc);
+}
+
+std::string Database::getPrmFileName(size_t tableIdx, size_t columnIdx, size_t partIdx)
+{
+  return Database::getPrmFileName(this->getDataPath().c_str(), tableIdx, columnIdx, partIdx);
+}
+
+std::string Database::getThesaurusFileName(size_t tableIdx, size_t columnIdx, size_t partIdx )
+{
+  return Database::getThesaurusFileName(this->getDataPath().c_str(), tableIdx, columnIdx, partIdx);
+}
+
+// static
+std::string Database::getPrmFileName(const char* path, size_t tableIdx, size_t columnIdx, size_t partIdx)
+{
+	return Database::getDataFileName(path, tableIdx, columnIdx, partIdx, "prm");
+}
+
+// static
+std::string Database::getThesaurusFileName(const char* path, size_t tableIdx, size_t columnIdx, size_t partIdx)
+{
+	return Database::getDataFileName(path, tableIdx, columnIdx, partIdx, "the");
+}
+
+// static
+std::string Database::getDataFileName(const char * path, size_t tIdx, size_t cIdx, size_t pIdx, const char * ext)
+{
+	char szFN[ _MAX_PATH ];
+	if (path)
+		sprintf(szFN, "%sB001T%.4luC%.4luV01P%.12lu.%s", path, tIdx, cIdx, pIdx, ext);
+	else
+		sprintf(szFN, "B001T%.4luC%.4luV01P%.12lu.%s", tIdx, cIdx, pIdx, ext);
+	return szFN;
+}
+ 
+// static
+std::string Database::getTemporaryFileName(size_t tableIdx, size_t columnIdx, size_t partIdx, const char * type, size_t size)
+{
+	char szFN[ _MAX_PATH ];
+  sprintf(szFN, "B001TMP%.4luC%.4lu%s%.4luP%.12lu.TMP", tableIdx, columnIdx, type, size, partIdx);
+	return szFN;
 }
 
 }
