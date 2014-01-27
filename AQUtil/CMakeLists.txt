@@ -55,5 +55,5 @@ target_link_libraries(aq-util-shared ${Boost_LIBRARIES})
 set_target_properties(aq-util-shared PROPERTIES OUTPUT_NAME "aq-util")
 
 # aql-parser
-add_executable(aql-parser Tests/aql_parser.cpp)
+add_executable(aql-parser Tools/aql_parser.cpp)
 target_link_libraries(aql-parser aq-util ${Boost_LIBRARIES})
